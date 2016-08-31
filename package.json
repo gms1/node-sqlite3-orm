@@ -1,0 +1,40 @@
+{
+  "name": "node-sqlite3-orm",
+  "version": "0.0.1",
+  "description": "ORM for sqlite3 and TypeScript/JavaScript",
+  "main": "index.js",
+  "keywords": [
+    "sqlite",
+    "javascript",
+    "typescript",
+    "ORM",
+    "DAO",
+    "database",
+    "schema"
+  ],
+  "author": "Guenter Sandner",
+  "license": "MIT",
+  "scripts": {
+    "bootstrap": "npm install -q",
+    "build": "tsc",
+    "buildwatch": "tsc --watch",
+    "test": "jasmine",
+    "tslint": "tslint \"src/**/*.ts\"",
+    "clean": "gulp clean",
+    "typedoc": "typedoc --mode modules --out docs/typedoc/sqlite3orm --tsconfig tsconfig.json --exclude '**/*.spec.ts' src/sqlite3orm"
+  },
+  "dependencies": {
+    "reflect-metadata": "^0.1.4",
+    "sqlite3": "^3.1.4"
+  },
+  "devDependencies": {
+    "@types/jasmine": "^2.2.30",
+    "@types/node": "^4.0.30",
+    "@types/reflect-metadata": "0.0.1",
+    "@types/sqlite3": "0.0.28",
+    "del": "^2.2.1",
+    "gulp": "^3.9.1",
+    "gulpclass": "^0.1.1",
+    "jasmine": "^2.4.1"
+  }
+}

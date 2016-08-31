@@ -1,0 +1,27 @@
+
+# compiled output and typescript
+docs/typedoc
+*.ts
+!*.d.ts
+*.js.map
+*.spec.js
+*.spec.ts
+*.spec.d.ts
+*.spec.js.map
+
+# -- dependency --
+/node_modules
+/.npm
+
+# -- logs --
+*.log
+npm-debug.log*
+
+# IDEs and editors
+/.vscode
+
+# local
+/TODO.txt
+/config/**/*
+!/config/default.json5
+

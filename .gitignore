@@ -1,0 +1,16 @@
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+
+# compiled output
+/dist
+/docs/typedoc
+*.map
+
+# dependencies
+/node_modules
+
+# logs
+npm-debug.log*
+
+# IDEs and editors
+/.vscode
+
