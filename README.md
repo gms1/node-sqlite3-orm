@@ -110,7 +110,7 @@ In order to read from or write to the database, you can use the `BaseDAO<Model>'
 ## Install
 
 ```
-$ npm install node-sqlite3-orm
+$ npm install sqlite3orm
 ```
 
 When using TypeScript, the compiler options `experimentalDecorators` and `emitDecoratorMetadata` must be enabled.

@@ -1,6 +1,6 @@
+!/dist
 
-# compiled output and typescript
-docs/typedoc
+# -- generated output:
 *.ts
 !*.d.ts
 *.js.map
@@ -8,17 +8,14 @@ docs/typedoc
 *.spec.ts
 *.spec.d.ts
 *.spec.js.map
+*.tgz
 
-# -- dependency --
+# -- dependencies:
 /node_modules
-/.npm
 
-# -- logs --
+# -- temporary files:
 *.log
 npm-debug.log*
-/coverage
 
-# IDEs and editors
+# -- IDEs and editors
 /.vscode
-
-
