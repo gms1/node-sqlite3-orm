@@ -2,8 +2,8 @@
 require('shelljs/global');
 var path = require('path');
 
-var distdir = './dist';
-var packagedir = './package';
+var distdir = 'dist/sqlite3orm';
+var packagedir = 'package';
 
 rm('-rf', packagedir);
 mkdir('-p',packagedir);
