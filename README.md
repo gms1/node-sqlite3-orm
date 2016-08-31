@@ -11,7 +11,7 @@ This module allows you to map your model, written in JavaScript or TypeScript, t
 **node-sqlite3-orm** provides you with the ability to create the database schema for the mapped model and to store and retrieve the mapped data to and from the database,
 
 ```TypeScript
-import {table, field, fk, id, TableOpts, FieldOpts} from 'sqlite3ormts/decorators';
+import {table, field, fk, id, TableOpts, FieldOpts} from 'sqlite3orm/decorators';
 
 @table({name: 'USERS'})
 class User {
@@ -45,7 +45,7 @@ Properties without a *node-sqlite3-orm* decorator will not be mapped to the data
 ## Database Connection
 
 ```TypeScript
-import {SqlDatabase} from 'sqlite3ormts/SqlDatabase';
+import {SqlDatabase} from 'sqlite3orm/SqlDatabase';
 
 (async () => {
   let sqldb = new SqlDatabase();
@@ -57,7 +57,7 @@ import {SqlDatabase} from 'sqlite3ormts/SqlDatabase';
 ## Schema Creation
 
 ```TypeScript
-import {schema} from 'sqlite3ormts/Schema';
+import {schema} from 'sqlite3orm/Schema';
 
 (async () => {
   // get the user_version from the database:
