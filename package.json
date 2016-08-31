@@ -1,8 +1,8 @@
 {
   "name": "node-sqlite3-orm",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "ORM for sqlite3 and TypeScript/JavaScript",
-  "main": "index.js",
+  "main": "dist/sqlite3orm/index.js",
   "keywords": [
     "sqlite",
     "javascript",
@@ -40,7 +40,8 @@
     "test": "jasmine",
     "tslint": "tslint \"src/**/*.ts\"",
     "clean": "gulp clean",
-    "typedoc": "typedoc --mode modules --out docs/typedoc/sqlite3orm --tsconfig tsconfig.json --exclude '**/*.spec.ts' src/sqlite3orm"
+    "typedoc": "typedoc --mode modules --out docs/typedoc/sqlite3orm --tsconfig tsconfig.json --exclude '**/*.spec.ts' src/sqlite3orm",
+    "npmts": "(npmts)"
   },
   "dependencies": {
     "reflect-metadata": "^0.1.4",
@@ -54,10 +55,7 @@
     "del": "^2.2.1",
     "gulp": "^3.9.1",
     "gulpclass": "^0.1.1",
-    "jasmine": "^2.4.1",
-    "npmextra": "^1.0.9",
-    "npmts-g": "^5.2.8"
+    "jasmine": "^2.4.1"
   },
-  "main": "dist/index.js",
-  "typings": ".dist/index.d.ts"
+  "typings": ".dist/sqlite3orm/index.d.ts"
 }

@@ -8,7 +8,7 @@ let del = require('del');
 export class Gulpfile {
     @Task()
     clean(cb: Function) {
-        return del(['*.log', './dist/**', './docs/typedoc/**'], cb);
+        return del(['*.log', './dist/sqlite3orm/**', './docs/typedoc/**'], cb);
     }
 
     @SequenceTask()
