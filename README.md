@@ -52,7 +52,7 @@ import {SqlDatabase} from 'sqlite3orm/SqlDatabase';
   await sqldb.open(':memory:');
 })();
 ```
-
+SqlDatabase is a thin promised-based wrapper around sqlite3.Database: [node-sqlite3](https://github.com/gms1/node-sqlite3-orm) 
 
 ## Schema Creation
 
@@ -86,8 +86,8 @@ In order to read from or write to the database, you can use the `BaseDAO<Model>'
 
 (async () => {
 
-  let userDAO = new BaseDAO(User);
-  let contactDAO = new BaseDAO(Contact);
+  let userDAO = new BaseDAO(User, sqldb);
+  let contactDAO = new BaseDAO(Contact, sqldb);
 
   let newUser: User;
   newUser.userId = 1;
@@ -132,3 +132,5 @@ tsconfig.json:
 
 sqlite3-orm-js is licensed under the MIT License:
 [LICENSE](./LICENSE)
+
+
