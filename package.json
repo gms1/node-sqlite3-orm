@@ -1,6 +1,6 @@
 {
   "name": "node-sqlite3-orm",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "ORM for sqlite3 and TypeScript/JavaScript",
   "main": "index.js",
   "keywords": [
@@ -12,8 +12,27 @@
     "database",
     "schema"
   ],
-  "author": "Guenter Sandner",
+  "author": {
+    "email": "www.gms@gmx.at",
+    "name": "Guenter Sandner"
+  },
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gms1/node-sqlite3-orm.git"
+  },
+  "bugs": {
+    "url": "https://github.com/gms1/node-sqlite3-orm/issues"
+  },
+  "tags": [
+    "javascript",
+    "typescript",
+    "sqlite",
+    "ORM",
+    "DAO",
+    "schema",
+    "database"
+  ],
   "scripts": {
     "bootstrap": "npm install -q",
     "build": "tsc",
@@ -35,6 +54,10 @@
     "del": "^2.2.1",
     "gulp": "^3.9.1",
     "gulpclass": "^0.1.1",
-    "jasmine": "^2.4.1"
-  }
+    "jasmine": "^2.4.1",
+    "npmextra": "^1.0.9",
+    "npmts-g": "^5.2.8"
+  },
+  "main": "dist/index.js",
+  "typings": ".dist/index.d.ts"
 }

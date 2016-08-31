@@ -16,12 +16,9 @@ docs/typedoc
 # -- logs --
 *.log
 npm-debug.log*
+/coverage
 
 # IDEs and editors
 /.vscode
 
-# local
-/TODO.txt
-/config/**/*
-!/config/default.json5
 

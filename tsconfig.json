@@ -5,7 +5,7 @@
     "moduleResolution": "node",
     "removeComments": false,
     "stripInternal": false,
-    "outDir": "./dist",
+    "outDir": "./dist/sqlite3orm",
     "declaration": true,
     "sourceMap": true,
     "experimentalDecorators": true,

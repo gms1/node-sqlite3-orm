@@ -1,0 +1,17 @@
+{
+  "npmts":{
+    "mode": "custom",
+    "docs": false,
+    "test": true,
+    "npmts": {
+      "ts": {
+	"./src/sqlite3orm/*.ts":"./dist/sqlite3orm/"
+      },
+      "tsOptions":{
+	"declaration":false,
+	"target":"ES6"
+      },
+      "cli":true
+    }
+  }
+}

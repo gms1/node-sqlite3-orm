@@ -7,9 +7,13 @@
 
 # dependencies
 /node_modules
+/coverage
 
 # logs
+*.log
 npm-debug.log*
+/coverage
+
 
 # IDEs and editors
 /.vscode
