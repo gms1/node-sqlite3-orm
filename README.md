@@ -52,7 +52,7 @@ import {SqlDatabase} from 'sqlite3orm/SqlDatabase';
   await sqldb.open(':memory:');
 })();
 ```
-SqlDatabase is a thin promised-based wrapper around sqlite3.Database: [node-sqlite3](https://github.com/gms1/node-sqlite3-orm) 
+SqlDatabase is a thin promised-based wrapper around sqlite3.Database: [node-sqlite3](https://github.com/mapbox/node-sqlite3) 
 
 ## Schema Creation
 
