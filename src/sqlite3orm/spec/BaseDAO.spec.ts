@@ -7,8 +7,10 @@ function rejectTest(err: Error): void {
   expect('' + err).toBeNull();
 }
 
+const USERS_TABLE = 'USERSTABLE';
+const CONTACTS_TABLE = 'CONTACTSTABLE';
 
-@table({name: 'USERS'})
+@table({name: USERS_TABLE})
 class User {
   @id({name: 'user_id', dbtype: 'INTEGER NOT NULL'})
   userId: number;
@@ -17,7 +19,7 @@ class User {
   userLoginName: string;
 }
 
-@table({name: 'CONTACTS', autoIncrement: true})
+@table({name: CONTACTS_TABLE, autoIncrement: true})
 class Contact {
   static userConstraint: string = 'user';
 
@@ -30,7 +32,7 @@ class Contact {
   @field({name: 'contact_mobile', dbtype: 'TEXT'})
   mobile: string;
 
-  @fk(Contact.userConstraint, 'USERS', 'user_id')
+  @fk(Contact.userConstraint, USERS_TABLE, 'user_id')
   @field({name: 'user_id', dbtype: 'INTEGER NOT NULL'})
   userId: number;
 }
@@ -44,8 +46,8 @@ describe('test BaseDAO', () => {
   beforeAll((done) => {
     sqldb = new SqlDatabase();
     sqldb.open(SQL_MEMORY_DB_PRIVATE)
-        .then(async(res) => { return schema().createTable(sqldb, 'USERS'); })
-        .then(async(res) => { return schema().createTable(sqldb, 'CONTACTS'); })
+        .then(async(res) => { return schema().createTable(sqldb, USERS_TABLE); })
+        .then(async(res) => { return schema().createTable(sqldb, CONTACTS_TABLE); })
         .then((res) => done())
         .catch((err) => {
           rejectTest(err);
