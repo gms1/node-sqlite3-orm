@@ -1,6 +1,6 @@
 {
   "name": "sqlite3orm",
-  "version": "0.0.2",
+  "version": "0.0.5",
   "description": "ORM for sqlite3 and TypeScript/JavaScript",
   "main": "./index.js",
   "tags": [
@@ -24,7 +24,6 @@
   "bugs": {
     "url": "https://github.com/gms1/node-sqlite3-orm/issues"
   },
-  "readme": "./README.md",
   "homepage": "https://github.com/gms1/node-sqlite3-orm",
   "scripts": {
     "bootstrap": "npm install -q",
