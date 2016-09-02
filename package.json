@@ -24,7 +24,7 @@
   "bugs": {
     "url": "https://github.com/gms1/node-sqlite3-orm/issues"
   },
-  "readme": "README.md",
+  "readme": "./README.md",
   "homepage": "https://github.com/gms1/node-sqlite3-orm",
   "scripts": {
     "bootstrap": "npm install -q",

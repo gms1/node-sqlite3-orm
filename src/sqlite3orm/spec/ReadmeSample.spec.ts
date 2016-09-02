@@ -60,29 +60,41 @@ async function runSample(): Promise<void> {
 
   (async () => {
 
-    let userDAO = new BaseDAO(User, sqldb);
-    let contactDAO = new BaseDAO(Contact, sqldb);
+  let userDAO = new BaseDAO(User, sqldb);
+  let contactDAO = new BaseDAO(Contact, sqldb);
 
-    let user = new User();
-    user.userId = 1;
-    user.userLoginName = 'donald';
-    user = await userDAO.insert(user);
+  // insert a user:
+  let user = new User();
+  user.userId = 1;
+  user.userLoginName = 'donald';
+  user = await userDAO.insert(user);
 
-    let contact = new Contact();
-    contact.userId = 1;
-    contact.emailAddress = 'donald@duck.com'
-    contact = await contactDAO.insert(contact);
+  // insert a contact:
+  let contact = new Contact();
+  contact.userId = 1;
+  contact.emailAddress = 'donald@duck.com'
+  contact = await contactDAO.insert(contact);
 
-    let userDonald = await userDAO.select(user);
+  // update a contact:
+  contact.mobile = '+49 123 456';
+  contact = await contactDAO.update(contact);
 
-    // read contacts from user 'donald':
-    let contactsDonald = await contactDAO.selectAllOf('contact_user', User, userDonald);
+  // read a user:
+  let userDonald = await userDAO.select(user);
 
-    let allUsers = await userDAO.selectAll();
-    let allUsersHavingContacts = await
-        userDAO.selectAll('WHERE EXISTS(select 1 from CONTACTS C where C.user_id = T.user_id)');
-    let allContactsFromDuckDotCom = await
-        contactDAO.selectAll('WHERE contact_email like :contact_email', {':contact_email': '%@duck.com'});
+  // read all contacts from user 'donald':
+  let contactsDonald = await contactDAO.selectAllOf('contact_user', User, userDonald);
+
+  // read all users:
+  let allUsers = await userDAO.selectAll();
+
+  // read all users having a contact:
+  let allUsersHavingContacts = await
+      userDAO.selectAll('WHERE EXISTS(select 1 from CONTACTS C where C.user_id = T.user_id)');
+
+  // read all contacts from 'duck.com':
+  let allContactsFromDuckDotCom = await
+      contactDAO.selectAll('WHERE contact_email like :contact_email', {':contact_email': '%@duck.com'});
 
     expect(userDonald.userId).toBe(user.userId, 'wrong userDonald.userId');
     expect(userDonald.userLoginName).toBe(user.userLoginName, 'wrong userDonald.userLoginName');
@@ -90,6 +102,7 @@ async function runSample(): Promise<void> {
     expect(contactsDonald.length).toBe(1, 'wrong contactsDonald.length');
     expect(contactsDonald[0].userId).toBe(contact.userId, 'wrong contactsDonald[0].userId');
     expect(contactsDonald[0].emailAddress).toBe(contact.emailAddress, 'wrong contactsDonald[0].emailAddress');
+    expect(contactsDonald[0].mobile).toBe(contact.mobile, 'wrong contactsDonald[0].mobile');
 
     expect(allUsersHavingContacts.length).toBe(1, 'wrong allUsersHavingContacts.length');
     expect(allContactsFromDuckDotCom.length).toBe(1, 'wrong allContactsFromDuckDotCom.length');

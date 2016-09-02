@@ -89,24 +89,36 @@ In order to read from or write to the database, you can use the `BaseDAO<Model>'
   let userDAO = new BaseDAO(User, sqldb);
   let contactDAO = new BaseDAO(Contact, sqldb);
 
+  // insert a user:
   let user = new User();
   user.userId = 1;
   user.userLoginName = 'donald';
   user = await userDAO.insert(user);
 
+  // insert a contact:
   let contact = new Contact();
   contact.userId = 1;
   contact.emailAddress = 'donald@duck.com'
   contact = await contactDAO.insert(contact);
 
+  // update a contact:
+  contact.mobile = '+49 123 456';
+  contact = await contactDAO.update(contact);
+
+  // read a user:
   let userDonald = await userDAO.select(user);
 
-  // read contacts from user 'donald':
+  // read all contacts from user 'donald':
   let contactsDonald = await contactDAO.selectAllOf('contact_user', User, userDonald);
 
+  // read all users:
   let allUsers = await userDAO.selectAll();
+
+  // read all users having a contact:
   let allUsersHavingContacts = await
       userDAO.selectAll('WHERE EXISTS(select 1 from CONTACTS C where C.user_id = T.user_id)');
+
+  // read all contacts from 'duck.com':
   let allContactsFromDuckDotCom = await
       contactDAO.selectAll('WHERE contact_email like :contact_email', {':contact_email': '%@duck.com'});
 
