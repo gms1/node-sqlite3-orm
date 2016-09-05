@@ -109,15 +109,15 @@ export class Table {
 
 
   /**
-   * The property key of the primary key, only set if the
+   * The field mapped to the primary key; only set if the
    * AUTOINCREMENT feature can be used
    *
    * @type {string|symbol}
    */
-  private _autoIncrementPropertyKey: string|symbol|undefined;
+  private _autoIncrementField: Field|undefined;
 
-  get autoIncrementPropertyKey(): string|symbol|undefined {
-    return this._autoIncrementPropertyKey;
+  get autoIncrementField(): Field|undefined {
+    return this._autoIncrementField;
   }
 
 
@@ -143,7 +143,7 @@ export class Table {
     this.fields = new Array<Field>();
     this.withoutRowId = false;
     this.autoIncrement = false;
-    this._autoIncrementPropertyKey = undefined;
+    this._autoIncrementField = undefined;
     this._statementsText = undefined;
   }
 
@@ -238,9 +238,9 @@ export class Table {
       if (this.autoIncrement && !this.withoutRowId &&
           this.mapNameToIdentityField.size === 1 &&
           field.dbtype.toUpperCase().indexOf('INTEGER') !== -1) {
-        this._autoIncrementPropertyKey = field.propertyKey;
+        this._autoIncrementField = field;
       } else {
-        this._autoIncrementPropertyKey = undefined;
+        this._autoIncrementField = undefined;
       }
     }
     return field;
@@ -353,7 +353,7 @@ export class Table {
         colSelPK.push(`${field.name}=${field.hostParameterName}`);
         if (this.mapNameToIdentityField.size === 1) {
           colDef += ' PRIMARY KEY';
-          if (!!this.autoIncrementPropertyKey) {
+          if (!!this.autoIncrementField) {
             colDef += ' AUTOINCREMENT';
           }
         }
@@ -427,13 +427,13 @@ export class Table {
     // --------------------------------------------------------------
     // generate INSERT INTO statement
     stmts.insertInto = `INSERT INTO ${this.name} (\n  `;
-    if (!this.autoIncrementPropertyKey) {
+    if (!this.autoIncrementField) {
       stmts.insertInto += colNames.join(', ');
     } else {
       stmts.insertInto += colNamesNoPK.join(', ');
     }
     stmts.insertInto += '\n) VALUES (\n  ';
-    if (!this.autoIncrementPropertyKey) {
+    if (!this.autoIncrementField) {
       stmts.insertInto += colParms.join(', ');
     } else {
       stmts.insertInto += colParmsNoPK.join(', ');

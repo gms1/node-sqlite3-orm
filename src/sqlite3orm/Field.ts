@@ -1,5 +1,13 @@
 import {Table} from './Table';
 
+export enum PropertyType {
+  UNKNOWN = 0,
+  BOOLEAN = 1,
+  STRING,
+  NUMBER,
+  DATE
+}
+
 /**
  * Class holding a field reference ( table and column name )
  *
@@ -64,7 +72,29 @@ export class Field {
    *
    * @type {string}
    */
-  propertyType?: string;
+  private _propertyType?: string;
+
+  get propertyType(): string|undefined {
+    return this._propertyType;
+  }
+
+  set propertyType(propertyType: string|undefined) {
+    this._propertyType = propertyType;
+    // tslint:disable: triple-equals
+    if (this._propertyType == 'function Boolean() { [native code] }') {
+      this._propertyKnownType = PropertyType.BOOLEAN;
+    } else if (this._propertyType == 'function String() { [native code] }') {
+      this._propertyKnownType = PropertyType.STRING;
+    } else if (this._propertyType == 'function Number() { [native code] }') {
+      this._propertyKnownType = PropertyType.NUMBER;
+    } else if (this._propertyType == 'function Date() { [native code] }') {
+      this._propertyKnownType = PropertyType.DATE;
+    } else {
+      this._propertyKnownType = PropertyType.UNKNOWN;
+    }
+    // tslint:enable: triple-equals
+  }
+
   /**
    * The type of the table column
    *
@@ -92,12 +122,25 @@ export class Field {
   }
 
   /**
+   * The property type enum mapped to this field
+   *
+   * @type {PropertyType}
+   */
+  private _propertyKnownType: PropertyType;
+
+  get propertyKnownType(): PropertyType {
+    return this._propertyKnownType;
+  }
+
+
+  /**
    * Creates an instance of Field.
    *
    */
   public constructor(key: string|symbol) {
     this.propertyKey = key;
-    this.propertyType = undefined;
+    this._propertyType = undefined;
+    this._propertyKnownType = PropertyType.UNKNOWN;
     this.isIdentity = false;
     this.dbtype = 'TEXT';
     this.foreignKeys = new Map<string, FieldReference>();

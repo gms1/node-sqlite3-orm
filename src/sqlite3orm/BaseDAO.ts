@@ -1,7 +1,7 @@
 import {METADATA_TABLE_KEY} from './decorators';
 import {SqlDatabase} from './SqlDatabase';
 import {Table, ForeignKey} from './Table';
-import {Field, FieldReference} from './Field';
+import {Field, FieldReference, PropertyType} from './Field';
 
 
 /**
@@ -41,13 +41,19 @@ export class BaseDAO<T extends Object> {
   public insert(t: T): Promise<T> {
     return new Promise<T>(async(resolve, reject) => {
       try {
-        if (!this.table.autoIncrementPropertyKey) {
+        if (!this.table.autoIncrementField) {
           let res = await this.sqldb.run(
             this.table.getInsertIntoStatement(), this.bindAllInputParams(t));
         } else {
-          let res = await this.sqldb.run(
+          let res: any = await this.sqldb.run(
             this.table.getInsertIntoStatement(), this.bindNonPrimaryKeyInputParams(t));
-          (t as any)[this.table.autoIncrementPropertyKey] = res.lastID;
+          // tslint:disable-next-line: triple-equals
+          if ( res.lastID == undefined) {
+            reject(new Error("AUTOINCREMENT failed, 'lastID' is undefined or null"));
+            return;
+          }
+          res[this.table.autoIncrementField.name] = res.lastID;
+          this.setProperty(t, this.table.autoIncrementField, res);
         }
       } catch (e) {
         reject(
@@ -223,52 +229,132 @@ export class BaseDAO<T extends Object> {
 
 
   protected bindAllInputParams(t: T): Object {
-    let res: Object = {};
-    this.table.fields.forEach(
-        (field) => (res as any)[field.hostParameterName] =
-            (t as any)[field.propertyKey]);
-    return res;
+    let hostParams: Object = {};
+    this.table.fields.forEach((field) => this.setHostParam(hostParams, field, t) );
+    return hostParams;
   }
 
   protected bindPrimaryKeyInputParams(t: T): Object {
-    let res: Object = {};
+    let hostParams: Object = {};
     this.table.fields.forEach(
         (field) => {
             if (field.isIdentity) {
-              (res as any)[field.hostParameterName] = (t as any)[field.propertyKey];
+              this.setHostParam(hostParams, field, t);
             }
           });
-    return res;
+    return hostParams;
   }
 
   protected bindNonPrimaryKeyInputParams(t: T): Object {
-    let res: Object = {};
+    let hostParams: Object = {};
     this.table.fields.forEach(
         (field) => {
             if (!field.isIdentity) {
-              (res as any)[field.hostParameterName] = (t as any)[field.propertyKey];
+              this.setHostParam(hostParams, field, t);
             }
           });
-    return res;
+    return hostParams;
   }
 
 
   protected bindForeignParams<F extends Object>(foreignDAO: BaseDAO<F>, fk: ForeignKey, foreignObject: F, more: Object = {}): Object {
-    let res: Object = Object.assign({}, more);
+    let hostParams: Object = Object.assign({}, more);
     fk.fields.forEach(
         (field) => {
           let fieldref = field.foreignKeys.get(fk.name) as FieldReference;
           let foreignfield = foreignDAO.table.getTableField(fieldref.colName);
-          (res as any)[field.hostParameterName] =
-            (foreignObject as any)[foreignfield.propertyKey];
+          foreignDAO.setHostParam(hostParams, foreignfield, foreignObject);
         });
-    return res;
+    return hostParams;
   }
 
   protected readResultRow(t: T, row: any): T {
-    // TODO: ensure type safety
     this.table.fields.forEach(
-        (field) => (t as any)[field.propertyKey] = (row as any)[field.name]);
+        (field) => this.setProperty(t, field, row)
+    );
     return t;
   }
+
+
+  protected setHostParam(hostParams: any, field: Field, t: T): void {
+    let value = Reflect.get(t, field.propertyKey);
+    // tslint:disable-next-line: triple-equals
+    if (value == undefined) {
+      (hostParams as any)[field.hostParameterName] = value;
+      return;
+    }
+    switch (field.propertyKnownType) {
+      case PropertyType.BOOLEAN:
+        value = !value ? 0 : 1;
+        break;
+      case PropertyType.DATE:
+        if (field.dbtype.toUpperCase().indexOf('INT') !== -1) {
+          value = Math.floor((value as Date).getTime() / 1000);
+        } else {
+          value = (value as Date).toISOString();
+        }
+        break;
+    }
+    (hostParams as any)[field.hostParameterName] = value;
+  }
+
+
+
+  protected setProperty(t: T, field: Field, row: any): void {
+    let value = row[field.name];
+    // tslint:disable-next-line: triple-equals
+    if (value == undefined) {
+      Reflect.set(t, field.propertyKey, undefined);
+      return;
+    }
+    switch (field.propertyKnownType) {
+      case PropertyType.BOOLEAN:
+        if (typeof value === 'string') {
+          if (value === '0' || value === 'false') {
+            value = false;
+          } else if ( value === '1' || value === 'true' ) {
+            value = true;
+          } else {
+            value = undefined;
+          }
+        } else {
+          value = !value ? false : true;
+        }
+        break;
+      case PropertyType.DATE:
+        switch (typeof value) {
+          case 'string':
+            value = new Date(Date.parse(value));
+            break;
+          case 'number':
+            if (Number.isInteger(value)) {
+              // unix time
+              value = new Date((value as number) * 1000);
+            } else {
+              // Julian day numbers ?
+              // TODO: currently not supported
+              value = NaN;
+            }
+            break;
+          default:
+            value = NaN;
+            break;
+        }
+        break;
+      case PropertyType.NUMBER:
+        if (typeof value !== 'number') {
+          value = Number(value);
+        }
+        break;
+      case PropertyType.STRING:
+        if (typeof value !== 'string') {
+          value = String(value);
+        }
+        break;
+    }
+    // console.log(`setting ${field.propertyKey} to ${value}`);
+    Reflect.set(t, field.propertyKey, value);
+  }
+
+
 }

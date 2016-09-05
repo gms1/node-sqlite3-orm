@@ -125,7 +125,12 @@ In order to read from or write to the database, you can use the `BaseDAO<Model>'
 })();
 
 ```
+## Supported data types using DAO:
 
+Of course, all primitive JavaScript data types ('String', 'Number', 'Boolean') and properties of type 'Date' are supported. 
+Type safety is guaranteed, when reading properties of these types from the database, however, NULL values will be treated as 'undefined'. 
+
+> TODO: add support for user provided serialize/deserialize functions  
 
 ## Install
 
@@ -153,4 +158,6 @@ tsconfig.json:
 sqlite3-orm-js is licensed under the MIT License:
 [LICENSE](./LICENSE)
 
+## Downloads
 
+[![NPM](https://nodei.co/npm/sqlite3orm.png?downloads=true&downloadRank=true&stars=true)](https://github.com/gms1/node-sqlite3-orm)

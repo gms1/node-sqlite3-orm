@@ -130,6 +130,7 @@ function decoratePropertyField(
   if (!!isIdentity) {
     field.isIdentity = isIdentity;
   }
+  // console.log(`name='${key.toString()}' type='${field.propertyType}' dbtype='${field.dbtype}'` );
   return field;
 }
 
