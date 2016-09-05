@@ -42,59 +42,67 @@ describe('test Date type', () => {
     done();
   });
 
-  it('expect writing Date properties to the database to succeed',
-     async(done) => {
-       try {
-         let sqlstmt = await sqldb.prepare(`SELECT
+  it('expect writing Date properties to the database to succeed', async(
+                                                                      done) => {
+    try {
+      let sqlstmt = await sqldb.prepare(`SELECT
               id, my_date_text, my_date_int
             FROM ${DATATYPE_DATE_TABLE}
             WHERE id = :id`);
 
-         let row: any;
+      let row: any;
 
-         // now
-         ++model.id;
-         model.myDate2Int = model.myDate2Text = new Date();
-         await dao.insert(model);
-         row = await sqlstmt.get({':id': model.id});
-         expect(row.id).toBe(model.id);
-         expect(row.my_date_text).toBe(model.myDate2Text.toISOString(), 'date wrongly written to text');
-         expect(row.my_date_int).toBe(Math.floor(model.myDate2Text.getTime() / 1000), 'date wrongly written to integer');
+      // now
+      ++model.id;
+      model.myDate2Int = model.myDate2Text = new Date();
+      await dao.insert(model);
+      row = await sqlstmt.get({':id': model.id});
+      expect(row.id).toBe(model.id);
+      expect(row.my_date_text)
+          .toBe(
+              model.myDate2Text.toISOString(), 'date wrongly written to text');
+      expect(row.my_date_int)
+          .toBe(
+              Math.floor(model.myDate2Text.getTime() / 1000),
+              'date wrongly written to integer');
 
-       } catch (err) {
-         rejectTest(err);
-       }
-       done();
+    } catch (err) {
+      rejectTest(err);
+    }
+    done();
 
-     });
+  });
 
 
-  it('expect reading boolean properties from database to succeed',
-     async(done) => {
-       try {
-         let sqlstmt =
-             await sqldb.prepare(`INSERT INTO ${DATATYPE_DATE_TABLE}
+  it('expect reading boolean properties from database to succeed', async(
+                                                                       done) => {
+    try {
+      let sqlstmt = await sqldb.prepare(`INSERT INTO ${DATATYPE_DATE_TABLE}
               (id, my_date_text, my_date_int)
             values
               (:id, :my_date_text, :my_date_int)`);
 
-         // all true
-         ++model.id;
-         await sqlstmt.run({
-           ':id': model.id,
-           ':my_date_text': new Date().toISOString(),
-           ':my_date_int': Math.floor(new Date().getTime() / 1000)
-         });
-         model = await dao.select(model);
-         expect(model.myDate2Text instanceof Date).toBeTruthy(`record ${model.id}: myDate2Text should be an instance of Date`);
-         expect(model.myDate2Int instanceof Date).toBeTruthy(`record ${model.id}: myDate2Int should be an instance of Date`);
+      // all true
+      ++model.id;
+      await sqlstmt.run({
+        ':id': model.id,
+        ':my_date_text': new Date().toISOString(),
+        ':my_date_int': Math.floor(new Date().getTime() / 1000)
+      });
+      model = await dao.select(model);
+      expect(model.myDate2Text instanceof Date)
+          .toBeTruthy(
+              `record ${model.id}: myDate2Text should be an instance of Date`);
+      expect(model.myDate2Int instanceof Date)
+          .toBeTruthy(
+              `record ${model.id}: myDate2Int should be an instance of Date`);
 
-       } catch (err) {
-         rejectTest(err);
-       }
-       done();
+    } catch (err) {
+      rejectTest(err);
+    }
+    done();
 
-     });
+  });
 
 
 });
