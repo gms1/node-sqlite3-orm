@@ -130,20 +130,12 @@ async function runSample():
 
 describe('test README sample', () => {
   // ---------------------------------------------
-  it('expect README sample to succeed', (done) => {
-    new Promise<void>(async(resolve, reject) => {
-             try {
-               await runSample();
-               resolve();
-             } catch (e) {
-               reject(new Error('FAILED: ' + e.message));
-             }
-           })
-        .then((res) => done())
-        .catch((e) => {
-          expect(e).toBeNull();
-          done();
-        });
+  it('expect README sample to succeed', async(done) => {
+    try {
+      await runSample();
+    } catch (err) {
+      expect(err).toBeNull();
+    }
+    done();
   });
 });
-

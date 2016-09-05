@@ -43,7 +43,8 @@ class ChildTable {
   public name?: string;
 
   @field({name: TABLE_CHILD_FIELD_FK_NAME, dbtype: 'INTEGER NOT NULL'})
-  @fk(TABLE_CHILD_FK_CONSTRAINT_NAME, TABLE_PARENT_TABLE_NAME, TABLE_PARENT_FIELD_ID_NAME)
+  @fk(TABLE_CHILD_FK_CONSTRAINT_NAME, TABLE_PARENT_TABLE_NAME,
+      TABLE_PARENT_FIELD_ID_NAME)
   public parentId?: number;
 
   public constructor() {
@@ -79,7 +80,8 @@ describe('test schema', () => {
       expect(parentIdField).toBeDefined();
       expect(parentIdField.name).toBe(TABLE_PARENT_FIELD_ID_NAME);
       expect(parentIdField.isIdentity).toBeTruthy();
-      let parentNameField = parentTable.getTableField(TABLE_PARENT_FIELD_NAME_NAME);
+      let parentNameField =
+          parentTable.getTableField(TABLE_PARENT_FIELD_NAME_NAME);
       expect(parentNameField).toBeDefined();
       expect(parentNameField.name).toBe(TABLE_PARENT_FIELD_NAME_NAME);
       expect(parentNameField.isIdentity).toBeFalsy();
@@ -91,7 +93,8 @@ describe('test schema', () => {
       expect(childIdField).toBeDefined();
       expect(childIdField.name).toBe(TABLE_CHILD_FIELD_ID_NAME);
       expect(childIdField.isIdentity).toBeTruthy();
-      let childNameField = childTable.getTableField(TABLE_CHILD_FIELD_NAME_NAME);
+      let childNameField =
+          childTable.getTableField(TABLE_CHILD_FIELD_NAME_NAME);
       expect(childNameField).toBeDefined();
       expect(childNameField.name).toBe(TABLE_CHILD_FIELD_NAME_NAME);
       expect(childNameField.isIdentity).toBeFalsy();
@@ -110,41 +113,33 @@ describe('test schema', () => {
   });
 
   // ---------------------------------------------
-  it('expect create/drop/alter table to work', (done) => {
-    let parentTable = schema().getTable(TABLE_PARENT_TABLE_NAME);
-    expect(parentTable).toBeDefined();
+  it('expect create/drop/alter table to work', async(done) => {
+    try {
+      let parentTable = schema().getTable(TABLE_PARENT_TABLE_NAME);
+      expect(parentTable).toBeDefined();
+      // create tables
+      await schema().createTable(sqldb, TABLE_PARENT_TABLE_NAME);
+      await schema().createTable(sqldb, TABLE_CHILD_TABLE_NAME);
 
-    schema()
-        // create tables
-        .createTable(sqldb, TABLE_PARENT_TABLE_NAME)
-        .then((res) => {
-          return schema().createTable(sqldb, TABLE_CHILD_TABLE_NAME);
-        })
-        .then((res) => {
-          // alter table add a new column
-          let newProperty = Symbol('dyndef');
-          let newField = new Field(newProperty);
-          newField.name = 'TESTADDCOL';
-          newField.dbtype = 'INTEGER';
-          parentTable.addPropertyField(newField);
-          parentTable.addTableField(newField);
-          expect(parentTable.hasPropertyField(newProperty)).toBeTruthy();
-          expect(parentTable.hasTableField(newField.name)).toBeTruthy();
-          return schema().alterTableAddColumn(
-              sqldb, TABLE_PARENT_TABLE_NAME, newField.name);
-        })
-        .then((res) => {
-          // drop tables
-          return schema().dropTable(sqldb, TABLE_CHILD_TABLE_NAME);
-        })
-        .then((res) => {
-          return schema().dropTable(sqldb, TABLE_PARENT_TABLE_NAME);
-        })
-        .then((res) => done())
-        .catch((err) => {
-          rejectTest(err);
-          done();
-        });
+      // alter table add a new column
+      let newProperty = Symbol('dyndef');
+      let newField = new Field(newProperty);
+      newField.name = 'TESTADDCOL';
+      newField.dbtype = 'INTEGER';
+      parentTable.addPropertyField(newField);
+      parentTable.addTableField(newField);
+      expect(parentTable.hasPropertyField(newProperty)).toBeTruthy();
+      expect(parentTable.hasTableField(newField.name)).toBeTruthy();
+
+      await schema().alterTableAddColumn(
+          sqldb, TABLE_PARENT_TABLE_NAME, newField.name);
+      await schema().dropTable(sqldb, TABLE_CHILD_TABLE_NAME);
+      await schema().dropTable(sqldb, TABLE_PARENT_TABLE_NAME);
+
+    } catch (err) {
+      rejectTest(err);
+    }
+    done();
   });
 
 });
