@@ -131,7 +131,7 @@ async function runSample():
 describe('test README sample', () => {
   // ---------------------------------------------
   it('expect README sample to succeed', (done) => {
-    return new Promise<void>(async(resolve, reject) => {
+    new Promise<void>(async(resolve, reject) => {
              try {
                await runSample();
                resolve();

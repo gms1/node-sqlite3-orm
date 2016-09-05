@@ -30,7 +30,7 @@ describe('test SqlDatabase', () => {
   });
 
   // ---------------------------------------------
-  it('expect dml without parameter to succeed', (done) => {
+  it('expect insert without parameter to succeed', (done) => {
     sqldb.run("INSERT INTO TEST (id,col) values (1,'testvalue 1/1')")
         .then((res) => {
           expect(res.lastID).toBe(1);
@@ -46,7 +46,7 @@ describe('test SqlDatabase', () => {
   });
 
   // ---------------------------------------------
-  it('expect dml without parameter to fail', (done) => {
+  it('expect insert without parameter to violate unique constraint', (done) => {
     sqldb.run("INSERT INTO TEST (id,col) values (1,'testvalue 1/1')")
         .then((res) => fail())
         .catch((err) => {
@@ -70,7 +70,7 @@ describe('test SqlDatabase', () => {
 
 
   // ---------------------------------------------
-  it('expect dml with parameter to succeed', (done) => {
+  it('expect update with parameter to succeed', (done) => {
     sqldb.run('UPDATE TEST set col = ? WHERE id=?', ['testvalue 1/2', 1])
         .catch((err) => {
           rejectTest(err);
@@ -91,7 +91,7 @@ describe('test SqlDatabase', () => {
   });
 
   // ---------------------------------------------
-  it('expect prepared dml with parameter to succeed', (done) => {
+  it('expect prepared update with parameter to succeed', (done) => {
     let stmt: SqlStatement;
     sqldb.prepare('UPDATE TEST set col = $col WHERE ID=$id')
         .catch((err) => {
@@ -124,7 +124,7 @@ describe('test SqlDatabase', () => {
 
   });
   // ---------------------------------------------
-  it('expect dql without parameter to succeed', (done) => {
+  it('expect select without parameter to succeed', (done) => {
     sqldb.all('SELECT id, col from TEST order by id')
         .catch((err) => {
           rejectTest(err);
@@ -142,7 +142,7 @@ describe('test SqlDatabase', () => {
 
 
   // ---------------------------------------------
-  it('expect dql with parameter to succeed', (done) => {
+  it('expect select with parameter to succeed', (done) => {
     let res: any[] = [];
 
     sqldb
@@ -171,7 +171,7 @@ describe('test SqlDatabase', () => {
         });
   });
 
-  it('test getting and setting PRAGMA user_version', (done) => {
+  it('expect getting and setting PRAGMA user_version to succeed', (done) => {
     let oldver: number;
     let newver: number;
     (async() => { return await sqldb.getUserVersion(); })()

@@ -70,7 +70,7 @@ describe('test schema', () => {
   });
 
   // ---------------------------------------------
-  it('test decorators', () => {
+  it('expect meta-data to be defined', () => {
     try {
       let parentTable = schema().getTable(TABLE_PARENT_TABLE_NAME);
       expect(parentTable).toBeDefined();
@@ -110,7 +110,7 @@ describe('test schema', () => {
   });
 
   // ---------------------------------------------
-  it('test create/drop/alter table', (done) => {
+  it('expect create/drop/alter table to work', (done) => {
     let parentTable = schema().getTable(TABLE_PARENT_TABLE_NAME);
     expect(parentTable).toBeDefined();
 

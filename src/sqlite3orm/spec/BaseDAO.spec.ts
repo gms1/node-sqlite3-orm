@@ -56,7 +56,7 @@ describe('test BaseDAO', () => {
   });
 
   // ---------------------------------------------
-  it('test BaseDAOs basic functionality (insert/update/delete/selectOne/selectAll)',
+  it('expect basic functionality (insert/update/delete/selectOne/selectAll) to work',
      (done) => {
        let p =
            new Promise<void>(async(resolve, reject) => {
@@ -107,7 +107,7 @@ describe('test BaseDAO', () => {
      });
 
   // ---------------------------------------------
-  it('test BaseDAOs foreign keys',
+  it('expect foreign key select to work',
      (done) => {
        let p =
            new Promise<void>(async(resolve, reject) => {
