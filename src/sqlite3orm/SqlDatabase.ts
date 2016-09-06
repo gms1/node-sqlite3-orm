@@ -347,5 +347,12 @@ export class SqlDatabase {
     return this.exec('PRAGMA user_version = ' + newver);
   }
 
+  /**
+   * Set the execution mode to verbose to produce long stack traces. There is no way to reset this.
+   * See https://github.com/mapbox/node-sqlite3/wiki/Debugging
+   *
+   * @param {number} newver
+   * @returns {Promise<void>}
+   */
   public static verbose(): void { sqlverbose(); }
 }
