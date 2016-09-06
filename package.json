@@ -30,6 +30,7 @@
     "prebuild": "npm run clean",
     "build": "tsc",
     "buildwatch": "tsc --watch",
+    "pretest": "npm run build",
     "test": "jasmine",
     "tslint": "tslint \"src/**/*.ts\"",
     "clean": "node ./shjs/clean.js",
