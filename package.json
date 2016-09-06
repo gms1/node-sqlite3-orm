@@ -47,7 +47,8 @@
     "@types/reflect-metadata": "0.0.1",
     "@types/sqlite3": "0.0.28",
     "jasmine": "^2.4.1",
-    "shelljs": "^0.7.4"
+    "shelljs": "^0.7.4",
+    "typescript": "^2.0.2"
   },
   "typescript": {
     "definition": "./index.d.ts"
