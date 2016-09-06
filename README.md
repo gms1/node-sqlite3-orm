@@ -78,7 +78,7 @@ import {schema} from 'sqlite3orm/Schema';
 ```
 
 
-## Read/Insert/Update/Delete using DAOs
+## Select/Insert/Update/Delete using DAOs
 
 In order to read from or write to the database, you can use the `BaseDAO<Model>' class
 
@@ -130,7 +130,37 @@ In order to read from or write to the database, you can use the `BaseDAO<Model>'
 Of course, all primitive JavaScript data types ('String', 'Number', 'Boolean') and properties of type 'Date' are supported. 
 Type safety is guaranteed, when reading properties of these types from the database, however, NULL values will be treated as 'undefined'. 
 
-> TODO: add support for user provided serialize/deserialize functions  
+> TODO: add support for user provided serialize/deserialize functions 
+
+## Connection pool
+
+> NOTE: For each database transaction, the involved database connection (SqlDatabase instance) should be used exclusively!
+
+One possibility to achieve this could be to use a connection pool and to perform all database transactions with its own database connection.
+
+> NOTE: instances of BaseDAO are lightweight objects and can be created on the fly and exclusively for one database transaction
+
+ 
+```TypeScript
+
+(async () => {
+  let pool = new SqlConnectionPool();
+
+  // open the database connection pool with 1 to 2 database connections:
+  //    do not use a private memory database for the connection pool :hint: 
+  await pool.open(SQL_MEMORY_DB_SHARED, SQL_OPEN_DEFAULT, 1, 2);
+
+  let con1 = await pool.get();
+  let con2 = await pool.get();
+  await Promise.all([doSomeThing(con1), doAnotherThing(con2)]);
+
+  // free all connections to the pool:
+  con1.close();
+  pool.release(con2);
+
+})();
+
+```
 
 ## Install
 
@@ -157,6 +187,14 @@ tsconfig.json:
 
 sqlite3-orm-js is licensed under the MIT License:
 [LICENSE](./LICENSE)
+
+## Release Notes
+
+| Release   | Notes                                                                                                                            |
+|-----------|----------------------------------------------------------------------------------------------------------------------------------|
+| 0.0.7     | SqlConnectionPool: a new connection pool                                                                                         |
+| 0.0.6     | BaseDAO: ensure type safety for mapped properties of primitive or Date type                                                      |
+
 
 ## Downloads
 

@@ -1,6 +1,7 @@
 import {cached, Database, OPEN_CREATE, OPEN_READONLY, OPEN_READWRITE, Statement, verbose as sqlverbose} from 'sqlite3';
 
 import {SqlStatement, SqlRunResult} from './SqlStatement';
+import {SqlConnectionPool} from './SqlConnectionPool';
 
 export const SQL_OPEN_READONLY = OPEN_READONLY;
 export const SQL_OPEN_READWRITE = OPEN_READWRITE;
@@ -24,7 +25,7 @@ export const SQL_MEMORY_DB_PRIVATE = ':memory:';
 //   Error: SQLITE_CONSTRAINT: UNIQUE constraint failed: TEST.id
 
 
-const SQL_OPEN_DEFAULT = SQL_OPEN_READWRITE | SQL_OPEN_CREATE;
+export const SQL_OPEN_DEFAULT = SQL_OPEN_READWRITE | SQL_OPEN_CREATE;
 
 /**
  * A thin wrapper for the 'Database' class from 'node-sqlite3' using Promises
@@ -39,13 +40,18 @@ const SQL_OPEN_DEFAULT = SQL_OPEN_READWRITE | SQL_OPEN_CREATE;
  * @class SqlDatabase
  */
 export class SqlDatabase {
-  private db: Database;
+  private db?: Database;
+  private pool?: SqlConnectionPool;
+
 
   /**
    * Creates an instance of SqlDatabase.
    *
    */
-  constructor() {}
+  constructor() {
+    this.db = undefined;
+    this.pool = undefined;
+  }
 
   /**
    * Open a database connection
@@ -53,16 +59,20 @@ export class SqlDatabase {
    * @param {string} databaseFile - The path to the database file or URI
    * filename (see SQL_MEMORY_DB_SHARED/SQL_MEMORY_DB_PRIVATE for an in-memory
    * database)
-   * @param {number} [mode] - A bit flag combination of: SQL_OPEN_CREATE |
+   * @param {number} [mode=SQL_OPEN_DEFAULT] - A bit flag combination of: SQL_OPEN_CREATE |
    * SQL_OPEN_READONLY | SQL_OPEN_READWRITE
    * @returns {Promise<void>}
    */
   public open(databaseFile: string, mode?: number): Promise<void> {
+    if (this.pool) {
+      this.pool.release(this);
+    }
     return new Promise<void>((resolve, reject) => {
-      this.db = new Database(databaseFile, mode || SQL_OPEN_DEFAULT, (err) => {
+      let db = new Database(databaseFile, mode || SQL_OPEN_DEFAULT, (err) => {
         if (err) {
           reject(err);
         } else {
+          this.db = db;
           resolve();
         }
       });
@@ -76,10 +86,17 @@ export class SqlDatabase {
    */
   public close(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      if (!this.db) {
+      if (this.pool) {
+        this.pool.release(this);
+        resolve();
+      }
+      else if (!this.db) {
         resolve();
       } else {
-        this.db.close((err) => {
+        let db = this.db;
+        this.db = undefined;
+        db.close((err) => {
+          db.removeAllListeners();
           if (err) {
             reject(err);
           } else {
@@ -88,6 +105,16 @@ export class SqlDatabase {
         });
       }
     });
+  }
+
+  /**
+   * Test if a connection is open
+   *
+   * @returns {boolean}
+   */
+  public isOpen(): boolean {
+    // tslint:disable-next-line: triple-equals
+    return this.db != undefined;
   }
 
   /**
@@ -102,6 +129,10 @@ export class SqlDatabase {
     return new Promise<SqlRunResult>((resolve, reject) => {
       // trace('run stmt=' + sql);
       // trace('>input: ' + JSON.stringify(params));
+      if (!this.db) {
+        reject(new Error('database connection not open'));
+        return;
+      }
       // tslint:disable-next-line: only-arrow-functions
       this.db.run(sql, params, function(err: Error): void {
         if (err) {
@@ -127,6 +158,10 @@ export class SqlDatabase {
     return new Promise<any>((resolve, reject) => {
       // trace('get stmt=' + sql);
       // trace('>input: ' + JSON.stringify(params));
+      if (!this.db) {
+        reject(new Error('database connection not open'));
+        return;
+      }
       this.db.get(sql, params, (err, row) => {
         if (err) {
           // trace('>error: ' + err.message);
@@ -151,6 +186,10 @@ export class SqlDatabase {
     return new Promise<any[]>((resolve, reject) => {
       // trace('all stmt=' + sql);
       // trace('>input: ' + JSON.stringify(params));
+      if (!this.db) {
+        reject(new Error('database connection not open'));
+        return;
+      }
       this.db.all(sql, params, (err, rows) => {
         if (err) {
           // trace('>error: ' + err.message);
@@ -177,6 +216,10 @@ export class SqlDatabase {
       sql: string, params?: any,
       callback?: (err: Error, row: any) => void): Promise<number> {
     return new Promise<number>((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error('database connection not open'));
+        return;
+      }
       this.db.each(sql, params, callback, (err, count) => {
         if (err) {
           reject(err);
@@ -196,6 +239,10 @@ export class SqlDatabase {
   public exec(sql: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       // trace('exec stmt=' + sql);
+      if (!this.db) {
+        reject(new Error('database connection not open'));
+        return;
+      }
       this.db.exec(sql, (err) => {
         if (err) {
           reject(err);
@@ -216,6 +263,10 @@ export class SqlDatabase {
    */
   public prepare(sql: string, params?: any): Promise<SqlStatement> {
     return new Promise<SqlStatement>((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error('database connection not open'));
+        return;
+      }
       let dbstmt: Statement;
       dbstmt = this.db.prepare(sql, params, (err) => {
         if (err) {
@@ -236,6 +287,9 @@ export class SqlDatabase {
    * @returns {void}
    */
   public serialize(callback?: () => void): void {
+    if (!this.db) {
+      throw new Error('database connection not open');
+    }
     return this.db.serialize(callback);
   }
 
@@ -248,6 +302,9 @@ export class SqlDatabase {
    * @returns {void}
    */
   public parallelize(callback?: () => void): void {
+    if (!this.db) {
+      throw new Error('database connection not open');
+    }
     return this.db.parallelize(callback);
   }
 
@@ -318,6 +375,9 @@ export class SqlDatabase {
    * @returns {this}
    */
   public on(event: string, listener: (sql: string) => void): this {
+    if (!this.db) {
+      throw new Error('database connection not open');
+    }
     this.db.on(event, listener);
     return this;
   }
@@ -347,6 +407,7 @@ export class SqlDatabase {
     return this.exec('PRAGMA user_version = ' + newver);
   }
 
+
   /**
    * Set the execution mode to verbose to produce long stack traces. There is no way to reset this.
    * See https://github.com/mapbox/node-sqlite3/wiki/Debugging
@@ -355,4 +416,64 @@ export class SqlDatabase {
    * @returns {Promise<void>}
    */
   public static verbose(): void { sqlverbose(); }
+
+
+  /*
+  @internal
+  */
+  public openByPool(pool: SqlConnectionPool, databaseFile: string, mode?: number): Promise<void> {
+    this.pool = pool;
+    return new Promise<void>((resolve, reject) => {
+      let db = new Database(databaseFile, mode || SQL_OPEN_DEFAULT, (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          this.db = db;
+          resolve();
+        }
+      });
+    });
+  }
+
+
+  /*
+  @internal
+  */
+  public closeByPool(): Promise<void> {
+    this.pool = undefined;
+    return new Promise<void>((resolve, reject) => {
+      if (!this.db) {
+        resolve();
+      } else {
+        let db = this.db;
+        this.db = undefined;
+        db.close((err) => {
+          db.removeAllListeners();
+          if (err) {
+            reject(err);
+          } else {
+            resolve();
+          }
+        });
+      }
+    });
+  }
+
+  /*
+  @internal
+  */
+  public getDatabase(): Database|undefined {
+    return this.db;
+  }
+
+  /*
+  @internal
+  */
+  public setDatabase(db: Database|undefined): void {
+    if (!!this.db) {
+      this.db.removeAllListeners();
+    }
+    this.db = db;
+  }
+
 }
