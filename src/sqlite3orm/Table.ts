@@ -12,15 +12,13 @@ const TABLEALIAS = 'T';
 export class ForeignKey {
   name: string;
   refTableName: string;
-  refColumns: Array<string>;
-  fields: Array<Field>;
-  selectCondition: string;
+  refColumns: string[] = [];
+  fields: Field[] = [];
+  selectCondition?: string;
 
   public constructor(name: string, refTableName: string) {
     this.name = name;
     this.refTableName = refTableName;
-    this.refColumns = new Array<string>();
-    this.fields = new Array<Field>();
   }
 }
 
@@ -88,9 +86,9 @@ export class Table {
   /**
    * The fields defined for this table
    *
-   * @type {Array<Field>}
+   * @type {Field[]}
    */
-  fields: Array<Field>;
+  fields: Field[] = [];
 
 
   /**
@@ -140,7 +138,7 @@ export class Table {
     this.mapPropToField = new Map<string|symbol, Field>();
     this.mapNameToField = new Map<string, Field>();
     this.mapNameToIdentityField = new Map<string, Field>();
-    this.fields = new Array<Field>();
+    this.fields = [];
     this.withoutRowId = false;
     this.autoIncrement = false;
     this._autoIncrementField = undefined;
@@ -329,14 +327,14 @@ export class Table {
    *
    */
   private generateStatementsText(): void {
-    let colNames = new Array<string>();
-    let colNamesPK = new Array<string>();
-    let colNamesNoPK = new Array<string>();
-    let colParms = new Array<string>();
-    let colParmsNoPK = new Array<string>();
-    let colSetsNoPK = new Array<string>();
-    let colSelPK = new Array<string>();
-    let colDefs = new Array<string>();
+    let colNames: string[] = [];
+    let colNamesPK: string[] = [];
+    let colNamesNoPK: string[] = [];
+    let colParms: string[] = [];
+    let colParmsNoPK: string[] = [];
+    let colSetsNoPK: string[] = [];
+    let colSelPK: string[] = [];
+    let colDefs: string[] = [];
     let stmts = new SqlStatementText();
 
     if (!this.fields.length) {

@@ -135,17 +135,17 @@ export class BaseDAO<T extends Object> {
    *
    * @param {string} [sql] - An optional sql-text which will be added to the select-statement
    * @param {Object} [params] - An optional object with additional host parameter
-   * @returns {Promise<Array<T>>}
+   * @returns {Promise<T[]>}
    */
-  public selectAll(sql?: string, params?: Object): Promise<Array<T>> {
-    return new Promise<Array<T>>(async(resolve, reject) => {
+  public selectAll(sql?: string, params?: Object): Promise<T[]> {
+    return new Promise<T[]>(async(resolve, reject) => {
       try {
         let stmt = this.table.getSelectAllStatement();
         if (!!sql) {
           stmt += sql;
         }
         let rows: any[] = await this.sqldb.all(stmt, params);
-        let results = new Array<T>();
+        let results: T[] = [];
         rows.forEach((row) => {
           results.push(this.readResultRow(new this.type(), row));
         });
@@ -194,12 +194,12 @@ export class BaseDAO<T extends Object> {
    * @param {F} foreign - An instance of the class mapped to the foreign table
    * @param {string} [sql] - An optional sql-text which will be added to the select-statement
    * @param {Object} [params] - An optional object with additional host parameter
-   * @returns {Promise<Array<T>>}
+   * @returns {Promise<T[]>}
    */
   public selectAllOf<F extends Object>(
       constraintName: string, foreignType: {new (): F}, foreign: F, sql?: string,
-      params?: Object): Promise<Array<T>> {
-    return new Promise<Array<T>>(async(resolve, reject) => {
+      params?: Object): Promise<T[]> {
+    return new Promise<T[]>(async(resolve, reject) => {
       try {
         if (!this.table.statementsText.foreignKeys.has(constraintName)) {
           throw new Error(`constraint '${constraintName}' is not defined`);
@@ -215,7 +215,7 @@ export class BaseDAO<T extends Object> {
           stmt += sql;
         }
         let rows: any[] = await this.sqldb.all(stmt, foreignParams);
-        let results = new Array<T>();
+        let results: T[] = [];
         rows.forEach((row) => {
           results.push(this.readResultRow(new this.type(), row));
         });
