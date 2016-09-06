@@ -30,10 +30,11 @@
     "prebuild": "npm run clean",
     "build": "tsc",
     "buildwatch": "tsc --watch",
-    "pretest": "npm run build",
+    "pretest": "npm run build && npm run tslint",
     "test": "jasmine",
     "tslint": "tslint \"src/**/*.ts\"",
     "clean": "node ./shjs/clean.js",
+    "prepackage": "npm run test",
     "package": "node ./shjs/package.js",
     "typedoc": "typedoc --mode modules --out docs/typedoc/sqlite3orm --tsconfig tsconfig.json --exclude '**/*.spec.ts' src/sqlite3orm"
   },
@@ -48,6 +49,7 @@
     "@types/sqlite3": "0.0.28",
     "jasmine": "^2.4.1",
     "shelljs": "^0.7.4",
+    "tslint": "^3.15.1",
     "typescript": "^2.0.2"
   },
   "typescript": {
