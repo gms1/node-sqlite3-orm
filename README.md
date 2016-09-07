@@ -1,3 +1,5 @@
+[![Build Status](https://api.travis-ci.org/gms1/node-sqlite3-orm.svg?branch=master)](https://travis-ci.org/gms1/node-sqlite3-orm)
+
 # node-sqlite3-orm
 This module allows you to map your model, written in JavaScript or TypeScript, to a database schema using SQLite Version 3.
 **node-sqlite3-orm** is designed to work with new JavaScript *Decorators*, *Promises* and the *async/await* feature.
