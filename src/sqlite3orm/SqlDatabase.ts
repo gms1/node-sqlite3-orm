@@ -64,7 +64,7 @@ export class SqlDatabase {
    * @returns {Promise<void>}
    */
   public open(databaseFile: string, mode?: number): Promise<void> {
-    if (this.pool) {
+    if (!!this.pool) {
       this.pool.release(this);
     }
     return new Promise<void>((resolve, reject) => {
@@ -86,7 +86,7 @@ export class SqlDatabase {
    */
   public close(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      if (this.pool) {
+      if (!!this.pool) {
         this.pool.release(this);
         resolve();
       }
@@ -462,18 +462,21 @@ export class SqlDatabase {
   /*
   @internal
   */
-  public getDatabase(): Database|undefined {
-    return this.db;
+  public recycleByPool(pool: SqlConnectionPool, sqldb: SqlDatabase): void {
+    if (!!sqldb.db) {
+      sqldb.db.removeAllListeners();
+      this.db = sqldb.db;
+      this.pool = pool;
+    }
+    sqldb.db = undefined;
+    sqldb.pool = undefined;
   }
 
   /*
   @internal
   */
-  public setDatabase(db: Database|undefined): void {
-    if (!!this.db) {
-      this.db.removeAllListeners();
-    }
-    this.db = db;
+  public getPool(): SqlConnectionPool | undefined {
+    return this.pool;
   }
 
 }

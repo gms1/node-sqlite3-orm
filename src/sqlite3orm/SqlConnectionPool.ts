@@ -78,13 +78,11 @@ export class SqlConnectionPool {
   close(): Promise<void> {
     return new Promise<void>(async(resolve, reject) => {
       try {
-        if (this.inUse.size) {
-          throw new Error(
-              `failed to close connection pool because ${this.inUse.size} connections are in use`);
-        }
         let promises: Promise<void>[] = [];
         this.inPool.forEach((value) => { promises.push(value.closeByPool()); });
         this.inPool.length = 0;
+        this.inUse.forEach((value) => { promises.push(value.closeByPool()); });
+        this.inUse.clear();
         await Promise.all(promises);
         this.databaseFile = undefined;
         this.mode = undefined;
@@ -104,18 +102,15 @@ export class SqlConnectionPool {
   get(timeout: number = 0): Promise<SqlDatabase> {
     return new Promise<SqlDatabase>(async(resolve, reject) => {
       try {
-        /**
-         *
-         *
-         * @returns
-         */
         let cond = () => { return (this.inPool.length > 0); };
-        if (!cond() && this.max && this.inUse.size >= this.max) {
+        if (this.max > 0 && !cond() && this.inUse.size >= this.max) {
           await wait(cond, timeout);
         }
         if (this.inPool.length > 0) {
           let sqldb = this.inPool.shift() as SqlDatabase;
-          this.inUse.add(sqldb);
+          if (this.max > 0) {
+            this.inUse.add(sqldb);
+          }
           resolve(sqldb);
           return;
         }
@@ -124,7 +119,9 @@ export class SqlConnectionPool {
           throw new Error(`connection pool not opened`);
         }
         await sqldb.openByPool(this, this.databaseFile, this.mode);
-        this.inUse.add(sqldb);
+        if (this.max > 0) {
+          this.inUse.add(sqldb);
+        }
         resolve(sqldb);
       } catch (err) {
         reject(err);
@@ -139,18 +136,19 @@ export class SqlConnectionPool {
    * @returns {void}
    */
   release(sqldb: SqlDatabase): void {
-    if (!this.inUse.has(sqldb)) {
+    if (this !== sqldb.getPool()) {
+      // not opened by this pool
       return;
     }
-    this.inUse.delete(sqldb);
-
-    // transfer wrapped database connection
-    let olddb = sqldb.getDatabase();
-    sqldb.setDatabase(undefined);
-
-    let newsqldb = new SqlDatabase();
-    newsqldb.setDatabase(olddb);
-    this.inPool.push(newsqldb);
+    if (this.max > 0 && this.inUse.has(sqldb)) {
+      this.inUse.delete(sqldb);
+    }
+    if (sqldb.isOpen()) {
+      // transfer database connection
+      let newsqldb = new SqlDatabase();
+      newsqldb.recycleByPool(this, sqldb);
+      this.inPool.push(newsqldb);
+    }
   }
 }
 
@@ -160,11 +158,6 @@ function wait(
     intervall: number = 100): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     let counter = 0;
-    /**
-     *
-     *
-     * @returns
-     */
     let timer = setInterval(() => {
       if (cond()) {
         clearInterval(timer);
