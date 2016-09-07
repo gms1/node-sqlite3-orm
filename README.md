@@ -202,4 +202,4 @@ tsconfig.json:
 
 ## Downloads
 
-[![NPM](https://nodei.co/npm/sqlite3orm.png?downloads=true&downloadRank=true&stars=true)](https://github.com/gms1/node-sqlite3-orm)
+[![NPM](https://nodei.co/npm/sqlite3orm.png?downloads=true&downloadRank=true&stars=true)](https://www.npmjs.com/package/sqlite3orm)
