@@ -139,7 +139,7 @@ Type safety is guaranteed, when reading properties of these types from the datab
 
 > NOTE: For each database transaction, the involved database connection (SqlDatabase instance) should be used exclusively!
 
-One possibility to achieve this could be to use a connection pool and to perform all database transactions with its own database connection.
+One possibility to achieve this could be to use a connection pool and to perform all database transactions with their own database connection.
 
 > NOTE: instances of BaseDAO are lightweight objects and can be created on the fly and exclusively for one database transaction
 
@@ -188,7 +188,7 @@ tsconfig.json:
 
 ## License
 
-sqlite3-orm-js is licensed under the MIT License:
+**node-sqlite3-orm** is licensed under the MIT License:
 [LICENSE](./LICENSE)
 
 ## Release Notes
