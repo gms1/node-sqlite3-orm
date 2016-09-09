@@ -1,5 +1,7 @@
 [![Build Status](https://api.travis-ci.org/gms1/node-sqlite3-orm.svg?branch=master)](https://travis-ci.org/gms1/node-sqlite3-orm)
 [![npm version](https://badge.fury.io/js/sqlite3orm.svg)](https://badge.fury.io/js/sqlite3orm)
+[![Dependency Status](https://david-dm.org/gms1/node-sqlite3-orm.svg)](https://david-dm.org/gms1/node-sqlite3-orm)
+[![devDependency Status](https://david-dm.org/gms1/node-sqlite3-orm/dev-status.svg)](https://david-dm.org/gms1/node-sqlite3-orm#info=devDependencies)
 
 # node-sqlite3-orm
 This module allows you to map your model, written in JavaScript or TypeScript, to a database schema using SQLite Version 3.
