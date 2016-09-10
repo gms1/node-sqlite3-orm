@@ -132,6 +132,12 @@ export class Field {
     return this._propertyKnownType;
   }
 
+  /**
+   * If this property should be serialized/deserialized to the database as Json data
+   *
+   * @type {boolean}
+   */
+  isJson: boolean;
 
   /**
    * Creates an instance of Field.
@@ -144,6 +150,7 @@ export class Field {
     this.isIdentity = false;
     this.dbtype = 'TEXT';
     this.foreignKeys = new Map<string, FieldReference>();
+    this.isJson = false;
   }
 
   public hasForeignKeyConstraint(constraintName: string): boolean {

@@ -48,6 +48,10 @@ export interface FieldOpts {
    * @type {string}
    */
   dbtype?: string;
+
+
+  isJson?: boolean;
+
 }
 
 /**
@@ -126,6 +130,9 @@ function decoratePropertyField(
 
   if (!!opts.dbtype) {
     field.dbtype = opts.dbtype;
+  }
+  if (!!opts.isJson) {
+    field.isJson = opts.isJson;
   }
   if (!!isIdentity) {
     field.isIdentity = isIdentity;

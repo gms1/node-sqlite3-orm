@@ -283,19 +283,23 @@ export class BaseDAO<T extends Object> {
       (hostParams as any)[field.hostParameterName] = value;
       return;
     }
-    switch (field.propertyKnownType) {
-      case PropertyType.BOOLEAN:
-        value = !value ? 0 : 1;
-        break;
-      case PropertyType.DATE:
-        if (field.dbtype.toUpperCase().indexOf('INT') !== -1) {
-          value = Math.floor((value as Date).getTime() / 1000);
-        } else {
-          value = (value as Date).toISOString();
-        }
-        break;
+    if (field.isJson) {
+      (hostParams as any)[field.hostParameterName] = JSON.stringify(value);
+    } else {
+      switch (field.propertyKnownType) {
+        case PropertyType.BOOLEAN:
+          value = !value ? 0 : 1;
+          break;
+        case PropertyType.DATE:
+          if (field.dbtype.toUpperCase().indexOf('INT') !== -1) {
+            value = Math.floor((value as Date).getTime() / 1000);
+          } else {
+            value = (value as Date).toISOString();
+          }
+          break;
+      }
+      (hostParams as any)[field.hostParameterName] = value;
     }
-    (hostParams as any)[field.hostParameterName] = value;
   }
 
 
@@ -307,50 +311,54 @@ export class BaseDAO<T extends Object> {
       Reflect.set(t, field.propertyKey, undefined);
       return;
     }
-    switch (field.propertyKnownType) {
-      case PropertyType.BOOLEAN:
-        if (typeof value === 'string') {
-          if (value === '0' || value === 'false') {
-            value = false;
-          } else if ( value === '1' || value === 'true' ) {
-            value = true;
-          } else {
-            value = undefined;
-          }
-        } else {
-          value = !value ? false : true;
-        }
-        break;
-      case PropertyType.DATE:
-        switch (typeof value) {
-          case 'string':
-            value = new Date(Date.parse(value));
-            break;
-          case 'number':
-            if (Number.isInteger(value)) {
-              // unix time
-              value = new Date((value as number) * 1000);
+    if (field.isJson) {
+      value = JSON.parse(value);
+    } else {
+      switch (field.propertyKnownType) {
+        case PropertyType.BOOLEAN:
+          if (typeof value === 'string') {
+            if (value === '0' || value === 'false') {
+              value = false;
+            } else if ( value === '1' || value === 'true' ) {
+              value = true;
             } else {
-              // Julian day numbers ?
-              // TODO: currently not supported
-              value = NaN;
+              value = undefined;
             }
-            break;
-          default:
-            value = NaN;
-            break;
-        }
-        break;
-      case PropertyType.NUMBER:
-        if (typeof value !== 'number') {
-          value = Number(value);
-        }
-        break;
-      case PropertyType.STRING:
-        if (typeof value !== 'string') {
-          value = String(value);
-        }
-        break;
+          } else {
+            value = !value ? false : true;
+          }
+          break;
+        case PropertyType.DATE:
+          switch (typeof value) {
+            case 'string':
+              value = new Date(Date.parse(value));
+              break;
+            case 'number':
+              if (Number.isInteger(value)) {
+                // unix time
+                value = new Date((value as number) * 1000);
+              } else {
+                // Julian day numbers ?
+                // TODO: currently not supported
+                value = NaN;
+              }
+              break;
+            default:
+              value = NaN;
+              break;
+          }
+          break;
+        case PropertyType.NUMBER:
+          if (typeof value !== 'number') {
+            value = Number(value);
+          }
+          break;
+        case PropertyType.STRING:
+          if (typeof value !== 'string') {
+            value = String(value);
+          }
+          break;
+      }
     }
     // console.log(`setting ${field.propertyKey} to ${value}`);
     Reflect.set(t, field.propertyKey, value);
