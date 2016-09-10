@@ -10,7 +10,7 @@ function rejectTest(err: Error): void {
 
 const DATATYPE_DATE_TABLE = 'DATATYPE_DATE';
 
-@table({name: 'DATATYPE_DATE'})
+@table({name: DATATYPE_DATE_TABLE})
 class DataTypeDate {
   @id({name: 'id', dbtype: 'INTEGER NOT NULL'})
   id: number;
@@ -74,7 +74,7 @@ describe('test Date type', () => {
   });
 
 
-  it('expect reading boolean properties from database to succeed', async(
+  it('expect reading Date properties from database to succeed', async(
                                                                        done) => {
     try {
       let sqlstmt = await sqldb.prepare(`INSERT INTO ${DATATYPE_DATE_TABLE}

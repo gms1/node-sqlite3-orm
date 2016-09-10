@@ -10,7 +10,7 @@ function rejectTest(err: Error): void {
 
 const DATATYPE_BOOLEAN_TABLE = 'DATATYPE_BOOLEAN';
 
-@table({name: 'DATATYPE_BOOLEAN'})
+@table({name: DATATYPE_BOOLEAN_TABLE})
 class DataTypeBoolean {
   @id({name: 'id', dbtype: 'INTEGER NOT NULL'})
   id: number;
