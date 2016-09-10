@@ -11,6 +11,9 @@ class User {
 
   @field({name: 'user_loginname', dbtype: 'TEXT NOT NULL'})
   userLoginName: string;
+
+  @field({name: 'user_json', dbtype: 'TEXT', isJson: true})
+  userJsonData: any;
 }
 
 @table({name: 'CONTACTS', autoIncrement: true})
@@ -70,6 +73,7 @@ async function runSample():
             let user = new User();
             user.userId = 1;
             user.userLoginName = 'donald';
+            user.userJsonData = { lastScores: [10, 42, 31]};
             user = await userDAO.insert(user);
 
             // insert a contact:
@@ -105,6 +109,9 @@ async function runSample():
                 .toBe(user.userId, 'wrong userDonald.userId');
             expect(userDonald.userLoginName)
                 .toBe(user.userLoginName, 'wrong userDonald.userLoginName');
+
+            expect(userDonald.userJsonData.lastScores.length)
+                .toBe(user.userJsonData.lastScores.length, 'wrong userDonald.userJsonData.lastScores.length');
 
             expect(contactsDonald.length)
                 .toBe(1, 'wrong contactsDonald.length');

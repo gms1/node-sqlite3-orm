@@ -20,26 +20,29 @@ import {table, field, fk, id, TableOpts, FieldOpts} from 'sqlite3orm/decorators'
 
 @table({name: 'USERS'})
 class User {
-  @id({name: 'user_id', dbtype:'INTEGER NOT NULL'})
+  @id({name: 'user_id', dbtype: 'INTEGER NOT NULL'})
   userId: number;
 
-  @field({name: 'user_loginname', dbtype:'TEXT NOT NULL'})
+  @field({name: 'user_loginname', dbtype: 'TEXT NOT NULL'})
   userLoginName: string;
+
+  @field({name: 'user_json', dbtype: 'TEXT', isJson: true})
+  userJsonData: any;  
 }
 
 @table({name: 'CONTACTS', autoIncrement: true})
 class Contact {
-  @id({name: 'contact_id', dbtype:'INTEGER NOT NULL'})
+  @id({name: 'contact_id', dbtype: 'INTEGER NOT NULL'})
   contactId: number;
   
-  @field({name: 'contact_email', dbtype:'TEXT'})
+  @field({name: 'contact_email', dbtype: 'TEXT'})
   emailAddress: string;
 
-  @field({name: 'contact_mobile', dbtype:'TEXT'})
+  @field({name: 'contact_mobile', dbtype: 'TEXT'})
   mobile: string;
 
   @fk('contact_user', 'USERS', 'user_id')
-  @field({name: 'user_id', dbtype:'INTEGER NOT NULL'})
+  @field({name: 'user_id', dbtype: 'INTEGER NOT NULL'})
   userId: number;
 }
 ```
@@ -98,6 +101,7 @@ In order to read from or write to the database, you can use the `BaseDAO<Model>'
   let user = new User();
   user.userId = 1;
   user.userLoginName = 'donald';
+  user.userJsonData = { lastScores: [10, 42, 31]};
   user = await userDAO.insert(user);
 
   // insert a contact:
@@ -197,6 +201,7 @@ tsconfig.json:
 
 | Release   | Notes                                                                                                                            |
 |-----------|----------------------------------------------------------------------------------------------------------------------------------|
+| 0.0.9     | possibility to map complex properties to a database column and serialize/deserialize the data as JSON
 | 0.0.8     | SqlConnectionPool: allow connections to be garbage-collected if the connection pool is not limited by max-connections            |
 | 0.0.7     | SqlConnectionPool: a new connection pool                                                                                         |
 | 0.0.6     | BaseDAO: ensure type safety for mapped properties of primitive or Date type                                                      |
