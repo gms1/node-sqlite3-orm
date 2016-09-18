@@ -136,8 +136,9 @@ In order to read from or write to the database, you can use the `BaseDAO<Model>'
 ```
 ## Supported data types using DAO:
 
-Of course, all primitive JavaScript data types ('String', 'Number', 'Boolean') and properties of type 'Date' are supported. 
-Type safety is guaranteed, when reading properties of these types from the database, however, NULL values will be treated as 'undefined'. 
+All primitive JavaScript data types ('String', 'Number', 'Boolean') and properties of type 'Date' are supported. 
+Type safety is guaranteed, when reading properties of these types from the database (NULL values are treated as 'undefined'). 
+Other data types can be serialized to a database field of type TEXT in JSON format, by setting the option 'isJson' to true (see sample above).
 
 > TODO: add support for user provided serialize/deserialize functions 
 
