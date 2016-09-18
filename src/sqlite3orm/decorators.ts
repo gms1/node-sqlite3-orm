@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 
-import {Field, FieldReference} from './Field';
+import {Field} from './Field';
+import {FieldReference} from './FieldReference';
 import {schema} from './Schema';
 import {Table} from './Table';
 
@@ -162,7 +163,7 @@ function decoratePropertyForeignKey(
 
   let table: Table = getTableMetadata(target.constructor);
   let field: Field = getFieldMetadata(table, key);
-  if (field.hasForeignKeyConstraint(constraintName)) {
+  if (field.hasForeignKeyField(constraintName)) {
     throw new Error(`decorating property '${target.constructor.name}.${key.toString()}': duplicate foreign key constraint 'constraintName'`);
   }
 

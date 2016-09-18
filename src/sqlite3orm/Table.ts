@@ -1,48 +1,8 @@
-import {Field, FieldReference} from './Field';
+import {Field} from './Field';
+import {FieldReference} from './FieldReference';
+import {ForeignKey} from './ForeignKey';
 
 const TABLEALIAS = 'T';
-
-
-/**
- * Class with the foreign key definition
- *
- * @export
- * @class Table
- */
-export class ForeignKey {
-  name: string;
-  refTableName: string;
-  refColumns: string[] = [];
-  fields: Field[] = [];
-  selectCondition?: string;
-
-  public constructor(name: string, refTableName: string) {
-    this.name = name;
-    this.refTableName = refTableName;
-  }
-}
-
-/**
- * Class with the sql statements
- *
- * @export
- * @class Table
- */
-export class SqlStatementText {
-  createTable: string;
-  dropTable: string;
-  alterTable: string;
-  insertInto: string;
-  updateSet: string;
-  deleteFrom: string;
-  selectAll: string;
-  selectOne: string;
-  foreignKeys: Map<string, ForeignKey>;
-
-  public constructor() {
-    this.foreignKeys = new Map<string, ForeignKey>();
-  }
-}
 
 /**
  * Class holding a table definition (name of the table and fields in the table)
@@ -98,7 +58,7 @@ export class Table {
    */
   private _statementsText?: SqlStatementText;
 
-  get statementsText(): SqlStatementText {
+  private get statementsText(): SqlStatementText {
     if (!this._statementsText) {
       this.generateStatementsText();
     }
@@ -322,6 +282,17 @@ export class Table {
     return this.statementsText.selectOne;
   }
 
+
+  /**
+   * Get a foreign key constraint definition
+   *
+   * @param {string} constraintName - The constraint name
+   * @returns {string}
+   */
+  public getForeignKey(constraintName: string): ForeignKey|undefined {
+    return this.statementsText.foreignKeys.get(constraintName);
+  }
+
   /**
    * Generate SQL Statements
    *
@@ -343,12 +314,13 @@ export class Table {
 
     this.fields.forEach((field) => {
       let colDef = `${field.name} ${field.dbtype}`;
+      let hostParmName = field.getHostParameterName();
 
       colNames.push(field.name);
-      colParms.push(field.hostParameterName);
+      colParms.push(hostParmName);
       if (field.isIdentity) {
         colNamesPK.push(field.name);
-        colSelPK.push(`${field.name}=${field.hostParameterName}`);
+        colSelPK.push(`${field.name}=${hostParmName}`);
         if (this.mapNameToIdentityField.size === 1) {
           colDef += ' PRIMARY KEY';
           if (!!this.autoIncrementField) {
@@ -357,8 +329,8 @@ export class Table {
         }
       } else {
         colNamesNoPK.push(field.name);
-        colParmsNoPK.push(field.hostParameterName);
-        colSetsNoPK.push(`${field.name}=${field.hostParameterName}`);
+        colParmsNoPK.push(hostParmName);
+        colSetsNoPK.push(`${field.name}=${hostParmName}`);
       }
       colDefs.push(colDef);
       field.foreignKeys.forEach((refColumn, constraintName) => {
@@ -469,11 +441,35 @@ export class Table {
     // generate SELECT-fk condition
     stmts.foreignKeys.forEach((fk, constraintName) => {
       fk.selectCondition =
-          fk.fields.map((field) => `${TABLEALIASPREFIX}${field.name}=${field.hostParameterName}`)
+          fk.fields.map((field) => `${TABLEALIASPREFIX}${field.name}=${field.getHostParameterName()}`)
               .join(' AND ');
     });
 
 
     this._statementsText = stmts;
+  }
+}
+
+
+
+/**
+ * helper class holding sql-statements/fragments
+ *
+ * @export
+ * @class Table
+ */
+class SqlStatementText {
+  createTable: string;
+  dropTable: string;
+  alterTable: string;
+  insertInto: string;
+  updateSet: string;
+  deleteFrom: string;
+  selectAll: string;
+  selectOne: string;
+  foreignKeys: Map<string, ForeignKey>;
+
+  public constructor() {
+    this.foreignKeys = new Map<string, ForeignKey>();
   }
 }

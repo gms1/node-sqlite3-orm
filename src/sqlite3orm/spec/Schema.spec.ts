@@ -1,5 +1,5 @@
 import {field, fk, id, table} from '../decorators';
-import {Field, FieldReference} from '../Field';
+import {Field} from '../Field';
 import {schema} from '../Schema';
 import {SQL_MEMORY_DB_PRIVATE, SqlDatabase} from '../SqlDatabase';
 import {Table} from '../Table';

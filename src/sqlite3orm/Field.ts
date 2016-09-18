@@ -1,44 +1,6 @@
 import {Table} from './Table';
-
-export enum PropertyType {
-  UNKNOWN = 0,
-  BOOLEAN = 1,
-  STRING,
-  NUMBER,
-  DATE
-}
-
-/**
- * Class holding a field reference ( table and column name )
- *
- * @export
- * @class FieldReference
- */
-export class FieldReference {
-  /**
-   * A table name
-   *
-   * @type {string}
-   */
-  tableName: string;
-  /**
-   * A column name
-   *
-   * @type {string}
-   */
-  colName: string;
-
-  /**
-   * Creates an instance of FieldReference.
-   *
-   * @param {string} tableName
-   * @param {string} colName
-   */
-  public constructor(tableName: string, colName: string) {
-    this.tableName = tableName;
-    this.colName = colName;
-  }
-}
+import {FieldReference} from './FieldReference';
+import {PropertyType} from './PropertyType';
 
 /**
  * Class holding a field definition
@@ -52,15 +14,8 @@ export class Field {
    *
    * @type {string}
    */
-  private _name: string;
+  public name: string;
 
-  get name(): string {
-    return this._name;
-  }
-  set name(value: string) {
-    this._name = value;
-    this._hostParameterName = ':' + value;
-  }
   /**
    * The property key mapped to this field
    *
@@ -114,13 +69,6 @@ export class Field {
    */
   foreignKeys: Map<string, FieldReference>;
 
-
-  private _hostParameterName: string;
-
-  get hostParameterName(): string {
-    return this._hostParameterName;
-  }
-
   /**
    * The property type enum mapped to this field
    *
@@ -153,19 +101,13 @@ export class Field {
     this.isJson = false;
   }
 
-  public hasForeignKeyConstraint(constraintName: string): boolean {
-    return this.foreignKeys.has(constraintName);
-  }
-
   /**
-   * Set this field to participate in a foreign key constraint
+   * Get the name for the corresponding host parameter
    *
-   * @param {string} constraintName - The constraint name
-   * @param {FieldReference} foreignTableField - The referenced table and column
+   * @returns {string}
    */
-  public setForeignKeyField(
-      constraintName: string, foreignTableField: FieldReference): void {
-    this.foreignKeys.set(constraintName, foreignTableField);
+  public getHostParameterName(): string {
+    return ':' + this.name;
   }
 
   /**
@@ -187,5 +129,17 @@ export class Field {
   public getForeignKeyField(constraintName: string): FieldReference {
     return this.foreignKeys.get(constraintName) as FieldReference;
   }
+
+  /**
+   * Set this field to participate in a foreign key constraint
+   *
+   * @param {string} constraintName - The constraint name
+   * @param {FieldReference} foreignTableField - The referenced table and column
+   */
+  public setForeignKeyField(
+      constraintName: string, foreignTableField: FieldReference): void {
+    this.foreignKeys.set(constraintName, foreignTableField);
+  }
+
 
 }

@@ -12,14 +12,11 @@ export {
 } from './SqlStatement';
 
 export {
-  Field,
-  FieldReference
+  Field
 } from './Field';
 
 export {
-  Table,
-  ForeignKey,
-  SqlStatementText
+  Table
 } from './Table';
 
 export {

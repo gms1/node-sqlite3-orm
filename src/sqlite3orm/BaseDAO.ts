@@ -1,7 +1,10 @@
 import {METADATA_TABLE_KEY} from './decorators';
 import {SqlDatabase} from './SqlDatabase';
-import {Table, ForeignKey} from './Table';
-import {Field, FieldReference, PropertyType} from './Field';
+import {Table} from './Table';
+import {Field} from './Field';
+import {FieldReference} from './FieldReference';
+import {ForeignKey} from './ForeignKey';
+import {PropertyType} from './PropertyType';
 
 
 /**
@@ -201,10 +204,10 @@ export class BaseDAO<T extends Object> {
       params?: Object): Promise<T[]> {
     return new Promise<T[]>(async(resolve, reject) => {
       try {
-        if (!this.table.statementsText.foreignKeys.has(constraintName)) {
+        let fk = this.table.getForeignKey(constraintName);
+        if (!fk) {
           throw new Error(`constraint '${constraintName}' is not defined`);
         }
-        let fk = this.table.statementsText.foreignKeys.get(constraintName) as ForeignKey;
         let stmt = this.table.getSelectAllStatement();
         stmt += '\nWHERE\n  ';
         stmt += fk.selectCondition;
@@ -280,11 +283,11 @@ export class BaseDAO<T extends Object> {
     let value = Reflect.get(t, field.propertyKey);
     // tslint:disable-next-line: triple-equals
     if (value == undefined) {
-      (hostParams as any)[field.hostParameterName] = value;
+      (hostParams as any)[field.getHostParameterName()] = value;
       return;
     }
     if (field.isJson) {
-      (hostParams as any)[field.hostParameterName] = JSON.stringify(value);
+      (hostParams as any)[field.getHostParameterName()] = JSON.stringify(value);
     } else {
       switch (field.propertyKnownType) {
         case PropertyType.BOOLEAN:
@@ -298,7 +301,7 @@ export class BaseDAO<T extends Object> {
           }
           break;
       }
-      (hostParams as any)[field.hostParameterName] = value;
+      (hostParams as any)[field.getHostParameterName()] = value;
     }
   }
 
