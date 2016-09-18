@@ -219,7 +219,7 @@ export class Table {
    * @returns {string}
    */
   public getDropTableStatement(): string {
-    return this.statementsText.dropTable;
+    return `DROP TABLE IF EXISTS ${this.name}`;
   }
 
   /**
@@ -229,7 +229,7 @@ export class Table {
    * @returns {string}
    */
   public getAlterTableAddColumnStatement(colName: string): string {
-    let stmt = this.statementsText.alterTable;
+    let stmt = `ALTER TABLE ${this.name}`;
 
     let field = this.getTableField(colName);
     stmt += ` ADD COLUMN ${field.name} ${field.dbtype}`;
@@ -386,13 +386,6 @@ export class Table {
     if (this.withoutRowId) {
       stmts.createTable += ' WITHOUT ROWID';
     }
-    // --------------------------------------------------------------
-    // generate DROP TABLE statement
-    stmts.dropTable = `DROP TABLE IF EXISTS ${this.name}`;
-
-    // --------------------------------------------------------------
-    // generate ALTER TABLE statement
-    stmts.alterTable = `ALTER TABLE ${this.name}`;
 
     // --------------------------------------------------------------
     // generate INSERT INTO statement
@@ -460,13 +453,12 @@ export class Table {
  */
 class SqlStatementText {
   createTable: string;
-  dropTable: string;
-  alterTable: string;
   insertInto: string;
   updateSet: string;
   deleteFrom: string;
   selectAll: string;
   selectOne: string;
+
   foreignKeys: Map<string, ForeignKey>;
 
   public constructor() {
