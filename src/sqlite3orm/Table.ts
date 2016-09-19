@@ -403,17 +403,23 @@ export class Table {
     }
     stmts.insertInto += '\n)';
 
+
+    // --------------------------------------------------------------
+    // generate simple where clause for selecting via primary key
+
+    let wherePrimaryKeyClause = '\nWHERE\n  ';
+    wherePrimaryKeyClause += colSelPK.join(' AND ');
+
     // --------------------------------------------------------------
     // generate UPDATE SET statement
     stmts.updateSet = `UPDATE ${this.name} SET\n  `;
     stmts.updateSet += colSetsNoPK.join(',\n  ');
-    stmts.updateSet += '\nWHERE\n  ';
-    stmts.updateSet += colSelPK.join(' AND ');
+    stmts.updateSet += wherePrimaryKeyClause;
 
     // --------------------------------------------------------------
     // generate DELETE FROM statement
-    stmts.deleteFrom = `DELETE FROM ${this.name} WHERE\n  `;
-    stmts.deleteFrom += colSelPK.join(' AND ');
+    stmts.deleteFrom = `DELETE FROM ${this.name}\n  `;
+    stmts.deleteFrom += wherePrimaryKeyClause;
 
     // --------------------------------------------------------------
     // generate SELECT-all statement
@@ -441,6 +447,7 @@ export class Table {
 
     this._statementsText = stmts;
   }
+
 }
 
 
