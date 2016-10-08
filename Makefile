@@ -1,11 +1,8 @@
-.PHONY: default install all clean build tslint test dist
+.PHONY: default all clean build tslint test dist
 
-default: install all test
+default: all test
 
 all: clean build tslint
-
-install:
-	npm run bootstrap
 
 clean:
 	npm run clean
