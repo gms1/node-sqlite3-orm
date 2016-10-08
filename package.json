@@ -27,14 +27,11 @@
   "homepage": "https://github.com/gms1/node-sqlite3-orm",
   "scripts": {
     "bootstrap": "npm install -q",
-    "prebuild": "npm run clean",
     "build": "tsc",
-    "buildwatch": "tsc --watch",
-    "pretest": "npm run build && npm run tslint",
+    "watch": "tsc --watch",
     "test": "node spec/jasmine-runner.js",
     "tslint": "tslint \"src/**/*.ts\"",
     "clean": "node ./shjs/clean.js",
-    "prepackage": "npm run test",
     "package": "node ./shjs/package.js",
     "typedoc": "typedoc --mode modules --out docs/typedoc/sqlite3orm --tsconfig tsconfig.json --exclude '**/*.spec.ts' src/sqlite3orm"
   },
