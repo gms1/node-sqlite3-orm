@@ -1,12 +1,12 @@
 import 'reflect-metadata';
 
-import {Field} from './Field';
-import {FieldReference} from './FieldReference';
-import {schema} from './Schema';
-import {Table} from './Table';
+import { Field } from './Field';
+import { FieldReference } from './FieldReference';
+import { schema } from './Schema';
+import { Table } from './Table';
 
 
-export  const METADATA_TABLE_KEY = 'schema:table';
+export const METADATA_TABLE_KEY = 'schema:table';
 
 /**
  * Options for the '@table' class decorator
@@ -49,14 +49,15 @@ export interface FieldOpts {
    * @type {string}
    */
   dbtype?: string;
-
-
+  /**
+   * Flag to indicate if field should be persisted to json string
+   * @type {boolean}
+   */
   isJson?: boolean;
-
 }
 
 /**
- * Get table metadata
+ * Get the table metadata
  *
  * @param {Function} target - The constructor of the class
  * @returns {Table}
@@ -64,13 +65,20 @@ export interface FieldOpts {
 function getTableMetadata(target: Function): Table {
   if (!Reflect.hasOwnMetadata(METADATA_TABLE_KEY, target.prototype)) {
     Reflect.defineMetadata(
-        METADATA_TABLE_KEY, new Table(target.name), target.prototype);
+      METADATA_TABLE_KEY, new Table(target.name), target.prototype);
   }
   let table: Table = Reflect.getMetadata(METADATA_TABLE_KEY, target.prototype);
   return table;
 }
 
-function getFieldMetadata(table: Table, key: string|symbol): Field {
+/**
+ * Get the field metadata
+ *
+ * @param {Table} table - The table of this field
+ * @param {(string | symbol)} key - The property key
+ * @returns {Field}
+ */
+function getFieldMetadata(table: Table, key: string | symbol): Field {
   let field: Field;
   if (table.hasPropertyField(key)) {
     field = table.getPropertyField(key);
@@ -92,7 +100,7 @@ function decorateClass(target: Function, opts: TableOpts): void {
   let table = getTableMetadata(target);
   if (!!opts.name && !!table.name && name !== table.name) {
     throw new Error(
-        `failed to map class '${target.name}' to table name '${opts.name}': This class is already mapped to the table '${table.name}'`);
+      `failed to map class '${target.name}' to table name '${opts.name}': This class is already mapped to the table '${table.name}'`);
   }
   table.name = opts.name || target.name;
   if (!!opts.withoutRowId) {
@@ -115,8 +123,8 @@ function decorateClass(target: Function, opts: TableOpts): void {
  * @returns {Field}
  */
 function decoratePropertyField(
-    target: Object, key: string|symbol, opts: FieldOpts,
-    isIdentity: boolean = false): Field {
+  target: Object, key: string | symbol, opts: FieldOpts,
+  isIdentity: boolean = false): Field {
 
   if (typeof target === 'function') {
     // not decorating static property
@@ -154,7 +162,7 @@ function decoratePropertyField(
  * @returns {Field}
  */
 function decoratePropertyForeignKey(
-    target: Object, key: string|symbol, constraintName: string, foreignTableName: string, foreignTableField: string): Field {
+  target: Object, key: string | symbol, constraintName: string, foreignTableName: string, foreignTableField: string): Field {
 
   if (typeof target === 'function') {
     // not decorating static property
@@ -194,7 +202,7 @@ export function table(opts: TableOpts = {}): (target: Function) => void {
  *     target: Object, key: string|symbol) => void)}
  */
 export function field(opts: FieldOpts = {}): (
-    target: Object, key: string|symbol) => void {
+  target: Object, key: string | symbol) => void {
   return ((target: Object, key: string | symbol) => {
     decoratePropertyField(target, key, opts, false);
   });
@@ -210,7 +218,7 @@ export function field(opts: FieldOpts = {}): (
  *     target: Object, key: string|symbol) => void)}
  */
 export function id(opts: FieldOpts = {}): (
-    target: Object, key: string|symbol) => void {
+  target: Object, key: string | symbol) => void {
   return ((target: Object, key: string | symbol) => {
     decoratePropertyField(target, key, opts, true);
   });
@@ -228,7 +236,7 @@ export function id(opts: FieldOpts = {}): (
  *     void)}
  */
 export function fk(
-    constraintName: string, foreignTableName: string, foreignTableField: string): (target: Object, key: string|symbol) =>
+  constraintName: string, foreignTableName: string, foreignTableField: string): (target: Object, key: string | symbol) =>
     void {
   return ((target: Object, key: string | symbol) => {
     let field = decoratePropertyForeignKey(target, key, constraintName, foreignTableName, foreignTableField);
