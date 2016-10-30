@@ -202,7 +202,8 @@ tsconfig.json:
 
 | Release   | Notes                                                                                                                            |
 |-----------|----------------------------------------------------------------------------------------------------------------------------------|
-| 0.0.9     | possibility to map properties of complex type to a database column and serialize/deserialize the data as JSON
+| 0.0.10    | dependencies update; small documentation changes; small code cleanup                                                             |
+| 0.0.9     | possibility to map properties of complex type to a database column and serialize/deserialize the data as JSON                    |
 | 0.0.8     | SqlConnectionPool: allow connections to be garbage-collected if the connection pool is not limited by max-connections            |
 | 0.0.7     | SqlConnectionPool: a new connection pool                                                                                         |
 | 0.0.6     | BaseDAO: ensure type safety for mapped properties of primitive or Date type                                                      |
