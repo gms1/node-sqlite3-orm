@@ -40,15 +40,15 @@
     "sqlite3": "^3.1.8"
   },
   "devDependencies": {
-    "@types/jasmine": "^2.5.36",
-    "@types/node": "^6.0.46",
-    "@types/reflect-metadata": "0.0.5",
+    "@types/jasmine": "^2.5.38",
+    "@types/node": "^6.0.48",
+    "@types/reflect-metadata": "^0.0.5",
     "@types/sqlite3": "^2.2.31",
     "jasmine": "^2.5.2",
     "jasmine-spec-reporter": "^2.7.0",
     "shelljs": "^0.7.5",
-    "tslint": "^3.15.1",
-    "typescript": "^2.0.6"
+    "tslint": "^4.0.0",
+    "typescript": "^2.0.10"
   },
   "typescript": {
     "definition": "./index.d.ts"
