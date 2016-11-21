@@ -1,21 +1,7 @@
-!/dist
 
 # -- generated output:
-*.ts
-!*.d.ts
+
 *.js.map
-*.spec.js
-*.spec.ts
 *.spec.d.ts
-*.spec.js.map
+*.spec.js
 *.tgz
-
-# -- dependencies:
-/node_modules
-
-# -- temporary files:
-*.log
-npm-debug.log*
-
-# -- IDEs and editors
-/.vscode
