@@ -1,20 +1,23 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
-# -- dependencies:
+#---------------------------------------
+# npm:
+
 /node_modules
-
-# -- generated output:
-/dist
-/package
-/docs/typedoc
-*.map
-*.tgz
-
-# -- temporary files:
-*.log
 npm-debug.log*
-*:memory*
 
-# -- IDEs and editors
+#---------------------------------------
+# IDEs and editors:
+
 /.vscode
 
+#---------------------------------------
+# compiled output:
+
+/dist
+/docs/typedoc
+
+#---------------------------------------
+# temporary files:
+
+*:memory*
