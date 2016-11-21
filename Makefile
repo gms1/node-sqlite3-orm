@@ -1,8 +1,8 @@
-.PHONY: default all clean build tslint test dist
+.PHONY: default all clean build test publish
 
 default: all test
 
-all: clean build tslint
+all: clean build
 
 clean:
 	npm run clean
@@ -10,13 +10,9 @@ clean:
 build:
 	npm run build
 
-tslint:
-	npm run tslint
-
 test:
 	npm run test
 
-dist: all test
-	npm run package
-	cd package && npm publish
+publish: all test
+	cd dist && npm publish
 
