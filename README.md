@@ -202,6 +202,7 @@ tsconfig.json:
 
 | Release   | Notes                                                                                                                            |
 |-----------|----------------------------------------------------------------------------------------------------------------------------------|
+| 0.0.12    | using tslint 4.0.2: fixed 'all null signatures should be adjacent' errors                                                        |
 | 0.0.10-11 | dependencies update; small documentation changes; small code cleanup                                                             |
 | 0.0.9     | possibility to map properties of complex type to a database column and serialize/deserialize the data as JSON                    |
 | 0.0.8     | SqlConnectionPool: allow connections to be garbage-collected if the connection pool is not limited by max-connections            |
