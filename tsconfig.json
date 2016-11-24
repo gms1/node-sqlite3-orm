@@ -5,7 +5,7 @@
     "moduleResolution": "node",
     "removeComments": false,
     "stripInternal": false,
-    "baseUrl": ".",
+    "baseUrl": "./src",
     "rootDirs": [ "./src" ],
     "outDir": "./dist/",
     "declaration": true,

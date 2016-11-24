@@ -65,7 +65,7 @@ export class BaseDAO<T extends Object> {
       }
       resolve(t);
     });
-  };
+  }
   /**
    * update
    *
@@ -88,7 +88,7 @@ export class BaseDAO<T extends Object> {
       }
       resolve(t);
     });
-  };
+  }
   /**
    * delete
    *
@@ -112,7 +112,7 @@ export class BaseDAO<T extends Object> {
       }
       resolve();
     });
-  };
+  }
   /**
    * select using primary key
    *
@@ -131,7 +131,7 @@ export class BaseDAO<T extends Object> {
       }
       resolve(t);
     });
-  };
+  }
   /**
    * perform:
    * select T.<col1>,.. FROM <table> T
@@ -158,7 +158,7 @@ export class BaseDAO<T extends Object> {
         return;
       }
     });
-  };
+  }
   /**
    * perform:
    * select T.<col1>,.. FROM <table> T
@@ -187,7 +187,7 @@ export class BaseDAO<T extends Object> {
       }
 
     });
-  };
+  }
 
   /**
    *
@@ -228,7 +228,7 @@ export class BaseDAO<T extends Object> {
         return;
       }
     });
-  };
+  }
 
 
   protected bindAllInputParams(t: T): Object {
