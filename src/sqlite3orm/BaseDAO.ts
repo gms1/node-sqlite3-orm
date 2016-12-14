@@ -96,7 +96,7 @@ export class BaseDAO<T extends Object> {
    * @returns {Promise<void>}
    */
   public delete (t: T): Promise<void> {
-    return new Promise<boolean>(async(resolve, reject) => {
+    return new Promise<void>(async(resolve, reject) => {
       try {
         let res = await this.sqldb.run(
             this.table.getDeleteFromStatement(), this.bindPrimaryKeyInputParams(t));

@@ -1,3 +1,7 @@
+// tslint:disable: arrow-parens
+// disabled for tslint 402, because of
+//   https://github.com/palantir/tslint/issues/1572
+
 import {SQL_MEMORY_DB_PRIVATE, SqlDatabase} from '../SqlDatabase';
 import {SqlStatement} from '../SqlStatement';
 
