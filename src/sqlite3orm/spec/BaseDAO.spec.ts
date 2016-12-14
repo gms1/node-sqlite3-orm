@@ -47,8 +47,11 @@ describe('test BaseDAO', () => {
     try {
       sqldb = new SqlDatabase();
       await sqldb.open(SQL_MEMORY_DB_PRIVATE);
-      await schema().createTable(sqldb, USERS_TABLE);
-      await schema().createTable(sqldb, CONTACTS_TABLE);
+
+      let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
+      let contactDao: BaseDAO<Contact> = new BaseDAO(Contact, sqldb);
+      await userDao.createTable();
+      await contactDao.createTable();
     } catch (err) {
       rejectTest(err);
     }
@@ -157,7 +160,6 @@ describe('test BaseDAO', () => {
     done();
 
   });
-
 
 
 });

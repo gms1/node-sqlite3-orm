@@ -3,6 +3,7 @@ import {Field} from '../Field';
 import {schema} from '../Schema';
 import {SQL_MEMORY_DB_PRIVATE, SqlDatabase} from '../SqlDatabase';
 import {Table} from '../Table';
+import {BaseDAO} from '../BaseDAO';
 
 function rejectTest(err: Error): void {
   expect('' + err).toBeNull();
@@ -113,7 +114,7 @@ describe('test schema', () => {
   });
 
   // ---------------------------------------------
-  it('expect create/drop/alter table to work', async(done) => {
+  it('expect create/drop/alter-table to work (using Schema)', async(done) => {
     try {
       let parentTable = schema().getTable(TABLE_PARENT_TABLE_NAME);
       expect(parentTable).toBeDefined();
@@ -122,9 +123,9 @@ describe('test schema', () => {
       await schema().createTable(sqldb, TABLE_CHILD_TABLE_NAME);
 
       // alter table add a new column
-      let newProperty = Symbol('dyndef');
+      let newProperty = Symbol('dyndef1');
       let newField = new Field(newProperty);
-      newField.name = 'TESTADDCOL';
+      newField.name = 'TESTADDCOL1';
       newField.dbtype = 'INTEGER';
       parentTable.addPropertyField(newField);
       parentTable.addTableField(newField);
@@ -141,5 +142,42 @@ describe('test schema', () => {
     }
     done();
   });
+
+  // ---------------------------------------------
+  it('expect create/drop/alter-table to work (using BaseDAO)', async(done) => {
+    try {
+     let parentDAO = new BaseDAO<ParentTable>(ParentTable, sqldb);
+     let childDAO = new BaseDAO<ChildTable>(ChildTable, sqldb);
+
+      // create tables
+      parentDAO.createTable();
+      childDAO.createTable();
+
+      // alter table add a new column
+
+      let parentTable = schema().getTable(TABLE_PARENT_TABLE_NAME);
+      expect(parentTable).toBeDefined();
+
+      let newProperty = Symbol('dyndef2');
+      let newField = new Field(newProperty);
+      newField.name = 'TESTADDCOL2';
+      newField.dbtype = 'INTEGER';
+      parentTable.addPropertyField(newField);
+      parentTable.addTableField(newField);
+      expect(parentTable.hasPropertyField(newProperty)).toBeTruthy();
+      expect(parentTable.hasTableField(newField.name)).toBeTruthy();
+
+      await schema().alterTableAddColumn(
+          sqldb, TABLE_PARENT_TABLE_NAME, newField.name);
+
+      await childDAO.dropTable();
+      await parentDAO.dropTable();
+
+    } catch (err) {
+      rejectTest(err);
+    }
+    done();
+  });
+
 
 });

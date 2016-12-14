@@ -367,5 +367,32 @@ export class BaseDAO<T extends Object> {
     Reflect.set(t, field.propertyKey, value);
   }
 
+  /**
+   * create a table in the database
+   *
+   * @returns {Promise<void>}
+   */
+  public createTable(): Promise<void> {
+    return this.sqldb.exec(this.table.getCreateTableStatement());
+  }
+
+  /**
+   * drop a table from the database
+   *
+   * @returns {Promise<void>}
+   */
+  public dropTable(): Promise<void> {
+    return this.sqldb.exec(this.table.getDropTableStatement());
+  }
+
+  /**
+   * add a column/field to a database table
+   *
+   * @param {string} colName
+   * @returns {Promise<void>}
+   */
+  public alterTableAddColumn(colName: string): Promise<void> {
+    return this.sqldb.exec(this.table.getAlterTableAddColumnStatement(colName));
+  }
 
 }
