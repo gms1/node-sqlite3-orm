@@ -2,7 +2,7 @@
   "name": "sqlite3orm",
   "version": "0.0.12",
   "description": "ORM for sqlite3 and TypeScript/JavaScript",
-  "main": "./dist/index.js",
+  "main": "dist/index.js",
   "tags": [
     "javascript",
     "typescript",
@@ -54,8 +54,9 @@
     "jasmine": "^2.5.2",
     "jasmine-spec-reporter": "^2.7.0",
     "merge-stream": "^1.0.1",
+    "run-sequence": "^1.2.2",
     "tslint": "^4.0.2",
-    "typescript": "^2.0.10"
+    "typescript": "2.0.10"
   },
   "typescript": {
     "definition": "./index.d.ts"

@@ -11,10 +11,11 @@ const gtslint = require('gulp-tslint');
 const path = require('path');
 const del = require('del');
 const merge = require('merge-stream');
+const runSequence = require('run-sequence');
 // ==================================================================================
 // settings:
 
-const outDir = './dist/';
+const outDir = 'dist'; // keep it simple (for 'del' package)
 const tsconfig = 'tsconfig.json';
 const tslintconfig = 'tslint.json';
 const watching = ['src/**/*'];
@@ -29,7 +30,7 @@ const transformDefinition = [
       if (!!data.scripts) {
         delete data.scripts;
       }
-      // main: remove outDir
+      // main: remove outDir prefix
       if (!data.main || !data.main.startsWith(outDir)) {
         console.warn(
           `packages.json: 'main' attribute not starting with '${outDir}'`);
@@ -57,7 +58,10 @@ const transformDefinition = [
 // ==================================================================================
 // clean
 
-gulp.task('clean', function () { return del([path.join(outDir, '*')]); })
+gulp.task('clean', function () {
+  // do not clean 'node_modules' to make 'npm link' happy
+  return del([path.join(outDir, '**'), '!' + outDir, '!' + path.join(outDir, 'node_modules', '**')]);
+})
 
 // ==================================================================================
 // transform-data
@@ -121,7 +125,10 @@ gulp.task('build', ['transform-data', 'tsc', 'tslint']);
 // ==================================================================================
 // rebuild
 
-gulp.task('rebuild', ['clean', 'build']);
+gulp.task('rebuild', function (callback) {
+  // runSequence will be obsolet after gulp 4 transistion
+  runSequence('clean', 'build', callback);
+});
 
 // ==================================================================================
 // watch
