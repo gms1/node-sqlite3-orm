@@ -148,7 +148,7 @@ describe('test README sample', () => {
     try {
       await runSample();
     } catch (err) {
-      expect(err).toBeNull();
+      fail(err);
     }
     done();
   });

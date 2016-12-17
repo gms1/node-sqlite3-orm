@@ -9,10 +9,6 @@ import {SQL_MEMORY_DB_PRIVATE, SqlDatabase} from '../SqlDatabase';
 import {Table} from '../Table';
 import {BaseDAO} from '../BaseDAO';
 
-function rejectTest(err: Error): void {
-  expect('' + err).toBeNull();
-}
-
 
 // sqlite3 catalog table
 
@@ -105,7 +101,9 @@ describe('test schema', () => {
   beforeAll((done) => {
     sqldb = new SqlDatabase();
     sqldb.open(SQL_MEMORY_DB_PRIVATE).then((res) => done()).catch((err) => {
-      rejectTest(err);
+      if (err) {
+        fail(err);
+      }
       done();
     });
 
@@ -150,8 +148,8 @@ describe('test schema', () => {
 
       expect(childFKField.isIndexField(TABLE_CHILD_IDX_NAME)).toBeTruthy();
 
-    } catch (e) {
-      rejectTest(e);
+    } catch (err) {
+      fail(err);
     }
   });
 
@@ -228,7 +226,7 @@ describe('test schema', () => {
       try { await catalogDAO.select(catalogItem); } catch (e) { expect(e).toBeDefined(); }
 
     } catch (err) {
-      rejectTest(err);
+      fail(err);
     }
     done();
   });
@@ -309,7 +307,7 @@ describe('test schema', () => {
       try { await catalogDAO.select(catalogItem); } catch (e) { expect(e).toBeDefined(); }
 
     } catch (err) {
-      rejectTest(err);
+      fail(err);
     }
     done();
   });

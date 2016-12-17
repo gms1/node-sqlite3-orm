@@ -7,9 +7,6 @@ import {field, FieldOpts, fk, id, table, TableOpts} from '../decorators';
 import {schema} from '../Schema';
 import {SQL_MEMORY_DB_PRIVATE, SqlDatabase} from '../SqlDatabase';
 
-function rejectTest(err: Error): void {
-  expect('' + err).toBeNull();
-}
 
 const USERS_TABLE = 'USERSTABLE';
 const CONTACTS_TABLE = 'CONTACTSTABLE';
@@ -57,7 +54,7 @@ describe('test BaseDAO', () => {
       await userDao.createTable();
       await contactDao.createTable();
     } catch (err) {
-      rejectTest(err);
+      fail(err);
     }
     done();
   });
@@ -96,7 +93,7 @@ describe('test BaseDAO', () => {
          let allUsers2 = await userDao.selectAll();
          expect(allUsers1.length).toBe(allUsers2.length + 1);
        } catch (err) {
-         rejectTest(err);
+         fail(err);
        }
        done();
      });
@@ -159,7 +156,7 @@ describe('test BaseDAO', () => {
       expect(contactsUser1$1.length).toBe(1);
 
     } catch (err) {
-      rejectTest(err);
+      fail(err);
     }
     done();
 

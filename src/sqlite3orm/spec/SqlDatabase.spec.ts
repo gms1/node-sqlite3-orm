@@ -5,10 +5,6 @@
 import {SQL_MEMORY_DB_PRIVATE, SqlDatabase} from '../SqlDatabase';
 import {SqlStatement} from '../SqlStatement';
 
-function rejectTest(err: Error): void {
-  expect('' + err).toBeNull();
-}
-
 // ---------------------------------------------
 
 describe('test SqlDatabase', () => {
@@ -25,7 +21,7 @@ describe('test SqlDatabase', () => {
           'INSERT INTO TEST (id, col) values (:a, :b)',
           {':a': 0, ':b': 'testvalue 0'});
     } catch (err) {
-      rejectTest(err);
+      fail(err);
     }
     done();
   });
@@ -40,7 +36,7 @@ describe('test SqlDatabase', () => {
           await sqldb.get('SELECT col from TEST where id=:id', {':id': 1});
       expect(row.col).toBe('testvalue 1/1');
     } catch (err) {
-      rejectTest(err);
+      fail(err);
     }
     done();
   });
@@ -65,7 +61,7 @@ describe('test SqlDatabase', () => {
           await sqldb.run('INSERT INTO TEST (col) values (\'testvalue 2\')');
       expect(res.lastID).toBe(2);
     } catch (err) {
-      rejectTest(err);
+      fail(err);
     }
     done();
   });
@@ -80,7 +76,7 @@ describe('test SqlDatabase', () => {
       let row = await sqldb.get('SELECT col from TEST where id=?', 1);
       expect(row.col).toBe('testvalue 1/2');
     } catch (err) {
-      rejectTest(err);
+      fail(err);
     }
     done();
   });
@@ -95,7 +91,7 @@ describe('test SqlDatabase', () => {
       let row = await sqldb.get('SELECT col from TEST where id=?', 1);
       expect(row.col).toBe('testvalue 1/3');
     } catch (err) {
-      rejectTest(err);
+      fail(err);
     }
     done();
   });
@@ -109,7 +105,7 @@ describe('test SqlDatabase', () => {
       expect(res[1].id).toBe(1);
       expect(res[1].col).toBe('testvalue 1/3');
     } catch (err) {
-      rejectTest(err);
+      fail(err);
     }
     done();
   });
@@ -125,7 +121,7 @@ describe('test SqlDatabase', () => {
           (err, row) => {
             if (err) {
               err.message = 'error row: ' + err.message;
-              rejectTest(err);
+              fail(err);
             } else {
               res.push(row);
             }
@@ -137,7 +133,7 @@ describe('test SqlDatabase', () => {
       expect(res[1].col).toBe('testvalue 1/3');
 
     } catch (err) {
-      rejectTest(err);
+      fail(err);
     }
     done();
   });
@@ -151,7 +147,7 @@ describe('test SqlDatabase', () => {
          let newver = await sqldb.getUserVersion();
          expect(newver).toBe(oldver + 3);
        } catch (err) {
-         rejectTest(err);
+         fail(err);
        }
        done();
      });

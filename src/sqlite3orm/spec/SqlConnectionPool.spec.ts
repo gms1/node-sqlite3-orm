@@ -5,10 +5,6 @@
 import {SqlDatabase, SQL_MEMORY_DB_SHARED, SQL_OPEN_DEFAULT} from '../SqlDatabase';
 import {SqlConnectionPool} from '../SqlConnectionPool';
 
-function rejectTest(err: Error): void {
-  expect('' + err).toBeNull();
-}
-
 describe('test SqlConnectionPool', () => {
   // ---------------------------------------------
 
@@ -62,7 +58,7 @@ describe('test SqlConnectionPool', () => {
       expect(ver3).toBe(ver1, 'got wrong user version from connection 3');
 
     } catch (err) {
-      rejectTest(err);
+      fail(err);
     }
     done();
 

@@ -8,9 +8,6 @@ import {schema} from '../Schema';
 import {SQL_MEMORY_DB_PRIVATE, SqlDatabase} from '../SqlDatabase';
 import {SqlStatement} from '../SqlStatement';
 
-function rejectTest(err: Error): void {
-  expect('' + err).toBeNull();
-}
 
 const DATATYPE_JSON_TABLE = 'DATATYPE_JSON';
 
@@ -44,7 +41,7 @@ describe('test Json data', () => {
       dao = new BaseDAO<DataTypeJson>(DataTypeJson, sqldb);
       model.id = 0;
     } catch (err) {
-      rejectTest(err);
+      fail(err);
     }
     done();
   });
@@ -68,7 +65,7 @@ describe('test Json data', () => {
       expect(model2.myJasonData.scores[2]).toBe(model2.myJasonData.scores[2]);
 
     } catch (err) {
-      rejectTest(err);
+      fail(err);
     }
     done();
 

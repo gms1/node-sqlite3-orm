@@ -8,9 +8,6 @@ import {schema} from '../Schema';
 import {SQL_MEMORY_DB_PRIVATE, SqlDatabase} from '../SqlDatabase';
 import {SqlStatement} from '../SqlStatement';
 
-function rejectTest(err: Error): void {
-  expect('' + err).toBeNull();
-}
 
 const DATATYPE_DATE_TABLE = 'DATATYPE_DATE';
 
@@ -41,7 +38,7 @@ describe('test Date type', () => {
       dao = new BaseDAO<DataTypeDate>(DataTypeDate, sqldb);
       model.id = 0;
     } catch (err) {
-      rejectTest(err);
+      fail(err);
     }
     done();
   });
@@ -71,7 +68,7 @@ describe('test Date type', () => {
               'date wrongly written to integer');
 
     } catch (err) {
-      rejectTest(err);
+      fail(err);
     }
     done();
 
@@ -102,7 +99,7 @@ describe('test Date type', () => {
               `record ${model.id}: myDate2Int should be an instance of Date`);
 
     } catch (err) {
-      rejectTest(err);
+      fail(err);
     }
     done();
 

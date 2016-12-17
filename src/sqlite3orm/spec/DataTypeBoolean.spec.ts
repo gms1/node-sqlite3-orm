@@ -8,10 +8,6 @@ import {schema} from '../Schema';
 import {SQL_MEMORY_DB_PRIVATE, SqlDatabase} from '../SqlDatabase';
 import {SqlStatement} from '../SqlStatement';
 
-function rejectTest(err: Error): void {
-  expect('' + err).toBeNull();
-}
-
 const DATATYPE_BOOLEAN_TABLE = 'DATATYPE_BOOLEAN';
 
 @table({name: DATATYPE_BOOLEAN_TABLE})
@@ -44,7 +40,7 @@ describe('test boolean type', () => {
       dao = new BaseDAO<DataTypeBoolean>(DataTypeBoolean, sqldb);
       model.id = 0;
     } catch (err) {
-      rejectTest(err);
+      fail(err);
     }
     done();
   });
@@ -98,7 +94,7 @@ describe('test boolean type', () => {
 
          await sqlstmt.finalize();
        } catch (err) {
-         rejectTest(err);
+         fail(err);
        }
        done();
      });
@@ -281,7 +277,7 @@ describe('test boolean type', () => {
 
          await sqlstmt.finalize();
        } catch (err) {
-         rejectTest(err);
+         fail(err);
        }
        done();
      });
