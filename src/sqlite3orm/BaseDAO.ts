@@ -403,10 +403,11 @@ export class BaseDAO<T extends Object> {
    * create index in the database
    *
    * @param {string} idxName - The name of the index
+   * @param {boolean} [unique] - create unique index
    * @returns {Promise<void>}
    */
-  public createIndex(idxName: string): Promise<void> {
-    return this.sqldb.exec(this.table.getCreateIndexStatement(idxName));
+  public createIndex(idxName: string, unique?: boolean): Promise<void> {
+    return this.sqldb.exec(this.table.getCreateIndexStatement(idxName, unique));
   }
 
   /**
