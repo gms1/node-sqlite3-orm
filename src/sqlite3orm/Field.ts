@@ -69,6 +69,14 @@ export class Field {
    */
   foreignKeys: Map<string, FieldReference>;
 
+
+  /**
+   * Set of all the indexes this field participates
+   *
+   * @type {Set<string}
+   */
+  indexKeys: Set<string>;
+
   /**
    * The property type enum mapped to this field
    *
@@ -98,6 +106,7 @@ export class Field {
     this.isIdentity = false;
     this.dbtype = 'TEXT';
     this.foreignKeys = new Map<string, FieldReference>();
+    this.indexKeys = new Set<string>();
     this.isJson = false;
   }
 
@@ -139,6 +148,27 @@ export class Field {
   public setForeignKeyField(
       constraintName: string, foreignTableField: FieldReference): void {
     this.foreignKeys.set(constraintName, foreignTableField);
+  }
+
+
+  /**
+   * Test if this field is part of the given index
+   *
+   * @param {string} constraintName
+   * @returns {boolean}
+   */
+  public isIndexField(indexName: string): boolean {
+    return this.indexKeys.has(indexName);
+  }
+
+  /**
+   * Test if this field is part of the given index
+   *
+   * @param {string} indexName
+   * @returns {void}
+   */
+  public setIndexField(indexName: string): void {
+    this.indexKeys.add(indexName);
   }
 
 

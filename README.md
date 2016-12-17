@@ -16,7 +16,7 @@ This module allows you to map your model, written in JavaScript or TypeScript, t
 **node-sqlite3-orm** provides you with the ability to create the database schema for the mapped model and to store and retrieve the mapped data to and from the database,
 
 ```TypeScript
-import {table, field, fk, id, TableOpts, FieldOpts} from 'sqlite3orm/decorators';
+import {table, id, field, index, fk, FieldOpts, TableOpts} from '../decorators';
 
 @table({name: 'USERS'})
 class User {
@@ -27,22 +27,23 @@ class User {
   userLoginName: string;
 
   @field({name: 'user_json', dbtype: 'TEXT', isJson: true})
-  userJsonData: any;  
+  userJsonData: any;
 }
 
 @table({name: 'CONTACTS', autoIncrement: true})
 class Contact {
   @id({name: 'contact_id', dbtype: 'INTEGER NOT NULL'})
   contactId: number;
-  
+
   @field({name: 'contact_email', dbtype: 'TEXT'})
   emailAddress: string;
 
   @field({name: 'contact_mobile', dbtype: 'TEXT'})
   mobile: string;
 
-  @fk('contact_user', 'USERS', 'user_id')
   @field({name: 'user_id', dbtype: 'INTEGER NOT NULL'})
+  @fk('fk_user_contacts', 'USERS', 'user_id')
+  @index('idx_contacts_user')
   userId: number;
 }
 ```
@@ -67,21 +68,23 @@ SqlDatabase is a thin promised-based wrapper around sqlite3.Database: [node-sqli
 ```TypeScript
 import {schema} from 'sqlite3orm/Schema';
 
-(async () => {
+(async() => {
   // get the user_version from the database:
   let userVersion = await sqldb.getUserVersion();
 
   // create all the tables if they do not exist:
-  await schema().createTable(sqldb,'USERS');
-  await schema().createTable(sqldb,'CONTACTS');
+  await schema().createTable(sqldb, 'USERS');
+  await schema().createTable(sqldb, 'CONTACTS');
+  await schema().createIndex(sqldb, 'CONTACTS', 'idx_contacts_user');
 
   if (userVersion >= 1 && userVersion < 10) {
-    // the 'CONTACTS' table has been introduced in user_version 1 
-    // a column 'contact_mobile' has been added to the 'CONTACTS' table in user_version 10
-    await schema().alterTableAddColumn(sqldb, 'CONTACTS', 'contact_mobile');
+    // the 'CONTACTS' table has been introduced in user_version 1
+    // a column 'contact_mobile' has been added to the 'CONTACTS'
+    // table in user_version 10
+    await schema().alterTableAddColumn(
+        sqldb, 'CONTACTS', 'contact_mobile');
   }
   await sqldb.setUserVersion(10);
-
 })();
 ```
 
@@ -107,7 +110,7 @@ In order to read from or write to the database, you can use the `BaseDAO<Model>'
   // insert a contact:
   let contact = new Contact();
   contact.userId = 1;
-  contact.emailAddress = 'donald@duck.com'
+  contact.emailAddress = 'donald@duck.com';
   contact = await contactDAO.insert(contact);
 
   // update a contact:
@@ -118,18 +121,20 @@ In order to read from or write to the database, you can use the `BaseDAO<Model>'
   let userDonald = await userDAO.select(user);
 
   // read all contacts from user 'donald':
-  let contactsDonald = await contactDAO.selectAllOf('contact_user', User, userDonald);
+  let contactsDonald =
+      await contactDAO.selectAllOf('fk_user_contacts', User, userDonald);
 
   // read all users:
   let allUsers = await userDAO.selectAll();
 
   // read all users having a contact:
-  let allUsersHavingContacts = await
-      userDAO.selectAll('WHERE EXISTS(select 1 from CONTACTS C where C.user_id = T.user_id)');
+  let allUsersHavingContacts = await userDAO.selectAll(
+      'WHERE EXISTS(select 1 from CONTACTS C where C.user_id = T.user_id)');
 
   // read all contacts from 'duck.com':
-  let allContactsFromDuckDotCom = await
-      contactDAO.selectAll('WHERE contact_email like :contact_email', {':contact_email': '%@duck.com'});
+  let allContactsFromDuckDotCom = await contactDAO.selectAll(
+      'WHERE contact_email like :contact_email',
+      {':contact_email': '%@duck.com'});
 
 })();
 

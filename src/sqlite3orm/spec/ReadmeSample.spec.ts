@@ -3,10 +3,11 @@
 //   https://github.com/palantir/tslint/issues/1572
 
 import {BaseDAO} from '../BaseDAO';
-import {field, FieldOpts, fk, id, table, TableOpts} from '../decorators';
 import {schema} from '../Schema';
 import {SqlDatabase} from '../SqlDatabase';
 
+// definition-part:
+import {table, id, field, index, fk, FieldOpts, TableOpts} from '../decorators';
 
 @table({name: 'USERS'})
 class User {
@@ -31,8 +32,9 @@ class Contact {
   @field({name: 'contact_mobile', dbtype: 'TEXT'})
   mobile: string;
 
-  @fk('contact_user', 'USERS', 'user_id')
   @field({name: 'user_id', dbtype: 'INTEGER NOT NULL'})
+  @fk('fk_user_contacts', 'USERS', 'user_id')
+  @index('idx_contacts_user')
   userId: number;
 }
 
@@ -53,6 +55,7 @@ async function runSample():
             // create all the tables if they do not exist:
             await schema().createTable(sqldb, 'USERS');
             await schema().createTable(sqldb, 'CONTACTS');
+            await schema().createIndex(sqldb, 'CONTACTS', 'idx_contacts_user');
 
             if (userVersion >= 1 && userVersion < 10) {
               // the 'CONTACTS' table has been introduced in user_version 1
@@ -95,7 +98,7 @@ async function runSample():
 
             // read all contacts from user 'donald':
             let contactsDonald =
-                await contactDAO.selectAllOf('contact_user', User, userDonald);
+                await contactDAO.selectAllOf('fk_user_contacts', User, userDonald);
 
             // read all users:
             let allUsers = await userDAO.selectAll();

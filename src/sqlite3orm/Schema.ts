@@ -70,7 +70,11 @@ export class Schema {
    * @returns {Promise<void>}
    */
   public createTable(sqldb: SqlDatabase, name: string): Promise<void> {
-    return sqldb.exec(this.getTable(name).getCreateTableStatement());
+    let table = this.getTable(name);
+    if (!table) {
+      return Promise.reject(new Error(`table '${name}' is not defined`));
+    }
+    return sqldb.exec(table.getCreateTableStatement());
   }
 
   /**
@@ -81,7 +85,11 @@ export class Schema {
    * @returns {Promise<void>}
    */
   public dropTable(sqldb: SqlDatabase, name: string): Promise<void> {
-    return sqldb.exec(this.getTable(name).getDropTableStatement());
+    let table = this.getTable(name);
+    if (!table) {
+      return Promise.reject(new Error(`table '${name}' is not defined`));
+    }
+    return sqldb.exec(table.getDropTableStatement());
   }
 
   /**
@@ -93,8 +101,46 @@ export class Schema {
    * @returns {Promise<void>}
    */
   public alterTableAddColumn(sqldb: SqlDatabase, tableName: string, colName: string): Promise<void> {
-    return sqldb.exec(this.getTable(tableName).getAlterTableAddColumnStatement(colName));
+    let table = this.getTable(tableName);
+    if (!table) {
+      return Promise.reject(new Error(`table '${tableName}' is not defined`));
+    }
+    return sqldb.exec(table.getAlterTableAddColumnStatement(colName));
   }
+
+  /**
+   * create an index in the database
+   *
+   * @param {SqlDatabase} sqldb
+   * @param {string} tableName - The name of the table
+   * @param {string} idxName - The name of the index
+   * @param {boolean} [unique] - create unique index
+   * @returns {Promise<void>}
+   */
+  public createIndex(sqldb: SqlDatabase, tableName: string, idxName: string, unique?: boolean): Promise<void> {
+    let table = this.getTable(tableName);
+    if (!table) {
+      return Promise.reject(new Error(`table '${tableName}' is not defined`));
+    }
+    return sqldb.exec(table.getCreateIndexStatement(idxName, unique));
+  }
+
+  /**
+   * drop a table from the database
+   *
+   * @param {SqlDatabase} sqldb
+   * @param {string} tableName - The name of the table
+   * @param {string} idxName - The name of the index
+   * @returns {Promise<void>}
+   */
+  public dropIndex(sqldb: SqlDatabase, tableName: string, idxName: string): Promise<void> {
+    let table = this.getTable(tableName);
+    if (!table) {
+      return Promise.reject(new Error(`table '${tableName}' is not defined`));
+    }
+    return sqldb.exec(table.getDropIndexStatement(idxName));
+  }
+
 
 }
 

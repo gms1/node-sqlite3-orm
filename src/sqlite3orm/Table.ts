@@ -1,6 +1,5 @@
 import {Field} from './Field';
 import {FieldReference} from './FieldReference';
-import {ForeignKey} from './ForeignKey';
 
 const TABLEALIAS = 'T';
 
@@ -236,6 +235,31 @@ export class Table {
     return stmt;
   }
 
+  /**
+   * Get 'CREATE TABLE'-statement using 'IF NOT EXISTS'-clause
+   *
+   * @returns {string}
+   */
+  public getCreateIndexStatement(idxName: string, unique?: boolean): string {
+    let stmtText = this.statementsText.indexKeys.get(idxName);
+    if (!stmtText) {
+      throw new Error(`index '${idxName}' is not defined on table '${this.name}'`);
+    }
+    return 'CREATE ' + (unique ? 'UNIQUE ' : '') + stmtText;
+  }
+
+  /**
+   * Get 'DROP TABLE'-statement
+   *
+   * @returns {string}
+   */
+  public getDropIndexStatement(idxName: string): string {
+    let stmtText = this.statementsText.indexKeys.get(idxName);
+    if (!stmtText) {
+      throw new Error(`index '${idxName}' is defined on table '${this.name}'`);
+    }
+    return `DROP INDEX IF EXISTS ${idxName}`;
+  }
 
   /**
    * Get 'INSERT INTO'-statement
@@ -284,13 +308,23 @@ export class Table {
 
 
   /**
-   * Get a foreign key constraint definition
+   * Get a select-condition for a foreign key constraint
    *
    * @param {string} constraintName - The constraint name
    * @returns {string}
    */
-  public getForeignKey(constraintName: string): ForeignKey|undefined {
-    return this.statementsText.foreignKeys.get(constraintName);
+  public getForeignKeySelects(constraintName: string): string|undefined {
+    return this.statementsText.foreignKeySelects.get(constraintName);
+  }
+
+  /**
+   * Get the reference fields for a foreign key constraint
+   *
+   * @param {string} constraintName - The constraint name
+   * @returns {string}
+   */
+  public getForeignKeyFields(constraintName: string): Field[]|undefined {
+    return this.statementsText.foreignKeyFields.get(constraintName);
   }
 
   /**
@@ -307,6 +341,8 @@ export class Table {
     let colSelPK: string[] = [];
     let colDefs: string[] = [];
     let stmts = new SqlStatementText();
+    let foreignKeys = new Map<string, ForeignKeyHelper>();
+    let indexKeys = new Map<string, string[]>();
 
     if (!this.fields.length) {
       throw new Error(`table '${this.name}': does not have any fields defined`);
@@ -334,19 +370,26 @@ export class Table {
       }
       colDefs.push(colDef);
       field.foreignKeys.forEach((refColumn, constraintName) => {
-        let fk: ForeignKey;
-        if (!stmts.foreignKeys.has(constraintName)) {
-          fk = new ForeignKey(constraintName, refColumn.tableName);
-          stmts.foreignKeys.set(constraintName, fk);
-        } else {
-          fk = stmts.foreignKeys.get(constraintName) as ForeignKey;
+        let fk: ForeignKeyHelper = foreignKeys.get(constraintName) as ForeignKeyHelper;
+        if (!fk) {
+          fk = new ForeignKeyHelper(constraintName, refColumn.tableName);
+          foreignKeys.set(constraintName, fk);
         }
         if (refColumn.tableName !== fk.refTableName) {
+          // TODO: this error should be found earlier
           throw new Error(
               `table '${this.name}': foreign key constraint '${constraintName}' references different tables: '${refColumn.tableName}' vs '${fk.refTableName}'`);
         }
         fk.fields.push(field);
         fk.refColumns.push(refColumn.colName);
+      });
+      field.indexKeys.forEach((indexName) => {
+        let idx: string[] = indexKeys.get(indexName) as string[];
+        if (!idx) {
+          idx = [];
+          indexKeys.set(indexName, idx);
+        }
+        idx.push(field.name);
       });
     });
     // --------------------------------------------------------------
@@ -362,8 +405,8 @@ export class Table {
       stmts.createTable += ')';
     }
     // add foreign key constraint definition:
-    let i = stmts.foreignKeys.size - 1;
-    stmts.foreignKeys.forEach((fk, fkName) => {
+    let i = foreignKeys.size - 1;
+    foreignKeys.forEach((fk, fkName) => {
       if (!fk.fields.length || !fk.refColumns.length ||
           fk.fields.length !== fk.refColumns.length) {
         throw new Error(
@@ -438,10 +481,17 @@ export class Table {
 
     // --------------------------------------------------------------
     // generate SELECT-fk condition
-    stmts.foreignKeys.forEach((fk, constraintName) => {
-      fk.selectCondition =
+    foreignKeys.forEach((fk, constraintName) => {
+      let selectCondition =
           fk.fields.map((field) => `${TABLEALIASPREFIX}${field.name}=${field.getHostParameterName()}`)
               .join(' AND ');
+      stmts.foreignKeySelects.set( constraintName, selectCondition);
+      stmts.foreignKeyFields.set( constraintName, fk.fields);
+    });
+
+    indexKeys.forEach((cols, indexName) => {
+      let createIdxCols = `INDEX IF NOT EXISTS ${indexName} ON ${this.name} (` + cols.join(', ') + ')';
+      stmts.indexKeys.set( indexName, createIdxCols);
     });
 
 
@@ -455,8 +505,7 @@ export class Table {
 /**
  * helper class holding sql-statements/fragments
  *
- * @export
- * @class Table
+ * @class SqlStatementText
  */
 class SqlStatementText {
   createTable: string;
@@ -466,9 +515,31 @@ class SqlStatementText {
   selectAll: string;
   selectOne: string;
 
-  foreignKeys: Map<string, ForeignKey>;
+  foreignKeySelects: Map<string, string>;
+  foreignKeyFields: Map<string, Field[]>;
+  indexKeys: Map<string, string>;
 
   public constructor() {
-    this.foreignKeys = new Map<string, ForeignKey>();
+    this.foreignKeySelects = new Map<string, string>();
+    this.foreignKeyFields = new Map<string, Field[]>();
+    this.indexKeys = new Map<string, string>();
+  }
+}
+
+
+/**
+ * helper class holding a foreign key definition
+ *
+ * @class ForeignKeyHelper
+ */
+class ForeignKeyHelper {
+  name: string;
+  refTableName: string;
+  refColumns: string[] = [];
+  fields: Field[] = [];
+
+  public constructor(name: string, refTableName: string) {
+    this.name = name;
+    this.refTableName = refTableName;
   }
 }

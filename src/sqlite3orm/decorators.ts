@@ -172,13 +172,39 @@ function decoratePropertyForeignKey(
   let table: Table = getTableMetadata(target.constructor);
   let field: Field = getFieldMetadata(table, key);
   if (field.hasForeignKeyField(constraintName)) {
-    throw new Error(`decorating property '${target.constructor.name}.${key.toString()}': duplicate foreign key constraint 'constraintName'`);
+    throw new Error(`decorating property '${target.constructor.name}.${key.toString()}': duplicate foreign key constraint '${constraintName}'`);
   }
 
   field.setForeignKeyField(constraintName, new FieldReference(foreignTableName, foreignTableField));
   return field;
 }
 
+
+/**
+ * Helper function for decorating a property and map it to an index field
+ *
+ * @param {Object} target - The decorated class
+ * @param {(string|symbol)} key - The decorated property
+ * @param {string} indexName - The name for the index
+ * @returns {Field}
+ */
+function decoratePropertyIndex(
+  target: Object, key: string | symbol, indexName: string): Field {
+
+  if (typeof target === 'function') {
+    // not decorating static property
+    throw new Error(`decorating static property '${key.toString()}' using field-decorator is not supported`);
+  }
+
+  let table: Table = getTableMetadata(target.constructor);
+  let field: Field = getFieldMetadata(table, key);
+  if (field.isIndexField(indexName)) {
+    throw new Error(`decorating property '${target.constructor.name}.${key.toString()}': duplicate index key '${indexName}'`);
+  }
+
+  field.setIndexField(indexName);
+  return field;
+}
 
 
 /**
@@ -240,5 +266,23 @@ export function fk(
     void {
   return ((target: Object, key: string | symbol) => {
     let field = decoratePropertyForeignKey(target, key, constraintName, foreignTableName, foreignTableField);
+  });
+}
+
+
+
+/**
+ * The index decorator for mapping a class property to be part of an index
+ *
+ * @export
+ * @param {string} indexName - The index name
+ * @returns {((target: Object, key: string|symbol) =>
+ *     void)}
+ */
+export function index(
+  indexName: string): (target: Object, key: string | symbol) =>
+    void {
+  return ((target: Object, key: string | symbol) => {
+    let field = decoratePropertyIndex(target, key, indexName);
   });
 }

@@ -3,7 +3,6 @@ import {SqlDatabase} from './SqlDatabase';
 import {Table} from './Table';
 import {Field} from './Field';
 import {FieldReference} from './FieldReference';
-import {ForeignKey} from './ForeignKey';
 import {PropertyType} from './PropertyType';
 
 
@@ -194,26 +193,26 @@ export class BaseDAO<T extends Object> {
    * @template F - The class mapped to the foreign table
    * @param {string} constraintName - The foreign key constraint
    * @param {{new (): F}} foreignType - The class mapped to the foreign table
-   * @param {F} foreign - An instance of the class mapped to the foreign table
+   * @param {F} foreignObj - An instance of the class mapped to the foreign table
    * @param {string} [sql] - An optional sql-text which will be added to the select-statement
    * @param {Object} [params] - An optional object with additional host parameter
    * @returns {Promise<T[]>}
    */
   public selectAllOf<F extends Object>(
-      constraintName: string, foreignType: {new (): F}, foreign: F, sql?: string,
+      constraintName: string, foreignType: {new (): F}, foreignObj: F, sql?: string,
       params?: Object): Promise<T[]> {
     return new Promise<T[]>(async(resolve, reject) => {
       try {
-        let fk = this.table.getForeignKey(constraintName);
-        if (!fk) {
+        let fkSelCondition = this.table.getForeignKeySelects(constraintName);
+        if (!fkSelCondition) {
           throw new Error(`constraint '${constraintName}' is not defined`);
         }
         let stmt = this.table.getSelectAllStatement();
         stmt += '\nWHERE\n  ';
-        stmt += fk.selectCondition;
+        stmt += fkSelCondition;
 
         let foreignDAO = new BaseDAO<F>(foreignType, this.sqldb);
-        let foreignParams = this.bindForeignParams(foreignDAO, fk, foreign, params);
+        let foreignParams = this.bindForeignParams(foreignDAO, constraintName, foreignObj, params);
         if (!!sql) {
           stmt += sql;
         }
@@ -260,11 +259,16 @@ export class BaseDAO<T extends Object> {
   }
 
 
-  protected bindForeignParams<F extends Object>(foreignDAO: BaseDAO<F>, fk: ForeignKey, foreignObject: F, more: Object = {}): Object {
+  protected bindForeignParams<F extends Object>(foreignDAO: BaseDAO<F>, fkName: string, foreignObject: F, more: Object = {}): Object {
     let hostParams: Object = Object.assign({}, more);
-    fk.fields.forEach(
+    let fkFields = this.table.getForeignKeyFields(fkName);
+    if (!fkFields) {
+      throw new Error(`internal error: fields for foreign key constraint '${fkName}' are not defined`);
+    }
+
+    fkFields.forEach(
         (field) => {
-          let fieldref = field.foreignKeys.get(fk.name) as FieldReference;
+          let fieldref = field.foreignKeys.get(fkName) as FieldReference;
           let foreignfield = foreignDAO.table.getTableField(fieldref.colName);
           foreignDAO.setHostParam(hostParams, foreignfield, foreignObject);
         });
@@ -393,6 +397,26 @@ export class BaseDAO<T extends Object> {
    */
   public alterTableAddColumn(colName: string): Promise<void> {
     return this.sqldb.exec(this.table.getAlterTableAddColumnStatement(colName));
+  }
+
+  /**
+   * create index in the database
+   *
+   * @param {string} idxName - The name of the index
+   * @returns {Promise<void>}
+   */
+  public createIndex(idxName: string): Promise<void> {
+    return this.sqldb.exec(this.table.getCreateIndexStatement(idxName));
+  }
+
+  /**
+   * drop an index from the database
+   *
+   * @param {string} idxName - The name of the index
+   * @returns {Promise<void>}
+   */
+  public dropIndex(idxName: string): Promise<void> {
+    return this.sqldb.exec(this.table.getDropIndexStatement(idxName));
   }
 
 }
