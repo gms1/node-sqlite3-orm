@@ -33,6 +33,7 @@ export {
   field,
   id,
   fk,
+  index,
   TableOpts,
   FieldOpts,
   METADATA_TABLE_KEY
