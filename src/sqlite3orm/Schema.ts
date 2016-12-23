@@ -71,9 +71,6 @@ export class Schema {
    */
   public createTable(sqldb: SqlDatabase, name: string): Promise<void> {
     let table = this.getTable(name);
-    if (!table) {
-      return Promise.reject(new Error(`table '${name}' is not defined`));
-    }
     return sqldb.exec(table.getCreateTableStatement());
   }
 
@@ -86,9 +83,6 @@ export class Schema {
    */
   public dropTable(sqldb: SqlDatabase, name: string): Promise<void> {
     let table = this.getTable(name);
-    if (!table) {
-      return Promise.reject(new Error(`table '${name}' is not defined`));
-    }
     return sqldb.exec(table.getDropTableStatement());
   }
 
@@ -102,9 +96,6 @@ export class Schema {
    */
   public alterTableAddColumn(sqldb: SqlDatabase, tableName: string, colName: string): Promise<void> {
     let table = this.getTable(tableName);
-    if (!table) {
-      return Promise.reject(new Error(`table '${tableName}' is not defined`));
-    }
     return sqldb.exec(table.getAlterTableAddColumnStatement(colName));
   }
 
@@ -119,9 +110,6 @@ export class Schema {
    */
   public createIndex(sqldb: SqlDatabase, tableName: string, idxName: string, unique?: boolean): Promise<void> {
     let table = this.getTable(tableName);
-    if (!table) {
-      return Promise.reject(new Error(`table '${tableName}' is not defined`));
-    }
     return sqldb.exec(table.getCreateIndexStatement(idxName, unique));
   }
 
@@ -135,9 +123,6 @@ export class Schema {
    */
   public dropIndex(sqldb: SqlDatabase, tableName: string, idxName: string): Promise<void> {
     let table = this.getTable(tableName);
-    if (!table) {
-      return Promise.reject(new Error(`table '${tableName}' is not defined`));
-    }
     return sqldb.exec(table.getDropIndexStatement(idxName));
   }
 
