@@ -33,7 +33,7 @@
     "tslint": "gulp tslint",
     "test": "node spec/jasmine-runner.js",
     "typedoc": "typedoc --mode modules --out docs/typedoc/sqlite3orm --tsconfig tsconfig.json --exclude '**/*.spec.ts' src/sqlite3orm",
-    "prepublish": "echo \"ERROR: please use the dist-folder for publishing\" && exit 1"
+    "prepublishOnly": "echo \"ERROR: please use the dist-folder for publishing\" && exit 1"
   },
   "dependencies": {
     "reflect-metadata": "^0.1.8",
