@@ -1,7 +1,3 @@
-// tslint:disable: arrow-parens
-// disabled for tslint 402, because of
-//   https://github.com/palantir/tslint/issues/1572
-
 import {field, fk, id, table, index} from '../decorators';
 import {Field} from '../Field';
 import {schema} from '../Schema';

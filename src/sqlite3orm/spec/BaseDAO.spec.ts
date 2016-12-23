@@ -1,7 +1,3 @@
-// tslint:disable: arrow-parens
-// disabled for tslint 402, because of
-//   https://github.com/palantir/tslint/issues/1572
-
 import {BaseDAO} from '../BaseDAO';
 import {field, FieldOpts, fk, id, table, TableOpts} from '../decorators';
 import {schema} from '../Schema';
