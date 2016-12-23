@@ -207,6 +207,7 @@ tsconfig.json:
 
 | Release   | Notes                                                                                                                            |
 |-----------|----------------------------------------------------------------------------------------------------------------------------------|
+| 0.0.15    | maintenance releases                                                                                                             |
 | 0.0.14    | new @index decorator and create/drop - index methods                                                                             |
 | 0.0.13    | BaseDAO: added createTable/dropTable/alterTableAddColumn methods for convenience                                                 |
 | 0.0.10-12 | maintenance releases                                                                                                             |
