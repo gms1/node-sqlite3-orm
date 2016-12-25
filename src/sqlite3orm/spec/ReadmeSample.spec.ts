@@ -101,7 +101,7 @@ async function runSample():
 
             // read all users having a contact:
             let allUsersHavingContacts = await userDAO.selectAll(
-                'WHERE EXISTS(select 1 from CONTACTS C where C.user_id = T.user_id)');
+                'WHERE EXISTS(SELECT 1 FROM CONTACTS C WHERE C.user_id = T.user_id)');
 
             // read all contacts from 'duck.com':
             let allContactsFromDuckDotCom = await contactDAO.selectAll(

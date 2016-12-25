@@ -29,7 +29,7 @@ describe('test SqlDatabase', () => {
         'INSERT INTO TEST (id,col) values (1,\'testvalue 1/1\')');
       expect(res.lastID).toBe(1);
       let row =
-        await sqldb.get('SELECT col from TEST where id=:id', { ':id': 1 });
+        await sqldb.get('SELECT col FROM TEST WHERE id=:id', { ':id': 1 });
       expect(row.col).toBe('testvalue 1/1');
     } catch (err) {
       fail(err);
@@ -69,7 +69,7 @@ describe('test SqlDatabase', () => {
       let res = await sqldb.run(
         'UPDATE TEST set col = ? WHERE id=?', ['testvalue 1/2', 1]);
       expect(res.changes).toBe(1);
-      let row = await sqldb.get('SELECT col from TEST where id=?', 1);
+      let row = await sqldb.get('SELECT col FROM TEST WHERE id=?', 1);
       expect(row.col).toBe('testvalue 1/2');
     } catch (err) {
       fail(err);
@@ -84,7 +84,7 @@ describe('test SqlDatabase', () => {
       let res = await stmt.run({ $id: 1, $col: 'testvalue 1/3' });
       expect(res.changes).toBe(1);
       await stmt.finalize();
-      let row = await sqldb.get('SELECT col from TEST where id=?', 1);
+      let row = await sqldb.get('SELECT col FROM TEST WHERE id=?', 1);
       expect(row.col).toBe('testvalue 1/3');
     } catch (err) {
       fail(err);
@@ -94,7 +94,7 @@ describe('test SqlDatabase', () => {
   // ---------------------------------------------
   it('expect select without parameter to succeed', async (done) => {
     try {
-      let res = await sqldb.all('SELECT id, col from TEST order by id');
+      let res = await sqldb.all('SELECT id, col FROM TEST order by id');
       expect(res.length).toBeGreaterThan(1);
       expect(res[0].id).toBe(0);
       expect(res[0].col).toBe('testvalue 0');
@@ -113,7 +113,7 @@ describe('test SqlDatabase', () => {
       let res: any[] = [];
 
       let count = await sqldb.each(
-        'SELECT id, col from TEST where id >= ? order by id', [0],
+        'SELECT id, col FROM TEST WHERE id >= ? order by id', [0],
         (err, row) => {
           if (err) {
             err.message = 'error row: ' + err.message;
