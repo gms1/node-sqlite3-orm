@@ -133,8 +133,8 @@ In order to read from or write to the database, you can use the `BaseDAO<Model>'
 
   // read all contacts from 'duck.com':
   let allContactsFromDuckDotCom = await contactDAO.selectAll(
-      'WHERE contact_email like :contact_email',
-      {':contact_email': '%@duck.com'});
+      'WHERE contact_email like $contact_email',
+      {$contact_email: '%@duck.com'});
 
 })();
 

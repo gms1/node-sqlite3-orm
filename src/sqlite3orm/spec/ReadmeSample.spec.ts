@@ -105,8 +105,8 @@ async function runSample():
 
             // read all contacts from 'duck.com':
             let allContactsFromDuckDotCom = await contactDAO.selectAll(
-                'WHERE contact_email like :contact_email',
-                {':contact_email': '%@duck.com'});
+                'WHERE contact_email like $contact_email',
+                {$contact_email: '%@duck.com'});
 
             expect(userDonald.userId)
                 .toBe(user.userId, 'wrong userDonald.userId');
