@@ -1,0 +1,7 @@
+{
+  "mode": "modules",
+  "excludeExternals": true,
+  "excludeNotExported": true,
+  "excludePrivate": false, 
+  "tsconfig": "tsconfig.json"
+}
