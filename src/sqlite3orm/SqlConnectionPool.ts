@@ -11,13 +11,13 @@ import {Database} from 'sqlite3';
 export class SqlConnectionPool {
   private databaseFile?: string;
 
-  private mode?: number;
+  private mode: number;
 
-  private min?: number;
+  private min: number;
 
-  private max?: number;
+  private max: number;
 
-  private inPool: SqlDatabase[] = [];
+  private inPool: SqlDatabase[];
 
   private inUse: Set<SqlDatabase>;
 
@@ -27,10 +27,12 @@ export class SqlConnectionPool {
    */
   constructor() {
     this.databaseFile = undefined;
-    this.mode = undefined;
+    this.mode = SQL_OPEN_DEFAULT;
     this.inUse = new Set<SqlDatabase>();
-  }
+    this.inPool = [];
+    this.min = this.max = 0;
 
+  }
 
   /**
    * Open a database connection pool
@@ -85,7 +87,7 @@ export class SqlConnectionPool {
         this.inUse.clear();
         await Promise.all(promises);
         this.databaseFile = undefined;
-        this.mode = undefined;
+        this.mode = SQL_OPEN_DEFAULT;
         resolve();
       } catch (err) {
         reject(err);
@@ -102,22 +104,23 @@ export class SqlConnectionPool {
   get(timeout: number = 0): Promise<SqlDatabase> {
     return new Promise<SqlDatabase>(async(resolve, reject) => {
       try {
+        let sqldb: SqlDatabase | undefined = undefined;
         let cond = () => { return (this.inPool.length > 0); };
         if (this.max > 0 && !cond() && this.inUse.size >= this.max) {
           await wait(cond, timeout);
         }
         if (this.inPool.length > 0) {
-          let sqldb = this.inPool.shift() as SqlDatabase;
+          sqldb = this.inPool.shift() as SqlDatabase;
           if (this.max > 0) {
             this.inUse.add(sqldb);
           }
           resolve(sqldb);
           return;
         }
-        let sqldb = new SqlDatabase();
-        if (this.databaseFile === undefined) {
+        if (!this.databaseFile) {
           throw new Error(`connection pool not opened`);
         }
+        sqldb = new SqlDatabase();
         await sqldb.openByPool(this, this.databaseFile, this.mode);
         if (this.max > 0) {
           this.inUse.add(sqldb);
