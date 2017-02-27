@@ -8,8 +8,6 @@
 This module allows you to map your model, written in JavaScript or TypeScript, to a database schema using SQLite Version 3.
 **node-sqlite3-orm** is designed to work with new JavaScript *Decorators*, *Promises* and the *async/await* feature.
 
-> NOTE: Please keep in mind that this module is in early development state! ( transpiled using TypeScript 2.0 and targeting ES6, tested on node 6.3.1 )
-
 > NOTE: Your contribution is highly welcome! Feel free to pick-up a TODO-item or add yours.
 
 ## Introduction
@@ -208,7 +206,7 @@ tsconfig.json:
 
 | Release   | Notes                                                                                                                            |
 |-----------|----------------------------------------------------------------------------------------------------------------------------------|
-| 0.0.15    | maintenance releases                                                                                                             |
+| 0.0.15-16 | maintenance releases                                                                                                             |
 | 0.0.14    | new @index decorator and create/drop - index methods                                                                             |
 | 0.0.13    | BaseDAO: added createTable/dropTable/alterTableAddColumn methods for convenience                                                 |
 | 0.0.10-12 | maintenance releases                                                                                                             |
