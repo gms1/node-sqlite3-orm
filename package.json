@@ -2,7 +2,8 @@
   "name": "sqlite3orm",
   "version": "0.0.15",
   "description": "ORM for sqlite3 and TypeScript/JavaScript",
-  "main": "index.js",
+  "main": "./index.js",
+  "types": "./index.d.ts",
   "tags": [
     "javascript",
     "typescript",
@@ -32,7 +33,7 @@
     "watch": "gulp watch",
     "tslint": "gulp ts:lint",
     "test": "node spec/jasmine-runner.js",
-    "typedoc": "typedoc --options typedoc.json --out docs/typedoc/sqlite3orm --exclude '**/*.spec.ts' src/sqlite3orm",
+    "typedoc": "typedoc --options typedoc.json --out docs/typedoc/sqlite3orm --exclude '**/*.spec.ts' src/",
     "prepublishOnly": "echo \"ERROR: please use the dist-folder for publishing\" && exit 1"
   },
   "dependencies": {
@@ -59,6 +60,7 @@
     "run-sequence": "^1.2.2",
     "ts-node": "^2.1.0",
     "tslint": "^4.3.0",
+    "typedoc": "^0.5.7",
     "typescript": "^2.1.4"
   },
   "typescript": {
