@@ -1,9 +1,10 @@
 import {BaseDAO} from '../BaseDAO';
 import {schema} from '../Schema';
 import {SqlDatabase} from '../SqlDatabase';
+// tslint:disable: no-unused-variable
 
 // definition-part:
-import {table, id, field, index, fk, FieldOpts, TableOpts} from '../decorators';
+import {table, id, field, index, fk} from '../decorators';
 
 @table({name: 'USERS'})
 class User {

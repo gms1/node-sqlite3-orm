@@ -1,3 +1,4 @@
+// tslint:disable-next-line: no-import-side-effect
 import 'reflect-metadata';
 
 import { Field } from './Field';
@@ -123,7 +124,7 @@ function decorateClass(target: Function, opts: TableOpts): void {
  * @returns {Field}
  */
 function decoratePropertyField(
-  target: Object, key: string | symbol, opts: FieldOpts,
+  target: Object|Function, key: string | symbol, opts: FieldOpts,
   isIdentity: boolean = false): Field {
 
   if (typeof target === 'function') {
@@ -162,7 +163,7 @@ function decoratePropertyField(
  * @returns {Field}
  */
 function decoratePropertyForeignKey(
-  target: Object, key: string | symbol, constraintName: string, foreignTableName: string, foreignTableField: string): Field {
+  target: Object|Function, key: string | symbol, constraintName: string, foreignTableName: string, foreignTableField: string): Field {
 
   if (typeof target === 'function') {
     // not decorating static property
@@ -189,7 +190,7 @@ function decoratePropertyForeignKey(
  * @returns {Field}
  */
 function decoratePropertyIndex(
-  target: Object, key: string | symbol, indexName: string): Field {
+  target: Object|Function, key: string | symbol, indexName: string): Field {
 
   if (typeof target === 'function') {
     // not decorating static property
@@ -265,7 +266,7 @@ export function fk(
   constraintName: string, foreignTableName: string, foreignTableField: string): (target: Object, key: string | symbol) =>
     void {
   return ((target: Object, key: string | symbol) => {
-    let field = decoratePropertyForeignKey(target, key, constraintName, foreignTableName, foreignTableField);
+    decoratePropertyForeignKey(target, key, constraintName, foreignTableName, foreignTableField);
   });
 }
 
@@ -283,6 +284,6 @@ export function index(
   indexName: string): (target: Object, key: string | symbol) =>
     void {
   return ((target: Object, key: string | symbol) => {
-    let field = decoratePropertyIndex(target, key, indexName);
+    decoratePropertyIndex(target, key, indexName);
   });
 }

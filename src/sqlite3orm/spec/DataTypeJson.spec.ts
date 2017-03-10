@@ -1,8 +1,7 @@
 import {BaseDAO} from '../BaseDAO';
-import {field, FieldOpts, fk, id, table, TableOpts} from '../decorators';
+import {field, id, table} from '../decorators';
 import {schema} from '../Schema';
 import {SQL_MEMORY_DB_PRIVATE, SqlDatabase} from '../SqlDatabase';
-import {SqlStatement} from '../SqlStatement';
 
 
 const DATATYPE_JSON_TABLE = 'DATATYPE_JSON';

@@ -21,11 +21,12 @@ describe('test SqlConnectionPool', () => {
       expect(sqldb2.isOpen()).toBeTruthy();
 
       // getting third connect should fail
-      let sqldb3: SqlDatabase|undefined = undefined;
+      let sqldb3: SqlDatabase|undefined;
       try {
         sqldb3 = await pool.get(100);
         fail('got 3 connection from pool with max 2 connections');
-      } catch (noerr) {
+      } catch (ignore) {
+        ;
       }
       expect(sqldb3).toBeUndefined();
 

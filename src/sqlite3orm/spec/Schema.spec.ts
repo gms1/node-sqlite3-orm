@@ -2,7 +2,6 @@ import {field, fk, id, table, index} from '../decorators';
 import {Field} from '../Field';
 import {schema} from '../Schema';
 import {SQL_MEMORY_DB_PRIVATE, SqlDatabase} from '../SqlDatabase';
-import {Table} from '../Table';
 import {BaseDAO} from '../BaseDAO';
 
 

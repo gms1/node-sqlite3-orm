@@ -1,6 +1,5 @@
 import {BaseDAO} from '../BaseDAO';
-import {field, FieldOpts, fk, id, table, TableOpts} from '../decorators';
-import {schema} from '../Schema';
+import {field, fk, id, table} from '../decorators';
 import {SQL_MEMORY_DB_PRIVATE, SqlDatabase} from '../SqlDatabase';
 
 

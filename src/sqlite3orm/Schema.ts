@@ -137,7 +137,8 @@ export class Schema {
  */
 export function schema(): Schema {
   if (!Schema.schema) {
-    let schema = new Schema();
+    // tslint:disable-next-line: no-unused-new
+    new Schema();
   }
   return Schema.schema;
 }

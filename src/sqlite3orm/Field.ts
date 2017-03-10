@@ -1,4 +1,3 @@
-import {Table} from './Table';
 import {FieldReference} from './FieldReference';
 import {PropertyType} from './PropertyType';
 

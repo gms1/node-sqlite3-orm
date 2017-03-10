@@ -1,5 +1,4 @@
 import {SqlDatabase, SQL_OPEN_DEFAULT} from './SqlDatabase';
-import {Database} from 'sqlite3';
 
 
 /**
@@ -104,8 +103,8 @@ export class SqlConnectionPool {
   get(timeout: number = 0): Promise<SqlDatabase> {
     return new Promise<SqlDatabase>(async(resolve, reject) => {
       try {
-        let sqldb: SqlDatabase | undefined = undefined;
-        let cond = () => { return (this.inPool.length > 0); };
+        let sqldb: SqlDatabase | undefined;
+        let cond = () => this.inPool.length > 0;
         if (this.max > 0 && !cond() && this.inUse.size >= this.max) {
           await wait(cond, timeout);
         }

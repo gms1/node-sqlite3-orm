@@ -1,5 +1,4 @@
 import { SQL_MEMORY_DB_PRIVATE, SqlDatabase } from '../SqlDatabase';
-import { SqlStatement } from '../SqlStatement';
 
 // ---------------------------------------------
 
@@ -41,7 +40,7 @@ describe('test SqlDatabase', () => {
   it('expect insert without parameter to violate unique constraint',
     async (done) => {
       try {
-        let res = await sqldb.run(
+        await sqldb.run(
           'INSERT INTO TEST (id,col) values (1,\'testvalue 1/1\')');
         fail();
       } catch (err) {

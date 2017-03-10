@@ -1,4 +1,4 @@
-import {cached, Database, OPEN_CREATE, OPEN_READONLY, OPEN_READWRITE, Statement, verbose as sqlverbose} from 'sqlite3';
+import {Database, OPEN_CREATE, OPEN_READONLY, OPEN_READWRITE, Statement, verbose as sqlverbose} from 'sqlite3';
 
 import {SqlStatement, SqlRunResult} from './SqlStatement';
 import {SqlConnectionPool} from './SqlConnectionPool';
@@ -24,7 +24,7 @@ export const SQL_MEMORY_DB_PRIVATE = ':memory:';
 //   Error: SQLITE_ERROR: table TEST already exists
 //   Error: SQLITE_CONSTRAINT: UNIQUE constraint failed: TEST.id
 
-
+// tslint:disable-next-line: no-bitwise
 export const SQL_OPEN_DEFAULT = SQL_OPEN_READWRITE | SQL_OPEN_CREATE;
 
 /**
@@ -113,8 +113,7 @@ export class SqlDatabase {
    * @returns {boolean}
    */
   public isOpen(): boolean {
-    // tslint:disable-next-line: triple-equals
-    return this.db != undefined;
+    return this.db !== undefined;
   }
 
   /**
@@ -327,6 +326,8 @@ export class SqlDatabase {
       );
   }
 
+  // tslint:disable unified-signatures
+
   /**
    *
    *
@@ -404,7 +405,7 @@ export class SqlDatabase {
    * @returns {Promise<void>}
    */
   public setUserVersion(newver: number): Promise<void> {
-    return this.exec('PRAGMA user_version = ' + newver);
+    return this.exec(`PRAGMA user_version = ${newver}`);
   }
 
 

@@ -1,5 +1,4 @@
 import {Field} from './Field';
-import {FieldReference} from './FieldReference';
 
 const TABLEALIAS = 'T';
 
