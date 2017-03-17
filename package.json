@@ -43,7 +43,6 @@
     "sqlite3": "^3.1.8"
   },
   "devDependencies": {
-    "@types/gulp": "^3.8.32",
     "@types/jasmine": "^2.5.43",
     "@types/node": "^7.0.8",
     "@types/reflect-metadata": "^0.0.5",
