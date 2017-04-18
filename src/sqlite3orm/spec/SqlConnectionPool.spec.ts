@@ -26,7 +26,7 @@ describe('test SqlConnectionPool', () => {
         sqldb3 = await pool.get(100);
         fail('got 3 connection from pool with max 2 connections');
       } catch (ignore) {
-        ;
+
       }
       expect(sqldb3).toBeUndefined();
 

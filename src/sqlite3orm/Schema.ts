@@ -137,7 +137,7 @@ export class Schema {
  */
 export function schema(): Schema {
   if (!Schema.schema) {
-    // tslint:disable-next-line: no-unused-new
+    // tslint:disable-next-line: no-unused-expression
     new Schema();
   }
   return Schema.schema;
