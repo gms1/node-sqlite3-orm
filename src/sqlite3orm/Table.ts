@@ -1,3 +1,4 @@
+// tslint:disable no-use-before-declare
 import {Field} from './Field';
 
 const TABLEALIAS = 'T';
@@ -244,6 +245,7 @@ export class Table {
     if (!stmtText) {
       throw new Error(`index '${idxName}' is not defined on table '${this.name}'`);
     }
+    // tslint:disable-next-line: restrict-plus-operands
     return 'CREATE ' + (unique ? 'UNIQUE ' : '') + stmtText;
   }
 
@@ -416,6 +418,7 @@ export class Table {
       stmts.createTable += ')\n';
 
       stmts.createTable += `    REFERENCES ${fk.refTableName} (`;
+      // tslint:disable-next-line: restrict-plus-operands
       stmts.createTable += fk.refColumns.join(', ') +
           ') ON DELETE CASCADE';  // TODO: hard-coded 'ON DELETE CASCADE'
       if (i--) {
@@ -489,6 +492,7 @@ export class Table {
     });
 
     indexKeys.forEach((cols, indexName) => {
+      // tslint:disable-next-line: restrict-plus-operands
       let createIdxCols = `INDEX IF NOT EXISTS ${indexName} ON ${this.name} (` + cols.join(', ') + ')';
       stmts.indexKeys.set( indexName, createIdxCols);
     });

@@ -1,28 +1,28 @@
-import {field, fk, id, table, index} from '../decorators';
-import {Field} from '../Field';
-import {schema} from '../Schema';
-import {SQL_MEMORY_DB_PRIVATE, SqlDatabase} from '../SqlDatabase';
-import {BaseDAO} from '../BaseDAO';
+import { field, fk, id, table, index } from '../decorators';
+import { Field } from '../Field';
+import { schema } from '../Schema';
+import { SQL_MEMORY_DB_PRIVATE, SqlDatabase } from '../SqlDatabase';
+import { BaseDAO } from '../BaseDAO';
 
 
 // sqlite3 catalog table
 
-@table({name: 'sqlite_master'})
+@table({ name: 'sqlite_master' })
 class CatalogTable {
 
-  @id({name: 'type', dbtype: 'TEXT'})
+  @id({ name: 'type', dbtype: 'TEXT' })
   objType?: string;
 
-  @id({name: 'name', dbtype: 'TEXT'})
+  @id({ name: 'name', dbtype: 'TEXT' })
   objName?: string;
 
-  @field({name: 'tbl_name', dbtype: 'TEXT'})
+  @field({ name: 'tbl_name', dbtype: 'TEXT' })
   tblName?: string;
 
-  @field({name: 'rootpage', dbtype: 'INTEGER'})
+  @field({ name: 'rootpage', dbtype: 'INTEGER' })
   rootPage?: number;
 
-  @field({name: 'sql', dbtype: 'TEXT'})
+  @field({ name: 'sql', dbtype: 'TEXT' })
   sql?: string;
 
   public constructor() {
@@ -49,12 +49,12 @@ const TABLE_CHILD_FK_CONSTRAINT_NAME = 'PARENT_CHILDS';
 const TABLE_CHILD_IDX_NAME = 'CHILD_PARENT_IDX';
 
 
-@table({name: TABLE_PARENT_TABLE_NAME})
+@table({ name: TABLE_PARENT_TABLE_NAME })
 class ParentTable {
-  @id({name: TABLE_PARENT_FIELD_ID_NAME, dbtype: 'INTEGER NOT NULL'})
+  @id({ name: TABLE_PARENT_FIELD_ID_NAME, dbtype: 'INTEGER NOT NULL' })
   public id?: number;
 
-  @field({name: TABLE_PARENT_FIELD_NAME_NAME, dbtype: 'TEXT'})
+  @field({ name: TABLE_PARENT_FIELD_NAME_NAME, dbtype: 'TEXT' })
   public name?: string;
 
   public constructor() {
@@ -64,17 +64,17 @@ class ParentTable {
 }
 
 
-@table({name: TABLE_CHILD_TABLE_NAME, autoIncrement: true})
+@table({ name: TABLE_CHILD_TABLE_NAME, autoIncrement: true })
 class ChildTable {
-  @id({name: TABLE_CHILD_FIELD_ID_NAME, dbtype: 'INTEGER NOT NULL'})
+  @id({ name: TABLE_CHILD_FIELD_ID_NAME, dbtype: 'INTEGER NOT NULL' })
   public id?: number;
 
-  @field({name: TABLE_CHILD_FIELD_NAME_NAME, dbtype: 'TEXT'})
+  @field({ name: TABLE_CHILD_FIELD_NAME_NAME, dbtype: 'TEXT' })
   public name?: string;
 
-  @field({name: TABLE_CHILD_FIELD_FK_NAME, dbtype: 'INTEGER NOT NULL'})
+  @field({ name: TABLE_CHILD_FIELD_FK_NAME, dbtype: 'INTEGER NOT NULL' })
   @fk(TABLE_CHILD_FK_CONSTRAINT_NAME, TABLE_PARENT_TABLE_NAME,
-      TABLE_PARENT_FIELD_ID_NAME)
+    TABLE_PARENT_FIELD_ID_NAME)
   @index(TABLE_CHILD_IDX_NAME)
   public parentId?: number;
 
@@ -93,15 +93,14 @@ describe('test schema', () => {
   let sqldb: SqlDatabase;
 
   // ---------------------------------------------
-  beforeAll((done) => {
-    sqldb = new SqlDatabase();
-    sqldb.open(SQL_MEMORY_DB_PRIVATE).then((res) => done()).catch((err) => {
-      if (err) {
-        fail(err);
-      }
+  beforeAll(async (done) => {
+    try {
+      sqldb = new SqlDatabase();
+      await sqldb.open(SQL_MEMORY_DB_PRIVATE);
       done();
-    });
-
+    } catch (e) {
+      fail(e);
+    }
   });
 
   // ---------------------------------------------
@@ -115,7 +114,7 @@ describe('test schema', () => {
       expect(parentIdField.name).toBe(TABLE_PARENT_FIELD_ID_NAME);
       expect(parentIdField.isIdentity).toBeTruthy();
       let parentNameField =
-          parentTable.getTableField(TABLE_PARENT_FIELD_NAME_NAME);
+        parentTable.getTableField(TABLE_PARENT_FIELD_NAME_NAME);
       expect(parentNameField).toBeDefined();
       expect(parentNameField.name).toBe(TABLE_PARENT_FIELD_NAME_NAME);
       expect(parentNameField.isIdentity).toBeFalsy();
@@ -128,7 +127,7 @@ describe('test schema', () => {
       expect(childIdField.name).toBe(TABLE_CHILD_FIELD_ID_NAME);
       expect(childIdField.isIdentity).toBeTruthy();
       let childNameField =
-          childTable.getTableField(TABLE_CHILD_FIELD_NAME_NAME);
+        childTable.getTableField(TABLE_CHILD_FIELD_NAME_NAME);
       expect(childNameField).toBeDefined();
       expect(childNameField.name).toBe(TABLE_CHILD_FIELD_NAME_NAME);
       expect(childNameField.isIdentity).toBeFalsy();
@@ -137,7 +136,7 @@ describe('test schema', () => {
       expect(childFKField.name).toBe(TABLE_CHILD_FIELD_FK_NAME);
       expect(childFKField.isIdentity).toBeFalsy();
       let childFKFieldRef =
-          childFKField.getForeignKeyField(TABLE_CHILD_FK_CONSTRAINT_NAME);
+        childFKField.getForeignKeyField(TABLE_CHILD_FK_CONSTRAINT_NAME);
       expect(childFKFieldRef.tableName).toBe(TABLE_PARENT_TABLE_NAME);
       expect(childFKFieldRef.colName).toBe(TABLE_PARENT_FIELD_ID_NAME);
 
@@ -149,7 +148,7 @@ describe('test schema', () => {
   });
 
   // ---------------------------------------------
-  it('expect create/drop/alter-table to work (using Schema)', async(done) => {
+  it('expect create/drop/alter-table to work (using Schema)', async (done) => {
     try {
       let catalogDAO = new BaseDAO<CatalogTable>(CatalogTable, sqldb);
       let catalogItem = new CatalogTable();
@@ -202,7 +201,7 @@ describe('test schema', () => {
       expect(parentTable.hasTableField(newField.name)).toBeTruthy();
 
       await schema().alterTableAddColumn(
-          sqldb, TABLE_PARENT_TABLE_NAME, newField.name);
+        sqldb, TABLE_PARENT_TABLE_NAME, newField.name);
 
       await schema().dropTable(sqldb, TABLE_CHILD_TABLE_NAME);
       await schema().dropTable(sqldb, TABLE_PARENT_TABLE_NAME);
@@ -227,7 +226,7 @@ describe('test schema', () => {
   });
 
   // ---------------------------------------------
-  it('expect create/drop/alter-table to work (using BaseDAO)', async(done) => {
+  it('expect create/drop/alter-table to work (using BaseDAO)', async (done) => {
     try {
       let catalogDAO = new BaseDAO<CatalogTable>(CatalogTable, sqldb);
       let catalogItem = new CatalogTable();
@@ -283,7 +282,7 @@ describe('test schema', () => {
       expect(parentTable.hasTableField(newField.name)).toBeTruthy();
 
       await schema().alterTableAddColumn(
-          sqldb, TABLE_PARENT_TABLE_NAME, newField.name);
+        sqldb, TABLE_PARENT_TABLE_NAME, newField.name);
 
       await childDAO.dropTable();
       await parentDAO.dropTable();

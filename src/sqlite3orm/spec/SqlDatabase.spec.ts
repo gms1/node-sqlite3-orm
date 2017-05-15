@@ -44,6 +44,7 @@ describe('test SqlDatabase', () => {
           'INSERT INTO TEST (id,col) values (1,\'testvalue 1/1\')');
         fail();
       } catch (err) {
+        // tslint:disable-next-line: restrict-plus-operands
         expect('' + err).toContain('UNIQUE constraint');
       }
       done();

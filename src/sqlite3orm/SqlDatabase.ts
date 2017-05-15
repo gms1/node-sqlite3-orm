@@ -113,7 +113,7 @@ export class SqlDatabase {
    * @returns {boolean}
    */
   public isOpen(): boolean {
-    return this.db !== undefined;
+    return !!this.db;
   }
 
   /**
