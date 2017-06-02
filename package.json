@@ -46,7 +46,7 @@
     "@types/jasmine": "^2.5.47",
     "@types/node": "^7.0.21",
     "@types/reflect-metadata": "^0.0.5",
-    "@types/sqlite3": "^2.2.33",
+    "@types/sqlite3": "^3.1.0",
     "del": "^2.2.2",
     "gulp": "^3.9.1",
     "gulp-batch": "^1.0.5",
