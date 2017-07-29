@@ -23,9 +23,7 @@ export class SqlStatement {
    *
    * @param {Statement} stmt
    */
-  public constructor(stmt: Statement) {
-    this.stmt = stmt;
-  }
+  public constructor(stmt: Statement) { this.stmt = stmt; }
 
   /**
    * Bind the given parameters to the prepared statement
@@ -44,12 +42,8 @@ export class SqlStatement {
    *
    * @returns {Promise<void>}
    */
-  public reset(): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      this.stmt.reset(() => {
-          resolve();
-      });
-    });
+  public async reset(): Promise<void> {
+    return new Promise<void>((resolve, reject) => { this.stmt.reset(() => { resolve(); }); });
   }
 
   /**
@@ -57,7 +51,7 @@ export class SqlStatement {
    *
    * @returns {Promise<void>}
    */
-  public finalize(): Promise<void> {
+  public async finalize(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.stmt.finalize((err) => {
         if (err) {
@@ -76,18 +70,18 @@ export class SqlStatement {
    * @param {*} [params] - The parameters referenced in the statement; you can provide multiple parameters as array
    * @returns {Promise<SqlRunResult>}
    */
-  public run(params?: any): Promise<SqlRunResult> {
+  public async run(params?: any): Promise<SqlRunResult> {
     return new Promise<SqlRunResult>((resolve, reject) => {
-        // tslint:disable-next-line: only-arrow-functions
-        this.stmt.run(params, function(err: Error): void {
-          if (err) {
-            reject(err);
-          } else {
-            // tslint:disable-next-line: no-invalid-this
-            let res: SqlRunResult = { lastID: this.lastID, changes: this.changes };
-            resolve(res);
-          }
-        });
+      // tslint:disable-next-line: only-arrow-functions
+      this.stmt.run(params, function(err: Error): void {
+        if (err) {
+          reject(err);
+        } else {
+          // tslint:disable-next-line: no-invalid-this
+          let res: SqlRunResult = {lastID: this.lastID, changes: this.changes};
+          resolve(res);
+        }
+      });
     });
   }
 
@@ -98,15 +92,15 @@ export class SqlStatement {
    * @param {*} [params] - The parameters referenced in the statement; you can provide multiple parameters as array
    * @returns {Promise<any>}
    */
-  public get(params?: any): Promise<any> {
+  public async get(params?: any): Promise<any> {
     return new Promise<any>((resolve, reject) => {
-        this.stmt.get(params, (err, row) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(row);
-          }
-        });
+      this.stmt.get(params, (err, row) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(row);
+        }
+      });
     });
   }
 
@@ -116,15 +110,15 @@ export class SqlStatement {
    * @param {*} [params] - The parameters referenced in the statement; you can provide multiple parameters as array
    * @returns {Promise<any[]>}
    */
-  public all(params?: any): Promise<any[]> {
+  public async all(params?: any): Promise<any[]> {
     return new Promise<any[]>((resolve, reject) => {
-        this.stmt.all(params, (err, rows) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(rows);
-          }
-        });
+      this.stmt.all(params, (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+      });
     });
   }
 
@@ -136,17 +130,15 @@ export class SqlStatement {
    * @param {(err: Error, row: any) => void} [callback]
    * @returns {Promise<number>}
    */
-  public each(params?: any, callback?: (err: Error, row: any) => void): Promise<number> {
+  public async each(params?: any, callback?: (err: Error, row: any) => void): Promise<number> {
     return new Promise<number>((resolve, reject) => {
-        this.stmt.each(params, callback, (err, count) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(count);
-          }
-        });
+      this.stmt.each(params, callback, (err, count) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(count);
+        }
+      });
     });
   }
-
 }
-

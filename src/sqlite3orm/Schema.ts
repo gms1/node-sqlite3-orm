@@ -69,7 +69,7 @@ export class Schema {
    * @param {string} name - The name of the table
    * @returns {Promise<void>}
    */
-  public createTable(sqldb: SqlDatabase, name: string): Promise<void> {
+  public async createTable(sqldb: SqlDatabase, name: string): Promise<void> {
     let table = this.getTable(name);
     return sqldb.exec(table.getCreateTableStatement());
   }
@@ -81,7 +81,7 @@ export class Schema {
    * @param {string} name - The name of the table
    * @returns {Promise<void>}
    */
-  public dropTable(sqldb: SqlDatabase, name: string): Promise<void> {
+  public async dropTable(sqldb: SqlDatabase, name: string): Promise<void> {
     let table = this.getTable(name);
     return sqldb.exec(table.getDropTableStatement());
   }
@@ -94,7 +94,7 @@ export class Schema {
    * @param {string} colName
    * @returns {Promise<void>}
    */
-  public alterTableAddColumn(sqldb: SqlDatabase, tableName: string, colName: string): Promise<void> {
+  public async alterTableAddColumn(sqldb: SqlDatabase, tableName: string, colName: string): Promise<void> {
     let table = this.getTable(tableName);
     return sqldb.exec(table.getAlterTableAddColumnStatement(colName));
   }
@@ -108,7 +108,7 @@ export class Schema {
    * @param {boolean} [unique] - create unique index
    * @returns {Promise<void>}
    */
-  public createIndex(sqldb: SqlDatabase, tableName: string, idxName: string, unique?: boolean): Promise<void> {
+  public async createIndex(sqldb: SqlDatabase, tableName: string, idxName: string, unique?: boolean): Promise<void> {
     let table = this.getTable(tableName);
     return sqldb.exec(table.getCreateIndexStatement(idxName, unique));
   }
@@ -121,12 +121,10 @@ export class Schema {
    * @param {string} idxName - The name of the index
    * @returns {Promise<void>}
    */
-  public dropIndex(sqldb: SqlDatabase, tableName: string, idxName: string): Promise<void> {
+  public async dropIndex(sqldb: SqlDatabase, tableName: string, idxName: string): Promise<void> {
     let table = this.getTable(tableName);
     return sqldb.exec(table.getDropIndexStatement(idxName));
   }
-
-
 }
 
 /**

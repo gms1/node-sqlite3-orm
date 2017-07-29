@@ -59,9 +59,9 @@ export class Table {
 
   private get statementsText(): SqlStatementText {
     if (!this._statementsText) {
-      this.generateStatementsText();
+      this._statementsText = this.generateStatementsText();
     }
-    return this._statementsText as SqlStatementText;
+    return this._statementsText;
   }
 
 
@@ -73,9 +73,7 @@ export class Table {
    */
   private _autoIncrementField: Field|undefined;
 
-  get autoIncrementField(): Field|undefined {
-    return this._autoIncrementField;
-  }
+  get autoIncrementField(): Field|undefined { return this._autoIncrementField; }
 
 
   // map property keys to a field definition
@@ -110,9 +108,7 @@ export class Table {
    * @param {(string|symbol)} key - The property key
    * @returns {boolean}
    */
-  public hasPropertyField(key: string|symbol): boolean {
-    return this.mapPropToField.has(key);
-  }
+  public hasPropertyField(key: string|symbol): boolean { return this.mapPropToField.has(key); }
 
   /**
    * Get the field definition for the mapped property key
@@ -122,8 +118,7 @@ export class Table {
    */
   public getPropertyField(key: string|symbol): Field {
     if (!this.mapPropToField.has(key)) {
-      throw new Error(
-          `property '${key.toString()}' on class '${this.className}' not mapped to any field`);
+      throw new Error(`property '${key.toString()}' on class '${this.className}' not mapped to any field`);
     }
     return this.mapPropToField.get(key) as Field;
   }
@@ -152,9 +147,7 @@ export class Table {
    * @param {string} colName - The name of the column
    * @returns {boolean}
    */
-  public hasTableField(name: string): boolean {
-    return this.mapNameToField.has(name);
-  }
+  public hasTableField(name: string): boolean { return this.mapNameToField.has(name); }
 
   /**
    * Get the field definition for the given column name
@@ -185,15 +178,13 @@ export class Table {
       }
     }
     if (!field.name) {
-      throw new Error(
-          `property '${field.propertyKey.toString()}' on class '${this.className}': field name missing`);
+      throw new Error(`property '${field.propertyKey.toString()}' on class '${this.className}': field name missing`);
     }
     this.mapNameToField.set(field.name, field);
     if (field.isIdentity) {
       this.mapNameToIdentityField.set(field.name, field);
 
-      if (this.autoIncrement && !this.withoutRowId &&
-          this.mapNameToIdentityField.size === 1 &&
+      if (this.autoIncrement && !this.withoutRowId && this.mapNameToIdentityField.size === 1 &&
           field.dbtype.toUpperCase().indexOf('INTEGER') !== -1) {
         this._autoIncrementField = field;
       } else {
@@ -208,18 +199,14 @@ export class Table {
    *
    * @returns {string}
    */
-  public getCreateTableStatement(): string {
-    return this.statementsText.createTable;
-  }
+  public getCreateTableStatement(): string { return this.statementsText.createTable; }
 
   /**
    * Get 'DROP TABLE'-statement
    *
    * @returns {string}
    */
-  public getDropTableStatement(): string {
-    return `DROP TABLE IF EXISTS ${this.name}`;
-  }
+  public getDropTableStatement(): string { return `DROP TABLE IF EXISTS ${this.name}`; }
 
   /**
    * Get 'ALTER TABLE...ADD COLUMN'-statement for the given column
@@ -267,45 +254,35 @@ export class Table {
    *
    * @returns {string}
    */
-  public getInsertIntoStatement(): string {
-    return this.statementsText.insertInto;
-  }
+  public getInsertIntoStatement(): string { return this.statementsText.insertInto; }
 
   /**
    * Get 'UPDATE SET'-statement
    *
    * @returns {string}
    */
-  public getUpdateSetStatement(): string {
-    return this.statementsText.updateSet;
-  }
+  public getUpdateSetStatement(): string { return this.statementsText.updateSet; }
 
   /**
    * Get 'DELETE FROM'-statement
    *
    * @returns {string}
    */
-  public getDeleteFromStatement(): string {
-    return this.statementsText.deleteFrom;
-  }
+  public getDeleteFromStatement(): string { return this.statementsText.deleteFrom; }
 
   /**
    * Get 'SELECT' all-statement
    *
    * @returns {string}
    */
-  public getSelectAllStatement(): string {
-    return this.statementsText.selectAll;
-  }
+  public getSelectAllStatement(): string { return this.statementsText.selectAll; }
 
   /**
    * Get 'SELECT' one-statement
    *
    * @returns {string}
    */
-  public getSelectOneStatement(): string {
-    return this.statementsText.selectOne;
-  }
+  public getSelectOneStatement(): string { return this.statementsText.selectOne; }
 
 
   /**
@@ -332,7 +309,7 @@ export class Table {
    * Generate SQL Statements
    *
    */
-  private generateStatementsText(): void {
+  private generateStatementsText(): SqlStatementText {
     let colNames: string[] = [];
     let colNamesPK: string[] = [];
     let colNamesNoPK: string[] = [];
@@ -408,10 +385,8 @@ export class Table {
     // add foreign key constraint definition:
     let i = foreignKeys.size - 1;
     foreignKeys.forEach((fk, fkName) => {
-      if (!fk.fields.length || !fk.refColumns.length ||
-          fk.fields.length !== fk.refColumns.length) {
-        throw new Error(
-            `table '${this.name}': foreign key constraint '${fkName}' definition is incomplete`);
+      if (!fk.fields.length || !fk.refColumns.length || fk.fields.length !== fk.refColumns.length) {
+        throw new Error(`table '${this.name}': foreign key constraint '${fkName}' definition is incomplete`);
       }
       stmts.createTable += `,\n  CONSTRAINT ${fkName} FOREIGN KEY (`;
       stmts.createTable += fk.fields.map((field) => field.name).join(', ');
@@ -419,8 +394,7 @@ export class Table {
 
       stmts.createTable += `    REFERENCES ${fk.refTableName} (`;
       // tslint:disable-next-line: restrict-plus-operands
-      stmts.createTable += fk.refColumns.join(', ') +
-          ') ON DELETE CASCADE';  // TODO: hard-coded 'ON DELETE CASCADE'
+      stmts.createTable += fk.refColumns.join(', ') + ') ON DELETE CASCADE';  // TODO: hard-coded 'ON DELETE CASCADE'
       if (i--) {
         stmts.createTable += ',';
       }
@@ -485,22 +459,20 @@ export class Table {
     // generate SELECT-fk condition
     foreignKeys.forEach((fk, constraintName) => {
       let selectCondition =
-          fk.fields.map((field) => `${TABLEALIASPREFIX}${field.name}=${field.getHostParameterName()}`)
-              .join(' AND ');
-      stmts.foreignKeySelects.set( constraintName, selectCondition);
-      stmts.foreignKeyFields.set( constraintName, fk.fields);
+          fk.fields.map((field) => `${TABLEALIASPREFIX}${field.name}=${field.getHostParameterName()}`).join(' AND ');
+      stmts.foreignKeySelects.set(constraintName, selectCondition);
+      stmts.foreignKeyFields.set(constraintName, fk.fields);
     });
 
     indexKeys.forEach((cols, indexName) => {
       // tslint:disable-next-line: restrict-plus-operands
       let createIdxCols = `INDEX IF NOT EXISTS ${indexName} ON ${this.name} (` + cols.join(', ') + ')';
-      stmts.indexKeys.set( indexName, createIdxCols);
+      stmts.indexKeys.set(indexName, createIdxCols);
     });
 
 
-    this._statementsText = stmts;
+    return stmts;
   }
-
 }
 
 

@@ -30,7 +30,6 @@ export class SqlConnectionPool {
     this.inUse = new Set<SqlDatabase>();
     this.inPool = [];
     this.min = this.max = 0;
-
   }
 
   /**
@@ -45,8 +44,7 @@ export class SqlConnectionPool {
    * @param {number} [max=0] maximum connections which can be opened by this connection pool
    * @returns {Promise<void>}
    */
-  open(databaseFile: string, mode: number = SQL_OPEN_DEFAULT, min: number = 1, max: number = 0):
-      Promise<void> {
+  async open(databaseFile: string, mode: number = SQL_OPEN_DEFAULT, min: number = 1, max: number = 0): Promise<void> {
     return new Promise<void>(async(resolve, reject) => {
       try {
         await this.close();
@@ -76,7 +74,7 @@ export class SqlConnectionPool {
    *
    * @returns {Promise<void>}
    */
-  close(): Promise<void> {
+  async close(): Promise<void> {
     return new Promise<void>(async(resolve, reject) => {
       try {
         let promises: Promise<void>[] = [];
@@ -100,15 +98,16 @@ export class SqlConnectionPool {
    * @param {number} [timeout=0] The timeout to wait for a connection ( 0 is infinite )
    * @returns {Promise<SqlDatabase>}
    */
-  get(timeout: number = 0): Promise<SqlDatabase> {
+  async get(timeout: number = 0): Promise<SqlDatabase> {
     return new Promise<SqlDatabase>(async(resolve, reject) => {
       try {
-        let sqldb: SqlDatabase | undefined;
+        let sqldb: SqlDatabase|undefined;
         let cond = () => this.inPool.length > 0;
         if (this.max > 0 && !cond() && this.inUse.size >= this.max) {
           await wait(cond, timeout);
         }
         if (this.inPool.length > 0) {
+          // tslint:disable-next-line no-unnecessary-type-assertion
           sqldb = this.inPool.shift() as SqlDatabase;
           if (this.max > 0) {
             this.inUse.add(sqldb);
@@ -155,9 +154,7 @@ export class SqlConnectionPool {
 }
 
 // TODO: move this function or find a better one:
-function wait(
-    cond: () => boolean, timeout: number = 0,
-    intervall: number = 100): Promise<void> {
+async function wait(cond: () => boolean, timeout: number = 0, intervall: number = 100): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     let counter = 0;
     let timer = setInterval(() => {

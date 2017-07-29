@@ -63,7 +63,7 @@ export class SqlDatabase {
    * SQL_OPEN_READONLY | SQL_OPEN_READWRITE
    * @returns {Promise<void>}
    */
-  public open(databaseFile: string, mode?: number): Promise<void> {
+  public async open(databaseFile: string, mode?: number): Promise<void> {
     if (!!this.pool) {
       this.pool.release(this);
     }
@@ -84,13 +84,12 @@ export class SqlDatabase {
    *
    * @returns {Promise<void>}
    */
-  public close(): Promise<void> {
+  public async close(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       if (!!this.pool) {
         this.pool.release(this);
         resolve();
-      }
-      else if (!this.db) {
+      } else if (!this.db) {
         resolve();
       } else {
         let db = this.db;
@@ -112,9 +111,7 @@ export class SqlDatabase {
    *
    * @returns {boolean}
    */
-  public isOpen(): boolean {
-    return !!this.db;
-  }
+  public isOpen(): boolean { return !!this.db; }
 
   /**
    * Runs a SQL statement with the specified parameters
@@ -124,7 +121,7 @@ export class SqlDatabase {
    * provide multiple parameters as array
    * @returns {Promise<SqlRunResult>}
    */
-  public run(sql: string, params?: any): Promise<SqlRunResult> {
+  public async run(sql: string, params?: any): Promise<SqlRunResult> {
     return new Promise<SqlRunResult>((resolve, reject) => {
       // trace('run stmt=' + sql);
       // trace('>input: ' + JSON.stringify(params));
@@ -153,7 +150,7 @@ export class SqlDatabase {
    * provide multiple parameters as array
    * @returns {Promise<any>}
    */
-  public get(sql: string, params?: any): Promise<any> {
+  public async get(sql: string, params?: any): Promise<any> {
     return new Promise<any>((resolve, reject) => {
       // trace('get stmt=' + sql);
       // trace('>input: ' + JSON.stringify(params));
@@ -181,7 +178,7 @@ export class SqlDatabase {
    * provide multiple parameters as array
    * @returns {Promise<any[]>}
    */
-  public all(sql: string, params?: any): Promise<any[]> {
+  public async all(sql: string, params?: any): Promise<any[]> {
     return new Promise<any[]>((resolve, reject) => {
       // trace('all stmt=' + sql);
       // trace('>input: ' + JSON.stringify(params));
@@ -211,9 +208,7 @@ export class SqlDatabase {
    * @param {(err: Error, row: any) => void} [callback]
    * @returns {Promise<number>}
    */
-  public each(
-      sql: string, params?: any,
-      callback?: (err: Error, row: any) => void): Promise<number> {
+  public async each(sql: string, params?: any, callback?: (err: Error, row: any) => void): Promise<number> {
     return new Promise<number>((resolve, reject) => {
       if (!this.db) {
         reject(new Error('database connection not open'));
@@ -235,7 +230,7 @@ export class SqlDatabase {
    * @param {string} sql - The SQL statement
    * @returns {Promise<void>}
    */
-  public exec(sql: string): Promise<void> {
+  public async exec(sql: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       // trace('exec stmt=' + sql);
       if (!this.db) {
@@ -260,7 +255,7 @@ export class SqlDatabase {
    * provide multiple parameters as array
    * @returns {Promise<SqlStatement>}
    */
-  public prepare(sql: string, params?: any): Promise<SqlStatement> {
+  public async prepare(sql: string, params?: any): Promise<SqlStatement> {
     return new Promise<SqlStatement>((resolve, reject) => {
       if (!this.db) {
         reject(new Error('database connection not open'));
@@ -314,16 +309,11 @@ export class SqlDatabase {
    * @param {() => void} [callback]
    * @returns {void}
    */
-  public transactionalize<T>(callback: () => Promise<T>): Promise<T> {
+  public async transactionalize<T>(callback: () => Promise<T>): Promise<T> {
     return this.run('BEGIN IMMEDIATE TRANSACTION')
-      .then(callback)
-      .then(
-        (res) =>
-          this.run('COMMIT TRANSACTION').then(() => Promise.resolve(res)))
-      .catch(
-        (err) => this.run('ROLLBACK TRANSACTION')
-          .then(() => Promise.reject(err))
-      );
+        .then(callback)
+        .then(async(res) => this.run('COMMIT TRANSACTION').then(async() => Promise.resolve(res)))
+        .catch(async(err) => this.run('ROLLBACK TRANSACTION').then(async() => Promise.reject(err)));
   }
 
   // tslint:disable unified-signatures
@@ -404,9 +394,7 @@ export class SqlDatabase {
    * @param {number} newver
    * @returns {Promise<void>}
    */
-  public setUserVersion(newver: number): Promise<void> {
-    return this.exec(`PRAGMA user_version = ${newver}`);
-  }
+  public async setUserVersion(newver: number): Promise<void> { return this.exec(`PRAGMA user_version = ${newver}`); }
 
 
   /**
@@ -422,7 +410,7 @@ export class SqlDatabase {
   /*
   @internal
   */
-  public openByPool(pool: SqlConnectionPool, databaseFile: string, mode?: number): Promise<void> {
+  public async openByPool(pool: SqlConnectionPool, databaseFile: string, mode?: number): Promise<void> {
     this.pool = pool;
     return new Promise<void>((resolve, reject) => {
       let db = new Database(databaseFile, mode || SQL_OPEN_DEFAULT, (err) => {
@@ -440,7 +428,7 @@ export class SqlDatabase {
   /*
   @internal
   */
-  public closeByPool(): Promise<void> {
+  public async closeByPool(): Promise<void> {
     this.pool = undefined;
     return new Promise<void>((resolve, reject) => {
       if (!this.db) {
@@ -476,8 +464,5 @@ export class SqlDatabase {
   /*
   @internal
   */
-  public getPool(): SqlConnectionPool | undefined {
-    return this.pool;
-  }
-
+  public getPool(): SqlConnectionPool|undefined { return this.pool; }
 }
