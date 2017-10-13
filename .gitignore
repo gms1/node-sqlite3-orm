@@ -22,3 +22,5 @@ npm-debug.log*
 # temporary files:
 
 *:memory*
+test*.db
+

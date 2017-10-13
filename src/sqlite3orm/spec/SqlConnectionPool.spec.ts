@@ -8,7 +8,7 @@ describe('test SqlConnectionPool', () => {
   it('expect pool to be able to open a database', async(done) => {
     try {
       let pool = new SqlConnectionPool();
-      await pool.open(SQL_MEMORY_DB_SHARED, SQL_OPEN_DEFAULT, 1, 2);
+      await pool.open('testsqlite3.db', SQL_OPEN_DEFAULT, 1, 2);
 
       // getting first connection
       let sqldb1 = await pool.get(100);
