@@ -146,6 +146,25 @@ Started
 Finished in 0.02 seconds
 ```
 
+Generate Documentation
+
+```bash
+$ npm run typedoc
+```
+
+### Sample output
+
+```bash
+> sqlite3orm@0.0.18 typedoc C:\ae\node-sqlite3-orm
+> typedoc --options typedoc.json --out docs/typedoc/sqlite3orm --exclude '**/*.spec.ts' src/
+
+
+Using TypeScript 2.4.1 from C:\ae\node-sqlite3-orm\node_modules\typedoc\node_modules\typescript\lib
+
+
+Documentation generated at C:\ae\node-sqlite3-orm\docs\typedoc\sqlite3orm
+```
+
 Try to make changes to the tests to get familar with the code.
 
 ---
