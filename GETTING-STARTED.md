@@ -146,7 +146,7 @@ Started
 Finished in 0.02 seconds
 ```
 
-Generate Documentation
+## Generate Documentation
 
 ```bash
 $ npm run typedoc
