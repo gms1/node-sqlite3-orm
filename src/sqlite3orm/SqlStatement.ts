@@ -1,11 +1,9 @@
-
 import {Statement} from 'sqlite3';
 
 export interface SqlRunResult {
   lastID: number;
   changes: number;
 }
-
 
 /**
  * A thin wrapper for the 'Statement' class from 'node-sqlite3' using Promises instead of callbacks
@@ -63,7 +61,6 @@ export class SqlStatement {
     });
   }
 
-
   /**
    * Runs a prepared statement with the specified parameters
    *
@@ -84,7 +81,6 @@ export class SqlStatement {
       });
     });
   }
-
 
   /**
    * Runs a prepared statement with the specified parameters, fetching only the first row

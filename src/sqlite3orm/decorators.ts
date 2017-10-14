@@ -113,7 +113,6 @@ function decorateTableClass(target: Function, opts: TableOpts): void {
   schema().addTable(metaTable);
 }
 
-
 /**
  * Helper function for decorating a property and map it to a table field
  *
@@ -153,7 +152,6 @@ function decorateFieldProperty(
   return metaField;
 }
 
-
 /**
  * Helper function for decorating a property and map it to a foreign key field
  *
@@ -185,7 +183,6 @@ function decorateForeignKeyProperty(
   return metaField;
 }
 
-
 /**
  * Helper function for decorating a property and map it to an index field
  *
@@ -212,7 +209,6 @@ function decorateIndexProperty(
   metaField.setIndexField(indexName);
   return metaField;
 }
-
 
 /**
  * The class decorator for mapping a database table to a class
@@ -258,7 +254,6 @@ export function id(opts: FieldOpts = {}): (
   });
 }
 
-
 /**
  * The fk decorator for mapping a class property to be part of a foreign key
  * constraint
@@ -278,8 +273,6 @@ export function fk(
         target, key, constraintName, foreignTableName, foreignTableField);
   });
 }
-
-
 
 /**
  * The index decorator for mapping a class property to be part of an index

@@ -32,7 +32,6 @@ export class Schema {
     return Schema.schema;
   }
 
-
   /**
    * get a table definition
    *

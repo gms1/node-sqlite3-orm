@@ -14,7 +14,6 @@ export class Field {
    * @type {string}
    */
   public name: string;
-
   /**
    * The property key mapped to this field
    *
@@ -67,7 +66,6 @@ export class Field {
    * @type {Map<string, FieldReference>}
    */
   foreignKeys: Map<string, FieldReference>;
-
 
   /**
    * Set of all the indexes this field participates
@@ -149,7 +147,6 @@ export class Field {
     this.foreignKeys.set(constraintName, foreignTableField);
   }
 
-
   /**
    * Test if this field is part of the given index
    *
@@ -169,6 +166,5 @@ export class Field {
   public setIndexField(indexName: string): void {
     this.indexKeys.add(indexName);
   }
-
 
 }
