@@ -386,7 +386,7 @@ export class SqlDatabase {
     }
     return Promise.resolve(userVersion);
   }
- 
+
   /**
    * Set the 'user_version' in the database
    *
