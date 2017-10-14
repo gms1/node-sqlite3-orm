@@ -1,6 +1,5 @@
 import {SqlDatabase, SQL_OPEN_DEFAULT} from './SqlDatabase';
 
-
 /**
  * A simple connection pool
  *

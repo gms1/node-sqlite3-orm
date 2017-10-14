@@ -32,7 +32,6 @@ export class Table {
    */
   withoutRowId: boolean;
 
-
   /**
    * Flag to indicate if AUTOINCREMENT should be enabled for a table having a
    * single-column INTEGER primary key
@@ -49,7 +48,6 @@ export class Table {
    */
   fields: Field[] = [];
 
-
   /**
    * This contains the generated SQL-statements/fragments
    *
@@ -64,7 +62,6 @@ export class Table {
     return this._statementsText;
   }
 
-
   /**
    * The field mapped to the primary key; only set if the
    * AUTOINCREMENT feature can be used
@@ -74,7 +71,6 @@ export class Table {
   private _autoIncrementField: Field|undefined;
 
   get autoIncrementField(): Field|undefined { return this._autoIncrementField; }
-
 
   // map property keys to a field definition
   private mapPropToField: Map<string|symbol, Field>;
@@ -284,7 +280,6 @@ export class Table {
    */
   public getSelectOneStatement(): string { return this.statementsText.selectOne; }
 
-
   /**
    * Get a select-condition for a foreign key constraint
    *
@@ -382,6 +377,7 @@ export class Table {
       stmts.createTable += colNamesPK.join(', ');
       stmts.createTable += ')';
     }
+
     // add foreign key constraint definition:
     let i = foreignKeys.size - 1;
     foreignKeys.forEach((fk, fkName) => {
@@ -422,10 +418,8 @@ export class Table {
     }
     stmts.insertInto += '\n)';
 
-
     // --------------------------------------------------------------
     // generate simple where clause for selecting via primary key
-
     let wherePrimaryKeyClause = '\nWHERE\n  ';
     wherePrimaryKeyClause += colSelPK.join(' AND ');
 
@@ -442,7 +436,6 @@ export class Table {
 
     // --------------------------------------------------------------
     // generate SELECT-all statement
-
     const TABLEALIASPREFIX = TABLEALIAS.length ? TABLEALIAS + '.' : '';
 
     stmts.selectAll = 'SELECT\n  ';
@@ -470,12 +463,9 @@ export class Table {
       stmts.indexKeys.set(indexName, createIdxCols);
     });
 
-
     return stmts;
   }
 }
-
-
 
 /**
  * helper class holding sql-statements/fragments
@@ -500,7 +490,6 @@ class SqlStatementText {
     this.indexKeys = new Map<string, string>();
   }
 }
-
 
 /**
  * helper class holding a foreign key definition
