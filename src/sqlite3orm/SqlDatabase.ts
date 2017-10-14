@@ -43,7 +43,6 @@ export class SqlDatabase {
   private db?: Database;
   private pool?: SqlConnectionPool;
 
-
   /**
    * Creates an instance of SqlDatabase.
    *
@@ -302,7 +301,6 @@ export class SqlDatabase {
     return this.db.parallelize(callback);
   }
 
-
   /**
    * Run callback inside a database transaction
    *
@@ -388,6 +386,7 @@ export class SqlDatabase {
     }
     return Promise.resolve(userVersion);
   }
+
   /**
    * Set the 'user_version' in the database
    *
@@ -395,7 +394,6 @@ export class SqlDatabase {
    * @returns {Promise<void>}
    */
   public async setUserVersion(newver: number): Promise<void> { return this.exec(`PRAGMA user_version = ${newver}`); }
-
 
   /**
    * Set the execution mode to verbose to produce long stack traces. There is no way to reset this.
@@ -405,7 +403,6 @@ export class SqlDatabase {
    * @returns {Promise<void>}
    */
   public static verbose(): void { sqlverbose(); }
-
 
   /*
   @internal
@@ -423,7 +420,6 @@ export class SqlDatabase {
       });
     });
   }
-
 
   /*
   @internal

@@ -5,7 +5,6 @@ import {Field} from './Field';
 import {FieldReference} from './FieldReference';
 import {PropertyType} from './PropertyType';
 
-
 /**
  *
  *
@@ -17,7 +16,6 @@ export class BaseDAO<T extends Object> {
   private type: {new (): T};
   private table: Table;
   private sqldb: SqlDatabase;
-
 
   /**
    * Creates an instance of BaseDAO.
@@ -63,6 +61,7 @@ export class BaseDAO<T extends Object> {
       resolve(t);
     });
   }
+
   /**
    * update
    *
@@ -84,6 +83,7 @@ export class BaseDAO<T extends Object> {
       resolve(t);
     });
   }
+
   /**
    * delete
    *
@@ -105,6 +105,7 @@ export class BaseDAO<T extends Object> {
       resolve();
     });
   }
+
   /**
    * select using primary key
    *
@@ -123,6 +124,7 @@ export class BaseDAO<T extends Object> {
       resolve(t);
     });
   }
+
   /**
    * perform:
    * select T.<col1>,.. FROM <table> T
@@ -148,6 +150,7 @@ export class BaseDAO<T extends Object> {
       }
     });
   }
+
   /**
    * perform:
    * select T.<col1>,.. FROM <table> T
@@ -173,7 +176,6 @@ export class BaseDAO<T extends Object> {
         reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
         return;
       }
-
     });
   }
 
@@ -215,7 +217,6 @@ export class BaseDAO<T extends Object> {
     });
   }
 
-
   protected bindAllInputParams(t: T): Object {
     let hostParams: Object = {};
     this.table.fields.forEach((field) => this.setHostParam(hostParams, field, t));
@@ -242,7 +243,6 @@ export class BaseDAO<T extends Object> {
     return hostParams;
   }
 
-
   protected bindForeignParams<F extends Object>(
       foreignDAO: BaseDAO<F>, fkName: string, foreignObject: F, more: Object = {}): Object {
     let hostParams: Object = Object.assign({}, more);
@@ -263,7 +263,6 @@ export class BaseDAO<T extends Object> {
     this.table.fields.forEach((field) => this.setProperty(t, field, row));
     return t;
   }
-
 
   protected setHostParam(hostParams: any, field: Field, t: T): void {
     let value = Reflect.get(t, field.propertyKey);
@@ -290,8 +289,6 @@ export class BaseDAO<T extends Object> {
       hostParams[field.getHostParameterName()] = value;
     }
   }
-
-
 
   protected setProperty(t: T, field: Field, row: any): void {
     let value = row[field.name];
