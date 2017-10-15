@@ -41,11 +41,11 @@ export class BaseDAO<T extends Object> {
   public async insert(t: T): Promise<T> {
     return new Promise<T>(async(resolve, reject) => {
       try {
-        let res: any;
         if (!this.table.autoIncrementField) {
-          res = await this.sqldb.run(this.table.getInsertIntoStatement(), this.bindAllInputParams(t));
+          await this.sqldb.run(this.table.getInsertIntoStatement(), this.bindAllInputParams(t));
         } else {
-          res = await this.sqldb.run(this.table.getInsertIntoStatement(), this.bindNonPrimaryKeyInputParams(t));
+          let res: any =
+              await this.sqldb.run(this.table.getInsertIntoStatement(), this.bindNonPrimaryKeyInputParams(t));
           // tslint:disable-next-line: triple-equals
           if (res.lastID == undefined) {
             reject(new Error('AUTOINCREMENT failed, \'lastID\' is undefined or null'));
