@@ -1,4 +1,4 @@
-import {SqlDatabase, SQL_MEMORY_DB_SHARED, SQL_OPEN_DEFAULT} from '../SqlDatabase';
+import {SqlDatabase, SQL_OPEN_DEFAULT} from '../SqlDatabase';
 import {SqlConnectionPool} from '../SqlConnectionPool';
 
 describe('test SqlConnectionPool', () => {
@@ -26,7 +26,6 @@ describe('test SqlConnectionPool', () => {
         sqldb3 = await pool.get(100);
         fail('got 3 connection from pool with max 2 connections');
       } catch (ignore) {
-
       }
       expect(sqldb3).toBeUndefined();
 
