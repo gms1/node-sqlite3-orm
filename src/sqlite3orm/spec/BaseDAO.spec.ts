@@ -28,8 +28,7 @@ class Contact {
   @field({name: 'contact_mobile', dbtype: 'TEXT'})
   mobile: string;
 
-  @fk(Contact.userConstraint, USERS_TABLE, 'user_id')
-  @field({name: 'user_id', dbtype: 'INTEGER NOT NULL'})
+  @fk(Contact.userConstraint, USERS_TABLE, 'user_id') @field({name: 'user_id', dbtype: 'INTEGER NOT NULL'})
   userId: number;
 }
 
@@ -55,43 +54,40 @@ describe('test BaseDAO', () => {
   });
 
   // ---------------------------------------------
-  it('expect basic functionality (insert/update/delete/selectOne/selectAll) to work',
-     async(done) => {
-       try {
-         let user1: User = new User();
-         let user2: User = new User();
-         let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
-         user1.userId = 1;
-         user1.userLoginName = 'login1/1';
-         await userDao.insert(user1);
-         user2.userId = user1.userId;
-         user2.userLoginName = 'login1/2';
-         await userDao.update(user2);
-         await userDao.select(user1);
-         expect(user1.userId)
-             .toBe(user2.userId, 'userId does not match after first update');
-         expect(user1.userLoginName)
-             .toBe(
-                 user2.userLoginName,
-                 'userLoginName does not match after first update');
-         let allUsers1 = await userDao.selectAll();
-         expect(allUsers1.length).toBe(1);
-         user2 = allUsers1[0];
-         expect(user1.userId)
-             .toBe(user2.userId, 'userId does not match after select all');
-         expect(user1.userLoginName)
-             .toBe(
-                 user2.userLoginName,
-                 'userLoginName does not match after select all');
+  it('expect basic functionality (insert/update/delete/select/selectAll) to work', async(done) => {
+    try {
+      let user1: User = new User();
+      let user2: User = new User();
+      let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
+      user1.userId = 1;
+      user1.userLoginName = 'login1/1';
+      await userDao.insert(user1);
+      user2.userId = user1.userId;
+      user2.userLoginName = 'login1/2';
+      await userDao.update(user2);
 
-         await userDao.delete(user1);
-         let allUsers2 = await userDao.selectAll();
-         expect(allUsers1.length).toBe(allUsers2.length + 1);
-       } catch (err) {
-         fail(err);
-       }
-       done();
-     });
+      await userDao.select(user1);
+      expect(user1.userId).toBe(user2.userId, 'userId does not match after first update');
+      expect(user1.userLoginName).toBe(user2.userLoginName, 'userLoginName does not match after first update');
+
+      user1 = await userDao.selectById({userId: 1});
+      expect(user1.userId).toBe(user2.userId, 'userId does not match using selectById');
+      expect(user1.userLoginName).toBe(user2.userLoginName, 'userLoginName does not match using selectById');
+
+      let allUsers1 = await userDao.selectAll();
+      expect(allUsers1.length).toBe(1);
+      user2 = allUsers1[0];
+      expect(user1.userId).toBe(user2.userId, 'userId does not match after select all');
+      expect(user1.userLoginName).toBe(user2.userLoginName, 'userLoginName does not match after select all');
+
+      await userDao.delete(user1);
+      let allUsers2 = await userDao.selectAll();
+      expect(allUsers1.length).toBe(allUsers2.length + 1);
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
 
   // ---------------------------------------------
   it('expect foreign key select to work', async(done) => {
@@ -129,24 +125,20 @@ describe('test BaseDAO', () => {
       expect(contact.contactId).toBe(3, 'autoIncrement id not updated');
 
       user.userId = 1;
-      let contactsUser1 =
-          await contactDao.selectAllOf(Contact.userConstraint, User, user);
+      let contactsUser1 = await contactDao.selectAllOf(Contact.userConstraint, User, user);
       expect(contactsUser1.length).toBe(2);
 
       user.userId = 2;
-      let contactsUser2 =
-          await contactDao.selectAllOf(Contact.userConstraint, User, user);
+      let contactsUser2 = await contactDao.selectAllOf(Contact.userConstraint, User, user);
       expect(contactsUser2.length).toBe(1);
 
       user.userId = 3;
-      let contactsUser3 =
-          await contactDao.selectAllOf(Contact.userConstraint, User, user);
+      let contactsUser3 = await contactDao.selectAllOf(Contact.userConstraint, User, user);
       expect(contactsUser3.length).toBe(0);
 
       user.userId = 1;
       let contactsUser1$1 = await contactDao.selectAllOf(
-          Contact.userConstraint, User, user,
-          ' AND contact_email=:contact_email',
+          Contact.userConstraint, User, user, ' AND contact_email=:contact_email',
           {':contact_email': 'user1@test2.net'});
       expect(contactsUser1$1.length).toBe(1);
 

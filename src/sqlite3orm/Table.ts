@@ -254,17 +254,33 @@ export class Table {
 
   /**
    * Get 'UPDATE SET'-statement
+   * @deprecated use getUpdateByIdStatement instead
    *
    * @returns {string}
    */
-  public getUpdateSetStatement(): string { return this.statementsText.updateSet; }
+  public getUpdateSetStatement(): string { return this.statementsText.updateById; }
+
+  /**
+   * Get 'UPDATE BY PRIMARY KEY' statement
+   *
+   * @returns {string}
+   */
+  public getUpdateByIdStatement(): string { return this.statementsText.updateById; }
 
   /**
    * Get 'DELETE FROM'-statement
+   * @deprecated use getDeleteByIdStatement instead
    *
    * @returns {string}
    */
-  public getDeleteFromStatement(): string { return this.statementsText.deleteFrom; }
+  public getDeleteFromStatement(): string { return this.statementsText.deleteById; }
+
+  /**
+   * Get 'DELETE BY PRIMARY KE'-statement
+   *
+   * @returns {string}
+   */
+  public getDeleteByIdStatement(): string { return this.statementsText.deleteById; }
 
   /**
    * Get 'SELECT' all-statement
@@ -275,10 +291,18 @@ export class Table {
 
   /**
    * Get 'SELECT' one-statement
+   * @deprecated use getSelectByIdStatement instead
    *
    * @returns {string}
    */
-  public getSelectOneStatement(): string { return this.statementsText.selectOne; }
+  public getSelectOneStatement(): string { return this.statementsText.selectById; }
+
+  /**
+   * Get 'SELECT BY PRIMARY KEY'-statement
+   *
+   * @returns {string}
+   */
+  public getSelectByIdStatement(): string { return this.statementsText.selectById; }
 
   /**
    * Get a select-condition for a foreign key constraint
@@ -425,14 +449,14 @@ export class Table {
 
     // --------------------------------------------------------------
     // generate UPDATE SET statement
-    stmts.updateSet = `UPDATE ${this.name} SET\n  `;
-    stmts.updateSet += colSetsNoPK.join(',\n  ');
-    stmts.updateSet += wherePrimaryKeyClause;
+    stmts.updateById = `UPDATE ${this.name} SET\n  `;
+    stmts.updateById += colSetsNoPK.join(',\n  ');
+    stmts.updateById += wherePrimaryKeyClause;
 
     // --------------------------------------------------------------
     // generate DELETE FROM statement
-    stmts.deleteFrom = `DELETE FROM ${this.name}\n  `;
-    stmts.deleteFrom += wherePrimaryKeyClause;
+    stmts.deleteById = `DELETE FROM ${this.name}\n  `;
+    stmts.deleteById += wherePrimaryKeyClause;
 
     // --------------------------------------------------------------
     // generate SELECT-all statement
@@ -444,9 +468,9 @@ export class Table {
 
     // --------------------------------------------------------------
     // generate SELECT-one statement
-    stmts.selectOne = stmts.selectAll;
-    stmts.selectOne += '\nWHERE\n  ';
-    stmts.selectOne += `${TABLEALIASPREFIX}` + colSelPK.join(` AND ${TABLEALIASPREFIX}`);
+    stmts.selectById = stmts.selectAll;
+    stmts.selectById += '\nWHERE\n  ';
+    stmts.selectById += `${TABLEALIASPREFIX}` + colSelPK.join(` AND ${TABLEALIASPREFIX}`);
 
     // --------------------------------------------------------------
     // generate SELECT-fk condition
@@ -475,10 +499,10 @@ export class Table {
 class SqlStatementText {
   createTable: string;
   insertInto: string;
-  updateSet: string;
-  deleteFrom: string;
+  updateById: string;
+  deleteById: string;
   selectAll: string;
-  selectOne: string;
+  selectById: string;
 
   foreignKeySelects: Map<string, string>;
   foreignKeyFields: Map<string, Field[]>;
