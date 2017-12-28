@@ -43,7 +43,7 @@
     "sqlite3": "^3.1.13"
   },
   "devDependencies": {
-    "@types/jasmine": "^2.8.2",
+    "@types/jasmine": "^2.8.3",
     "@types/node": "^8.5.2",
     "@types/reflect-metadata": "^0.0.5",
     "@types/sqlite3": "^3.1.1",
@@ -53,7 +53,7 @@
     "gulp-jasmine": "^2.4.2",
     "gulp-json-transform": "^0.4.5",
     "gulp-options": "^1.1.1",
-    "gulp-sourcemaps": "^2.6.1",
+    "gulp-sourcemaps": "^2.6.2",
     "gulp-tslint": "^8.1.2",
     "gulp-typescript": "^3.2.3",
     "gulp-watch": "^4.3.11",
