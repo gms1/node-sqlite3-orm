@@ -44,7 +44,7 @@
   },
   "devDependencies": {
     "@types/jasmine": "^2.8.3",
-    "@types/node": "^8.5.2",
+    "@types/node": "^9.3.0",
     "@types/sqlite3": "^3.1.1",
     "del": "^3.0.0",
     "gulp": "^3.9.1",
