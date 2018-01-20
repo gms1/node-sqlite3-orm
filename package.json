@@ -39,11 +39,11 @@
     "release:publish": "npm run typedoc && cd dist && npm --access public publish"
   },
   "dependencies": {
-    "reflect-metadata": "^0.1.10",
+    "reflect-metadata": "^0.1.12",
     "sqlite3": "^3.1.13"
   },
   "devDependencies": {
-    "@types/jasmine": "^2.8.3",
+    "@types/jasmine": "^2.8.4",
     "@types/node": "^9.3.0",
     "@types/sqlite3": "^3.1.1",
     "del": "^3.0.0",
@@ -56,7 +56,7 @@
     "gulp-tslint": "^8.1.2",
     "gulp-typescript": "^4.0.0-alpha.1",
     "gulp-watch": "^5.0.0",
-    "jasmine": "^2.8.0",
+    "jasmine": "^2.9.0",
     "jasmine-spec-reporter": "^4.2.1",
     "merge-stream": "^1.0.1",
     "run-sequence": "^2.2.1",
