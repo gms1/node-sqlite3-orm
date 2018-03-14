@@ -35,43 +35,43 @@ export class BaseDAO<T extends Object> {
   /**
    * insert
    *
-   * @param {T} t
+   * @param {T} model
    * @returns {Promise<T>}
    */
-  public async insert(t: T): Promise<T> {
+  public async insert(model: T): Promise<T> {
     return new Promise<T>(async(resolve, reject) => {
       try {
         if (!this.table.autoIncrementField) {
-          await this.sqldb.run(this.table.getInsertIntoStatement(), this.bindAllInputParams(t));
+          await this.sqldb.run(this.table.getInsertIntoStatement(), this.bindAllInputParams(model));
         } else {
           let res: any =
-              await this.sqldb.run(this.table.getInsertIntoStatement(), this.bindNonPrimaryKeyInputParams(t));
+              await this.sqldb.run(this.table.getInsertIntoStatement(), this.bindNonPrimaryKeyInputParams(model));
           // tslint:disable-next-line: triple-equals
           if (res.lastID == undefined) {
             reject(new Error('AUTOINCREMENT failed, \'lastID\' is undefined or null'));
             return;
           }
           res[this.table.autoIncrementField.name] = res.lastID;
-          this.setProperty(t, this.table.autoIncrementField, res);
+          this.setProperty(model, this.table.autoIncrementField, res);
         }
       } catch (e) {
         reject(new Error(`insert into '${this.table.name}' failed: ${e.message}`));
         return;
       }
-      resolve(t);
+      resolve(model);
     });
   }
 
   /**
    * update
    *
-   * @param {T} t
+   * @param {T} model
    * @returns {Promise<T>}
    */
-  public async update(t: T): Promise<T> {
+  public async update(model: T): Promise<T> {
     return new Promise<T>(async(resolve, reject) => {
       try {
-        let res = await this.sqldb.run(this.table.getUpdateSetStatement(), this.bindAllInputParams(t));
+        let res = await this.sqldb.run(this.table.getUpdateByIdStatement(), this.bindAllInputParams(model));
         if (!res.changes) {
           reject(new Error(`update '${this.table.name}' failed: nothing changed`));
           return;
@@ -80,20 +80,42 @@ export class BaseDAO<T extends Object> {
         reject(new Error(`update '${this.table.name}' failed: ${e.message}`));
         return;
       }
-      resolve(t);
+      resolve(model);
     });
   }
 
   /**
-   * delete
+   * delete using primary key
    *
-   * @param {T} t
+   * @param {T} model
    * @returns {Promise<void>}
    */
-  public async delete (t: T): Promise<void> {
+  public async delete (model: T): Promise<void> {
     return new Promise<void>(async(resolve, reject) => {
       try {
-        let res = await this.sqldb.run(this.table.getDeleteFromStatement(), this.bindPrimaryKeyInputParams(t));
+        let res = await this.sqldb.run(this.table.getDeleteByIdStatement(), this.bindPrimaryKeyInputParams(model));
+        if (!res.changes) {
+          reject(new Error(`delete from '${this.table.name}' failed: nothing changed`));
+          return;
+        }
+      } catch (e) {
+        reject(new Error(`delete from '${this.table.name}' failed: ${e.message}`));
+        return;
+      }
+      resolve();
+    });
+  }
+
+  /**
+   * delete using primary key
+   *
+   * @param {object} input
+   * @returns {Promise<void>}
+   */
+  public async deleteById(input: object): Promise<void> {
+    return new Promise<void>(async(resolve, reject) => {
+      try {
+        let res = await this.sqldb.run(this.table.getDeleteByIdStatement(), this.bindPrimaryKeyInputParams(input as T));
         if (!res.changes) {
           reject(new Error(`delete from '${this.table.name}' failed: nothing changed`));
           return;
@@ -109,19 +131,40 @@ export class BaseDAO<T extends Object> {
   /**
    * select using primary key
    *
-   * @param {T} t
+   * @param {T} model
    * @returns {Promise<T>}
    */
-  public async select(t: T): Promise<T> {
+  public async select(model: T): Promise<T> {
     return new Promise<T>(async(resolve, reject) => {
       try {
-        let row = await this.sqldb.get(this.table.getSelectOneStatement(), this.bindPrimaryKeyInputParams(t));
-        t = this.readResultRow(t, row);
+        let row = await this.sqldb.get(this.table.getSelectByIdStatement(), this.bindPrimaryKeyInputParams(model));
+        model = this.readResultRow(model, row);
       } catch (e) {
         reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
         return;
       }
-      resolve(t);
+      resolve(model);
+    });
+  }
+
+
+  /**
+   * select using primary key
+   *
+   * @param {object} input
+   * @returns {Promise<T>}
+   */
+  public async selectById(input: object): Promise<T> {
+    return new Promise<T>(async(resolve, reject) => {
+      let output: T;
+      try {
+        let row = await this.sqldb.get(this.table.getSelectByIdStatement(), this.bindPrimaryKeyInputParams(input as T));
+        output = this.readResultRow(new this.type(), row);
+      } catch (e) {
+        reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
+        return;
+      }
+      resolve(output);
     });
   }
 
@@ -155,12 +198,12 @@ export class BaseDAO<T extends Object> {
    * perform:
    * select T.<col1>,.. FROM <table> T
    *
-   * @param {(err: Error, t: T) => void} callback - The callback called for each row
+   * @param {(err: Error, model: T) => void} callback - The callback called for each row
    * @param {string} [sql] - An optional sql-text which will be added to the select-statement
    * @param {Object} [params] - An optional object with additional host parameter
    * @returns {Promise<number>}
    */
-  public async selectEach(callback: (err: Error, t: T) => void, sql?: string, params?: Object): Promise<number> {
+  public async selectEach(callback: (err: Error, model: T) => void, sql?: string, params?: Object): Promise<number> {
     return new Promise<number>(async(resolve, reject) => {
       try {
         let stmt = this.table.getSelectAllStatement();
@@ -217,27 +260,27 @@ export class BaseDAO<T extends Object> {
     });
   }
 
-  protected bindAllInputParams(t: T): Object {
+  protected bindAllInputParams(model: T): Object {
     let hostParams: Object = {};
-    this.table.fields.forEach((field) => this.setHostParam(hostParams, field, t));
+    this.table.fields.forEach((field) => this.setHostParam(hostParams, field, model));
     return hostParams;
   }
 
-  protected bindPrimaryKeyInputParams(t: T): Object {
+  protected bindPrimaryKeyInputParams(model: T): Object {
     let hostParams: Object = {};
     this.table.fields.forEach((field) => {
       if (field.isIdentity) {
-        this.setHostParam(hostParams, field, t);
+        this.setHostParam(hostParams, field, model);
       }
     });
     return hostParams;
   }
 
-  protected bindNonPrimaryKeyInputParams(t: T): Object {
+  protected bindNonPrimaryKeyInputParams(model: T): Object {
     let hostParams: Object = {};
     this.table.fields.forEach((field) => {
       if (!field.isIdentity) {
-        this.setHostParam(hostParams, field, t);
+        this.setHostParam(hostParams, field, model);
       }
     });
     return hostParams;
@@ -259,13 +302,13 @@ export class BaseDAO<T extends Object> {
     return hostParams;
   }
 
-  protected readResultRow(t: T, row: any): T {
-    this.table.fields.forEach((field) => this.setProperty(t, field, row));
-    return t;
+  protected readResultRow(model: T, row: any): T {
+    this.table.fields.forEach((field) => this.setProperty(model, field, row));
+    return model;
   }
 
-  protected setHostParam(hostParams: any, field: Field, t: T): void {
-    let value = Reflect.get(t, field.propertyKey);
+  protected setHostParam(hostParams: any, field: Field, model: T): void {
+    let value = Reflect.get(model, field.propertyKey);
     // tslint:disable-next-line: triple-equals
     if (value == undefined) {
       hostParams[field.getHostParameterName()] = value;
@@ -290,11 +333,11 @@ export class BaseDAO<T extends Object> {
     }
   }
 
-  protected setProperty(t: T, field: Field, row: any): void {
+  protected setProperty(model: T, field: Field, row: any): void {
     let value = row[field.name];
     // tslint:disable-next-line: triple-equals
     if (value == undefined) {
-      Reflect.set(t, field.propertyKey, undefined);
+      Reflect.set(model, field.propertyKey, undefined);
       return;
     }
     if (field.isJson) {
@@ -347,7 +390,7 @@ export class BaseDAO<T extends Object> {
       }
     }
     // console.log(`setting ${field.propertyKey} to ${value}`);
-    Reflect.set(t, field.propertyKey, value);
+    Reflect.set(model, field.propertyKey, value);
   }
 
   /**
