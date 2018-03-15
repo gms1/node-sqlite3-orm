@@ -40,7 +40,7 @@
   },
   "dependencies": {
     "reflect-metadata": "^0.1.12",
-    "sqlite3": "^3.1.13"
+    "sqlite3": "^4.0.0"
   },
   "devDependencies": {
     "@types/jasmine": "^2.8.6",
