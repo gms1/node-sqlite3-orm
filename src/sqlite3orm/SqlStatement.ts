@@ -128,7 +128,7 @@ export class SqlStatement {
    */
   public async each(params?: any, callback?: (err: Error, row: any) => void): Promise<number> {
     return new Promise<number>((resolve, reject) => {
-      this.stmt.each(params, callback, (err, count) => {
+      this.stmt.each(params, callback, (err: Error, count: number) => {
         if (err) {
           reject(err);
         } else {

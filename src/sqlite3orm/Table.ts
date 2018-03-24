@@ -15,7 +15,7 @@ export class Table {
    *
    * @type {string}
    */
-  name: string;
+  name!: string;
 
   /**
    * The class name
@@ -497,12 +497,12 @@ export class Table {
  * @class SqlStatementText
  */
 class SqlStatementText {
-  createTable: string;
-  insertInto: string;
-  updateById: string;
-  deleteById: string;
-  selectAll: string;
-  selectById: string;
+  createTable!: string;
+  insertInto!: string;
+  updateById!: string;
+  deleteById!: string;
+  selectAll!: string;
+  selectById!: string;
 
   foreignKeySelects: Map<string, string>;
   foreignKeyFields: Map<string, Field[]>;

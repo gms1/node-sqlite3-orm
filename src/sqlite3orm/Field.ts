@@ -13,7 +13,7 @@ export class Field {
    *
    * @type {string}
    */
-  public name: string;
+  public name!: string;
   /**
    * The property key mapped to this field
    *

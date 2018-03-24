@@ -13,6 +13,11 @@ class User {
 
   @field({name: 'user_loginname', dbtype: 'TEXT NOT NULL'})
   userLoginName: string;
+
+  constructor() {
+    this.userId = 0;
+    this.userLoginName = 'noname';
+  }
 }
 
 @table({name: CONTACTS_TABLE, autoIncrement: true})
@@ -30,6 +35,13 @@ class Contact {
 
   @fk(Contact.userConstraint, USERS_TABLE, 'user_id') @field({name: 'user_id', dbtype: 'INTEGER NOT NULL'})
   userId: number;
+
+  constructor() {
+    this.contactId = 0;
+    this.emailAddress = 'noemail';
+    this.mobile = 'nomobile';
+    this.userId = 0;
+  }
 }
 
 // ---------------------------------------------
