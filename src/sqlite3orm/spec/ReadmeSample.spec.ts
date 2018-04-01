@@ -16,6 +16,11 @@ class User {
 
   @field({name: 'user_json', dbtype: 'TEXT', isJson: true})
   userJsonData: any;
+
+  constructor() {
+    this.userId = 0;
+    this.userLoginName = 'noname';
+  }
 }
 
 @table({name: 'CONTACTS', autoIncrement: true})
@@ -33,6 +38,13 @@ class Contact {
   @fk('fk_user_contacts', 'USERS', 'user_id')
   @index('idx_contacts_user')
   userId: number;
+
+  constructor() {
+    this.contactId = 0;
+    this.emailAddress = 'noemail';
+    this.mobile = 'nomobile';
+    this.userId = 0;
+  }
 }
 
 

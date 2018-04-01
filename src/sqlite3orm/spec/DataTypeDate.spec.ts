@@ -12,10 +12,12 @@ class DataTypeDate {
   id: number;
 
   @field({name: 'my_date_text', dbtype: 'TEXT'})
-  myDate2Text: Date;
+  myDate2Text?: Date;
 
   @field({name: 'my_date_int', dbtype: 'INTEGER'})
-  myDate2Int: Date;
+  myDate2Int?: Date;
+
+  constructor() { this.id = 0; }
 }
 
 

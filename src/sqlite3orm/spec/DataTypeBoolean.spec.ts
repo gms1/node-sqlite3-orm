@@ -11,13 +11,15 @@ class DataTypeBoolean {
   id: number;
 
   @field({name: 'my_bool_text', dbtype: 'TEXT'})
-  myBool2Text: boolean;
+  myBool2Text?: boolean;
 
   @field({name: 'my_bool_int', dbtype: 'INTEGER'})
-  myBool2Int: boolean;
+  myBool2Int?: boolean;
 
   @field({name: 'my_bool_real', dbtype: 'REAL'})
-  myBool2Real: boolean;
+  myBool2Real?: boolean;
+
+  constructor() { this.id = 0; }
 }
 
 

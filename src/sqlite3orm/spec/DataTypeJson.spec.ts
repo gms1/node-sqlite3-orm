@@ -18,7 +18,9 @@ class DataTypeJson {
   id: number;
 
   @field({name: 'my_json_text', dbtype: 'TEXT', isJson: true})
-  myJasonData: JsonData;
+  myJasonData?: JsonData;
+
+  constructor() { this.id = 0; }
 }
 
 
@@ -53,6 +55,7 @@ describe('test Json data', () => {
       let model2: DataTypeJson = await dao.select(model);
       expect(model2.id).toBe(model.id);
       expect(model2.myJasonData).toBeDefined();
+      if (!model2.myJasonData) { throw new Error('this should not happen'); }
       expect(model2.myJasonData.notes).toBe(model.myJasonData.notes);
       expect(model2.myJasonData.scores.length).toBe(model2.myJasonData.scores.length);
       expect(model2.myJasonData.scores[0]).toBe(model2.myJasonData.scores[0]);

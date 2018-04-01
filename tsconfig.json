@@ -17,6 +17,7 @@
     "preserveConstEnums": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
+    "strict": true,
     "typeRoots": [
       "node_modules/@types"
     ],

@@ -213,7 +213,7 @@ export class SqlDatabase {
         reject(new Error('database connection not open'));
         return;
       }
-      this.db.each(sql, params, callback, (err, count) => {
+      this.db.each(sql, params, callback, (err: Error, count: number) => {
         if (err) {
           reject(err);
         } else {

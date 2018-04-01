@@ -16,7 +16,7 @@ export class Schema {
    */
   public static schema: Schema;
 
-  private mapNameToTable: Map<string, Table>;
+  private mapNameToTable!: Map<string, Table>;
 
   /**
    * Creates an instance of Schema.
