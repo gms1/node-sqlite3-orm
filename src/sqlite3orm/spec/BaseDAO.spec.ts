@@ -50,7 +50,7 @@ describe('test BaseDAO', () => {
   let sqldb: SqlDatabase;
 
   // ---------------------------------------------
-  beforeAll(async(done) => {
+  beforeEach(async(done) => {
     try {
       sqldb = new SqlDatabase();
       await sqldb.open(SQL_MEMORY_DB_PRIVATE);
