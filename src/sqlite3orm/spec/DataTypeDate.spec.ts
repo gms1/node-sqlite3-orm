@@ -17,7 +17,9 @@ class DataTypeDate {
   @field({name: 'my_date_int', dbtype: 'INTEGER'})
   myDate2Int?: Date;
 
-  constructor() { this.id = 0; }
+  constructor() {
+    this.id = 0;
+  }
 }
 
 
@@ -27,7 +29,7 @@ describe('test Date type', () => {
   let dao: BaseDAO<DataTypeDate>;
   let model: DataTypeDate = new DataTypeDate();
   // ---------------------------------------------
-  beforeAll(async(done) => {
+  beforeEach(async(done) => {
     try {
       sqldb = new SqlDatabase();
       await sqldb.open(SQL_MEMORY_DB_PRIVATE);
@@ -40,8 +42,7 @@ describe('test Date type', () => {
     done();
   });
 
-  it('expect writing Date properties to the database to succeed', async(
-                                                                      done) => {
+  it('expect writing Date properties to the database to succeed', async(done) => {
     try {
       let sqlstmt = await sqldb.prepare(`SELECT
               id, my_date_text, my_date_int
@@ -56,13 +57,8 @@ describe('test Date type', () => {
       await dao.insert(model);
       row = await sqlstmt.get({':id': model.id});
       expect(row.id).toBe(model.id);
-      expect(row.my_date_text)
-          .toBe(
-              model.myDate2Text.toISOString(), 'date wrongly written to text');
-      expect(row.my_date_int)
-          .toBe(
-              Math.floor(model.myDate2Text.getTime() / 1000),
-              'date wrongly written to integer');
+      expect(row.my_date_text).toBe(model.myDate2Text.toISOString(), 'date wrongly written to text');
+      expect(row.my_date_int).toBe(Math.floor(model.myDate2Text.getTime() / 1000), 'date wrongly written to integer');
 
     } catch (err) {
       fail(err);
@@ -72,8 +68,7 @@ describe('test Date type', () => {
   });
 
 
-  it('expect reading Date properties from database to succeed', async(
-                                                                       done) => {
+  it('expect reading Date properties from database to succeed', async(done) => {
     try {
       let sqlstmt = await sqldb.prepare(`INSERT INTO ${DATATYPE_DATE_TABLE}
               (id, my_date_text, my_date_int)
@@ -89,11 +84,9 @@ describe('test Date type', () => {
       });
       model = await dao.select(model);
       expect(model.myDate2Text instanceof Date)
-          .toBeTruthy(
-              `record ${model.id}: myDate2Text should be an instance of Date`);
+          .toBeTruthy(`record ${model.id}: myDate2Text should be an instance of Date`);
       expect(model.myDate2Int instanceof Date)
-          .toBeTruthy(
-              `record ${model.id}: myDate2Int should be an instance of Date`);
+          .toBeTruthy(`record ${model.id}: myDate2Int should be an instance of Date`);
 
     } catch (err) {
       fail(err);
