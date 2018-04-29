@@ -29,7 +29,7 @@ export class SqlConnectionPool {
     this.inUse = new Set<SqlDatabase>();
     this.inPool = [];
     this.min = this.max = 0;
-  }
+    }
 
   /**
    * Open a database connection pool
@@ -52,10 +52,10 @@ export class SqlConnectionPool {
         this.min = min;
         this.max = max;
 
-        let promises: Promise<void>[] = [];
+        const promises: Promise<void>[] = [];
 
         for (let i = 0; i < this.min; i++) {
-          let sqldb = new SqlDatabase();
+          const sqldb = new SqlDatabase();
           this.inPool.push(sqldb);
           promises.push(sqldb.openByPool(this, this.databaseFile, this.mode));
         }
@@ -66,7 +66,7 @@ export class SqlConnectionPool {
         reject(err);
       }
     });
-  }
+    }
 
   /**
    * Close the database connection pool
@@ -76,10 +76,14 @@ export class SqlConnectionPool {
   async close(): Promise<void> {
     return new Promise<void>(async(resolve, reject) => {
       try {
-        let promises: Promise<void>[] = [];
-        this.inPool.forEach((value) => { promises.push(value.closeByPool()); });
+        const promises: Promise<void>[] = [];
+        this.inPool.forEach((value) => {
+          promises.push(value.closeByPool());
+        });
         this.inPool.length = 0;
-        this.inUse.forEach((value) => { promises.push(value.closeByPool()); });
+        this.inUse.forEach((value) => {
+          promises.push(value.closeByPool());
+        });
         this.inUse.clear();
         await Promise.all(promises);
         this.databaseFile = undefined;
@@ -89,7 +93,7 @@ export class SqlConnectionPool {
         reject(err);
       }
     });
-  }
+    }
 
   /**
    * get a connection from the pool
@@ -101,10 +105,10 @@ export class SqlConnectionPool {
     return new Promise<SqlDatabase>(async(resolve, reject) => {
       try {
         let sqldb: SqlDatabase|undefined;
-        let cond = () => this.inPool.length > 0;
+        const cond = () => this.inPool.length > 0;
         if (this.max > 0 && !cond() && this.inUse.size >= this.max) {
           await wait(cond, timeout);
-        }
+          }
         if (this.inPool.length > 0) {
           // tslint:disable-next-line no-unnecessary-type-assertion
           sqldb = this.inPool.shift() as SqlDatabase;
@@ -113,7 +117,7 @@ export class SqlConnectionPool {
           }
           resolve(sqldb);
           return;
-        }
+          }
         if (!this.databaseFile) {
           throw new Error(`connection pool not opened`);
         }
@@ -139,29 +143,29 @@ export class SqlConnectionPool {
     if (this !== sqldb.getPool()) {
       // not opened by this pool
       return;
-    }
+      }
     if (this.max > 0 && this.inUse.has(sqldb)) {
       this.inUse.delete(sqldb);
-    }
+      }
     if (sqldb.isOpen()) {
       // transfer database connection
-      let newsqldb = new SqlDatabase();
+      const newsqldb = new SqlDatabase();
       newsqldb.recycleByPool(this, sqldb);
       this.inPool.push(newsqldb);
     }
   }
-}
+  }
 
 // TODO: move this function or find a better one:
 async function wait(cond: () => boolean, timeout: number = 0, intervall: number = 100): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     let counter = 0;
-    let timer = setInterval(() => {
+    const timer = setInterval(() => {
       if (cond()) {
         clearInterval(timer);
         resolve();
         return;
-      }
+        }
       if (timeout > 0 && (++counter * intervall) >= timeout) {
         clearInterval(timer);
         reject(new Error('timeout reached'));

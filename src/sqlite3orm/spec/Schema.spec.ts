@@ -1,3 +1,4 @@
+// tslint:disable prefer-const
 import {field, fk, id, table, index} from '../decorators';
 import {Field} from '../Field';
 import {schema} from '../Schema';

@@ -1,3 +1,4 @@
+// tslint:disable prefer-const
 import {BaseDAO} from '../BaseDAO';
 import {field, fk, id, table} from '../decorators';
 import {SQL_MEMORY_DB_PRIVATE, SqlDatabase} from '../SqlDatabase';

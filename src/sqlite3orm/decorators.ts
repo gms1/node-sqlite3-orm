@@ -32,7 +32,7 @@ export interface TableOpts {
    * @type {boolean}
    */
   autoIncrement?: boolean;
-}
+  }
 
 /**
  * Options for the property decorators '@field' and '@id'
@@ -56,7 +56,7 @@ export interface FieldOpts {
    * @type {boolean}
    */
   isJson?: boolean;
-}
+  }
 
 /**
  * Get the table metadata
@@ -66,11 +66,10 @@ export interface FieldOpts {
  */
 function getTableMetadata(target: Function): Table {
   if (!Reflect.hasOwnMetadata(METADATA_TABLE_KEY, target.prototype)) {
-    Reflect.defineMetadata(
-        METADATA_TABLE_KEY, new Table(target.name), target.prototype);
-  }
+    Reflect.defineMetadata(METADATA_TABLE_KEY, new Table(target.name), target.prototype);
+    }
   return Reflect.getMetadata(METADATA_TABLE_KEY, target.prototype);
-}
+  }
 
 /**
  * Get the field metadata
@@ -86,9 +85,9 @@ function getFieldMetadata(metaTable: Table, key: string|symbol): Field {
   } else {
     metaField = new Field(key);
     metaTable.addPropertyField(metaField);
-  }
+    }
   return metaField;
-}
+  }
 
 /**
  * Helper function for decorating a class and map it to a database table
@@ -98,20 +97,20 @@ function getFieldMetadata(metaTable: Table, key: string|symbol): Field {
  * @returns {Table}
  */
 function decorateTableClass(target: Function, opts: TableOpts): void {
-  let metaTable = getTableMetadata(target);
+  const metaTable = getTableMetadata(target);
   if (!!opts.name && !!metaTable.name && name !== metaTable.name) {
-    throw new Error(
-        `failed to map class '${target.name}' to table name '${opts.name}': This class is already mapped to the table '${metaTable.name}'`);
+    throw new Error(`failed to map class '${target.name
+                    }' to table name '${opts.name}': This class is already mapped to the table '${metaTable.name}'`);
   }
   metaTable.name = opts.name || target.name;
   if (!!opts.withoutRowId) {
     metaTable.withoutRowId = true;
-  }
+    }
   if (!!opts.autoIncrement) {
     metaTable.autoIncrement = true;
   }
   schema().addTable(metaTable);
-}
+  }
 
 /**
  * Helper function for decorating a property and map it to a table field
@@ -124,33 +123,31 @@ function decorateTableClass(target: Function, opts: TableOpts): void {
  * @returns {Field}
  */
 function decorateFieldProperty(
-    target: Object|Function, key: string|symbol, opts: FieldOpts,
-    isIdentity: boolean = false): Field {
+    target: Object|Function, key: string|symbol, opts: FieldOpts, isIdentity: boolean = false): Field {
   if (typeof target === 'function') {
     // not decorating static property
-    throw new Error(
-        `decorating static property '${key.toString()}' using field-decorator is not supported`);
-  }
+    throw new Error(`decorating static property '${key.toString()}' using field-decorator is not supported`);
+    }
 
-  let metaTable: Table = getTableMetadata(target.constructor);
-  let metaField: Field = getFieldMetadata(metaTable, key);
+  const metaTable: Table = getTableMetadata(target.constructor);
+  const metaField: Field = getFieldMetadata(metaTable, key);
 
   metaField.propertyType = Reflect.getMetadata('design:type', target, key);
   metaField.name = opts.name || key.toString();
 
   if (!!opts.dbtype) {
     metaField.dbtype = opts.dbtype;
-  }
+    }
   if (!!opts.isJson) {
     metaField.isJson = opts.isJson;
-  }
+    }
   if (!!isIdentity) {
     metaField.isIdentity = isIdentity;
-  }
+    }
   // console.log(`name='${key.toString()}' type='${field.propertyType}'
   // dbtype='${field.dbtype}'` );
   return metaField;
-}
+  }
 
 /**
  * Helper function for decorating a property and map it to a foreign key field
@@ -163,25 +160,23 @@ function decorateFieldProperty(
  * @returns {Field}
  */
 function decorateForeignKeyProperty(
-    target: Object|Function, key: string|symbol, constraintName: string,
-    foreignTableName: string, foreignTableField: string): Field {
+    target: Object|Function, key: string|symbol, constraintName: string, foreignTableName: string,
+    foreignTableField: string): Field {
   if (typeof target === 'function') {
     // not decorating static property
-    throw new Error(
-        `decorating static property '${key.toString()}' using field-decorator is not supported`);
-  }
+    throw new Error(`decorating static property '${key.toString()}' using field-decorator is not supported`);
+    }
 
-  let metaTable: Table = getTableMetadata(target.constructor);
-  let metaField: Field = getFieldMetadata(metaTable, key);
+  const metaTable: Table = getTableMetadata(target.constructor);
+  const metaField: Field = getFieldMetadata(metaTable, key);
   if (metaField.hasForeignKeyField(constraintName)) {
-    throw new Error(
-        `decorating property '${target.constructor.name}.${key.toString()}': duplicate foreign key constraint '${constraintName}'`);
+    throw new Error(`decorating property '${target.constructor.name
+                    }.${key.toString()}': duplicate foreign key constraint '${constraintName}'`);
   }
 
-  metaField.setForeignKeyField(
-      constraintName, new FieldReference(foreignTableName, foreignTableField));
+  metaField.setForeignKeyField(constraintName, new FieldReference(foreignTableName, foreignTableField));
   return metaField;
-}
+  }
 
 /**
  * Helper function for decorating a property and map it to an index field
@@ -191,16 +186,14 @@ function decorateForeignKeyProperty(
  * @param {string} indexName - The name for the index
  * @returns {Field}
  */
-function decorateIndexProperty(
-    target: Object|Function, key: string|symbol, indexName: string): Field {
+function decorateIndexProperty(target: Object|Function, key: string|symbol, indexName: string): Field {
   if (typeof target === 'function') {
     // not decorating static property
-    throw new Error(
-        `decorating static property '${key.toString()}' using field-decorator is not supported`);
-  }
+    throw new Error(`decorating static property '${key.toString()}' using field-decorator is not supported`);
+    }
 
-  let metaTable: Table = getTableMetadata(target.constructor);
-  let metaField: Field = getFieldMetadata(metaTable, key);
+  const metaTable: Table = getTableMetadata(target.constructor);
+  const metaField: Field = getFieldMetadata(metaTable, key);
   if (metaField.isIndexField(indexName)) {
     throw new Error(
         `decorating property '${target.constructor.name}.${key.toString()}': duplicate index key '${indexName}'`);
@@ -208,7 +201,7 @@ function decorateIndexProperty(
 
   metaField.setIndexField(indexName);
   return metaField;
-}
+  }
 
 /**
  * The class decorator for mapping a database table to a class
@@ -219,7 +212,7 @@ function decorateIndexProperty(
  */
 export function table(opts: TableOpts = {}): (target: Function) => void {
   return ((target: Function) => decorateTableClass(target, opts));
-}
+  }
 
 /**
  * The field decorator for mapping a class property to a table field
@@ -230,12 +223,11 @@ export function table(opts: TableOpts = {}): (target: Function) => void {
  * @returns {((
  *     target: Object, key: string|symbol) => void)}
  */
-export function field(opts: FieldOpts = {}): (
-    target: Object, key: string|symbol) => void {
+export function field(opts: FieldOpts = {}): (target: Object, key: string|symbol) => void {
   return ((target: Object, key: string | symbol) => {
     decorateFieldProperty(target, key, opts, false);
   });
-}
+  }
 
 /**
  * The id decorator for mapping a class property to a field of the primary key
@@ -247,12 +239,11 @@ export function field(opts: FieldOpts = {}): (
  * @returns {((
  *     target: Object, key: string|symbol) => void)}
  */
-export function id(opts: FieldOpts = {}): (
-    target: Object, key: string|symbol) => void {
+export function id(opts: FieldOpts = {}): (target: Object, key: string|symbol) => void {
   return ((target: Object, key: string | symbol) => {
     decorateFieldProperty(target, key, opts, true);
   });
-}
+  }
 
 /**
  * The fk decorator for mapping a class property to be part of a foreign key
@@ -265,14 +256,12 @@ export function id(opts: FieldOpts = {}): (
  * @returns {((target: Object, key: string|symbol) =>
  *     void)}
  */
-export function fk(
-    constraintName: string, foreignTableName: string,
-    foreignTableField: string): (target: Object, key: string|symbol) => void {
+export function fk(constraintName: string, foreignTableName: string, foreignTableField: string): (
+    target: Object, key: string|symbol) => void {
   return ((target: Object, key: string | symbol) => {
-    decorateForeignKeyProperty(
-        target, key, constraintName, foreignTableName, foreignTableField);
+    decorateForeignKeyProperty(target, key, constraintName, foreignTableName, foreignTableField);
   });
-}
+  }
 
 /**
  * The index decorator for mapping a class property to be part of an index
@@ -282,8 +271,7 @@ export function fk(
  * @returns {((target: Object, key: string|symbol) =>
  *     void)}
  */
-export function index(indexName: string): (
-    target: Object, key: string|symbol) => void {
+export function index(indexName: string): (target: Object, key: string|symbol) => void {
   return ((target: Object, key: string | symbol) => {
     decorateIndexProperty(target, key, indexName);
   });

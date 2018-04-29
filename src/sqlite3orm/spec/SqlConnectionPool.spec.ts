@@ -1,3 +1,4 @@
+// tslint:disable prefer-const
 import {SqlDatabase, SQL_OPEN_DEFAULT} from '../SqlDatabase';
 import {SqlConnectionPool} from '../SqlConnectionPool';
 
