@@ -1,3 +1,4 @@
+// tslint:disable prefer-const
 import {SQL_MEMORY_DB_PRIVATE, SqlDatabase} from '../SqlDatabase';
 
 // ---------------------------------------------

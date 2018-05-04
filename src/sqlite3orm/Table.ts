@@ -58,7 +58,7 @@ export class Table {
   private get statementsText(): SqlStatementText {
     if (!this._statementsText) {
       this._statementsText = this.generateStatementsText();
-    }
+      }
     return this._statementsText;
   }
 
@@ -70,7 +70,9 @@ export class Table {
    */
   private _autoIncrementField: Field|undefined;
 
-  get autoIncrementField(): Field|undefined { return this._autoIncrementField; }
+  get autoIncrementField(): Field|undefined {
+    return this._autoIncrementField;
+  }
 
   // map property keys to a field definition
   private mapPropToField: Map<string|symbol, Field>;
@@ -104,7 +106,9 @@ export class Table {
    * @param {(string|symbol)} key - The property key
    * @returns {boolean}
    */
-  public hasPropertyField(key: string|symbol): boolean { return this.mapPropToField.has(key); }
+  public hasPropertyField(key: string|symbol): boolean {
+    return this.mapPropToField.has(key);
+  }
 
   /**
    * Get the field definition for the mapped property key
@@ -115,7 +119,7 @@ export class Table {
   public getPropertyField(key: string|symbol): Field {
     if (!this.mapPropToField.has(key)) {
       throw new Error(`property '${key.toString()}' on class '${this.className}' not mapped to any field`);
-    }
+      }
     return this.mapPropToField.get(key) as Field;
   }
 
@@ -130,7 +134,7 @@ export class Table {
       if (field !== this.mapPropToField.get(field.propertyKey)) {
         throw new Error(
             `property '${field.propertyKey.toString()}' on class '${this.className}' is mapped to multiple fields`);
-      }
+        }
       return;
     }
     this.fields.push(field);
@@ -143,7 +147,9 @@ export class Table {
    * @param {string} colName - The name of the column
    * @returns {boolean}
    */
-  public hasTableField(name: string): boolean { return this.mapNameToField.has(name); }
+  public hasTableField(name: string): boolean {
+    return this.mapNameToField.has(name);
+  }
 
   /**
    * Get the field definition for the given column name
@@ -154,7 +160,7 @@ export class Table {
   public getTableField(name: string): Field {
     if (!this.mapNameToField.has(name)) {
       throw new Error(`field '${name}' not registered yet`);
-    }
+      }
     return this.mapNameToField.get(name) as Field;
   }
 
@@ -167,12 +173,12 @@ export class Table {
   public addTableField(field: Field): Field {
     this._statementsText = undefined;
     if (this.mapNameToField.has(field.name)) {
-      let oldField = this.mapNameToField.get(field.name) as Field;
+      const oldField = this.mapNameToField.get(field.name) as Field;
       if (field !== oldField) {
-        throw new Error(
-            `properties '${field.propertyKey.toString()}' and '${oldField.propertyKey.toString()}' on class '${this.className}' are mapped to the same column ${field.name}`);
+        throw new Error(`properties '${field.propertyKey.toString()}' and '${oldField.propertyKey
+                            .toString()}' on class '${this.className}' are mapped to the same column ${field.name}`);
       }
-    }
+      }
     if (!field.name) {
       throw new Error(`property '${field.propertyKey.toString()}' on class '${this.className}': field name missing`);
     }
@@ -186,7 +192,7 @@ export class Table {
       } else {
         this._autoIncrementField = undefined;
       }
-    }
+      }
     return field;
   }
 
@@ -195,14 +201,18 @@ export class Table {
    *
    * @returns {string}
    */
-  public getCreateTableStatement(): string { return this.statementsText.createTable; }
+  public getCreateTableStatement(): string {
+    return this.statementsText.createTable;
+  }
 
   /**
    * Get 'DROP TABLE'-statement
    *
    * @returns {string}
    */
-  public getDropTableStatement(): string { return `DROP TABLE IF EXISTS ${this.name}`; }
+  public getDropTableStatement(): string {
+    return `DROP TABLE IF EXISTS ${this.name}`;
+  }
 
   /**
    * Get 'ALTER TABLE...ADD COLUMN'-statement for the given column
@@ -213,7 +223,7 @@ export class Table {
   public getAlterTableAddColumnStatement(colName: string): string {
     let stmt = `ALTER TABLE ${this.name}`;
 
-    let field = this.getTableField(colName);
+    const field = this.getTableField(colName);
     stmt += ` ADD COLUMN ${field.name} ${field.dbtype}`;
     return stmt;
   }
@@ -224,10 +234,10 @@ export class Table {
    * @returns {string}
    */
   public getCreateIndexStatement(idxName: string, unique?: boolean): string {
-    let stmtText = this.statementsText.indexKeys.get(idxName);
+    const stmtText = this.statementsText.indexKeys.get(idxName);
     if (!stmtText) {
       throw new Error(`index '${idxName}' is not defined on table '${this.name}'`);
-    }
+      }
     // tslint:disable-next-line: restrict-plus-operands
     return 'CREATE ' + (unique ? 'UNIQUE ' : '') + stmtText;
   }
@@ -238,10 +248,10 @@ export class Table {
    * @returns {string}
    */
   public getDropIndexStatement(idxName: string): string {
-    let stmtText = this.statementsText.indexKeys.get(idxName);
+    const stmtText = this.statementsText.indexKeys.get(idxName);
     if (!stmtText) {
       throw new Error(`index '${idxName}' is defined on table '${this.name}'`);
-    }
+      }
     return `DROP INDEX IF EXISTS ${idxName}`;
   }
 
@@ -250,7 +260,9 @@ export class Table {
    *
    * @returns {string}
    */
-  public getInsertIntoStatement(): string { return this.statementsText.insertInto; }
+  public getInsertIntoStatement(): string {
+    return this.statementsText.insertInto;
+  }
 
   /**
    * Get 'UPDATE SET'-statement
@@ -258,14 +270,18 @@ export class Table {
    *
    * @returns {string}
    */
-  public getUpdateSetStatement(): string { return this.statementsText.updateById; }
+  public getUpdateSetStatement(): string {
+    return this.statementsText.updateById;
+  }
 
   /**
    * Get 'UPDATE BY PRIMARY KEY' statement
    *
    * @returns {string}
    */
-  public getUpdateByIdStatement(): string { return this.statementsText.updateById; }
+  public getUpdateByIdStatement(): string {
+    return this.statementsText.updateById;
+  }
 
   /**
    * Get 'DELETE FROM'-statement
@@ -273,21 +289,27 @@ export class Table {
    *
    * @returns {string}
    */
-  public getDeleteFromStatement(): string { return this.statementsText.deleteById; }
+  public getDeleteFromStatement(): string {
+    return this.statementsText.deleteById;
+  }
 
   /**
    * Get 'DELETE BY PRIMARY KE'-statement
    *
    * @returns {string}
    */
-  public getDeleteByIdStatement(): string { return this.statementsText.deleteById; }
+  public getDeleteByIdStatement(): string {
+    return this.statementsText.deleteById;
+  }
 
   /**
    * Get 'SELECT' all-statement
    *
    * @returns {string}
    */
-  public getSelectAllStatement(): string { return this.statementsText.selectAll; }
+  public getSelectAllStatement(): string {
+    return this.statementsText.selectAll;
+  }
 
   /**
    * Get 'SELECT' one-statement
@@ -295,14 +317,18 @@ export class Table {
    *
    * @returns {string}
    */
-  public getSelectOneStatement(): string { return this.statementsText.selectById; }
+  public getSelectOneStatement(): string {
+    return this.statementsText.selectById;
+  }
 
   /**
    * Get 'SELECT BY PRIMARY KEY'-statement
    *
    * @returns {string}
    */
-  public getSelectByIdStatement(): string { return this.statementsText.selectById; }
+  public getSelectByIdStatement(): string {
+    return this.statementsText.selectById;
+  }
 
   /**
    * Get a select-condition for a foreign key constraint
@@ -329,17 +355,17 @@ export class Table {
    *
    */
   private generateStatementsText(): SqlStatementText {
-    let colNames: string[] = [];
-    let colNamesPK: string[] = [];
-    let colNamesNoPK: string[] = [];
-    let colParms: string[] = [];
-    let colParmsNoPK: string[] = [];
-    let colSetsNoPK: string[] = [];
-    let colSelPK: string[] = [];
-    let colDefs: string[] = [];
-    let stmts = new SqlStatementText();
-    let foreignKeys = new Map<string, ForeignKeyHelper>();
-    let indexKeys = new Map<string, string[]>();
+    const colNames: string[] = [];
+    const colNamesPK: string[] = [];
+    const colNamesNoPK: string[] = [];
+    const colParms: string[] = [];
+    const colParmsNoPK: string[] = [];
+    const colSetsNoPK: string[] = [];
+    const colSelPK: string[] = [];
+    const colDefs: string[] = [];
+    const stmts = new SqlStatementText();
+    const foreignKeys = new Map<string, ForeignKeyHelper>();
+    const indexKeys = new Map<string, string[]>();
 
     if (!this.fields.length) {
       throw new Error(`table '${this.name}': does not have any fields defined`);
@@ -347,7 +373,7 @@ export class Table {
 
     this.fields.forEach((field) => {
       let colDef = `${field.name} ${field.dbtype}`;
-      let hostParmName = field.getHostParameterName();
+      const hostParmName = field.getHostParameterName();
 
       colNames.push(field.name);
       colParms.push(hostParmName);
@@ -371,11 +397,12 @@ export class Table {
         if (!fk) {
           fk = new ForeignKeyHelper(constraintName, refColumn.tableName);
           foreignKeys.set(constraintName, fk);
-        }
+          }
         if (refColumn.tableName !== fk.refTableName) {
           // TODO: this error should be found earlier
-          throw new Error(
-              `table '${this.name}': foreign key constraint '${constraintName}' references different tables: '${refColumn.tableName}' vs '${fk.refTableName}'`);
+          throw new Error(`table '${this
+                              .name}': foreign key constraint '${constraintName
+                                   }' references different tables: '${refColumn.tableName}' vs '${fk.refTableName}'`);
         }
         fk.fields.push(field);
         fk.refColumns.push(refColumn.colName);
@@ -400,7 +427,7 @@ export class Table {
       stmts.createTable += ',\n  CONSTRAINT PRIMARY_KEY PRIMARY KEY (';
       stmts.createTable += colNamesPK.join(', ');
       stmts.createTable += ')';
-    }
+      }
 
     // add foreign key constraint definition:
     let i = foreignKeys.size - 1;
@@ -475,7 +502,7 @@ export class Table {
     // --------------------------------------------------------------
     // generate SELECT-fk condition
     foreignKeys.forEach((fk, constraintName) => {
-      let selectCondition =
+      const selectCondition =
           fk.fields.map((field) => `${TABLEALIASPREFIX}${field.name}=${field.getHostParameterName()}`).join(' AND ');
       stmts.foreignKeySelects.set(constraintName, selectCondition);
       stmts.foreignKeyFields.set(constraintName, fk.fields);
@@ -483,13 +510,13 @@ export class Table {
 
     indexKeys.forEach((cols, indexName) => {
       // tslint:disable-next-line: restrict-plus-operands
-      let createIdxCols = `INDEX IF NOT EXISTS ${indexName} ON ${this.name} (` + cols.join(', ') + ')';
+      const createIdxCols = `INDEX IF NOT EXISTS ${indexName} ON ${this.name} (` + cols.join(', ') + ')';
       stmts.indexKeys.set(indexName, createIdxCols);
     });
 
     return stmts;
   }
-}
+  }
 
 /**
  * helper class holding sql-statements/fragments
@@ -513,7 +540,7 @@ class SqlStatementText {
     this.foreignKeyFields = new Map<string, Field[]>();
     this.indexKeys = new Map<string, string>();
   }
-}
+  }
 
 /**
  * helper class holding a foreign key definition

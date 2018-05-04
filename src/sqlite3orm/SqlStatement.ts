@@ -3,7 +3,7 @@ import {Statement} from 'sqlite3';
 export interface SqlRunResult {
   lastID: number;
   changes: number;
-}
+  }
 
 /**
  * A thin wrapper for the 'Statement' class from 'node-sqlite3' using Promises instead of callbacks
@@ -21,7 +21,9 @@ export class SqlStatement {
    *
    * @param {Statement} stmt
    */
-  public constructor(stmt: Statement) { this.stmt = stmt; }
+  public constructor(stmt: Statement) {
+    this.stmt = stmt;
+  }
 
   /**
    * Bind the given parameters to the prepared statement
@@ -41,7 +43,11 @@ export class SqlStatement {
    * @returns {Promise<void>}
    */
   public async reset(): Promise<void> {
-    return new Promise<void>((resolve, reject) => { this.stmt.reset(() => { resolve(); }); });
+    return new Promise<void>((resolve, reject) => {
+      this.stmt.reset(() => {
+        resolve();
+      });
+    });
   }
 
   /**
@@ -75,7 +81,7 @@ export class SqlStatement {
           reject(err);
         } else {
           // tslint:disable-next-line: no-invalid-this
-          let res: SqlRunResult = {lastID: this.lastID, changes: this.changes};
+          const res: SqlRunResult = {lastID: this.lastID, changes: this.changes};
           resolve(res);
         }
       });

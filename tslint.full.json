@@ -10,7 +10,11 @@
     "no-empty-interface": true,
 
     "no-import-side-effect": true,
-    "no-inferrable-types": [false],
+    "no-inferrable-types": [
+      true,
+      "ignore-params",
+      "ignore-properties"
+    ],
     "no-internal-module": true,
 
     "no-magic-numbers": false,
@@ -104,7 +108,7 @@
     "use-default-type-parameter": true,
     "use-isnan": true,
 
-    "cyclomatic-complexity": [true],
+    "cyclomatic-complexity": [true, 18],
     "deprecation": true,
     "eofline": true,
     "indent": [true, "spaces"],
@@ -121,7 +125,7 @@
 
     "no-require-imports": true,
     "object-literal-sort-keys": false,
-    "prefer-const": false,
+    "prefer-const": true,
 
     "trailing-comma": [true, {"multiline": "never", "singleline": "never"}],
 

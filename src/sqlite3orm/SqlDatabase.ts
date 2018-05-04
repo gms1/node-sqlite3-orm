@@ -65,9 +65,9 @@ export class SqlDatabase {
   public async open(databaseFile: string, mode?: number): Promise<void> {
     if (!!this.pool) {
       this.pool.release(this);
-    }
+      }
     return new Promise<void>((resolve, reject) => {
-      let db = new Database(databaseFile, mode || SQL_OPEN_DEFAULT, (err) => {
+      const db = new Database(databaseFile, mode || SQL_OPEN_DEFAULT, (err) => {
         if (err) {
           reject(err);
         } else {
@@ -91,7 +91,7 @@ export class SqlDatabase {
       } else if (!this.db) {
         resolve();
       } else {
-        let db = this.db;
+        const db = this.db;
         this.db = undefined;
         db.close((err) => {
           db.removeAllListeners();
@@ -110,7 +110,9 @@ export class SqlDatabase {
    *
    * @returns {boolean}
    */
-  public isOpen(): boolean { return !!this.db; }
+  public isOpen(): boolean {
+    return !!this.db;
+  }
 
   /**
    * Runs a SQL statement with the specified parameters
@@ -134,7 +136,7 @@ export class SqlDatabase {
           reject(err);
         } else {
           // tslint:disable-next-line: no-invalid-this
-          let res: SqlRunResult = {lastID: this.lastID, changes: this.changes};
+          const res: SqlRunResult = {lastID: this.lastID, changes: this.changes};
           resolve(res);
         }
       });
@@ -259,7 +261,7 @@ export class SqlDatabase {
       if (!this.db) {
         reject(new Error('database connection not open'));
         return;
-      }
+        }
       let dbstmt: Statement;
       dbstmt = this.db.prepare(sql, params, (err) => {
         if (err) {
@@ -282,7 +284,7 @@ export class SqlDatabase {
   public serialize(callback?: () => void): void {
     if (!this.db) {
       throw new Error('database connection not open');
-    }
+      }
     return this.db.serialize(callback);
   }
 
@@ -297,7 +299,7 @@ export class SqlDatabase {
   public parallelize(callback?: () => void): void {
     if (!this.db) {
       throw new Error('database connection not open');
-    }
+      }
     return this.db.parallelize(callback);
   }
 
@@ -379,11 +381,11 @@ export class SqlDatabase {
   public async getUserVersion(): Promise<number> {
     let userVersion = 0;
     try {
-      let res = await this.get('PRAGMA user_version');
+      const res = await this.get('PRAGMA user_version');
       userVersion = res.user_version;
     } catch (e) {
       return Promise.reject(e);
-    }
+      }
     return Promise.resolve(userVersion);
   }
 
@@ -393,7 +395,9 @@ export class SqlDatabase {
    * @param {number} newver
    * @returns {Promise<void>}
    */
-  public async setUserVersion(newver: number): Promise<void> { return this.exec(`PRAGMA user_version = ${newver}`); }
+  public async setUserVersion(newver: number): Promise<void> {
+    return this.exec(`PRAGMA user_version = ${newver}`);
+  }
 
   /**
    * Set the execution mode to verbose to produce long stack traces. There is no way to reset this.
@@ -402,7 +406,9 @@ export class SqlDatabase {
    * @param {number} newver
    * @returns {Promise<void>}
    */
-  public static verbose(): void { sqlverbose(); }
+  public static verbose(): void {
+    sqlverbose();
+  }
 
   /*
   @internal
@@ -410,7 +416,7 @@ export class SqlDatabase {
   public async openByPool(pool: SqlConnectionPool, databaseFile: string, mode?: number): Promise<void> {
     this.pool = pool;
     return new Promise<void>((resolve, reject) => {
-      let db = new Database(databaseFile, mode || SQL_OPEN_DEFAULT, (err) => {
+      const db = new Database(databaseFile, mode || SQL_OPEN_DEFAULT, (err) => {
         if (err) {
           reject(err);
         } else {
@@ -430,7 +436,7 @@ export class SqlDatabase {
       if (!this.db) {
         resolve();
       } else {
-        let db = this.db;
+        const db = this.db;
         this.db = undefined;
         db.close((err) => {
           db.removeAllListeners();
@@ -460,5 +466,7 @@ export class SqlDatabase {
   /*
   @internal
   */
-  public getPool(): SqlConnectionPool|undefined { return this.pool; }
+  public getPool(): SqlConnectionPool|undefined {
+    return this.pool;
+  }
 }

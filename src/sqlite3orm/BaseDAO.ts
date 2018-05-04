@@ -13,7 +13,7 @@ import {PropertyType} from './PropertyType';
  * @template T - The class mapped to the base table
  */
 export class BaseDAO<T extends Object> {
-  private type: {new (): T};
+  private type: {new(): T};
   private table: Table;
   private sqldb: SqlDatabase;
 
@@ -23,7 +23,7 @@ export class BaseDAO<T extends Object> {
    * @param {{new (): T}} type - The class mapped to the base table
    * @param {SqlDatabase} sqldb - The database connection
    */
-  public constructor(type: {new (): T}, sqldb: SqlDatabase) {
+  public constructor(type: {new(): T}, sqldb: SqlDatabase) {
     this.type = type;
     this.table = Reflect.getMetadata(METADATA_TABLE_KEY, type.prototype);
     if (!this.table) {
@@ -44,7 +44,7 @@ export class BaseDAO<T extends Object> {
         if (!this.table.autoIncrementField) {
           await this.sqldb.run(this.table.getInsertIntoStatement(), this.bindAllInputParams(model));
         } else {
-          let res: any =
+          const res: any =
               await this.sqldb.run(this.table.getInsertIntoStatement(), this.bindNonPrimaryKeyInputParams(model));
           // tslint:disable-next-line: triple-equals
           if (res.lastID == undefined) {
@@ -71,7 +71,7 @@ export class BaseDAO<T extends Object> {
   public async update(model: T): Promise<T> {
     return new Promise<T>(async(resolve, reject) => {
       try {
-        let res = await this.sqldb.run(this.table.getUpdateByIdStatement(), this.bindAllInputParams(model));
+        const res = await this.sqldb.run(this.table.getUpdateByIdStatement(), this.bindAllInputParams(model));
         if (!res.changes) {
           reject(new Error(`update '${this.table.name}' failed: nothing changed`));
           return;
@@ -90,10 +90,10 @@ export class BaseDAO<T extends Object> {
    * @param {T} model
    * @returns {Promise<void>}
    */
-  public async delete (model: T): Promise<void> {
+  public async delete(model: T): Promise<void> {
     return new Promise<void>(async(resolve, reject) => {
       try {
-        let res = await this.sqldb.run(this.table.getDeleteByIdStatement(), this.bindPrimaryKeyInputParams(model));
+        const res = await this.sqldb.run(this.table.getDeleteByIdStatement(), this.bindPrimaryKeyInputParams(model));
         if (!res.changes) {
           reject(new Error(`delete from '${this.table.name}' failed: nothing changed`));
           return;
@@ -115,7 +115,8 @@ export class BaseDAO<T extends Object> {
   public async deleteById(input: object): Promise<void> {
     return new Promise<void>(async(resolve, reject) => {
       try {
-        let res = await this.sqldb.run(this.table.getDeleteByIdStatement(), this.bindPrimaryKeyInputParams(input as T));
+        const res =
+            await this.sqldb.run(this.table.getDeleteByIdStatement(), this.bindPrimaryKeyInputParams(input as T));
         if (!res.changes) {
           reject(new Error(`delete from '${this.table.name}' failed: nothing changed`));
           return;
@@ -137,7 +138,7 @@ export class BaseDAO<T extends Object> {
   public async select(model: T): Promise<T> {
     return new Promise<T>(async(resolve, reject) => {
       try {
-        let row = await this.sqldb.get(this.table.getSelectByIdStatement(), this.bindPrimaryKeyInputParams(model));
+        const row = await this.sqldb.get(this.table.getSelectByIdStatement(), this.bindPrimaryKeyInputParams(model));
         model = this.readResultRow(model, row);
       } catch (e) {
         reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
@@ -158,7 +159,8 @@ export class BaseDAO<T extends Object> {
     return new Promise<T>(async(resolve, reject) => {
       let output: T;
       try {
-        let row = await this.sqldb.get(this.table.getSelectByIdStatement(), this.bindPrimaryKeyInputParams(input as T));
+        const row =
+            await this.sqldb.get(this.table.getSelectByIdStatement(), this.bindPrimaryKeyInputParams(input as T));
         output = this.readResultRow(new this.type(), row);
       } catch (e) {
         reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
@@ -182,10 +184,12 @@ export class BaseDAO<T extends Object> {
         let stmt = this.table.getSelectAllStatement();
         if (!!sql) {
           stmt += sql;
-        }
-        let rows: any[] = await this.sqldb.all(stmt, params);
-        let results: T[] = [];
-        rows.forEach((row) => { results.push(this.readResultRow(new this.type(), row)); });
+          }
+        const rows: any[] = await this.sqldb.all(stmt, params);
+        const results: T[] = [];
+        rows.forEach((row) => {
+          results.push(this.readResultRow(new this.type(), row));
+        });
         resolve(results);
       } catch (e) {
         reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
@@ -209,8 +213,8 @@ export class BaseDAO<T extends Object> {
         let stmt = this.table.getSelectAllStatement();
         if (!!sql) {
           stmt += sql;
-        }
-        let res = await this.sqldb.each(stmt, params, (err, row) => {
+          }
+        const res = await this.sqldb.each(stmt, params, (err, row) => {
           // TODO: err?
           callback(err, this.readResultRow(new this.type(), row));
         });
@@ -233,25 +237,27 @@ export class BaseDAO<T extends Object> {
    * @returns {Promise<T[]>}
    */
   public async selectAllOf<F extends Object>(
-      constraintName: string, foreignType: {new (): F}, foreignObj: F, sql?: string, params?: Object): Promise<T[]> {
+      constraintName: string, foreignType: {new(): F}, foreignObj: F, sql?: string, params?: Object): Promise<T[]> {
     return new Promise<T[]>(async(resolve, reject) => {
       try {
-        let fkSelCondition = this.table.getForeignKeySelects(constraintName);
+        const fkSelCondition = this.table.getForeignKeySelects(constraintName);
         if (!fkSelCondition) {
           throw new Error(`constraint '${constraintName}' is not defined`);
-        }
+          }
         let stmt = this.table.getSelectAllStatement();
         stmt += '\nWHERE\n  ';
         stmt += fkSelCondition;
 
-        let foreignDAO = new BaseDAO<F>(foreignType, this.sqldb);
-        let foreignParams = this.bindForeignParams(foreignDAO, constraintName, foreignObj, params);
+        const foreignDAO = new BaseDAO<F>(foreignType, this.sqldb);
+        const foreignParams = this.bindForeignParams(foreignDAO, constraintName, foreignObj, params);
         if (!!sql) {
           stmt += sql;
-        }
-        let rows: any[] = await this.sqldb.all(stmt, foreignParams);
-        let results: T[] = [];
-        rows.forEach((row) => { results.push(this.readResultRow(new this.type(), row)); });
+          }
+        const rows: any[] = await this.sqldb.all(stmt, foreignParams);
+        const results: T[] = [];
+        rows.forEach((row) => {
+          results.push(this.readResultRow(new this.type(), row));
+        });
         resolve(results);
       } catch (e) {
         reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
@@ -261,13 +267,13 @@ export class BaseDAO<T extends Object> {
   }
 
   protected bindAllInputParams(model: T): Object {
-    let hostParams: Object = {};
+    const hostParams: Object = {};
     this.table.fields.forEach((field) => this.setHostParam(hostParams, field, model));
     return hostParams;
   }
 
   protected bindPrimaryKeyInputParams(model: T): Object {
-    let hostParams: Object = {};
+    const hostParams: Object = {};
     this.table.fields.forEach((field) => {
       if (field.isIdentity) {
         this.setHostParam(hostParams, field, model);
@@ -277,7 +283,7 @@ export class BaseDAO<T extends Object> {
   }
 
   protected bindNonPrimaryKeyInputParams(model: T): Object {
-    let hostParams: Object = {};
+    const hostParams: Object = {};
     this.table.fields.forEach((field) => {
       if (!field.isIdentity) {
         this.setHostParam(hostParams, field, model);
@@ -288,15 +294,15 @@ export class BaseDAO<T extends Object> {
 
   protected bindForeignParams<F extends Object>(
       foreignDAO: BaseDAO<F>, fkName: string, foreignObject: F, more: Object = {}): Object {
-    let hostParams: Object = Object.assign({}, more);
-    let fkFields = this.table.getForeignKeyFields(fkName);
+    const hostParams: Object = Object.assign({}, more);
+    const fkFields = this.table.getForeignKeyFields(fkName);
     if (!fkFields) {
       throw new Error(`internal error: fields for foreign key constraint '${fkName}' are not defined`);
     }
 
     fkFields.forEach((field) => {
-      let fieldref = field.foreignKeys.get(fkName) as FieldReference;
-      let foreignfield = foreignDAO.table.getTableField(fieldref.colName);
+      const fieldref = field.foreignKeys.get(fkName) as FieldReference;
+      const foreignfield = foreignDAO.table.getTableField(fieldref.colName);
       foreignDAO.setHostParam(hostParams, foreignfield, foreignObject);
     });
     return hostParams;
@@ -313,7 +319,7 @@ export class BaseDAO<T extends Object> {
     if (value == undefined) {
       hostParams[field.getHostParameterName()] = value;
       return;
-    }
+      }
     if (field.isJson) {
       hostParams[field.getHostParameterName()] = JSON.stringify(value);
     } else {
@@ -326,7 +332,7 @@ export class BaseDAO<T extends Object> {
             value = Math.floor((value as Date).getTime() / 1000);
           } else {
             value = (value as Date).toISOString();
-          }
+            }
           break;
       }
       hostParams[field.getHostParameterName()] = value;
@@ -339,7 +345,7 @@ export class BaseDAO<T extends Object> {
     if (value == undefined) {
       Reflect.set(model, field.propertyKey, undefined);
       return;
-    }
+      }
     if (field.isJson) {
       value = JSON.parse(value);
     } else {
@@ -355,7 +361,7 @@ export class BaseDAO<T extends Object> {
             }
           } else {
             value = !value ? false : true;
-          }
+            }
           break;
         case PropertyType.DATE:
           switch (typeof value) {
@@ -370,22 +376,22 @@ export class BaseDAO<T extends Object> {
                 // Julian day numbers ?
                 // TODO: currently not supported
                 value = NaN;
-              }
+                }
               break;
             default:
               value = NaN;
               break;
-          }
+              }
           break;
         case PropertyType.NUMBER:
           if (typeof value !== 'number') {
             value = Number(value);
-          }
+            }
           break;
         case PropertyType.STRING:
           if (typeof value !== 'string') {
             value = String(value);
-          }
+            }
           break;
       }
     }
@@ -398,14 +404,18 @@ export class BaseDAO<T extends Object> {
    *
    * @returns {Promise<void>}
    */
-  public async createTable(): Promise<void> { return this.sqldb.exec(this.table.getCreateTableStatement()); }
+  public async createTable(): Promise<void> {
+    return this.sqldb.exec(this.table.getCreateTableStatement());
+  }
 
   /**
    * drop a table from the database
    *
    * @returns {Promise<void>}
    */
-  public async dropTable(): Promise<void> { return this.sqldb.exec(this.table.getDropTableStatement()); }
+  public async dropTable(): Promise<void> {
+    return this.sqldb.exec(this.table.getDropTableStatement());
+  }
 
   /**
    * add a column/field to a database table

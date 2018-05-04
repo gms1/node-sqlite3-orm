@@ -1,3 +1,4 @@
+// tslint:disable prefer-const
 import {BaseDAO} from '../BaseDAO';
 import {schema} from '../Schema';
 import {SqlDatabase} from '../SqlDatabase';
@@ -45,7 +46,7 @@ class Contact {
     this.mobile = 'nomobile';
     this.userId = 0;
   }
-}
+  }
 
 
 async function runSample():
@@ -70,8 +71,7 @@ async function runSample():
               // the 'CONTACTS' table has been introduced in user_version 1
               // a column 'contact_mobile' has been added to the 'CONTACTS'
               // table in user_version 10
-              await schema().alterTableAddColumn(
-                  sqldb, 'CONTACTS', 'contact_mobile');
+              await schema().alterTableAddColumn(sqldb, 'CONTACTS', 'contact_mobile');
             }
             await sqldb.setUserVersion(10);
 
@@ -89,7 +89,7 @@ async function runSample():
             let user = new User();
             user.userId = 1;
             user.userLoginName = 'donald';
-            user.userJsonData = { lastScores: [10, 42, 31]};
+            user.userJsonData = {lastScores: [10, 42, 31]};
             user = await userDAO.insert(user);
 
             // insert a contact:
@@ -106,44 +106,32 @@ async function runSample():
             let userDonald = await userDAO.select(user);
 
             // read all contacts from user 'donald':
-            let contactsDonald =
-                await contactDAO.selectAllOf('fk_user_contacts', User, userDonald);
+            let contactsDonald = await contactDAO.selectAllOf('fk_user_contacts', User, userDonald);
 
             // read all users:
             let allUsers = await userDAO.selectAll();
 
             // read all users having a contact:
-            let allUsersHavingContacts = await userDAO.selectAll(
-                'WHERE EXISTS(SELECT 1 FROM CONTACTS C WHERE C.user_id = T.user_id)');
+            let allUsersHavingContacts =
+                await userDAO.selectAll('WHERE EXISTS(SELECT 1 FROM CONTACTS C WHERE C.user_id = T.user_id)');
 
             // read all contacts from 'duck.com':
-            let allContactsFromDuckDotCom = await contactDAO.selectAll(
-                'WHERE contact_email like $contact_email',
-                {$contact_email: '%@duck.com'});
+            let allContactsFromDuckDotCom =
+                await contactDAO.selectAll('WHERE contact_email like $contact_email', {$contact_email: '%@duck.com'});
 
-            expect(userDonald.userId)
-                .toBe(user.userId, 'wrong userDonald.userId');
-            expect(userDonald.userLoginName)
-                .toBe(user.userLoginName, 'wrong userDonald.userLoginName');
+            expect(userDonald.userId).toBe(user.userId, 'wrong userDonald.userId');
+            expect(userDonald.userLoginName).toBe(user.userLoginName, 'wrong userDonald.userLoginName');
 
             expect(userDonald.userJsonData.lastScores.length)
                 .toBe(user.userJsonData.lastScores.length, 'wrong userDonald.userJsonData.lastScores.length');
 
-            expect(contactsDonald.length)
-                .toBe(1, 'wrong contactsDonald.length');
-            expect(contactsDonald[0].userId)
-                .toBe(contact.userId, 'wrong contactsDonald[0].userId');
-            expect(contactsDonald[0].emailAddress)
-                .toBe(
-                    contact.emailAddress,
-                    'wrong contactsDonald[0].emailAddress');
-            expect(contactsDonald[0].mobile)
-                .toBe(contact.mobile, 'wrong contactsDonald[0].mobile');
+            expect(contactsDonald.length).toBe(1, 'wrong contactsDonald.length');
+            expect(contactsDonald[0].userId).toBe(contact.userId, 'wrong contactsDonald[0].userId');
+            expect(contactsDonald[0].emailAddress).toBe(contact.emailAddress, 'wrong contactsDonald[0].emailAddress');
+            expect(contactsDonald[0].mobile).toBe(contact.mobile, 'wrong contactsDonald[0].mobile');
 
-            expect(allUsersHavingContacts.length)
-                .toBe(1, 'wrong allUsersHavingContacts.length');
-            expect(allContactsFromDuckDotCom.length)
-                .toBe(1, 'wrong allContactsFromDuckDotCom.length');
+            expect(allUsersHavingContacts.length).toBe(1, 'wrong allUsersHavingContacts.length');
+            expect(allContactsFromDuckDotCom.length).toBe(1, 'wrong allContactsFromDuckDotCom.length');
 
           })();
 

@@ -28,7 +28,7 @@ export class Schema {
       Schema.schema = this;
 
       this.mapNameToTable = new Map<string, Table>();
-    }
+      }
     return Schema.schema;
   }
 
@@ -41,7 +41,7 @@ export class Schema {
   public getTable(name: string): Table {
     if (!this.mapNameToTable.has(name)) {
       throw new Error(`table '${name}' not registered yet`);
-    }
+      }
     return this.mapNameToTable.get(name) as Table;
   }
 
@@ -69,7 +69,7 @@ export class Schema {
    * @returns {Promise<void>}
    */
   public async createTable(sqldb: SqlDatabase, name: string): Promise<void> {
-    let table = this.getTable(name);
+    const table = this.getTable(name);
     return sqldb.exec(table.getCreateTableStatement());
   }
 
@@ -81,7 +81,7 @@ export class Schema {
    * @returns {Promise<void>}
    */
   public async dropTable(sqldb: SqlDatabase, name: string): Promise<void> {
-    let table = this.getTable(name);
+    const table = this.getTable(name);
     return sqldb.exec(table.getDropTableStatement());
   }
 
@@ -94,7 +94,7 @@ export class Schema {
    * @returns {Promise<void>}
    */
   public async alterTableAddColumn(sqldb: SqlDatabase, tableName: string, colName: string): Promise<void> {
-    let table = this.getTable(tableName);
+    const table = this.getTable(tableName);
     return sqldb.exec(table.getAlterTableAddColumnStatement(colName));
   }
 
@@ -108,7 +108,7 @@ export class Schema {
    * @returns {Promise<void>}
    */
   public async createIndex(sqldb: SqlDatabase, tableName: string, idxName: string, unique?: boolean): Promise<void> {
-    let table = this.getTable(tableName);
+    const table = this.getTable(tableName);
     return sqldb.exec(table.getCreateIndexStatement(idxName, unique));
   }
 
@@ -121,10 +121,10 @@ export class Schema {
    * @returns {Promise<void>}
    */
   public async dropIndex(sqldb: SqlDatabase, tableName: string, idxName: string): Promise<void> {
-    let table = this.getTable(tableName);
+    const table = this.getTable(tableName);
     return sqldb.exec(table.getDropIndexStatement(idxName));
   }
-}
+  }
 
 /**
  * get the Schema singleton
@@ -136,6 +136,6 @@ export function schema(): Schema {
   if (!Schema.schema) {
     // tslint:disable-next-line: no-unused-expression
     new Schema();
-  }
+    }
   return Schema.schema;
 }
