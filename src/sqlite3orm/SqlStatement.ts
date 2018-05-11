@@ -27,6 +27,7 @@ export class SqlStatement {
 
   /**
    * Bind the given parameters to the prepared statement
+   * TODO: usage is unclear
    *
    * @param {...any[]} params
    * @returns {this}
@@ -59,6 +60,7 @@ export class SqlStatement {
     return new Promise<void>((resolve, reject) => {
       this.stmt.finalize((err) => {
         if (err) {
+          /* istanbul ignore next */
           reject(err);
         } else {
           resolve();
@@ -115,6 +117,7 @@ export class SqlStatement {
   public async all(params?: any): Promise<any[]> {
     return new Promise<any[]>((resolve, reject) => {
       this.stmt.all(params, (err, rows) => {
+        /* istanbul ignore if */
         if (err) {
           reject(err);
         } else {
@@ -135,6 +138,7 @@ export class SqlStatement {
   public async each(params?: any, callback?: (err: Error, row: any) => void): Promise<number> {
     return new Promise<number>((resolve, reject) => {
       this.stmt.each(params, callback, (err: Error, count: number) => {
+        /* istanbul ignore if */
         if (err) {
           reject(err);
         } else {

@@ -54,9 +54,12 @@ class ParentTable {
 
   @field({name: TABLE_PARENT_FIELD_NAME_NAME, dbtype: 'TEXT'}) public name?: string;
 
+  dyndef2: number;
+
   public constructor() {
     this.id = undefined;
     this.name = undefined;
+    this.dyndef2 = 42;
   }
 }
 
@@ -203,7 +206,13 @@ describe('test schema', () => {
       expect(parentTable.hasPropertyField(newProperty)).toBeTruthy();
       expect(parentTable.hasTableField(newField.name)).toBeTruthy();
 
+      // TODO: we do not have defined the property type
+      expect(parentTable.getTableField(newField.name).propertyType).toBeUndefined();
+
+
       await schema().alterTableAddColumn(sqldb, TABLE_PARENT_TABLE_NAME, newField.name);
+
+      // TODO: validate if new column exist
 
       await schema().dropTable(sqldb, TABLE_CHILD_TABLE_NAME);
       await schema().dropTable(sqldb, TABLE_PARENT_TABLE_NAME);
@@ -298,17 +307,21 @@ describe('test schema', () => {
       let parentTable = schema().getTable(TABLE_PARENT_TABLE_NAME);
       expect(parentTable).toBeDefined();
 
-      let newProperty = Symbol('dyndef2');
+      let newProperty = 'dyndef2';
       let newField = new Field(newProperty);
       newField.name = 'TESTADDCOL2';
       newField.dbtype = 'INTEGER';
       parentTable.addPropertyField(newField);
       parentTable.addTableField(newField);
+
       expect(parentTable.hasPropertyField(newProperty)).toBeTruthy();
       expect(parentTable.hasTableField(newField.name)).toBeTruthy();
 
-      await schema().alterTableAddColumn(sqldb, TABLE_PARENT_TABLE_NAME, newField.name);
+      await parentDAO.alterTableAddColumn(newField.name);
 
+      // TODO: validate if new column exist
+
+      await childDAO.dropIndex(TABLE_CHILD_IDX_NAME);
       await childDAO.dropTable();
       await parentDAO.dropTable();
 

@@ -159,6 +159,101 @@ describe('test SqlDatabase', () => {
     done();
   });
   // ---------------------------------------------
+  it('expect closing database to succeed', async(done) => {
+    try {
+      await sqldb.close();
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+  // ---------------------------------------------
+  it('expect closed database to throw on exec', async(done) => {
+    try {
+      await sqldb.close();
+      await sqldb.exec('INSERT INTO TEST (col) values (\'testvalue 3\')');
+      fail('closed database should throw on exec');
+    } catch (err) {
+    }
+    done();
+  });
+  // ---------------------------------------------
+  it('expect closed database to throw on prepare', async(done) => {
+    try {
+      await sqldb.close();
+      await sqldb.prepare('INSERT INTO TEST (col) values (\'testvalue 3\')');
+      fail('closed database should throw on prepare');
+    } catch (err) {
+    }
+    done();
+  });
+  // ---------------------------------------------
+  it('expect closed database to throw on run', async(done) => {
+    try {
+      await sqldb.close();
+      await sqldb.run('INSERT INTO TEST (col) values (\'testvalue 3\')');
+      fail('closed database should throw on run');
+    } catch (err) {
+    }
+    done();
+  });
+  // ---------------------------------------------
+  it('expect closed database to throw on get', async(done) => {
+    try {
+      await sqldb.close();
+      await sqldb.get('SELECT col from TEST');
+      fail('closed database should throw on get');
+    } catch (err) {
+    }
+    done();
+  });
+  // ---------------------------------------------
+  it('expect closed database to throw on all', async(done) => {
+    try {
+      await sqldb.close();
+      await sqldb.all('SELECT col from TEST');
+      fail('closed database should throw on all');
+    } catch (err) {
+    }
+    done();
+  });
+  // ---------------------------------------------
+  it('expect closed database to throw on each', async(done) => {
+    try {
+      await sqldb.close();
+      await sqldb.each('SELECT col from TEST', () => {});
+      fail('closed database should throw on each');
+    } catch (err) {
+    }
+    done();
+  });
+  // ---------------------------------------------
+  it('expect insert into not existing table should throw', async(done) => {
+    try {
+      SqlDatabase.verbose();
+      await sqldb.exec('INSERT INTO NOTEXIST (col) values (\'testvalue 3\')');
+      fail('insert into not existing table should throw');
+    } catch (err) {
+    }
+    done();
+  });
+
+  // ---------------------------------------------
+  // TODO:
+  /*
+  it('expect closing database to trigger close-event', async(done) => {
+    try {
+      let isOpen = true;
+      sqldb.on('close', () => isOpen = false);
+      await sqldb.close();
+      expect(isOpen).toBeFalsy('close-event not fired');
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+  */
+
 
 
 });
