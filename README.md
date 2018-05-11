@@ -1,5 +1,6 @@
-[![Build Status](https://api.travis-ci.org/gms1/node-sqlite3-orm.svg?branch=master)](https://travis-ci.org/gms1/node-sqlite3-orm)
 [![npm version](https://badge.fury.io/js/sqlite3orm.svg)](https://badge.fury.io/js/sqlite3orm)
+[![Build Status](https://api.travis-ci.org/gms1/node-sqlite3-orm.svg?branch=master)](https://travis-ci.org/gms1/node-sqlite3-orm)
+[![Coverage Status](https://coveralls.io/repos/github/gms1/node-sqlite3-orm/badge.svg?branch=master)](https://coveralls.io/github/gms1/node-sqlite3-orm?branch=master)
 [![DeepScan Grade](https://deepscan.io/api/projects/699/branches/1107/badge/grade.svg)](https://deepscan.io/dashboard/#view=project&pid=699&bid=1107)
 [![Dependency Status](https://david-dm.org/gms1/node-sqlite3-orm.svg)](https://david-dm.org/gms1/node-sqlite3-orm)
 [![devDependency Status](https://david-dm.org/gms1/node-sqlite3-orm/dev-status.svg)](https://david-dm.org/gms1/node-sqlite3-orm#info=devDependencies)
