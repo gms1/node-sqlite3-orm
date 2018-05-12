@@ -99,7 +99,7 @@ function getFieldMetadata(metaTable: Table, key: string|symbol): Field {
 function decorateTableClass(target: Function, opts: TableOpts): void {
   const newTableName = opts.name || target.name;
   const metaTable = getTableMetadata(target);
-  if (metaTable && !!metaTable.name && newTableName !== metaTable.name) {
+  if (!!metaTable.name && newTableName !== metaTable.name) {
     throw new Error(
         `failed to map class '${target
             .name}' to table name '${newTableName}': This class is already mapped to the table '${metaTable.name}'`);
