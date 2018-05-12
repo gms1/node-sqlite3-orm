@@ -1,7 +1,7 @@
-// tslint:disable prefer-const
+// tslint:disable prefer-const max-classes-per-file
 import {field, fk, id, table, index} from '../decorators';
 import {Field} from '../Field';
-import {schema} from '../Schema';
+import {schema, Schema} from '../Schema';
 import {SQL_MEMORY_DB_PRIVATE, SqlDatabase} from '../SqlDatabase';
 import {BaseDAO} from '../BaseDAO';
 
@@ -81,7 +81,6 @@ class ChildTable {
     this.parentId = undefined;
   }
 }
-
 
 
 // ---------------------------------------------
@@ -209,19 +208,29 @@ describe('test schema', () => {
       // TODO: we do not have defined the property type
       expect(parentTable.getTableField(newField.name).propertyType).toBeUndefined();
 
-
+      // TODO: validate if new column exist afterwards
       await schema().alterTableAddColumn(sqldb, TABLE_PARENT_TABLE_NAME, newField.name);
 
-      // TODO: validate if new column exist
+      await schema().dropIndex(sqldb, TABLE_CHILD_TABLE_NAME, TABLE_CHILD_IDX_NAME);
+      catalogItem.objType = 'index';
+      catalogItem.objName = TABLE_CHILD_IDX_NAME;
+      try {
+        await catalogDAO.select(catalogItem);
+        fail(`index should not exist`);
+      } catch (e) {
+        expect(e).toBeDefined();
+      }
 
       await schema().dropTable(sqldb, TABLE_CHILD_TABLE_NAME);
       await schema().dropTable(sqldb, TABLE_PARENT_TABLE_NAME);
 
       // now database objects should not exist in the database catalog:
+
       catalogItem.objType = 'table';
       catalogItem.objName = TABLE_PARENT_TABLE_NAME;
       try {
         await catalogDAO.select(catalogItem);
+        fail(`table ${TABLE_CHILD_TABLE_NAME} should not exist`);
       } catch (e) {
         expect(e).toBeDefined();
       }
@@ -230,14 +239,7 @@ describe('test schema', () => {
       catalogItem.objName = TABLE_CHILD_TABLE_NAME;
       try {
         await catalogDAO.select(catalogItem);
-      } catch (e) {
-        expect(e).toBeDefined();
-      }
-
-      catalogItem.objType = 'index';
-      catalogItem.objName = TABLE_CHILD_IDX_NAME;
-      try {
-        await catalogDAO.select(catalogItem);
+        fail(`table ${TABLE_CHILD_TABLE_NAME} should not exist`);
       } catch (e) {
         expect(e).toBeDefined();
       }
@@ -317,11 +319,19 @@ describe('test schema', () => {
       expect(parentTable.hasPropertyField(newProperty)).toBeTruthy();
       expect(parentTable.hasTableField(newField.name)).toBeTruthy();
 
+      // TODO: validate if new column exist afterwards
       await parentDAO.alterTableAddColumn(newField.name);
 
-      // TODO: validate if new column exist
-
       await childDAO.dropIndex(TABLE_CHILD_IDX_NAME);
+      catalogItem.objType = 'index';
+      catalogItem.objName = TABLE_CHILD_IDX_NAME;
+      try {
+        await catalogDAO.select(catalogItem);
+        fail('index should not exist');
+      } catch (e) {
+        expect(e).toBeDefined();
+      }
+
       await childDAO.dropTable();
       await parentDAO.dropTable();
 
@@ -330,6 +340,7 @@ describe('test schema', () => {
       catalogItem.objName = TABLE_PARENT_TABLE_NAME;
       try {
         await catalogDAO.select(catalogItem);
+        fail(`table ${TABLE_PARENT_TABLE_NAME} should not exist`);
       } catch (e) {
         expect(e).toBeDefined();
       }
@@ -338,18 +349,200 @@ describe('test schema', () => {
       catalogItem.objName = TABLE_CHILD_TABLE_NAME;
       try {
         await catalogDAO.select(catalogItem);
+        fail(`table ${TABLE_CHILD_TABLE_NAME} should not exist`);
       } catch (e) {
         expect(e).toBeDefined();
       }
 
-      catalogItem.objType = 'index';
-      catalogItem.objName = TABLE_CHILD_IDX_NAME;
-      try {
-        await catalogDAO.select(catalogItem);
-      } catch (e) {
-        expect(e).toBeDefined();
-      }
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
 
+  // ---------------------------------------------
+  it('getTable for undefined table should throw', async(done) => {
+    try {
+      await schema().getTable('NOTABLE');
+      fail('should have thrown');
+    } catch (err) {
+    }
+    done();
+  });
+
+  // ---------------------------------------------
+  it('addTable for registered table should throw', async(done) => {
+    try {
+      let parentTable = schema().getTable(TABLE_PARENT_TABLE_NAME);
+      await schema().addTable(parentTable);
+      fail('should have thrown');
+    } catch (err) {
+    }
+    done();
+  });
+
+  // ---------------------------------------------
+  it('get undefined property should throw', async(done) => {
+    try {
+      let parentTable = schema().getTable(TABLE_PARENT_TABLE_NAME);
+      parentTable.getPropertyField('UNDEFFIELD');
+      fail('should have thrown');
+    } catch (err) {
+    }
+    done();
+  });
+
+  // ---------------------------------------------
+
+  @table({name: 'TESTTABLE'})
+  class TestTable {
+    @id({name: 'ID', dbtype: 'INTEGER NOT NULL'}) public id?: number;
+
+    @field({name: 'NAME', dbtype: 'TEXT'}) public name?: string;
+
+    @field({name: 'NAME2', dbtype: 'TEXT'}) public name2?: string;
+
+    public constructor() {
+      this.id = undefined;
+      this.name = undefined;
+    }
+  }
+
+  // ---------------------------------------------
+  it('add property to multiple names should throw', async(done) => {
+    let testTable = schema().getTable('TESTTABLE');
+    let idField = testTable.getPropertyField('id');
+    let nameField = testTable.getPropertyField('name');
+    try {
+      idField.propertyKey = nameField.propertyKey;
+      testTable.addPropertyField(idField);
+      fail('should have thrown');
+    } catch (err) {
+      }
+    let idField2 = testTable.getPropertyField('id');
+    let nameField2 = testTable.getPropertyField('name');
+    expect(idField2).toBe(idField);
+    expect(nameField2).toBe(nameField);
+    done();
+  });
+
+  // ---------------------------------------------
+  it('add property to same name should succeed', async(done) => {
+    let testTable = schema().getTable('TESTTABLE');
+    let nameField = testTable.getPropertyField('name');
+    try {
+      testTable.addPropertyField(nameField);
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+
+  // ---------------------------------------------
+  it('get not defined field should throw', async(done) => {
+    let testTable = schema().getTable('TESTTABLE');
+    try {
+      let nameField = testTable.getTableField('undef');
+      fail('should have thrown');
+    } catch (err) {
+    }
+    done();
+  });
+
+
+  // ---------------------------------------------
+  it('adding field without a name should throw', async(done) => {
+    let testTable = schema().getTable('TESTTABLE');
+    let nameField = testTable.getPropertyField('name');
+    try {
+      nameField.name = undefined as any as string;
+      testTable.addTableField(nameField);
+      fail('should have thrown');
+    } catch (err) {
+    }
+    done();
+  });
+
+  // ---------------------------------------------
+  it('adding field to multiple properties should throw', async(done) => {
+    let testTable = schema().getTable('TESTTABLE');
+    let name2Field = testTable.getPropertyField('name2');
+    try {
+      name2Field.name = 'NAME';
+      name2Field.propertyKey = 'nameX';
+      testTable.addTableField(name2Field);
+      fail('should have thrown');
+    } catch (err) {
+    }
+    done();
+  });
+
+
+  // ---------------------------------------------
+  it('get create index statement for undefined index should throw', async(done) => {
+    let testTable = schema().getTable('TESTTABLE');
+    try {
+      let nameField = testTable.getCreateIndexStatement('undef');
+      fail('should have thrown');
+    } catch (err) {
+    }
+    done();
+  });
+
+  // ---------------------------------------------
+  it('get drop index statement for undefined index should throw', async(done) => {
+    let testTable = schema().getTable('TESTTABLE');
+    try {
+      let nameField = testTable.getDropIndexStatement('undef');
+      fail('should have thrown');
+    } catch (err) {
+    }
+    done();
+  });
+
+  // ---------------------------------------------
+  it('get dml statements for known table should succeed', async(done) => {
+    let testTable = schema().getTable('TESTTABLE');
+    try {
+      testTable.getUpdateSetStatement();
+      testTable.getDeleteFromStatement();
+      testTable.getSelectOneStatement();
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+
+
+  // ---------------------------------------------
+  @table({name: 'NOFIELDSTABLE'})
+  class NoFieldsTable {
+    id: number;
+    name: string;
+    public constructor() {
+      this.id = 0;
+      this.name = '';
+    }
+  }
+
+  // ---------------------------------------------
+  it('get dml statements for table without fields should throw', async(done) => {
+    let noFieldsTable = schema().getTable('NOFIELDSTABLE');
+    try {
+      noFieldsTable.getUpdateSetStatement();
+      fail('should have thrown');
+    } catch (err) {
+    }
+    done();
+  });
+
+
+
+  // ---------------------------------------------
+  it('schema should be a singleton', async(done) => {
+    try {
+      let currSchema = schema();
+      expect(new Schema()).toBe(currSchema);
     } catch (err) {
       fail(err);
     }
