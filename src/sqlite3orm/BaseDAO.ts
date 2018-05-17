@@ -46,8 +46,10 @@ export class BaseDAO<T extends Object> {
         } else {
           const res: any =
               await this.sqldb.run(this.table.getInsertIntoStatement(), this.bindNonPrimaryKeyInputParams(model));
+          /* istanbul ignore if */
           // tslint:disable-next-line: triple-equals
           if (res.lastID == undefined) {
+            // NOTE: should not happen
             reject(new Error('AUTOINCREMENT failed, \'lastID\' is undefined or null'));
             return;
           }
@@ -99,7 +101,10 @@ export class BaseDAO<T extends Object> {
           return;
         }
       } catch (e) {
+        // NOTE: should not happen
+        /* istanbul ignore next */
         reject(new Error(`delete from '${this.table.name}' failed: ${e.message}`));
+        /* istanbul ignore next */
         return;
       }
       resolve();
@@ -109,10 +114,10 @@ export class BaseDAO<T extends Object> {
   /**
    * delete using primary key
    *
-   * @param {object} input
+   * @param {Partial<T>} input
    * @returns {Promise<void>}
    */
-  public async deleteById(input: object): Promise<void> {
+  public async deleteById(input: Partial<T>): Promise<void> {
     return new Promise<void>(async(resolve, reject) => {
       try {
         const res =
@@ -122,7 +127,10 @@ export class BaseDAO<T extends Object> {
           return;
         }
       } catch (e) {
+        // NOTE: should not happen
+        /* istanbul ignore next */
         reject(new Error(`delete from '${this.table.name}' failed: ${e.message}`));
+        /* istanbul ignore next */
         return;
       }
       resolve();
@@ -152,10 +160,10 @@ export class BaseDAO<T extends Object> {
   /**
    * select using primary key
    *
-   * @param {object} input
+   * @param {Partial<T>} input
    * @returns {Promise<T>}
    */
-  public async selectById(input: object): Promise<T> {
+  public async selectById(input: Partial<T>): Promise<T> {
     return new Promise<T>(async(resolve, reject) => {
       let output: T;
       try {
@@ -296,7 +304,9 @@ export class BaseDAO<T extends Object> {
       foreignDAO: BaseDAO<F>, fkName: string, foreignObject: F, more: Object = {}): Object {
     const hostParams: Object = Object.assign({}, more);
     const fkFields = this.table.getForeignKeyFields(fkName);
+    // istanbul ignore if */
     if (!fkFields) {
+      // NOTE: should not happen
       throw new Error(`internal error: fields for foreign key constraint '${fkName}' are not defined`);
     }
 
@@ -378,7 +388,9 @@ export class BaseDAO<T extends Object> {
                 value = NaN;
                 }
               break;
+            /* istanbul ignore next */
             default:
+              // NOTE: should not happen
               value = NaN;
               break;
               }

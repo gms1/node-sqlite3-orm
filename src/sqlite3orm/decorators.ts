@@ -97,12 +97,14 @@ function getFieldMetadata(metaTable: Table, key: string|symbol): Field {
  * @returns {Table}
  */
 function decorateTableClass(target: Function, opts: TableOpts): void {
+  const newTableName = opts.name || target.name;
   const metaTable = getTableMetadata(target);
-  if (!!opts.name && !!metaTable.name && name !== metaTable.name) {
-    throw new Error(`failed to map class '${target.name
-                    }' to table name '${opts.name}': This class is already mapped to the table '${metaTable.name}'`);
+  if (!!metaTable.name && newTableName !== metaTable.name) {
+    throw new Error(
+        `failed to map class '${target
+            .name}' to table name '${newTableName}': This class is already mapped to the table '${metaTable.name}'`);
   }
-  metaTable.name = opts.name || target.name;
+  metaTable.name = newTableName;
   if (!!opts.withoutRowId) {
     metaTable.withoutRowId = true;
     }
@@ -164,7 +166,7 @@ function decorateForeignKeyProperty(
     foreignTableField: string): Field {
   if (typeof target === 'function') {
     // not decorating static property
-    throw new Error(`decorating static property '${key.toString()}' using field-decorator is not supported`);
+    throw new Error(`decorating static property '${key.toString()}' using fk-decorator is not supported`);
     }
 
   const metaTable: Table = getTableMetadata(target.constructor);
@@ -189,7 +191,7 @@ function decorateForeignKeyProperty(
 function decorateIndexProperty(target: Object|Function, key: string|symbol, indexName: string): Field {
   if (typeof target === 'function') {
     // not decorating static property
-    throw new Error(`decorating static property '${key.toString()}' using field-decorator is not supported`);
+    throw new Error(`decorating static property '${key.toString()}' using index-decorator is not supported`);
     }
 
   const metaTable: Table = getTableMetadata(target.constructor);

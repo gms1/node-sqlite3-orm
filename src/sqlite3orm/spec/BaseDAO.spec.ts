@@ -1,4 +1,4 @@
-// tslint:disable prefer-const
+// tslint:disable prefer-const max-classes-per-file
 import {BaseDAO} from '../BaseDAO';
 import {field, fk, id, table} from '../decorators';
 import {SQL_MEMORY_DB_PRIVATE, SqlDatabase} from '../SqlDatabase';
@@ -162,5 +162,260 @@ describe('test BaseDAO', () => {
 
   });
 
+  // ---------------------------------------------
+  class NoTable {
+    id: number;
+    constructor() {
+      this.id = 0;
+    }
+  }
+
+  it('expect class without table-definition to throw', async(done) => {
+    try {
+      let noTableDao: BaseDAO<NoTable> = new BaseDAO(NoTable, sqldb);
+      fail('instantiation BaseDAO for class without table-definition should have thrown');
+    } catch (err) {
+    }
+    done();
+
+  });
+
+  // ---------------------------------------------
+  it('expect inserting duplicate id to throw', async(done) => {
+    let user1: User = new User();
+    let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
+    try {
+      user1.userId = 1;
+      user1.userLoginName = 'login1/1';
+      await userDao.insert(user1);
+    } catch (err) {
+      fail(err);
+      }
+    try {
+      user1.userId = 1;
+      user1.userLoginName = 'login1/2';
+      await userDao.insert(user1);
+      fail('inserting duplicate id should have thrown');
+    } catch (err) {
+    }
+    done();
+
+  });
+
+  // ---------------------------------------------
+  it('expect updating using wrong id to throw', async(done) => {
+    let user1: User = new User();
+    let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
+    try {
+      user1.userId = undefined as any as number;
+      user1.userLoginName = 'login1/2';
+      await userDao.update(user1);
+      fail('updating using wrong id should have thrown');
+    } catch (err) {
+    }
+    done();
+
+  });
+
+  // ---------------------------------------------
+  it('expect updating not null column with null to throw', async(done) => {
+    let user1: User = new User();
+    let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
+    try {
+      user1.userId = 1;
+      user1.userLoginName = 'login1/1';
+      await userDao.insert(user1);
+    } catch (err) {
+      fail(err);
+      }
+    try {
+      user1.userId = 1;
+      user1.userLoginName = undefined as any as string;
+      await userDao.update(user1);
+      fail('updating not null column with null should have thrown');
+    } catch (err) {
+    }
+    done();
+
+  });
+
+  // ---------------------------------------------
+  it('expect deleting using wrong id to throw', async(done) => {
+    let user1: User = new User();
+    let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
+    try {
+      user1.userId = undefined as any as number;
+      user1.userLoginName = 'login1/2';
+      await userDao.delete(user1);
+      fail('deleting using wrong id should have thrown');
+    } catch (err) {
+    }
+    done();
+
+  });
+
+  // ---------------------------------------------
+  it('expect deleting by id using wrong id to throw', async(done) => {
+    let user1: User = new User();
+    let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
+    try {
+      user1.userId = undefined as any as number;
+      user1.userLoginName = 'login1/2';
+      await userDao.deleteById(user1);
+      fail('deleting using wrong id should have thrown');
+    } catch (err) {
+    }
+    done();
+
+  });
+
+  // ---------------------------------------------
+  it('expect deleting by id to succeed', async(done) => {
+    let user1: User = new User();
+    let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
+    try {
+      user1.userId = 1;
+      user1.userLoginName = 'login1/1';
+      await userDao.insert(user1);
+      await userDao.selectById({userId: 1});
+      expect(user1.userId).toBe(1, 'userId does not match after insert');
+      user1.userId = 1;
+      await userDao.deleteById({userId: 1});
+    } catch (err) {
+      fail(err);
+      }
+    try {
+      await userDao.selectById({userId: 1});
+      fail('row should have been deleted');
+    } catch (err) {
+      }
+    try {
+      await userDao.selectAll('WHERE noColumn=9');
+      fail('a condition using not existing column should have thrown');
+    } catch (err) {
+    }
+    done();
+
+  });
+
+  // ---------------------------------------------
+  it('expect selectAll to throw on failure', async(done) => {
+    let user1: User = new User();
+    let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
+    try {
+      await userDao.selectAll('WHERE noColumn=9');
+      fail('a condition using not existing column should have thrown');
+    } catch (err) {
+    }
+    done();
+
+  });
+  // ---------------------------------------------
+  it('expect selectEach to throw on failure', async(done) => {
+    let user1: User = new User();
+    let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
+    try {
+      user1.userId = 1;
+      await userDao.selectEach(() => {}, 'WHERE noColumn=9');
+      fail('a condition using not existing column should have thrown');
+    } catch (err) {
+    }
+    done();
+
+  });
+
+  // ---------------------------------------------
+  it('expect selectEach to succeed', async(done) => {
+    let user1: User = new User();
+    let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
+    try {
+      user1.userId = 1;
+      user1.userLoginName = 'login1/1';
+      await userDao.insert(user1);
+    } catch (err) {
+      fail(err);
+      }
+    try {
+      let user2: User = new User();
+      await userDao.selectEach((err, usr) => user2 = usr, 'WHERE user_id=1');
+      expect(user1.userId).toBe(user2.userId, 'userId does not match');
+      expect(user1.userLoginName).toBe(user2.userLoginName, 'userLoginName does not match');
+      await userDao.selectEach((err, usr) => user2 = usr);
+    } catch (err) {
+      fail(err);
+    }
+    done();
+
+  });
+
+  // ---------------------------------------------
+  it('expect selectAllOf for undefined constraint to fail', async(done) => {
+    let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
+    let contact: Contact = new Contact();
+    try {
+      let usersContact1 = await userDao.selectAllOf('undefConstraint', Contact, contact);
+      fail('selectAllOf for undefined constraint should have failed');
+    } catch (err) {
+    }
+    done();
+
+  });
+
+  // ---------------------------------------------
+
+  @table({name: 'TEST_SET_PROP_TABLE'})
+  class TestSetProperty {
+    @id({name: 'id', dbtype: 'INTEGER NOT NULL'})
+    id: number;
+
+    @field({name: 'my_bool_text', dbtype: 'TEXT'})
+    myBool2Text?: boolean;
+
+    @field({name: 'my_number_text', dbtype: 'TEXT'})
+    myNumber2Text?: number;
+
+    @field({name: 'my_string_int', dbtype: 'INTEGER'})
+    myString2Number?: string;
+
+    @field({name: 'my_date_real', dbtype: 'REAL'})
+    myDate2Number?: Date;
+
+    constructor() {
+      this.id = 0;
+    }
+  }
+
+  // ---------------------------------------------
+  it('expect setProperty to work', async(done) => {
+    let testDao: BaseDAO<TestSetProperty> = new BaseDAO(TestSetProperty, sqldb);
+    let testRow: TestSetProperty = new TestSetProperty();
+    try {
+      await testDao.createTable();
+      await sqldb.exec(`
+        INSERT INTO TEST_SET_PROP_TABLE (
+          id,
+          my_bool_text,
+          my_number_text,
+          my_string_int,
+          my_date_real
+        ) values (
+          1,
+          \"abc\",
+          \"42\",
+          24,
+          3.14
+        )
+      `);
+      testRow = await testDao.selectById({id: 1});
+      expect(testRow.myBool2Text).toBeUndefined();
+      expect(testRow.myNumber2Text).toBe(42);
+      expect(testRow.myString2Number).toBe('24');
+      expect(testRow.myDate2Number).toBeNaN();
+    } catch (err) {
+      fail(err);
+    }
+    done();
+
+  });
 
 });

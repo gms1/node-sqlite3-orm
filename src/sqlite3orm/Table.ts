@@ -172,15 +172,15 @@ export class Table {
    */
   public addTableField(field: Field): Field {
     this._statementsText = undefined;
+    if (!field.name) {
+      throw new Error(`property '${field.propertyKey.toString()}' on class '${this.className}': field name missing`);
+      }
     if (this.mapNameToField.has(field.name)) {
       const oldField = this.mapNameToField.get(field.name) as Field;
       if (field !== oldField) {
         throw new Error(`properties '${field.propertyKey.toString()}' and '${oldField.propertyKey
                             .toString()}' on class '${this.className}' are mapped to the same column ${field.name}`);
       }
-      }
-    if (!field.name) {
-      throw new Error(`property '${field.propertyKey.toString()}' on class '${this.className}': field name missing`);
     }
     this.mapNameToField.set(field.name, field);
     if (field.isIdentity) {

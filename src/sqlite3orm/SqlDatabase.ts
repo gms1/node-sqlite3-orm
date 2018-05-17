@@ -384,6 +384,8 @@ export class SqlDatabase {
       const res = await this.get('PRAGMA user_version');
       userVersion = res.user_version;
     } catch (e) {
+      // NOTE: should not happen
+      /* istanbul ignore next */
       return Promise.reject(e);
       }
     return Promise.resolve(userVersion);
