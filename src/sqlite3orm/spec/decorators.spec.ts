@@ -1,4 +1,4 @@
-// tslint:disable prefer-const max-classes-per-file no-unnecessary-class
+// tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
 import {field, fk, id, table, index} from '../decorators';
 import {Field} from '../Field';
 import {schema, Schema} from '../Schema';
