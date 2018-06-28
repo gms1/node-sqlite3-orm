@@ -208,8 +208,8 @@ tsconfig.json:
 
 ## Release Notes
 
-| Release   | Notes                                                                                                                            |
-|-----------|----------------------------------------------------------------------------------------------------------------------------------|
+| Release   | Notes                                                                                                               |------------|---------------------------------------------------------------------------------------------------------------------|
+| 1.0.0     | maintenance releases
 | 0.0.20-24 | maintenance releases
 | 0.0.19    | BaseDAO: added selectById/deleteById methods for convenience
 | 0.0.15-18 | maintenance releases

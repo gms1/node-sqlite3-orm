@@ -1,4 +1,4 @@
-// tslint:disable prefer-const max-classes-per-file
+// tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class deprecation
 import {field, fk, id, table, index} from '../decorators';
 import {Field} from '../Field';
 import {schema, Schema} from '../Schema';
@@ -363,7 +363,7 @@ describe('test schema', () => {
   // ---------------------------------------------
   it('getTable for undefined table should throw', async(done) => {
     try {
-      await schema().getTable('NOTABLE');
+      schema().getTable('NOTABLE');
       fail('should have thrown');
     } catch (err) {
     }
@@ -374,7 +374,7 @@ describe('test schema', () => {
   it('addTable for registered table should throw', async(done) => {
     try {
       let parentTable = schema().getTable(TABLE_PARENT_TABLE_NAME);
-      await schema().addTable(parentTable);
+      schema().addTable(parentTable);
       fail('should have thrown');
     } catch (err) {
     }
@@ -505,8 +505,11 @@ describe('test schema', () => {
     let testTable = schema().getTable('TESTTABLE');
     try {
       testTable.getUpdateSetStatement();
+      testTable.getUpdateByIdStatement();
       testTable.getDeleteFromStatement();
+      testTable.getDeleteByIdStatement();
       testTable.getSelectOneStatement();
+      testTable.getSelectByIdStatement();
     } catch (err) {
       fail(err);
     }

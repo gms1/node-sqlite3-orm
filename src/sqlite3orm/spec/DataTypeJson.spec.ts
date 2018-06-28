@@ -1,4 +1,4 @@
-// tslint:disable prefer-const
+// tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
 import {BaseDAO} from '../BaseDAO';
 import {field, id, table} from '../decorators';
 import {schema} from '../Schema';

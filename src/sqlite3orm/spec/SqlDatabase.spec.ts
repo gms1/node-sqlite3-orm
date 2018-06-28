@@ -1,4 +1,4 @@
-// tslint:disable prefer-const
+// tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
 import {SQL_MEMORY_DB_PRIVATE, SqlDatabase} from '../SqlDatabase';
 
 // ---------------------------------------------
