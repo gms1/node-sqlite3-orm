@@ -64,7 +64,8 @@ import {SqlDatabase} from 'sqlite3orm/SqlDatabase';
   await sqldb.open(':memory:');
 })();
 ```
-SqlDatabase is a thin promised-based wrapper around sqlite3.Database: [node-sqlite3](https://github.com/mapbox/node-sqlite3) 
+
+SqlDatabase is a thin promised-based wrapper around sqlite3.Database: [node-sqlite3](https://github.com/mapbox/node-sqlite3)
 
 ## Schema Creation
 
@@ -90,7 +91,6 @@ import {schema} from 'sqlite3orm/Schema';
   await sqldb.setUserVersion(10);
 })();
 ```
-
 
 ## Select/Insert/Update/Delete using DAOs
 
@@ -142,13 +142,14 @@ In order to read from or write to the database, you can use the `BaseDAO<Model>'
 })();
 
 ```
+
 ## Supported data types using DAO:
 
-All primitive JavaScript data types ('String', 'Number', 'Boolean') and properties of type 'Date' are supported. 
-Type safety is guaranteed, when reading properties of these types from the database (NULL values are treated as 'undefined'). 
+All primitive JavaScript data types ('String', 'Number', 'Boolean') and properties of type 'Date' are supported.
+Type safety is guaranteed, when reading properties of these types from the database (NULL values are treated as 'undefined').
 Other data types can be serialized to a database field of type TEXT in JSON format, by setting the option 'isJson' to true (see sample above).
 
-> TODO: add support for user provided serialize/deserialize functions 
+> TODO: add support for user provided serialize/deserialize functions
 
 ## Connection pool
 
@@ -158,7 +159,6 @@ One possibility to achieve this could be to use a connection pool and to perform
 
 > NOTE: instances of BaseDAO are lightweight objects and can be created on the fly and exclusively for one database transaction
 
- 
 ```TypeScript
 
 (async () => {
@@ -182,13 +182,14 @@ One possibility to achieve this could be to use a connection pool and to perform
 
 ## Install
 
-```
-$ npm install sqlite3orm
+``` bash
+npm install sqlite3orm
 ```
 
 When using TypeScript, the compiler options `experimentalDecorators` and `emitDecoratorMetadata` must be enabled.
 
 tsconfig.json:
+
 ```JSON
 {
   "compilerOptions": {
@@ -200,27 +201,25 @@ tsconfig.json:
 }
 ```
 
-
 ## License
 
-**node-sqlite3-orm** is licensed under the MIT License:
-[LICENSE](./LICENSE)
+**node-sqlite3-orm** is licensed under the MIT License: [LICENSE](./LICENSE)
 
 ## Release Notes
 
-| Release   | Notes                                                                                                               |------------|---------------------------------------------------------------------------------------------------------------------|
-| 1.0.0     | maintenance releases
-| 0.0.20-24 | maintenance releases
-| 0.0.19    | BaseDAO: added selectById/deleteById methods for convenience
-| 0.0.15-18 | maintenance releases
-| 0.0.14    | new @index decorator and create/drop - index methods
-| 0.0.13    | BaseDAO: added createTable/dropTable/alterTableAddColumn methods for convenience
-| 0.0.10-12 | maintenance releases
-| 0.0.9     | possibility to map properties of complex type to a database column and serialize/deserialize this properties in JSON format
-| 0.0.8     | SqlConnectionPool: allow connections to be garbage-collected if the connection pool is not limited by max-connections
-| 0.0.7     | SqlConnectionPool: a new connection pool
-| 0.0.6     | BaseDAO: ensure type safety for mapped properties of primitive or Date type
-
+| Release   | Notes                                                                                                                       |
+|-----------|-----------------------------------------------------------------------------------------------------------------------------|
+| 1.0.0     | maintenance releases                                                                                                        |
+| 0.0.20-24 | maintenance releases                                                                                                        |
+| 0.0.19    | BaseDAO: added selectById/deleteById methods for convenience                                                                |
+| 0.0.15-18 | maintenance releases                                                                                                        |
+| 0.0.14    | new @index decorator and create/drop - index methods                                                                        |
+| 0.0.13    | BaseDAO: added createTable/dropTable/alterTableAddColumn methods for convenience                                            |
+| 0.0.10-12 | maintenance releases                                                                                                        |
+| 0.0.9     | possibility to map properties of complex type to a database column and serialize/deserialize this properties in JSON format |
+| 0.0.8     | SqlConnectionPool: allow connections to be garbage-collected if the connection pool is not limited by max-connections       |
+| 0.0.7     | SqlConnectionPool: a new connection pool                                                                                    |
+| 0.0.6     | BaseDAO: ensure type safety for mapped properties of primitive or Date type                                                 |
 
 ## Downloads
 
