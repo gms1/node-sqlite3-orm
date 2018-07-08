@@ -1,8 +1,5 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-import {BaseDAO} from '../BaseDAO';
-import {field, id, table} from '../decorators';
-import {schema} from '../Schema';
-import {SQL_MEMORY_DB_PRIVATE, SqlDatabase} from '../SqlDatabase';
+import {SqlDatabase, BaseDAO, SQL_MEMORY_DB_PRIVATE, schema, field, id, table} from '../index';
 
 const DATATYPE_BOOLEAN_TABLE = 'DATATYPE_BOOLEAN';
 
@@ -32,7 +29,7 @@ describe('test boolean type', () => {
   let dao: BaseDAO<DataTypeBoolean>;
   let model: DataTypeBoolean = new DataTypeBoolean();
   // ---------------------------------------------
-  beforeEach(async(done) => {
+  beforeEach(async (done) => {
     try {
       sqldb = new SqlDatabase();
       await sqldb.open(SQL_MEMORY_DB_PRIVATE);
@@ -45,7 +42,7 @@ describe('test boolean type', () => {
     done();
   });
 
-  it('expect writing boolean properties to the database to succeed', async(done) => {
+  it('expect writing boolean properties to the database to succeed', async (done) => {
     try {
       let sqlstmt = await sqldb.prepare(`SELECT
               id, my_bool_text, my_bool_int, my_bool_real
@@ -99,7 +96,7 @@ describe('test boolean type', () => {
   });
 
 
-  it('expect reading boolean properties from database to succeed', async(done) => {
+  it('expect reading boolean properties from database to succeed', async (done) => {
     try {
       let sqlstmt = await sqldb.prepare(`INSERT INTO ${DATATYPE_BOOLEAN_TABLE}
               (id, my_bool_text, my_bool_int, my_bool_real)

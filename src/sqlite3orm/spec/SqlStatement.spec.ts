@@ -1,6 +1,5 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-import {SQL_MEMORY_DB_PRIVATE, SqlDatabase} from '../SqlDatabase';
-import {SqlStatement} from '..';
+import {SqlDatabase, SqlStatement, SQL_MEMORY_DB_PRIVATE} from '../index';
 
 // ---------------------------------------------
 
@@ -8,7 +7,7 @@ describe('test SqlStatement', () => {
   let sqldb: SqlDatabase;
 
   // ---------------------------------------------
-  beforeEach(async(done) => {
+  beforeEach(async (done) => {
     try {
       sqldb = new SqlDatabase();
       await sqldb.open(SQL_MEMORY_DB_PRIVATE);
@@ -21,7 +20,7 @@ describe('test SqlStatement', () => {
   });
 
   // ---------------------------------------------
-  it('expect basic prepared dml to succeed', async(done) => {
+  it('expect basic prepared dml to succeed', async (done) => {
     let selStmt: SqlStatement;
     let insStmt: SqlStatement;
     selStmt = await sqldb.prepare('SELECT col FROM TEST WHERE id=?');
@@ -44,13 +43,13 @@ describe('test SqlStatement', () => {
       await insStmt.finalize();
     } catch (err) {
       fail(err);
-      }
+    }
     try {
       // statement is not prepared
       await selStmt.run();
       fail('\"run\" should failed on finalized statement');
     } catch (err) {
-      }
+    }
     try {
       // statement is not prepared
       await selStmt.get();
@@ -71,7 +70,7 @@ describe('test SqlStatement', () => {
           .toBe('testvalue 1', 'result from prepared statement have col=\"testvalue 1\" in first row');
     } catch (err) {
       fail(err);
-      }
+    }
     try {
       // select all rows having id>0 using callback
       let allRows: any[] = [];

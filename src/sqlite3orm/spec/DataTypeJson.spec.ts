@@ -1,9 +1,5 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-import {BaseDAO} from '../BaseDAO';
-import {field, id, table} from '../decorators';
-import {schema} from '../Schema';
-import {SQL_MEMORY_DB_PRIVATE, SqlDatabase} from '../SqlDatabase';
-
+import {SqlDatabase, BaseDAO, SQL_MEMORY_DB_PRIVATE, schema, field, id, table} from '../index';
 
 const DATATYPE_JSON_TABLE = 'DATATYPE_JSON';
 
@@ -33,7 +29,7 @@ describe('test Json data', () => {
   let dao: BaseDAO<DataTypeJson>;
   let model: DataTypeJson = new DataTypeJson();
   // ---------------------------------------------
-  beforeEach(async(done) => {
+  beforeEach(async (done) => {
     try {
       sqldb = new SqlDatabase();
       await sqldb.open(SQL_MEMORY_DB_PRIVATE);
@@ -46,7 +42,7 @@ describe('test Json data', () => {
     done();
   });
 
-  it('expect reading/writing Json properties from/to the database to succeed', async(done) => {
+  it('expect reading/writing Json properties from/to the database to succeed', async (done) => {
     try {
       // write
       ++model.id;

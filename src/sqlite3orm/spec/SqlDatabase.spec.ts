@@ -1,5 +1,5 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-import {SQL_MEMORY_DB_PRIVATE, SqlDatabase} from '../SqlDatabase';
+import {SqlDatabase, SQL_MEMORY_DB_PRIVATE} from '../index';
 
 // ---------------------------------------------
 
@@ -7,7 +7,7 @@ describe('test SqlDatabase', () => {
   let sqldb: SqlDatabase;
 
   // ---------------------------------------------
-  beforeEach(async(done) => {
+  beforeEach(async (done) => {
     try {
       sqldb = new SqlDatabase();
       await sqldb.open(SQL_MEMORY_DB_PRIVATE);
@@ -20,7 +20,7 @@ describe('test SqlDatabase', () => {
   });
 
   // ---------------------------------------------
-  it('expect basic dmls to succeed', async(done) => {
+  it('expect basic dmls to succeed', async (done) => {
     try {
       // insert id=1 should work
       let res = await sqldb.run('INSERT INTO TEST (id,col) values (1,\'testvalue 1/1\')');
@@ -38,14 +38,14 @@ describe('test SqlDatabase', () => {
       }
     } catch (err) {
       fail(err);
-      }
+    }
     // insert without id should work
     try {
       let res = await sqldb.run('INSERT INTO TEST (col) values (\'testvalue 2\')');
       expect(res.lastID).toBe(2);
     } catch (err) {
       fail(err);
-      }
+    }
 
     // select without parameter should work
     try {
@@ -59,7 +59,7 @@ describe('test SqlDatabase', () => {
       expect(res[2].col).toBe('testvalue 2');
     } catch (err) {
       fail(err);
-      }
+    }
 
     try {
       // update should work
@@ -69,7 +69,7 @@ describe('test SqlDatabase', () => {
       expect(row.col).toBe('testvalue 1/2');
     } catch (err) {
       fail(err);
-      }
+    }
 
     try {
       // prepared update should work
@@ -81,7 +81,7 @@ describe('test SqlDatabase', () => {
       expect(row.col).toBe('testvalue 1/3');
     } catch (err) {
       fail(err);
-      }
+    }
 
     try {
       let res2: any[] = [];
@@ -108,11 +108,11 @@ describe('test SqlDatabase', () => {
 
 
   // ---------------------------------------------
-  it('expect transaction to commit on end', async(done) => {
+  it('expect transaction to commit on end', async (done) => {
     try {
       let oldver = await sqldb.getUserVersion();
 
-      await sqldb.transactionalize(async() => {
+      await sqldb.transactionalize(async () => {
         await sqldb.setUserVersion(oldver + 3);
       });
 
@@ -125,12 +125,12 @@ describe('test SqlDatabase', () => {
   });
 
   // ---------------------------------------------
-  it('expect transaction to rollback on error', async(done) => {
+  it('expect transaction to rollback on error', async (done) => {
     try {
       let oldver = await sqldb.getUserVersion();
 
       try {
-        await sqldb.transactionalize(async() => {
+        await sqldb.transactionalize(async () => {
           await sqldb.setUserVersion(oldver + 3);
           throw new Error('do not commit');
         });
@@ -146,7 +146,7 @@ describe('test SqlDatabase', () => {
   });
 
   // ---------------------------------------------
-  it('expect getting and setting PRAGMA user_version to succeed', async(done) => {
+  it('expect getting and setting PRAGMA user_version to succeed', async (done) => {
     try {
       let oldver = await sqldb.getUserVersion();
       expect(oldver).toBe(0);
@@ -159,7 +159,7 @@ describe('test SqlDatabase', () => {
     done();
   });
   // ---------------------------------------------
-  it('expect closing database to succeed', async(done) => {
+  it('expect closing database to succeed', async (done) => {
     try {
       await sqldb.close();
     } catch (err) {
@@ -168,7 +168,7 @@ describe('test SqlDatabase', () => {
     done();
   });
   // ---------------------------------------------
-  it('expect closed database to throw on exec', async(done) => {
+  it('expect closed database to throw on exec', async (done) => {
     try {
       await sqldb.close();
       await sqldb.exec('INSERT INTO TEST (col) values (\'testvalue 3\')');
@@ -178,7 +178,7 @@ describe('test SqlDatabase', () => {
     done();
   });
   // ---------------------------------------------
-  it('expect closed database to throw on prepare', async(done) => {
+  it('expect closed database to throw on prepare', async (done) => {
     try {
       await sqldb.close();
       await sqldb.prepare('INSERT INTO TEST (col) values (\'testvalue 3\')');
@@ -188,7 +188,7 @@ describe('test SqlDatabase', () => {
     done();
   });
   // ---------------------------------------------
-  it('expect closed database to throw on run', async(done) => {
+  it('expect closed database to throw on run', async (done) => {
     try {
       await sqldb.close();
       await sqldb.run('INSERT INTO TEST (col) values (\'testvalue 3\')');
@@ -198,7 +198,7 @@ describe('test SqlDatabase', () => {
     done();
   });
   // ---------------------------------------------
-  it('expect closed database to throw on get', async(done) => {
+  it('expect closed database to throw on get', async (done) => {
     try {
       await sqldb.close();
       await sqldb.get('SELECT col from TEST');
@@ -208,7 +208,7 @@ describe('test SqlDatabase', () => {
     done();
   });
   // ---------------------------------------------
-  it('expect closed database to throw on all', async(done) => {
+  it('expect closed database to throw on all', async (done) => {
     try {
       await sqldb.close();
       await sqldb.all('SELECT col from TEST');
@@ -218,7 +218,7 @@ describe('test SqlDatabase', () => {
     done();
   });
   // ---------------------------------------------
-  it('expect closed database to throw on each', async(done) => {
+  it('expect closed database to throw on each', async (done) => {
     try {
       await sqldb.close();
       await sqldb.each('SELECT col from TEST', () => {});
@@ -228,7 +228,7 @@ describe('test SqlDatabase', () => {
     done();
   });
   // ---------------------------------------------
-  it('expect insert into not existing table should throw', async(done) => {
+  it('expect insert into not existing table should throw', async (done) => {
     try {
       SqlDatabase.verbose();
       await sqldb.exec('INSERT INTO NOTEXIST (col) values (\'testvalue 3\')');

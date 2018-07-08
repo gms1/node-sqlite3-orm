@@ -1,10 +1,17 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class deprecation
-import {field, fk, id, table, index} from '../decorators';
-import {Field} from '../Field';
-import {schema, Schema} from '../Schema';
-import {SQL_MEMORY_DB_PRIVATE, SqlDatabase} from '../SqlDatabase';
-import {BaseDAO} from '../BaseDAO';
-
+import {
+  BaseDAO,
+  Field,
+  SqlDatabase,
+  Schema,
+  SQL_MEMORY_DB_PRIVATE,
+  schema,
+  field,
+  fk,
+  id,
+  index,
+  table
+} from '../index';
 
 // sqlite3 catalog table
 
@@ -32,7 +39,7 @@ class CatalogTable {
     this.rootPage = undefined;
     this.sql = undefined;
   }
-  }
+}
 
 
 
@@ -89,7 +96,7 @@ describe('test schema', () => {
   let sqldb: SqlDatabase;
 
   // ---------------------------------------------
-  beforeEach(async(done) => {
+  beforeEach(async (done) => {
     try {
       sqldb = new SqlDatabase();
       await sqldb.open(SQL_MEMORY_DB_PRIVATE);
@@ -141,7 +148,7 @@ describe('test schema', () => {
   });
 
   // ---------------------------------------------
-  it('expect create/drop/alter-table to work (using Schema)', async(done) => {
+  it('expect create/drop/alter-table to work (using Schema)', async (done) => {
     try {
       let catalogDAO = new BaseDAO<CatalogTable>(CatalogTable, sqldb);
       let catalogItem = new CatalogTable();
@@ -251,7 +258,7 @@ describe('test schema', () => {
   });
 
   // ---------------------------------------------
-  it('expect create/drop/alter-table to work (using BaseDAO)', async(done) => {
+  it('expect create/drop/alter-table to work (using BaseDAO)', async (done) => {
     try {
       let catalogDAO = new BaseDAO<CatalogTable>(CatalogTable, sqldb);
       let catalogItem = new CatalogTable();
@@ -279,7 +286,7 @@ describe('test schema', () => {
         await catalogDAO.select(catalogItem);
       } catch (e) {
         expect(e).toBeDefined();
-        }
+      }
 
       // create tables
 
@@ -361,7 +368,7 @@ describe('test schema', () => {
   });
 
   // ---------------------------------------------
-  it('getTable for undefined table should throw', async(done) => {
+  it('getTable for undefined table should throw', async (done) => {
     try {
       schema().getTable('NOTABLE');
       fail('should have thrown');
@@ -371,7 +378,7 @@ describe('test schema', () => {
   });
 
   // ---------------------------------------------
-  it('addTable for registered table should throw', async(done) => {
+  it('addTable for registered table should throw', async (done) => {
     try {
       let parentTable = schema().getTable(TABLE_PARENT_TABLE_NAME);
       schema().addTable(parentTable);
@@ -382,7 +389,7 @@ describe('test schema', () => {
   });
 
   // ---------------------------------------------
-  it('get undefined property should throw', async(done) => {
+  it('get undefined property should throw', async (done) => {
     try {
       let parentTable = schema().getTable(TABLE_PARENT_TABLE_NAME);
       parentTable.getPropertyField('UNDEFFIELD');
@@ -409,7 +416,7 @@ describe('test schema', () => {
   }
 
   // ---------------------------------------------
-  it('add property to multiple names should throw', async(done) => {
+  it('add property to multiple names should throw', async (done) => {
     let testTable = schema().getTable('TESTTABLE');
     let idField = testTable.getPropertyField('id');
     let nameField = testTable.getPropertyField('name');
@@ -418,7 +425,7 @@ describe('test schema', () => {
       testTable.addPropertyField(idField);
       fail('should have thrown');
     } catch (err) {
-      }
+    }
     let idField2 = testTable.getPropertyField('id');
     let nameField2 = testTable.getPropertyField('name');
     expect(idField2).toBe(idField);
@@ -427,7 +434,7 @@ describe('test schema', () => {
   });
 
   // ---------------------------------------------
-  it('add property to same name should succeed', async(done) => {
+  it('add property to same name should succeed', async (done) => {
     let testTable = schema().getTable('TESTTABLE');
     let nameField = testTable.getPropertyField('name');
     try {
@@ -439,7 +446,7 @@ describe('test schema', () => {
   });
 
   // ---------------------------------------------
-  it('get not defined field should throw', async(done) => {
+  it('get not defined field should throw', async (done) => {
     let testTable = schema().getTable('TESTTABLE');
     try {
       let nameField = testTable.getTableField('undef');
@@ -451,7 +458,7 @@ describe('test schema', () => {
 
 
   // ---------------------------------------------
-  it('adding field without a name should throw', async(done) => {
+  it('adding field without a name should throw', async (done) => {
     let testTable = schema().getTable('TESTTABLE');
     let nameField = testTable.getPropertyField('name');
     try {
@@ -464,7 +471,7 @@ describe('test schema', () => {
   });
 
   // ---------------------------------------------
-  it('adding field to multiple properties should throw', async(done) => {
+  it('adding field to multiple properties should throw', async (done) => {
     let testTable = schema().getTable('TESTTABLE');
     let name2Field = testTable.getPropertyField('name2');
     try {
@@ -479,7 +486,7 @@ describe('test schema', () => {
 
 
   // ---------------------------------------------
-  it('get create index statement for undefined index should throw', async(done) => {
+  it('get create index statement for undefined index should throw', async (done) => {
     let testTable = schema().getTable('TESTTABLE');
     try {
       let nameField = testTable.getCreateIndexStatement('undef');
@@ -490,7 +497,7 @@ describe('test schema', () => {
   });
 
   // ---------------------------------------------
-  it('get drop index statement for undefined index should throw', async(done) => {
+  it('get drop index statement for undefined index should throw', async (done) => {
     let testTable = schema().getTable('TESTTABLE');
     try {
       let nameField = testTable.getDropIndexStatement('undef');
@@ -501,7 +508,7 @@ describe('test schema', () => {
   });
 
   // ---------------------------------------------
-  it('get dml statements for known table should succeed', async(done) => {
+  it('get dml statements for known table should succeed', async (done) => {
     let testTable = schema().getTable('TESTTABLE');
     try {
       testTable.getUpdateSetStatement();
@@ -529,7 +536,7 @@ describe('test schema', () => {
   }
 
   // ---------------------------------------------
-  it('get dml statements for table without fields should throw', async(done) => {
+  it('get dml statements for table without fields should throw', async (done) => {
     let noFieldsTable = schema().getTable('NOFIELDSTABLE');
     try {
       noFieldsTable.getUpdateSetStatement();
@@ -542,7 +549,7 @@ describe('test schema', () => {
 
 
   // ---------------------------------------------
-  it('schema should be a singleton', async(done) => {
+  it('schema should be a singleton', async (done) => {
     try {
       let currSchema = schema();
       expect(new Schema()).toBe(currSchema);

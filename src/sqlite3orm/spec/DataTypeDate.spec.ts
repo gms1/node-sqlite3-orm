@@ -1,9 +1,5 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-import {BaseDAO} from '../BaseDAO';
-import {field, id, table} from '../decorators';
-import {schema} from '../Schema';
-import {SQL_MEMORY_DB_PRIVATE, SqlDatabase} from '../SqlDatabase';
-
+import {SqlDatabase, BaseDAO, SQL_MEMORY_DB_PRIVATE, schema, field, id, table} from '../index';
 
 const DATATYPE_DATE_TABLE = 'DATATYPE_DATE';
 
@@ -30,7 +26,7 @@ describe('test Date type', () => {
   let dao: BaseDAO<DataTypeDate>;
   let model: DataTypeDate = new DataTypeDate();
   // ---------------------------------------------
-  beforeEach(async(done) => {
+  beforeEach(async (done) => {
     try {
       sqldb = new SqlDatabase();
       await sqldb.open(SQL_MEMORY_DB_PRIVATE);
@@ -43,7 +39,7 @@ describe('test Date type', () => {
     done();
   });
 
-  it('expect writing Date properties to the database to succeed', async(done) => {
+  it('expect writing Date properties to the database to succeed', async (done) => {
     try {
       let sqlstmt = await sqldb.prepare(`SELECT
               id, my_date_text, my_date_int
@@ -69,7 +65,7 @@ describe('test Date type', () => {
   });
 
 
-  it('expect reading Date properties from database to succeed', async(done) => {
+  it('expect reading Date properties from database to succeed', async (done) => {
     try {
       let sqlstmt = await sqldb.prepare(`INSERT INTO ${DATATYPE_DATE_TABLE}
               (id, my_date_text, my_date_int)
