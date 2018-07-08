@@ -63,9 +63,9 @@ export class SqlDatabase {
    * @returns {Promise<void>}
    */
   public async open(databaseFile: string, mode?: number): Promise<void> {
-    if (!!this.pool) {
+    if (this.pool) {
       this.pool.release(this);
-      }
+    }
     return new Promise<void>((resolve, reject) => {
       const db = new Database(databaseFile, mode || SQL_OPEN_DEFAULT, (err) => {
         if (err) {
@@ -85,10 +85,10 @@ export class SqlDatabase {
    */
   public async close(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      if (!!this.pool) {
-        this.pool.release(this);
+      if (!this.db) {
         resolve();
-      } else if (!this.db) {
+      } else if (this.pool) {
+        this.pool.release(this);
         resolve();
       } else {
         const db = this.db;
@@ -261,7 +261,7 @@ export class SqlDatabase {
       if (!this.db) {
         reject(new Error('database connection not open'));
         return;
-        }
+      }
       let dbstmt: Statement;
       dbstmt = this.db.prepare(sql, params, (err) => {
         if (err) {
@@ -284,7 +284,7 @@ export class SqlDatabase {
   public serialize(callback?: () => void): void {
     if (!this.db) {
       throw new Error('database connection not open');
-      }
+    }
     return this.db.serialize(callback);
   }
 
@@ -299,7 +299,7 @@ export class SqlDatabase {
   public parallelize(callback?: () => void): void {
     if (!this.db) {
       throw new Error('database connection not open');
-      }
+    }
     return this.db.parallelize(callback);
   }
 
@@ -312,8 +312,8 @@ export class SqlDatabase {
   public async transactionalize<T>(callback: () => Promise<T>): Promise<T> {
     return this.run('BEGIN IMMEDIATE TRANSACTION')
         .then(callback)
-        .then(async(res) => this.run('COMMIT TRANSACTION').then(async() => Promise.resolve(res)))
-        .catch(async(err) => this.run('ROLLBACK TRANSACTION').then(async() => Promise.reject(err)));
+        .then(async (res) => this.run('COMMIT TRANSACTION').then(async () => Promise.resolve(res)))
+        .catch(async (err) => this.run('ROLLBACK TRANSACTION').then(async () => Promise.reject(err)));
   }
 
   // tslint:disable unified-signatures
@@ -387,7 +387,7 @@ export class SqlDatabase {
       // NOTE: should not happen
       /* istanbul ignore next */
       return Promise.reject(e);
-      }
+    }
     return Promise.resolve(userVersion);
   }
 
@@ -416,12 +416,12 @@ export class SqlDatabase {
   @internal
   */
   public async openByPool(pool: SqlConnectionPool, databaseFile: string, mode?: number): Promise<void> {
-    this.pool = pool;
     return new Promise<void>((resolve, reject) => {
       const db = new Database(databaseFile, mode || SQL_OPEN_DEFAULT, (err) => {
         if (err) {
           reject(err);
         } else {
+          this.pool = pool;
           this.db = db;
           resolve();
         }
@@ -456,7 +456,7 @@ export class SqlDatabase {
   @internal
   */
   public recycleByPool(pool: SqlConnectionPool, sqldb: SqlDatabase): void {
-    if (!!sqldb.db) {
+    if (sqldb.db) {
       sqldb.db.removeAllListeners();
       this.db = sqldb.db;
       this.pool = pool;
