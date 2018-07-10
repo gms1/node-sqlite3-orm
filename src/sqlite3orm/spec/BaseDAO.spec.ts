@@ -1,7 +1,5 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-import {BaseDAO} from '../BaseDAO';
-import {field, fk, id, table} from '../decorators';
-import {SQL_MEMORY_DB_PRIVATE, SqlDatabase} from '../SqlDatabase';
+import {SqlDatabase, BaseDAO, SQL_MEMORY_DB_PRIVATE, field, fk, id, table} from '../index';
 
 
 const USERS_TABLE = 'USERSTABLE';
@@ -51,7 +49,7 @@ describe('test BaseDAO', () => {
   let sqldb: SqlDatabase;
 
   // ---------------------------------------------
-  beforeEach(async(done) => {
+  beforeEach(async (done) => {
     try {
       sqldb = new SqlDatabase();
       await sqldb.open(SQL_MEMORY_DB_PRIVATE);
@@ -67,7 +65,7 @@ describe('test BaseDAO', () => {
   });
 
   // ---------------------------------------------
-  it('expect basic functionality (insert/update/delete/select/selectAll) to work', async(done) => {
+  it('expect basic functionality (insert/update/delete/select/selectAll) to work', async (done) => {
     try {
       let user1: User = new User();
       let user2: User = new User();
@@ -103,7 +101,7 @@ describe('test BaseDAO', () => {
   });
 
   // ---------------------------------------------
-  it('expect foreign key select to work', async(done) => {
+  it('expect foreign key select to work', async (done) => {
     try {
       let user: User = new User();
       let contact: Contact = new Contact();
@@ -170,7 +168,7 @@ describe('test BaseDAO', () => {
     }
   }
 
-  it('expect class without table-definition to throw', async(done) => {
+  it('expect class without table-definition to throw', async (done) => {
     try {
       let noTableDao: BaseDAO<NoTable> = new BaseDAO(NoTable, sqldb);
       fail('instantiation BaseDAO for class without table-definition should have thrown');
@@ -181,7 +179,7 @@ describe('test BaseDAO', () => {
   });
 
   // ---------------------------------------------
-  it('expect inserting duplicate id to throw', async(done) => {
+  it('expect inserting duplicate id to throw', async (done) => {
     let user1: User = new User();
     let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
     try {
@@ -190,7 +188,7 @@ describe('test BaseDAO', () => {
       await userDao.insert(user1);
     } catch (err) {
       fail(err);
-      }
+    }
     try {
       user1.userId = 1;
       user1.userLoginName = 'login1/2';
@@ -203,7 +201,7 @@ describe('test BaseDAO', () => {
   });
 
   // ---------------------------------------------
-  it('expect updating using wrong id to throw', async(done) => {
+  it('expect updating using wrong id to throw', async (done) => {
     let user1: User = new User();
     let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
     try {
@@ -218,7 +216,7 @@ describe('test BaseDAO', () => {
   });
 
   // ---------------------------------------------
-  it('expect updating not null column with null to throw', async(done) => {
+  it('expect updating not null column with null to throw', async (done) => {
     let user1: User = new User();
     let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
     try {
@@ -227,7 +225,7 @@ describe('test BaseDAO', () => {
       await userDao.insert(user1);
     } catch (err) {
       fail(err);
-      }
+    }
     try {
       user1.userId = 1;
       user1.userLoginName = undefined as any as string;
@@ -240,7 +238,7 @@ describe('test BaseDAO', () => {
   });
 
   // ---------------------------------------------
-  it('expect deleting using wrong id to throw', async(done) => {
+  it('expect deleting using wrong id to throw', async (done) => {
     let user1: User = new User();
     let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
     try {
@@ -255,7 +253,7 @@ describe('test BaseDAO', () => {
   });
 
   // ---------------------------------------------
-  it('expect deleting by id using wrong id to throw', async(done) => {
+  it('expect deleting by id using wrong id to throw', async (done) => {
     let user1: User = new User();
     let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
     try {
@@ -270,7 +268,7 @@ describe('test BaseDAO', () => {
   });
 
   // ---------------------------------------------
-  it('expect deleting by id to succeed', async(done) => {
+  it('expect deleting by id to succeed', async (done) => {
     let user1: User = new User();
     let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
     try {
@@ -283,12 +281,12 @@ describe('test BaseDAO', () => {
       await userDao.deleteById({userId: 1});
     } catch (err) {
       fail(err);
-      }
+    }
     try {
       await userDao.selectById({userId: 1});
       fail('row should have been deleted');
     } catch (err) {
-      }
+    }
     try {
       await userDao.selectAll('WHERE noColumn=9');
       fail('a condition using not existing column should have thrown');
@@ -299,7 +297,7 @@ describe('test BaseDAO', () => {
   });
 
   // ---------------------------------------------
-  it('expect selectAll to throw on failure', async(done) => {
+  it('expect selectAll to throw on failure', async (done) => {
     let user1: User = new User();
     let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
     try {
@@ -311,7 +309,7 @@ describe('test BaseDAO', () => {
 
   });
   // ---------------------------------------------
-  it('expect selectEach to throw on failure', async(done) => {
+  it('expect selectEach to throw on failure', async (done) => {
     let user1: User = new User();
     let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
     try {
@@ -325,7 +323,7 @@ describe('test BaseDAO', () => {
   });
 
   // ---------------------------------------------
-  it('expect selectEach to succeed', async(done) => {
+  it('expect selectEach to succeed', async (done) => {
     let user1: User = new User();
     let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
     try {
@@ -334,7 +332,7 @@ describe('test BaseDAO', () => {
       await userDao.insert(user1);
     } catch (err) {
       fail(err);
-      }
+    }
     try {
       let user2: User = new User();
       await userDao.selectEach((err, usr) => user2 = usr, 'WHERE user_id=1');
@@ -349,7 +347,7 @@ describe('test BaseDAO', () => {
   });
 
   // ---------------------------------------------
-  it('expect selectAllOf for undefined constraint to fail', async(done) => {
+  it('expect selectAllOf for undefined constraint to fail', async (done) => {
     let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
     let contact: Contact = new Contact();
     try {
@@ -386,7 +384,7 @@ describe('test BaseDAO', () => {
   }
 
   // ---------------------------------------------
-  it('expect setProperty to work', async(done) => {
+  it('expect setProperty to work', async (done) => {
     let testDao: BaseDAO<TestSetProperty> = new BaseDAO(TestSetProperty, sqldb);
     let testRow: TestSetProperty = new TestSetProperty();
     try {

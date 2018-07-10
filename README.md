@@ -19,7 +19,7 @@ This module allows you to map your model, written in JavaScript or TypeScript, t
 **node-sqlite3-orm** provides you with the ability to create the database schema for the mapped model and to store and retrieve the mapped data to and from the database,
 
 ```TypeScript
-import {table, id, field, index, fk, FieldOpts, TableOpts} from '../decorators';
+import {table, id, field, index, fk, FieldOpts, TableOpts} from 'sqlite3orm';
 
 @table({name: 'USERS'})
 class User {
@@ -57,7 +57,7 @@ Properties without a *node-sqlite3-orm* decorator will not be mapped to the data
 ## Database Connection
 
 ```TypeScript
-import {SqlDatabase} from 'sqlite3orm/SqlDatabase';
+import {SqlDatabase} from 'sqlite3orm';
 
 (async () => {
   let sqldb = new SqlDatabase();
@@ -70,7 +70,7 @@ SqlDatabase is a thin promised-based wrapper around sqlite3.Database: [node-sqli
 ## Schema Creation
 
 ```TypeScript
-import {schema} from 'sqlite3orm/Schema';
+import {schema} from 'sqlite3orm';
 
 (async() => {
   // get the user_version from the database:
@@ -207,20 +207,5 @@ tsconfig.json:
 
 ## Release Notes
 
-| Release   | Notes                                                                                                                       |
-|-----------|-----------------------------------------------------------------------------------------------------------------------------|
-| 1.0.0     | maintenance releases                                                                                                        |
-| 0.0.20-24 | maintenance releases                                                                                                        |
-| 0.0.19    | BaseDAO: added selectById/deleteById methods for convenience                                                                |
-| 0.0.15-18 | maintenance releases                                                                                                        |
-| 0.0.14    | new @index decorator and create/drop - index methods                                                                        |
-| 0.0.13    | BaseDAO: added createTable/dropTable/alterTableAddColumn methods for convenience                                            |
-| 0.0.10-12 | maintenance releases                                                                                                        |
-| 0.0.9     | possibility to map properties of complex type to a database column and serialize/deserialize this properties in JSON format |
-| 0.0.8     | SqlConnectionPool: allow connections to be garbage-collected if the connection pool is not limited by max-connections       |
-| 0.0.7     | SqlConnectionPool: a new connection pool                                                                                    |
-| 0.0.6     | BaseDAO: ensure type safety for mapped properties of primitive or Date type                                                 |
+[CHANGELOG](./CHANGELOG.md)
 
-## Downloads
-
-[![NPM](https://nodei.co/npm/sqlite3orm.png?downloads=true&downloadRank=true&stars=true)](https://www.npmjs.com/package/sqlite3orm)

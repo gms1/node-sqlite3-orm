@@ -1,10 +1,5 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-import {field, fk, id, table, index} from '../decorators';
-import {Field} from '../Field';
-import {schema, Schema} from '../Schema';
-import {SQL_MEMORY_DB_PRIVATE, SqlDatabase} from '../SqlDatabase';
-import {BaseDAO} from '../BaseDAO';
-
+import {field, fk, id, index, table} from '../index';
 
 // ---------------------------------------------
 

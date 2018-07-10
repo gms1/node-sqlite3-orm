@@ -1,12 +1,11 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-import {SqlDatabase, SQL_OPEN_DEFAULT} from '../SqlDatabase';
-import {SqlConnectionPool} from '../SqlConnectionPool';
+import {SqlConnectionPool, SqlDatabase, SQL_OPEN_DEFAULT} from '../index';
 
 describe('test SqlConnectionPool', () => {
   // ---------------------------------------------
 
 
-  it('expect pool to be able to open a database', async(done) => {
+  it('expect pool to be able to open a database', async (done) => {
     try {
       let pool = new SqlConnectionPool();
       await pool.open('testsqlite3.db', SQL_OPEN_DEFAULT, 1, 2);
