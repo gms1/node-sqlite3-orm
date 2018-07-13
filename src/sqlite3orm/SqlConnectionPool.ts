@@ -59,6 +59,10 @@ export class SqlConnectionPool {
 
         const promises: Promise<void>[] = [];
 
+        if (this.min < 1) {
+          this.min = 1;
+        }
+
         for (let i = 0; i < this.min; i++) {
           const sqldb = new SqlDatabase();
           this.inPool.push(sqldb);
@@ -67,6 +71,10 @@ export class SqlConnectionPool {
         await Promise.all(promises);
         resolve();
       } catch (err) {
+        try {
+          await this.close();
+        } catch (_ignore) {
+        }
         reject(err);
       }
     });
