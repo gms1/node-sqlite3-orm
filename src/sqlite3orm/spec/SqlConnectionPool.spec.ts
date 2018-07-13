@@ -1,5 +1,5 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-import {SqlConnectionPool, SqlDatabase, SQL_OPEN_DEFAULT} from '../index';
+import {SqlConnectionPool, SqlDatabase, SQL_OPEN_DEFAULT, SQL_OPEN_READWRITE} from '../index';
 
 describe('test SqlConnectionPool', () => {
   // ---------------------------------------------
@@ -9,6 +9,7 @@ describe('test SqlConnectionPool', () => {
     try {
       let pool = new SqlConnectionPool();
       await pool.open('testsqlite3.db', SQL_OPEN_DEFAULT, 1, 2);
+      expect(pool.isOpen()).toBeTruthy();
 
       // getting first connection
       let sqldb1 = await pool.get(100);
@@ -54,9 +55,26 @@ describe('test SqlConnectionPool', () => {
       expect(ver3).toBe(ver1, 'got wrong user version from connection 3');
 
       await pool.close();
+      expect(pool.isOpen()).toBeFalsy();
 
     } catch (err) {
       fail(err);
+    }
+    done();
+
+  });
+
+
+  it('expect pool to be closed after failed attempt to open a database', async (done) => {
+    try {
+      let pool = new SqlConnectionPool();
+      await pool.open('testsqlite4.db', SQL_OPEN_READWRITE, 1, 2);
+      expect(pool.isOpen()).toBeFalsy();
+
+      // getting first connection
+      let sqldb1 = await pool.get(100);
+      fail('got invalid connection');
+    } catch (err) {
     }
     done();
 
