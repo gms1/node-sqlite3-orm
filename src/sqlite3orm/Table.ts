@@ -58,7 +58,7 @@ export class Table {
   private get statementsText(): SqlStatementText {
     if (!this._statementsText) {
       this._statementsText = this.generateStatementsText();
-      }
+    }
     return this._statementsText;
   }
 
@@ -119,7 +119,7 @@ export class Table {
   public getPropertyField(key: string|symbol): Field {
     if (!this.mapPropToField.has(key)) {
       throw new Error(`property '${key.toString()}' on class '${this.className}' not mapped to any field`);
-      }
+    }
     return this.mapPropToField.get(key) as Field;
   }
 
@@ -134,7 +134,7 @@ export class Table {
       if (field !== this.mapPropToField.get(field.propertyKey)) {
         throw new Error(
             `property '${field.propertyKey.toString()}' on class '${this.className}' is mapped to multiple fields`);
-        }
+      }
       return;
     }
     this.fields.push(field);
@@ -160,7 +160,7 @@ export class Table {
   public getTableField(name: string): Field {
     if (!this.mapNameToField.has(name)) {
       throw new Error(`field '${name}' not registered yet`);
-      }
+    }
     return this.mapNameToField.get(name) as Field;
   }
 
@@ -174,12 +174,16 @@ export class Table {
     this._statementsText = undefined;
     if (!field.name) {
       throw new Error(`property '${field.propertyKey.toString()}' on class '${this.className}': field name missing`);
-      }
+    }
     if (this.mapNameToField.has(field.name)) {
       const oldField = this.mapNameToField.get(field.name) as Field;
       if (field !== oldField) {
-        throw new Error(`properties '${field.propertyKey.toString()}' and '${oldField.propertyKey
-                            .toString()}' on class '${this.className}' are mapped to the same column ${field.name}`);
+        throw new Error(
+            `properties '${
+                           field.propertyKey.toString()
+                         }' and '${
+                                   oldField.propertyKey.toString()
+                                 }' on class '${this.className}' are mapped to the same column ${field.name}`);
       }
     }
     this.mapNameToField.set(field.name, field);
@@ -192,7 +196,7 @@ export class Table {
       } else {
         this._autoIncrementField = undefined;
       }
-      }
+    }
     return field;
   }
 
@@ -229,7 +233,7 @@ export class Table {
   }
 
   /**
-   * Get 'CREATE TABLE'-statement using 'IF NOT EXISTS'-clause
+   * Get 'CREATE [UNIQUE] INDEX'-statement using 'IF NOT EXISTS'-clause
    *
    * @returns {string}
    */
@@ -237,7 +241,7 @@ export class Table {
     const stmtText = this.statementsText.indexKeys.get(idxName);
     if (!stmtText) {
       throw new Error(`index '${idxName}' is not defined on table '${this.name}'`);
-      }
+    }
     // tslint:disable-next-line: restrict-plus-operands
     return 'CREATE ' + (unique ? 'UNIQUE ' : '') + stmtText;
   }
@@ -251,7 +255,7 @@ export class Table {
     const stmtText = this.statementsText.indexKeys.get(idxName);
     if (!stmtText) {
       throw new Error(`index '${idxName}' is defined on table '${this.name}'`);
-      }
+    }
     return `DROP INDEX IF EXISTS ${idxName}`;
   }
 
@@ -397,12 +401,17 @@ export class Table {
         if (!fk) {
           fk = new ForeignKeyHelper(constraintName, refColumn.tableName);
           foreignKeys.set(constraintName, fk);
-          }
+        }
         if (refColumn.tableName !== fk.refTableName) {
           // TODO: this error should be found earlier
-          throw new Error(`table '${this
-                              .name}': foreign key constraint '${constraintName
-                                   }' references different tables: '${refColumn.tableName}' vs '${fk.refTableName}'`);
+          throw new Error(
+              `table '${this.name}': foreign key constraint '${
+                                                               constraintName
+                                                             }' references different tables: '${
+                                                                                                refColumn.tableName
+                                                                                              }' vs '${
+                                                                                                       fk.refTableName
+                                                                                                     }'`);
         }
         fk.fields.push(field);
         fk.refColumns.push(refColumn.colName);
@@ -427,7 +436,7 @@ export class Table {
       stmts.createTable += ',\n  CONSTRAINT PRIMARY_KEY PRIMARY KEY (';
       stmts.createTable += colNamesPK.join(', ');
       stmts.createTable += ')';
-      }
+    }
 
     // add foreign key constraint definition:
     let i = foreignKeys.size - 1;
@@ -516,7 +525,7 @@ export class Table {
 
     return stmts;
   }
-  }
+}
 
 /**
  * helper class holding sql-statements/fragments
@@ -540,7 +549,7 @@ class SqlStatementText {
     this.foreignKeyFields = new Map<string, Field[]>();
     this.indexKeys = new Map<string, string>();
   }
-  }
+}
 
 /**
  * helper class holding a foreign key definition

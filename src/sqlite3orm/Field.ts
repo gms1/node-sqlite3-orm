@@ -142,8 +142,7 @@ export class Field {
    * @param {string} constraintName - The constraint name
    * @param {FieldReference} foreignTableField - The referenced table and column
    */
-  public setForeignKeyField(
-      constraintName: string, foreignTableField: FieldReference): void {
+  public setForeignKeyField(constraintName: string, foreignTableField: FieldReference): void {
     this.foreignKeys.set(constraintName, foreignTableField);
   }
 
@@ -166,5 +165,4 @@ export class Field {
   public setIndexField(indexName: string): void {
     this.indexKeys.add(indexName);
   }
-
 }

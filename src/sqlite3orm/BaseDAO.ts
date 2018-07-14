@@ -39,7 +39,7 @@ export class BaseDAO<T extends Object> {
    * @returns {Promise<T>}
    */
   public async insert(model: T): Promise<T> {
-    return new Promise<T>(async(resolve, reject) => {
+    return new Promise<T>(async (resolve, reject) => {
       try {
         if (!this.table.autoIncrementField) {
           await this.sqldb.run(this.table.getInsertIntoStatement(), this.bindAllInputParams(model));
@@ -71,7 +71,7 @@ export class BaseDAO<T extends Object> {
    * @returns {Promise<T>}
    */
   public async update(model: T): Promise<T> {
-    return new Promise<T>(async(resolve, reject) => {
+    return new Promise<T>(async (resolve, reject) => {
       try {
         const res = await this.sqldb.run(this.table.getUpdateByIdStatement(), this.bindAllInputParams(model));
         if (!res.changes) {
@@ -93,7 +93,7 @@ export class BaseDAO<T extends Object> {
    * @returns {Promise<void>}
    */
   public async delete(model: T): Promise<void> {
-    return new Promise<void>(async(resolve, reject) => {
+    return new Promise<void>(async (resolve, reject) => {
       try {
         const res = await this.sqldb.run(this.table.getDeleteByIdStatement(), this.bindPrimaryKeyInputParams(model));
         if (!res.changes) {
@@ -118,7 +118,7 @@ export class BaseDAO<T extends Object> {
    * @returns {Promise<void>}
    */
   public async deleteById(input: Partial<T>): Promise<void> {
-    return new Promise<void>(async(resolve, reject) => {
+    return new Promise<void>(async (resolve, reject) => {
       try {
         const res =
             await this.sqldb.run(this.table.getDeleteByIdStatement(), this.bindPrimaryKeyInputParams(input as T));
@@ -144,7 +144,7 @@ export class BaseDAO<T extends Object> {
    * @returns {Promise<T>}
    */
   public async select(model: T): Promise<T> {
-    return new Promise<T>(async(resolve, reject) => {
+    return new Promise<T>(async (resolve, reject) => {
       try {
         const row = await this.sqldb.get(this.table.getSelectByIdStatement(), this.bindPrimaryKeyInputParams(model));
         model = this.readResultRow(model, row);
@@ -164,7 +164,7 @@ export class BaseDAO<T extends Object> {
    * @returns {Promise<T>}
    */
   public async selectById(input: Partial<T>): Promise<T> {
-    return new Promise<T>(async(resolve, reject) => {
+    return new Promise<T>(async (resolve, reject) => {
       let output: T;
       try {
         const row =
@@ -187,12 +187,12 @@ export class BaseDAO<T extends Object> {
    * @returns {Promise<T[]>}
    */
   public async selectAll(sql?: string, params?: Object): Promise<T[]> {
-    return new Promise<T[]>(async(resolve, reject) => {
+    return new Promise<T[]>(async (resolve, reject) => {
       try {
         let stmt = this.table.getSelectAllStatement();
         if (!!sql) {
           stmt += sql;
-          }
+        }
         const rows: any[] = await this.sqldb.all(stmt, params);
         const results: T[] = [];
         rows.forEach((row) => {
@@ -216,12 +216,12 @@ export class BaseDAO<T extends Object> {
    * @returns {Promise<number>}
    */
   public async selectEach(callback: (err: Error, model: T) => void, sql?: string, params?: Object): Promise<number> {
-    return new Promise<number>(async(resolve, reject) => {
+    return new Promise<number>(async (resolve, reject) => {
       try {
         let stmt = this.table.getSelectAllStatement();
         if (!!sql) {
           stmt += sql;
-          }
+        }
         const res = await this.sqldb.each(stmt, params, (err, row) => {
           // TODO: err?
           callback(err, this.readResultRow(new this.type(), row));
@@ -246,12 +246,12 @@ export class BaseDAO<T extends Object> {
    */
   public async selectAllOf<F extends Object>(
       constraintName: string, foreignType: {new(): F}, foreignObj: F, sql?: string, params?: Object): Promise<T[]> {
-    return new Promise<T[]>(async(resolve, reject) => {
+    return new Promise<T[]>(async (resolve, reject) => {
       try {
         const fkSelCondition = this.table.getForeignKeySelects(constraintName);
         if (!fkSelCondition) {
           throw new Error(`constraint '${constraintName}' is not defined`);
-          }
+        }
         let stmt = this.table.getSelectAllStatement();
         stmt += '\nWHERE\n  ';
         stmt += fkSelCondition;
@@ -260,7 +260,7 @@ export class BaseDAO<T extends Object> {
         const foreignParams = this.bindForeignParams(foreignDAO, constraintName, foreignObj, params);
         if (!!sql) {
           stmt += sql;
-          }
+        }
         const rows: any[] = await this.sqldb.all(stmt, foreignParams);
         const results: T[] = [];
         rows.forEach((row) => {
@@ -329,7 +329,7 @@ export class BaseDAO<T extends Object> {
     if (value == undefined) {
       hostParams[field.getHostParameterName()] = value;
       return;
-      }
+    }
     if (field.isJson) {
       hostParams[field.getHostParameterName()] = JSON.stringify(value);
     } else {
@@ -342,7 +342,7 @@ export class BaseDAO<T extends Object> {
             value = Math.floor((value as Date).getTime() / 1000);
           } else {
             value = (value as Date).toISOString();
-            }
+          }
           break;
       }
       hostParams[field.getHostParameterName()] = value;
@@ -355,7 +355,7 @@ export class BaseDAO<T extends Object> {
     if (value == undefined) {
       Reflect.set(model, field.propertyKey, undefined);
       return;
-      }
+    }
     if (field.isJson) {
       value = JSON.parse(value);
     } else {
@@ -371,7 +371,7 @@ export class BaseDAO<T extends Object> {
             }
           } else {
             value = !value ? false : true;
-            }
+          }
           break;
         case PropertyType.DATE:
           switch (typeof value) {
@@ -386,24 +386,24 @@ export class BaseDAO<T extends Object> {
                 // Julian day numbers ?
                 // TODO: currently not supported
                 value = NaN;
-                }
+              }
               break;
             /* istanbul ignore next */
             default:
               // NOTE: should not happen
               value = NaN;
               break;
-              }
+          }
           break;
         case PropertyType.NUMBER:
           if (typeof value !== 'number') {
             value = Number(value);
-            }
+          }
           break;
         case PropertyType.STRING:
           if (typeof value !== 'string') {
             value = String(value);
-            }
+          }
           break;
       }
     }

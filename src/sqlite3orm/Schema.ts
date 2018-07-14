@@ -28,7 +28,7 @@ export class Schema {
       Schema.schema = this;
 
       this.mapNameToTable = new Map<string, Table>();
-      }
+    }
     return Schema.schema;
   }
 
@@ -41,7 +41,7 @@ export class Schema {
   public getTable(name: string): Table {
     if (!this.mapNameToTable.has(name)) {
       throw new Error(`table '${name}' not registered yet`);
-      }
+    }
     return this.mapNameToTable.get(name) as Table;
   }
 
@@ -124,7 +124,7 @@ export class Schema {
     const table = this.getTable(tableName);
     return sqldb.exec(table.getDropIndexStatement(idxName));
   }
-  }
+}
 
 /**
  * get the Schema singleton
@@ -136,6 +136,6 @@ export function schema(): Schema {
   if (!Schema.schema) {
     // tslint:disable-next-line: no-unused-expression
     new Schema();
-    }
+  }
   return Schema.schema;
 }

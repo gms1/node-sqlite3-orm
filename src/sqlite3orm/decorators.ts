@@ -32,7 +32,7 @@ export interface TableOpts {
    * @type {boolean}
    */
   autoIncrement?: boolean;
-  }
+}
 
 /**
  * Options for the property decorators '@field' and '@id'
@@ -56,7 +56,7 @@ export interface FieldOpts {
    * @type {boolean}
    */
   isJson?: boolean;
-  }
+}
 
 /**
  * Get the table metadata
@@ -67,9 +67,9 @@ export interface FieldOpts {
 function getTableMetadata(target: Function): Table {
   if (!Reflect.hasOwnMetadata(METADATA_TABLE_KEY, target.prototype)) {
     Reflect.defineMetadata(METADATA_TABLE_KEY, new Table(target.name), target.prototype);
-    }
-  return Reflect.getMetadata(METADATA_TABLE_KEY, target.prototype);
   }
+  return Reflect.getMetadata(METADATA_TABLE_KEY, target.prototype);
+}
 
 /**
  * Get the field metadata
@@ -85,9 +85,9 @@ function getFieldMetadata(metaTable: Table, key: string|symbol): Field {
   } else {
     metaField = new Field(key);
     metaTable.addPropertyField(metaField);
-    }
-  return metaField;
   }
+  return metaField;
+}
 
 /**
  * Helper function for decorating a class and map it to a database table
@@ -101,18 +101,21 @@ function decorateTableClass(target: Function, opts: TableOpts): void {
   const metaTable = getTableMetadata(target);
   if (!!metaTable.name && newTableName !== metaTable.name) {
     throw new Error(
-        `failed to map class '${target
-            .name}' to table name '${newTableName}': This class is already mapped to the table '${metaTable.name}'`);
+        `failed to map class '${
+                                target.name
+                              }' to table name '${
+                                                  newTableName
+                                                }': This class is already mapped to the table '${metaTable.name}'`);
   }
   metaTable.name = newTableName;
   if (!!opts.withoutRowId) {
     metaTable.withoutRowId = true;
-    }
+  }
   if (!!opts.autoIncrement) {
     metaTable.autoIncrement = true;
   }
   schema().addTable(metaTable);
-  }
+}
 
 /**
  * Helper function for decorating a property and map it to a table field
@@ -129,7 +132,7 @@ function decorateFieldProperty(
   if (typeof target === 'function') {
     // not decorating static property
     throw new Error(`decorating static property '${key.toString()}' using field-decorator is not supported`);
-    }
+  }
 
   const metaTable: Table = getTableMetadata(target.constructor);
   const metaField: Field = getFieldMetadata(metaTable, key);
@@ -139,17 +142,17 @@ function decorateFieldProperty(
 
   if (!!opts.dbtype) {
     metaField.dbtype = opts.dbtype;
-    }
+  }
   if (!!opts.isJson) {
     metaField.isJson = opts.isJson;
-    }
+  }
   if (!!isIdentity) {
     metaField.isIdentity = isIdentity;
-    }
+  }
   // console.log(`name='${key.toString()}' type='${field.propertyType}'
   // dbtype='${field.dbtype}'` );
   return metaField;
-  }
+}
 
 /**
  * Helper function for decorating a property and map it to a foreign key field
@@ -167,18 +170,19 @@ function decorateForeignKeyProperty(
   if (typeof target === 'function') {
     // not decorating static property
     throw new Error(`decorating static property '${key.toString()}' using fk-decorator is not supported`);
-    }
+  }
 
   const metaTable: Table = getTableMetadata(target.constructor);
   const metaField: Field = getFieldMetadata(metaTable, key);
   if (metaField.hasForeignKeyField(constraintName)) {
-    throw new Error(`decorating property '${target.constructor.name
-                    }.${key.toString()}': duplicate foreign key constraint '${constraintName}'`);
+    throw new Error(`decorating property '${
+                                            target.constructor.name
+                                          }.${key.toString()}': duplicate foreign key constraint '${constraintName}'`);
   }
 
   metaField.setForeignKeyField(constraintName, new FieldReference(foreignTableName, foreignTableField));
   return metaField;
-  }
+}
 
 /**
  * Helper function for decorating a property and map it to an index field
@@ -192,7 +196,7 @@ function decorateIndexProperty(target: Object|Function, key: string|symbol, inde
   if (typeof target === 'function') {
     // not decorating static property
     throw new Error(`decorating static property '${key.toString()}' using index-decorator is not supported`);
-    }
+  }
 
   const metaTable: Table = getTableMetadata(target.constructor);
   const metaField: Field = getFieldMetadata(metaTable, key);
@@ -203,7 +207,7 @@ function decorateIndexProperty(target: Object|Function, key: string|symbol, inde
 
   metaField.setIndexField(indexName);
   return metaField;
-  }
+}
 
 /**
  * The class decorator for mapping a database table to a class
@@ -214,7 +218,7 @@ function decorateIndexProperty(target: Object|Function, key: string|symbol, inde
  */
 export function table(opts: TableOpts = {}): (target: Function) => void {
   return ((target: Function) => decorateTableClass(target, opts));
-  }
+}
 
 /**
  * The field decorator for mapping a class property to a table field
@@ -229,7 +233,7 @@ export function field(opts: FieldOpts = {}): (target: Object, key: string|symbol
   return ((target: Object, key: string | symbol) => {
     decorateFieldProperty(target, key, opts, false);
   });
-  }
+}
 
 /**
  * The id decorator for mapping a class property to a field of the primary key
@@ -245,7 +249,7 @@ export function id(opts: FieldOpts = {}): (target: Object, key: string|symbol) =
   return ((target: Object, key: string | symbol) => {
     decorateFieldProperty(target, key, opts, true);
   });
-  }
+}
 
 /**
  * The fk decorator for mapping a class property to be part of a foreign key
@@ -263,7 +267,7 @@ export function fk(constraintName: string, foreignTableName: string, foreignTabl
   return ((target: Object, key: string | symbol) => {
     decorateForeignKeyProperty(target, key, constraintName, foreignTableName, foreignTableField);
   });
-  }
+}
 
 /**
  * The index decorator for mapping a class property to be part of an index
