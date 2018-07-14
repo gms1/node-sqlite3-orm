@@ -407,19 +407,22 @@ export class Table {
     const foreignKeys = new Map<string, ForeignKeyHelper>();
     const indexKeys = new Map<string, string[]>();
 
+    const quotedTableName = this.quotedName;
+
     if (!this.fields.length) {
       throw new Error(`table '${this.name}': does not have any fields defined`);
     }
 
     this.fields.forEach((field) => {
-      let colDef = `${field.quotedName} ${field.dbtype}`;
+      const quotedFieldName = field.quotedName;
+      let colDef = `${quotedFieldName} ${field.dbtype}`;
       const hostParmName = field.getHostParameterName();
 
-      colNames.push(field.quotedName);
+      colNames.push(quotedFieldName);
       colParms.push(hostParmName);
       if (field.isIdentity) {
-        colNamesPK.push(field.quotedName);
-        colSelPK.push(`${field.quotedName}=${hostParmName}`);
+        colNamesPK.push(quotedFieldName);
+        colSelPK.push(`${quotedFieldName}=${hostParmName}`);
         if (this.mapNameToIdentityField.size === 1) {
           colDef += ' PRIMARY KEY';
           if (!!this.autoIncrementField) {
@@ -427,9 +430,9 @@ export class Table {
           }
         }
       } else {
-        colNamesNoPK.push(field.quotedName);
+        colNamesNoPK.push(quotedFieldName);
         colParmsNoPK.push(hostParmName);
-        colSetsNoPK.push(`${field.quotedName}=${hostParmName}`);
+        colSetsNoPK.push(`${quotedFieldName}=${hostParmName}`);
       }
       colDefs.push(colDef);
       field.foreignKeys.forEach((fieldRef, constraintName) => {
@@ -467,12 +470,12 @@ export class Table {
           idx = [];
           indexKeys.set(indexName, idx);
         }
-        idx.push(field.quotedName);
+        idx.push(quotedFieldName);
       });
     });
     // --------------------------------------------------------------
     // generate CREATE TABLE statement
-    stmts.createTable = `CREATE TABLE IF NOT EXISTS ${this.quotedName} (\n  `;
+    stmts.createTable = `CREATE TABLE IF NOT EXISTS ${quotedTableName} (\n  `;
 
     // add column definitions
     stmts.createTable += colDefs.join(',\n  ');
@@ -510,7 +513,7 @@ export class Table {
 
     // --------------------------------------------------------------
     // generate INSERT INTO statement
-    stmts.insertInto = `INSERT INTO ${this.quotedName} (\n  `;
+    stmts.insertInto = `INSERT INTO ${quotedTableName} (\n  `;
     if (!this.autoIncrementField) {
       stmts.insertInto += colNames.join(', ');
     } else {
@@ -531,13 +534,13 @@ export class Table {
 
     // --------------------------------------------------------------
     // generate UPDATE SET statement
-    stmts.updateById = `UPDATE ${this.quotedName} SET\n  `;
+    stmts.updateById = `UPDATE ${quotedTableName} SET\n  `;
     stmts.updateById += colSetsNoPK.join(',\n  ');
     stmts.updateById += wherePrimaryKeyClause;
 
     // --------------------------------------------------------------
     // generate DELETE FROM statement
-    stmts.deleteById = `DELETE FROM ${this.quotedName}\n  `;
+    stmts.deleteById = `DELETE FROM ${quotedTableName}\n  `;
     stmts.deleteById += wherePrimaryKeyClause;
 
     // --------------------------------------------------------------
@@ -546,7 +549,7 @@ export class Table {
 
     stmts.selectAll = 'SELECT\n  ';
     stmts.selectAll += `${TABLEALIASPREFIX}` + colNames.join(`, ${TABLEALIASPREFIX}`);
-    stmts.selectAll += `\nFROM ${this.quotedName} ${TABLEALIAS} `;
+    stmts.selectAll += `\nFROM ${quotedTableName} ${TABLEALIAS} `;
 
     // --------------------------------------------------------------
     // generate SELECT-one statement
