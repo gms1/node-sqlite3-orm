@@ -1,3 +1,4 @@
+import {TableReference} from './TableReference';
 
 /**
  * Class holding a field reference ( table and column name )
@@ -11,7 +12,7 @@ export class FieldReference {
    *
    * @type {string}
    */
-  tableName: string;
+  tableRef: TableReference;
   /**
    * A column name
    *
@@ -22,11 +23,11 @@ export class FieldReference {
   /**
    * Creates an instance of FieldReference.
    *
-   * @param {string} tableName
+   * @param {TableReference} constraint
    * @param {string} colName
    */
-  public constructor(tableName: string, colName: string) {
-    this.tableName = tableName;
+  public constructor(tableRef: TableReference, colName: string) {
+    this.tableRef = tableRef;
     this.colName = colName;
   }
 }

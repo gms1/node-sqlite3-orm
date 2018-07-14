@@ -101,7 +101,7 @@ export class SqlConnectionPool {
         this.inUse.clear();
         await Promise.all(promises);
         resolve();
-      } catch (err) {
+      } catch (err) /* istanbul ignore next */ {
         reject(err);
       }
     });

@@ -1,5 +1,6 @@
 import {FieldReference} from './FieldReference';
 import {PropertyType} from './PropertyType';
+import {quotedIdentifierName} from './utils';
 
 /**
  * Class holding a field definition
@@ -14,6 +15,14 @@ export class Field {
    * @type {string}
    */
   public name!: string;
+
+  /**
+   * The quoted field name
+   */
+  get quotedName(): string {
+    return quotedIdentifierName(this.name);
+  }
+
   /**
    * The property key mapped to this field
    *
@@ -149,7 +158,7 @@ export class Field {
   /**
    * Test if this field is part of the given index
    *
-   * @param {string} constraintName
+   * @param {string} indexName
    * @returns {boolean}
    */
   public isIndexField(indexName: string): boolean {
@@ -157,7 +166,7 @@ export class Field {
   }
 
   /**
-   * Test if this field is part of the given index
+   * Set this field as part of the given index
    *
    * @param {string} indexName
    * @returns {void}

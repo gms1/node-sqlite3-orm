@@ -33,16 +33,28 @@ export class Schema {
   }
 
   /**
+   * lookup table definition for given table name
+   *
+   * @param {string} name - The name of the table
+   * @returns {Table}
+   */
+
+  public hasTable(name: string): Table|undefined {
+    return this.mapNameToTable.get(name);
+  }
+
+  /**
    * get a table definition
    *
    * @param {string} name - The name of the table
    * @returns {Table}
    */
   public getTable(name: string): Table {
-    if (!this.mapNameToTable.has(name)) {
+    const table = this.mapNameToTable.get(name);
+    if (!table) {
       throw new Error(`table '${name}' not registered yet`);
     }
-    return this.mapNameToTable.get(name) as Table;
+    return table;
   }
 
   /**

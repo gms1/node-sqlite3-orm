@@ -1,5 +1,7 @@
 // tslint:disable no-use-before-declare
 import {Field} from './Field';
+import {TableReference} from './TableReference';
+import {quotedQualifiedIdentifierName, quotedUnqualifiedIdentifierName} from './utils';
 
 const TABLEALIAS = 'T';
 
@@ -11,11 +13,15 @@ const TABLEALIAS = 'T';
  */
 export class Table {
   /**
-   * The table name
+   * The table name (containing the schema name if specified)
    *
    * @type {string}
    */
   name!: string;
+
+  get quotedName(): string {
+    return quotedQualifiedIdentifierName(this.name);
+  }
 
   /**
    * The class name
@@ -80,8 +86,11 @@ export class Table {
   // map column name to a field definition
   private mapNameToField: Map<string, Field>;
 
-  // map column name to a field definition
+  // map column name to a identity field definition
   private mapNameToIdentityField: Map<string, Field>;
+
+  // map constraint name to foreign table reference
+  private mapNameToTableReference: Map<string, TableReference>;
 
   /**
    * Creates an instance of Table.
@@ -93,6 +102,7 @@ export class Table {
     this.mapPropToField = new Map<string|symbol, Field>();
     this.mapNameToField = new Map<string, Field>();
     this.mapNameToIdentityField = new Map<string, Field>();
+    this.mapNameToTableReference = new Map<string, TableReference>();
     this.fields = [];
     this.withoutRowId = false;
     this.autoIncrement = false;
@@ -117,10 +127,11 @@ export class Table {
    * @returns {Field}
    */
   public getPropertyField(key: string|symbol): Field {
-    if (!this.mapPropToField.has(key)) {
+    const field = this.mapPropToField.get(key);
+    if (!field) {
       throw new Error(`property '${key.toString()}' on class '${this.className}' not mapped to any field`);
     }
-    return this.mapPropToField.get(key) as Field;
+    return field;
   }
 
   /**
@@ -158,10 +169,11 @@ export class Table {
    * @returns {Field}
    */
   public getTableField(name: string): Field {
-    if (!this.mapNameToField.has(name)) {
+    const field = this.mapNameToField.get(name) as Field;
+    if (!field) {
       throw new Error(`field '${name}' not registered yet`);
     }
-    return this.mapNameToField.get(name) as Field;
+    return field;
   }
 
   /**
@@ -200,6 +212,26 @@ export class Table {
     return field;
   }
 
+
+  public hasTableReference(name: string): TableReference|undefined {
+    return this.mapNameToTableReference.get(name);
+  }
+
+  public getTableReference(name: string): TableReference {
+    const constraint = this.mapNameToTableReference.get(name);
+    if (!constraint) {
+      throw new Error(`foreign key constraint ${name} not registered yet`);
+    }
+    return constraint;
+  }
+
+  public addTableReference(constraint: TableReference): void {
+    if (this.mapNameToTableReference.has(constraint.constraintName)) {
+      throw new Error(`foreign key constraint ${constraint.constraintName} already registered`);
+    }
+    this.mapNameToTableReference.set(constraint.constraintName, constraint);
+  }
+
   /**
    * Get 'CREATE TABLE'-statement using 'IF NOT EXISTS'-clause
    *
@@ -215,7 +247,7 @@ export class Table {
    * @returns {string}
    */
   public getDropTableStatement(): string {
-    return `DROP TABLE IF EXISTS ${this.name}`;
+    return `DROP TABLE IF EXISTS ${this.quotedName}`;
   }
 
   /**
@@ -225,10 +257,10 @@ export class Table {
    * @returns {string}
    */
   public getAlterTableAddColumnStatement(colName: string): string {
-    let stmt = `ALTER TABLE ${this.name}`;
+    let stmt = `ALTER TABLE ${this.quotedName}`;
 
     const field = this.getTableField(colName);
-    stmt += ` ADD COLUMN ${field.name} ${field.dbtype}`;
+    stmt += ` ADD COLUMN ${field.quotedName} ${field.dbtype}`;
     return stmt;
   }
 
@@ -242,8 +274,11 @@ export class Table {
     if (!stmtText) {
       throw new Error(`index '${idxName}' is not defined on table '${this.name}'`);
     }
+    const quotedIdxName = quotedQualifiedIdentifierName(idxName);
+    const quotedTableName = quotedUnqualifiedIdentifierName(this.name);
     // tslint:disable-next-line: restrict-plus-operands
-    return 'CREATE ' + (unique ? 'UNIQUE ' : '') + stmtText;
+    return 'CREATE ' + (unique ? 'UNIQUE ' : ' ') + `INDEX IF NOT EXISTS ${quotedIdxName} ON ${quotedTableName} ` +
+        stmtText;
   }
 
   /**
@@ -254,9 +289,10 @@ export class Table {
   public getDropIndexStatement(idxName: string): string {
     const stmtText = this.statementsText.indexKeys.get(idxName);
     if (!stmtText) {
-      throw new Error(`index '${idxName}' is defined on table '${this.name}'`);
+      throw new Error(`index '${idxName}' is not defined on table '${this.name}'`);
     }
-    return `DROP INDEX IF EXISTS ${idxName}`;
+    const quotedIdxName = quotedQualifiedIdentifierName(idxName);
+    return `DROP INDEX IF EXISTS ${quotedIdxName}`;
   }
 
   /**
@@ -376,14 +412,14 @@ export class Table {
     }
 
     this.fields.forEach((field) => {
-      let colDef = `${field.name} ${field.dbtype}`;
+      let colDef = `${field.quotedName} ${field.dbtype}`;
       const hostParmName = field.getHostParameterName();
 
-      colNames.push(field.name);
+      colNames.push(field.quotedName);
       colParms.push(hostParmName);
       if (field.isIdentity) {
-        colNamesPK.push(field.name);
-        colSelPK.push(`${field.name}=${hostParmName}`);
+        colNamesPK.push(field.quotedName);
+        colSelPK.push(`${field.quotedName}=${hostParmName}`);
         if (this.mapNameToIdentityField.size === 1) {
           colDef += ' PRIMARY KEY';
           if (!!this.autoIncrementField) {
@@ -391,30 +427,39 @@ export class Table {
           }
         }
       } else {
-        colNamesNoPK.push(field.name);
+        colNamesNoPK.push(field.quotedName);
         colParmsNoPK.push(hostParmName);
-        colSetsNoPK.push(`${field.name}=${hostParmName}`);
+        colSetsNoPK.push(`${field.quotedName}=${hostParmName}`);
       }
       colDefs.push(colDef);
-      field.foreignKeys.forEach((refColumn, constraintName) => {
+      field.foreignKeys.forEach((fieldRef, constraintName) => {
         let fk: ForeignKeyHelper = foreignKeys.get(constraintName) as ForeignKeyHelper;
         if (!fk) {
-          fk = new ForeignKeyHelper(constraintName, refColumn.tableName);
+          const table = fieldRef.tableRef.table;
+          if (!table) {
+            throw new Error(
+                `table '${
+                          this.name
+                        }': foreign key constraint '${
+                                                      constraintName
+                                                    }' references unknown tables: '${fieldRef.tableRef.tableName}'`);
+          }
+          fk = new ForeignKeyHelper(constraintName, fieldRef.tableRef);
           foreignKeys.set(constraintName, fk);
         }
-        if (refColumn.tableName !== fk.refTableName) {
+        if (fieldRef.tableRef.tableName !== fk.tableRef.tableName) {
           // TODO: this error should be found earlier
           throw new Error(
-              `table '${this.name}': foreign key constraint '${
-                                                               constraintName
-                                                             }' references different tables: '${
-                                                                                                refColumn.tableName
-                                                                                              }' vs '${
-                                                                                                       fk.refTableName
-                                                                                                     }'`);
+              `table '${
+                        this.name
+                      }': foreign key constraint '${
+                                                    constraintName
+                                                  }' references different tables: '${
+                                                                                     fieldRef.tableRef.tableName
+                                                                                   }' vs '${fk.tableRef.tableName}'`);
         }
         fk.fields.push(field);
-        fk.refColumns.push(refColumn.colName);
+        fk.refColumns.push(fieldRef.colName);
       });
       field.indexKeys.forEach((indexName) => {
         let idx: string[] = indexKeys.get(indexName) as string[];
@@ -422,12 +467,12 @@ export class Table {
           idx = [];
           indexKeys.set(indexName, idx);
         }
-        idx.push(field.name);
+        idx.push(field.quotedName);
       });
     });
     // --------------------------------------------------------------
     // generate CREATE TABLE statement
-    stmts.createTable = `CREATE TABLE IF NOT EXISTS ${this.name} (\n  `;
+    stmts.createTable = `CREATE TABLE IF NOT EXISTS ${this.quotedName} (\n  `;
 
     // add column definitions
     stmts.createTable += colDefs.join(',\n  ');
@@ -444,11 +489,12 @@ export class Table {
       if (!fk.fields.length || !fk.refColumns.length || fk.fields.length !== fk.refColumns.length) {
         throw new Error(`table '${this.name}': foreign key constraint '${fkName}' definition is incomplete`);
       }
-      stmts.createTable += `,\n  CONSTRAINT ${fkName} FOREIGN KEY (`;
-      stmts.createTable += fk.fields.map((field) => field.name).join(', ');
+      stmts.createTable += `,\n  CONSTRAINT ${fk.tableRef.quotedConstraintName} FOREIGN KEY (`;
+      stmts.createTable += fk.fields.map((field) => field.quotedName).join(', ');
       stmts.createTable += ')\n';
 
-      stmts.createTable += `    REFERENCES ${fk.refTableName} (`;
+      // tslint:disable-next-line no-non-null-assertion
+      stmts.createTable += `    REFERENCES ${fk.tableRef.table!.quotedName} (`;
       // tslint:disable-next-line: restrict-plus-operands
       stmts.createTable += fk.refColumns.join(', ') + ') ON DELETE CASCADE';  // TODO: hard-coded 'ON DELETE CASCADE'
       if (i--) {
@@ -464,7 +510,7 @@ export class Table {
 
     // --------------------------------------------------------------
     // generate INSERT INTO statement
-    stmts.insertInto = `INSERT INTO ${this.name} (\n  `;
+    stmts.insertInto = `INSERT INTO ${this.quotedName} (\n  `;
     if (!this.autoIncrementField) {
       stmts.insertInto += colNames.join(', ');
     } else {
@@ -485,13 +531,13 @@ export class Table {
 
     // --------------------------------------------------------------
     // generate UPDATE SET statement
-    stmts.updateById = `UPDATE ${this.name} SET\n  `;
+    stmts.updateById = `UPDATE ${this.quotedName} SET\n  `;
     stmts.updateById += colSetsNoPK.join(',\n  ');
     stmts.updateById += wherePrimaryKeyClause;
 
     // --------------------------------------------------------------
     // generate DELETE FROM statement
-    stmts.deleteById = `DELETE FROM ${this.name}\n  `;
+    stmts.deleteById = `DELETE FROM ${this.quotedName}\n  `;
     stmts.deleteById += wherePrimaryKeyClause;
 
     // --------------------------------------------------------------
@@ -500,7 +546,7 @@ export class Table {
 
     stmts.selectAll = 'SELECT\n  ';
     stmts.selectAll += `${TABLEALIASPREFIX}` + colNames.join(`, ${TABLEALIASPREFIX}`);
-    stmts.selectAll += `\nFROM ${this.name} ${TABLEALIAS} `;
+    stmts.selectAll += `\nFROM ${this.quotedName} ${TABLEALIAS} `;
 
     // --------------------------------------------------------------
     // generate SELECT-one statement
@@ -512,14 +558,15 @@ export class Table {
     // generate SELECT-fk condition
     foreignKeys.forEach((fk, constraintName) => {
       const selectCondition =
-          fk.fields.map((field) => `${TABLEALIASPREFIX}${field.name}=${field.getHostParameterName()}`).join(' AND ');
+          fk.fields.map((field) => `${TABLEALIASPREFIX}${field.quotedName}=${field.getHostParameterName()}`)
+              .join(' AND ');
       stmts.foreignKeySelects.set(constraintName, selectCondition);
       stmts.foreignKeyFields.set(constraintName, fk.fields);
     });
 
     indexKeys.forEach((cols, indexName) => {
       // tslint:disable-next-line: restrict-plus-operands
-      const createIdxCols = `INDEX IF NOT EXISTS ${indexName} ON ${this.name} (` + cols.join(', ') + ')';
+      const createIdxCols = `(` + cols.join(', ') + ')';
       stmts.indexKeys.set(indexName, createIdxCols);
     });
 
@@ -558,12 +605,12 @@ class SqlStatementText {
  */
 class ForeignKeyHelper {
   name: string;
-  refTableName: string;
+  tableRef: TableReference;
   refColumns: string[] = [];
   fields: Field[] = [];
 
-  public constructor(name: string, refTableName: string) {
+  public constructor(name: string, tableRef: TableReference) {
     this.name = name;
-    this.refTableName = refTableName;
+    this.tableRef = tableRef;
   }
 }

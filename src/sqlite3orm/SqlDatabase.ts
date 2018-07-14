@@ -132,6 +132,8 @@ export class SqlDatabase {
       }
       // tslint:disable-next-line: only-arrow-functions
       this.db.run(sql, params, function(err: Error): void {
+        // do not use arrow function for this callback
+        // the below 'this' should not reference our self
         if (err) {
           reject(err);
         } else {

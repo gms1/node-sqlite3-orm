@@ -1,5 +1,5 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-import {field, fk, id, index, table} from '../index';
+import {field, fk, id, index, table} from '..';
 
 // ---------------------------------------------
 

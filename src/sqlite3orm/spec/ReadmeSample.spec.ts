@@ -1,5 +1,5 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-import {BaseDAO, table, id, field, index, fk, SqlDatabase, schema} from '../index';
+import {BaseDAO, table, id, field, index, fk, SqlDatabase, schema} from '..';
 
 // definition-part:
 

@@ -21,3 +21,6 @@ export {Schema, schema} from './Schema';
 export {table, field, id, fk, index, TableOpts, FieldOpts, METADATA_TABLE_KEY} from './decorators';
 
 export {SqlConnectionPool} from './SqlConnectionPool';
+
+export {TableReference} from './TableReference';
+export {FieldReference} from './FieldReference';

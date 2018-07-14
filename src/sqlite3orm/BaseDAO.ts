@@ -407,7 +407,6 @@ export class BaseDAO<T extends Object> {
           break;
       }
     }
-    // console.log(`setting ${field.propertyKey} to ${value}`);
     Reflect.set(model, field.propertyKey, value);
   }
 

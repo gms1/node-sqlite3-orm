@@ -1,18 +1,6 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class deprecation
-import {
-  BaseDAO,
-  Field,
-  SqlDatabase,
-  Schema,
-  SQL_MEMORY_DB_PRIVATE,
-  schema,
-  field,
-  fk,
-  id,
-  index,
-  table
-} from '../index';
-
+import {BaseDAO, Field, SqlDatabase, Schema, SQL_MEMORY_DB_PRIVATE, schema, field, fk, id, index, table} from '..';
+import {unqualifiedIdentifierName} from '../utils';
 // sqlite3 catalog table
 
 @table({name: 'sqlite_master'})
@@ -47,12 +35,12 @@ const TABLE_PARENT_TABLE_NAME = 'PARENTTABLE';
 const TABLE_PARENT_FIELD_ID_NAME = 'ID';
 const TABLE_PARENT_FIELD_NAME_NAME = 'NAME';
 
-const TABLE_CHILD_TABLE_NAME = 'CHILDTABLE';
+const TABLE_CHILD_TABLE_NAME = 'main.CHILD TABLE';
 const TABLE_CHILD_FIELD_ID_NAME = 'ID';
 const TABLE_CHILD_FIELD_NAME_NAME = 'NAME';
 const TABLE_CHILD_FIELD_FK_NAME = 'PARENT_ID';
 const TABLE_CHILD_FK_CONSTRAINT_NAME = 'PARENT_CHILDS';
-const TABLE_CHILD_IDX_NAME = 'CHILD_PARENT_IDX';
+const TABLE_CHILD_IDX_NAME = 'main.CHILD PARENT IDX';
 
 
 @table({name: TABLE_PARENT_TABLE_NAME})
@@ -112,32 +100,39 @@ describe('test schema', () => {
       let parentTable = schema().getTable(TABLE_PARENT_TABLE_NAME);
       expect(parentTable).toBeDefined();
       expect(parentTable.name).toBe(TABLE_PARENT_TABLE_NAME);
+      expect(parentTable.quotedName).toBeDefined();
       let parentIdField = parentTable.getTableField(TABLE_PARENT_FIELD_ID_NAME);
       expect(parentIdField).toBeDefined();
       expect(parentIdField.name).toBe(TABLE_PARENT_FIELD_ID_NAME);
+      expect(parentIdField.quotedName).toBeDefined();
       expect(parentIdField.isIdentity).toBeTruthy();
       let parentNameField = parentTable.getTableField(TABLE_PARENT_FIELD_NAME_NAME);
       expect(parentNameField).toBeDefined();
       expect(parentNameField.name).toBe(TABLE_PARENT_FIELD_NAME_NAME);
+      expect(parentNameField.quotedName).toBeDefined();
       expect(parentNameField.isIdentity).toBeFalsy();
 
       let childTable = schema().getTable(TABLE_CHILD_TABLE_NAME);
       expect(childTable).toBeDefined();
       expect(childTable.name).toBe(TABLE_CHILD_TABLE_NAME);
+      expect(childTable.quotedName).toBeDefined();
       let childIdField = childTable.getTableField(TABLE_CHILD_FIELD_ID_NAME);
       expect(childIdField).toBeDefined();
       expect(childIdField.name).toBe(TABLE_CHILD_FIELD_ID_NAME);
+      expect(childIdField.quotedName).toBeDefined();
       expect(childIdField.isIdentity).toBeTruthy();
       let childNameField = childTable.getTableField(TABLE_CHILD_FIELD_NAME_NAME);
       expect(childNameField).toBeDefined();
       expect(childNameField.name).toBe(TABLE_CHILD_FIELD_NAME_NAME);
+      expect(childNameField.quotedName).toBeDefined();
       expect(childNameField.isIdentity).toBeFalsy();
       let childFKField = childTable.getTableField(TABLE_CHILD_FIELD_FK_NAME);
       expect(childFKField).toBeDefined();
       expect(childFKField.name).toBe(TABLE_CHILD_FIELD_FK_NAME);
+      expect(childFKField.quotedName).toBeDefined();
       expect(childFKField.isIdentity).toBeFalsy();
       let childFKFieldRef = childFKField.getForeignKeyField(TABLE_CHILD_FK_CONSTRAINT_NAME);
-      expect(childFKFieldRef.tableName).toBe(TABLE_PARENT_TABLE_NAME);
+      expect(childFKFieldRef.tableRef.tableName).toBe(TABLE_PARENT_TABLE_NAME);
       expect(childFKFieldRef.colName).toBe(TABLE_PARENT_FIELD_ID_NAME);
 
       expect(childFKField.isIndexField(TABLE_CHILD_IDX_NAME)).toBeTruthy();
@@ -155,7 +150,7 @@ describe('test schema', () => {
 
       // the database objects should not exist in the database catalog:
       catalogItem.objType = 'table';
-      catalogItem.objName = TABLE_PARENT_TABLE_NAME;
+      catalogItem.objName = unqualifiedIdentifierName(TABLE_PARENT_TABLE_NAME);
       try {
         await catalogDAO.select(catalogItem);
       } catch (e) {
@@ -163,7 +158,7 @@ describe('test schema', () => {
       }
 
       catalogItem.objType = 'table';
-      catalogItem.objName = TABLE_CHILD_TABLE_NAME;
+      catalogItem.objName = unqualifiedIdentifierName(TABLE_CHILD_TABLE_NAME);
       try {
         await catalogDAO.select(catalogItem);
       } catch (e) {
@@ -171,7 +166,7 @@ describe('test schema', () => {
       }
 
       catalogItem.objType = 'index';
-      catalogItem.objName = TABLE_CHILD_IDX_NAME;
+      catalogItem.objName = unqualifiedIdentifierName(TABLE_CHILD_IDX_NAME);
       try {
         await catalogDAO.select(catalogItem);
       } catch (e) {
@@ -186,17 +181,17 @@ describe('test schema', () => {
 
       // now the database objects should exist in the database catalog:
       catalogItem.objType = 'table';
-      catalogItem.objName = TABLE_PARENT_TABLE_NAME;
+      catalogItem.objName = unqualifiedIdentifierName(TABLE_PARENT_TABLE_NAME);
       catalogItem = await catalogDAO.select(catalogItem);
 
       catalogItem.objType = 'table';
-      catalogItem.objName = TABLE_CHILD_TABLE_NAME;
+      catalogItem.objName = unqualifiedIdentifierName(TABLE_CHILD_TABLE_NAME);
       catalogItem = await catalogDAO.select(catalogItem);
 
       catalogItem.objType = 'index';
-      catalogItem.objName = TABLE_CHILD_IDX_NAME;
+      catalogItem.objName = unqualifiedIdentifierName(TABLE_CHILD_IDX_NAME);
       catalogItem = await catalogDAO.select(catalogItem);
-      expect(catalogItem.tblName === TABLE_CHILD_TABLE_NAME);
+      expect(catalogItem.tblName === unqualifiedIdentifierName(TABLE_CHILD_TABLE_NAME));
 
       // alter table add a new column
 
@@ -220,7 +215,7 @@ describe('test schema', () => {
 
       await schema().dropIndex(sqldb, TABLE_CHILD_TABLE_NAME, TABLE_CHILD_IDX_NAME);
       catalogItem.objType = 'index';
-      catalogItem.objName = TABLE_CHILD_IDX_NAME;
+      catalogItem.objName = unqualifiedIdentifierName(TABLE_CHILD_IDX_NAME);
       try {
         await catalogDAO.select(catalogItem);
         fail(`index should not exist`);
@@ -234,7 +229,7 @@ describe('test schema', () => {
       // now database objects should not exist in the database catalog:
 
       catalogItem.objType = 'table';
-      catalogItem.objName = TABLE_PARENT_TABLE_NAME;
+      catalogItem.objName = unqualifiedIdentifierName(TABLE_PARENT_TABLE_NAME);
       try {
         await catalogDAO.select(catalogItem);
         fail(`table ${TABLE_CHILD_TABLE_NAME} should not exist`);
@@ -243,7 +238,7 @@ describe('test schema', () => {
       }
 
       catalogItem.objType = 'table';
-      catalogItem.objName = TABLE_CHILD_TABLE_NAME;
+      catalogItem.objName = unqualifiedIdentifierName(TABLE_CHILD_TABLE_NAME);
       try {
         await catalogDAO.select(catalogItem);
         fail(`table ${TABLE_CHILD_TABLE_NAME} should not exist`);
@@ -265,7 +260,7 @@ describe('test schema', () => {
 
       // the database objects should not exist in the database catalog:
       catalogItem.objType = 'table';
-      catalogItem.objName = TABLE_PARENT_TABLE_NAME;
+      catalogItem.objName = unqualifiedIdentifierName(TABLE_PARENT_TABLE_NAME);
       try {
         await catalogDAO.select(catalogItem);
       } catch (e) {
@@ -273,7 +268,7 @@ describe('test schema', () => {
       }
 
       catalogItem.objType = 'table';
-      catalogItem.objName = TABLE_CHILD_TABLE_NAME;
+      catalogItem.objName = unqualifiedIdentifierName(TABLE_CHILD_TABLE_NAME);
       try {
         await catalogDAO.select(catalogItem);
       } catch (e) {
@@ -281,7 +276,7 @@ describe('test schema', () => {
       }
 
       catalogItem.objType = 'index';
-      catalogItem.objName = TABLE_CHILD_IDX_NAME;
+      catalogItem.objName = unqualifiedIdentifierName(TABLE_CHILD_IDX_NAME);
       try {
         await catalogDAO.select(catalogItem);
       } catch (e) {
@@ -299,17 +294,17 @@ describe('test schema', () => {
 
       // now the database objects should exist in the database catalog:
       catalogItem.objType = 'table';
-      catalogItem.objName = TABLE_PARENT_TABLE_NAME;
+      catalogItem.objName = unqualifiedIdentifierName(TABLE_PARENT_TABLE_NAME);
       catalogItem = await catalogDAO.select(catalogItem);
 
       catalogItem.objType = 'table';
-      catalogItem.objName = TABLE_CHILD_TABLE_NAME;
+      catalogItem.objName = unqualifiedIdentifierName(TABLE_CHILD_TABLE_NAME);
       catalogItem = await catalogDAO.select(catalogItem);
 
       catalogItem.objType = 'index';
-      catalogItem.objName = TABLE_CHILD_IDX_NAME;
+      catalogItem.objName = unqualifiedIdentifierName(TABLE_CHILD_IDX_NAME);
       catalogItem = await catalogDAO.select(catalogItem);
-      expect(catalogItem.tblName === TABLE_CHILD_TABLE_NAME);
+      expect(catalogItem.tblName === unqualifiedIdentifierName(TABLE_CHILD_TABLE_NAME));
 
       // alter table add a new column
 
@@ -331,7 +326,7 @@ describe('test schema', () => {
 
       await childDAO.dropIndex(TABLE_CHILD_IDX_NAME);
       catalogItem.objType = 'index';
-      catalogItem.objName = TABLE_CHILD_IDX_NAME;
+      catalogItem.objName = unqualifiedIdentifierName(TABLE_CHILD_IDX_NAME);
       try {
         await catalogDAO.select(catalogItem);
         fail('index should not exist');
@@ -344,7 +339,7 @@ describe('test schema', () => {
 
       // now database objects should not exist in the database catalog:
       catalogItem.objType = 'table';
-      catalogItem.objName = TABLE_PARENT_TABLE_NAME;
+      catalogItem.objName = unqualifiedIdentifierName(TABLE_PARENT_TABLE_NAME);
       try {
         await catalogDAO.select(catalogItem);
         fail(`table ${TABLE_PARENT_TABLE_NAME} should not exist`);
@@ -353,7 +348,7 @@ describe('test schema', () => {
       }
 
       catalogItem.objType = 'table';
-      catalogItem.objName = TABLE_CHILD_TABLE_NAME;
+      catalogItem.objName = unqualifiedIdentifierName(TABLE_CHILD_TABLE_NAME);
       try {
         await catalogDAO.select(catalogItem);
         fail(`table ${TABLE_CHILD_TABLE_NAME} should not exist`);
@@ -409,11 +404,20 @@ describe('test schema', () => {
 
     @field({name: 'NAME2', dbtype: 'TEXT'}) public name2?: string;
 
-    public constructor() {
-      this.id = undefined;
-      this.name = undefined;
-    }
+    public constructor() {}
   }
+
+  @table({name: 'TESTTABLE2'})
+  class TestTable2 {
+    @id({name: 'ID', dbtype: 'INTEGER NOT NULL'}) public id?: number;
+
+    @field({name: 'NAME', dbtype: 'TEXT'}) public name?: string;
+
+    @field({name: 'NAME2', dbtype: 'TEXT'}) public name2?: string;
+
+    public constructor() {}
+  }
+
 
   // ---------------------------------------------
   it('add property to multiple names should throw', async (done) => {
@@ -509,7 +513,7 @@ describe('test schema', () => {
 
   // ---------------------------------------------
   it('get dml statements for known table should succeed', async (done) => {
-    let testTable = schema().getTable('TESTTABLE');
+    let testTable = schema().getTable('TESTTABLE2');
     try {
       testTable.getUpdateSetStatement();
       testTable.getUpdateByIdStatement();

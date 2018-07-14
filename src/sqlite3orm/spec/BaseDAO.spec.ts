@@ -1,9 +1,9 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-import {SqlDatabase, BaseDAO, SQL_MEMORY_DB_PRIVATE, field, fk, id, table} from '../index';
+import {SqlDatabase, BaseDAO, SQL_MEMORY_DB_PRIVATE, field, fk, id, table} from '..';
 
 
-const USERS_TABLE = 'USERSTABLE';
-const CONTACTS_TABLE = 'CONTACTSTABLE';
+const USERS_TABLE = 'USERS TABLE';
+const CONTACTS_TABLE = 'main.CONTACTS TABLE';
 
 @table({name: USERS_TABLE})
 class User {

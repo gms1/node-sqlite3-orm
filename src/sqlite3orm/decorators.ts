@@ -3,6 +3,7 @@ import 'reflect-metadata';
 
 import {Field} from './Field';
 import {FieldReference} from './FieldReference';
+import {TableReference} from './TableReference';
 import {schema} from './Schema';
 import {Table} from './Table';
 
@@ -20,6 +21,7 @@ export interface TableOpts {
    * @type {string}
    */
   name?: string;
+
   /**
    * Flag to indicate if table should be created using the 'WITHOUT ROWID'
    * clause
@@ -97,8 +99,9 @@ function getFieldMetadata(metaTable: Table, key: string|symbol): Field {
  * @returns {Table}
  */
 function decorateTableClass(target: Function, opts: TableOpts): void {
-  const newTableName = opts.name || target.name;
   const metaTable = getTableMetadata(target);
+  const newTableName = opts.name || target.name;
+
   if (!!metaTable.name && newTableName !== metaTable.name) {
     throw new Error(
         `failed to map class '${
@@ -107,6 +110,8 @@ function decorateTableClass(target: Function, opts: TableOpts): void {
                                                   newTableName
                                                 }': This class is already mapped to the table '${metaTable.name}'`);
   }
+
+
   metaTable.name = newTableName;
   if (!!opts.withoutRowId) {
     metaTable.withoutRowId = true;
@@ -149,10 +154,9 @@ function decorateFieldProperty(
   if (!!isIdentity) {
     metaField.isIdentity = isIdentity;
   }
-  // console.log(`name='${key.toString()}' type='${field.propertyType}'
-  // dbtype='${field.dbtype}'` );
   return metaField;
 }
+
 
 /**
  * Helper function for decorating a property and map it to a foreign key field
@@ -173,6 +177,12 @@ function decorateForeignKeyProperty(
   }
 
   const metaTable: Table = getTableMetadata(target.constructor);
+  let tableRef = metaTable.hasTableReference(constraintName);
+  if (!tableRef) {
+    tableRef = new TableReference(constraintName, foreignTableName);
+    metaTable.addTableReference(tableRef);
+  }
+
   const metaField: Field = getFieldMetadata(metaTable, key);
   if (metaField.hasForeignKeyField(constraintName)) {
     throw new Error(`decorating property '${
@@ -180,7 +190,7 @@ function decorateForeignKeyProperty(
                                           }.${key.toString()}': duplicate foreign key constraint '${constraintName}'`);
   }
 
-  metaField.setForeignKeyField(constraintName, new FieldReference(foreignTableName, foreignTableField));
+  metaField.setForeignKeyField(constraintName, new FieldReference(tableRef, foreignTableField));
   return metaField;
 }
 
@@ -209,6 +219,9 @@ function decorateIndexProperty(target: Object|Function, key: string|symbol, inde
   return metaField;
 }
 
+/*****************************************************************************************/
+/* decorators:
+
 /**
  * The class decorator for mapping a database table to a class
  *
@@ -221,7 +234,7 @@ export function table(opts: TableOpts = {}): (target: Function) => void {
 }
 
 /**
- * The field decorator for mapping a class property to a table field
+ * The property decorator for mapping a table field to a class property
  *
  * @export
  * @param {string} [name] - The name of the field; defaults to the property name
@@ -236,8 +249,7 @@ export function field(opts: FieldOpts = {}): (target: Object, key: string|symbol
 }
 
 /**
- * The id decorator for mapping a class property to a field of the primary key
- * of the table
+ * The id decorator for mapping a field of the primary key to a class property
  *
  * @export
  * @param {string} [name] - The name of the field; defaults to the property name
