@@ -12,7 +12,6 @@ export class Schema {
    * The one and only Schema instance
    *
    * @static
-   * @type {Schema}
    */
   public static schema: Schema;
 
@@ -35,8 +34,8 @@ export class Schema {
   /**
    * lookup table definition for given table name
    *
-   * @param {string} name - The name of the table
-   * @returns {Table}
+   * @param name - The name of the table
+   * @returns The table definition or undefined
    */
 
   public hasTable(name: string): Table|undefined {
@@ -46,8 +45,8 @@ export class Schema {
   /**
    * get a table definition
    *
-   * @param {string} name - The name of the table
-   * @returns {Table}
+   * @param name - The name of the table
+   * @returns The table definition
    */
   public getTable(name: string): Table {
     const table = this.mapNameToTable.get(name);
@@ -60,9 +59,9 @@ export class Schema {
   /**
    * add a table definition
    *
-   * @param {string} name - The name of the table
-   * @param {Table} table
-   * @returns {Table}
+   * @param name - The name of the table
+   * @param table - The table definition
+   * @returns The table definition
    */
   public addTable(table: Table): Table {
     if (this.mapNameToTable.has(table.name)) {
@@ -76,9 +75,9 @@ export class Schema {
   /**
    * create a table in the database
    *
-   * @param {SqlDatabase} sqldb
-   * @param {string} name - The name of the table
-   * @returns {Promise<void>}
+   * @param sqldb - The db connection
+   * @param name - The name of the table
+   * @returns A promise
    */
   public async createTable(sqldb: SqlDatabase, name: string): Promise<void> {
     const table = this.getTable(name);
@@ -88,9 +87,9 @@ export class Schema {
   /**
    * drop a table from the database
    *
-   * @param {SqlDatabase} sqldb
-   * @param {string} name - The name of the table
-   * @returns {Promise<void>}
+   * @param sqldb - The db connection
+   * @param name - The name of the table
+   * @returns A promise
    */
   public async dropTable(sqldb: SqlDatabase, name: string): Promise<void> {
     const table = this.getTable(name);
@@ -100,10 +99,10 @@ export class Schema {
   /**
    * add a column/field to a database table
    *
-   * @param {SqlDatabase} sqldb
-   * @param {string} tableName
-   * @param {string} colName
-   * @returns {Promise<void>}
+   * @param sqldb - The db connection
+   * @param tableName - The name of the table
+   * @param colName - The name of the column
+   * @returns A promise
    */
   public async alterTableAddColumn(sqldb: SqlDatabase, tableName: string, colName: string): Promise<void> {
     const table = this.getTable(tableName);
@@ -113,11 +112,11 @@ export class Schema {
   /**
    * create an index in the database
    *
-   * @param {SqlDatabase} sqldb
-   * @param {string} tableName - The name of the table
-   * @param {string} idxName - The name of the index
-   * @param {boolean} [unique] - create unique index
-   * @returns {Promise<void>}
+   * @param sqldb - The db connection
+   * @param tableName - The name of the table
+   * @param idxName - The name of the index
+   * @param [unique] - create unique index
+   * @returns A promise
    */
   public async createIndex(sqldb: SqlDatabase, tableName: string, idxName: string, unique?: boolean): Promise<void> {
     const table = this.getTable(tableName);
@@ -127,10 +126,10 @@ export class Schema {
   /**
    * drop a table from the database
    *
-   * @param {SqlDatabase} sqldb
-   * @param {string} tableName - The name of the table
-   * @param {string} idxName - The name of the index
-   * @returns {Promise<void>}
+   * @param sqldb - The db connection
+   * @param tableName - The name of the table
+   * @param idxName - The name of the index
+   * @returns A promise
    */
   public async dropIndex(sqldb: SqlDatabase, tableName: string, idxName: string): Promise<void> {
     const table = this.getTable(tableName);

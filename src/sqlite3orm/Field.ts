@@ -11,8 +11,6 @@ import {quotedIdentifierName} from './utils';
 export class Field {
   /**
    * The name of the column
-   *
-   * @type {string}
    */
   public name!: string;
 
@@ -25,14 +23,10 @@ export class Field {
 
   /**
    * The property key mapped to this field
-   *
-   * @type {(string|symbol)}
    */
   propertyKey: string|symbol;
   /**
    * The property type mapped to this field
-   *
-   * @type {string}
    */
   private _propertyType?: string;
 
@@ -59,34 +53,24 @@ export class Field {
 
   /**
    * The type of the table column
-   *
-   * @type {string}
    */
   dbtype: string;
   /**
    * Flag if this field is part of the primary key
-   *
-   * @type {boolean}
    */
   isIdentity: boolean;
   /**
    * Map of all the foreign key constraints this field participates
-   *
-   * @type {Map<string, FieldReference>}
    */
   foreignKeys: Map<string, FieldReference>;
 
   /**
    * Set of all the indexes this field participates
-   *
-   * @type {Set<string}
    */
   indexKeys: Set<string>;
 
   /**
    * The property type enum mapped to this field
-   *
-   * @type {PropertyType}
    */
   private _propertyKnownType: PropertyType;
 
@@ -96,8 +80,6 @@ export class Field {
 
   /**
    * If this property should be serialized/deserialized to the database as Json data
-   *
-   * @type {boolean}
    */
   isJson: boolean;
 
@@ -128,8 +110,7 @@ export class Field {
   /**
    * Test if this field is part of the given foreign key constraint
    *
-   * @param {string} constraintName
-   * @returns {boolean}
+   * @param constraintName
    */
   public hasForeignKeyField(constraintName: string): boolean {
     return this.foreignKeys.has(constraintName);
@@ -138,8 +119,8 @@ export class Field {
   /**
    * Get the field reference for the given foreign key constraint
    *
-   * @param {string} constraintName
-   * @returns {FieldReference}
+   * @param constraintName
+   * @returns The referenced table and column
    */
   public getForeignKeyField(constraintName: string): FieldReference {
     return this.foreignKeys.get(constraintName) as FieldReference;
@@ -148,8 +129,8 @@ export class Field {
   /**
    * Set this field to participate in a foreign key constraint
    *
-   * @param {string} constraintName - The constraint name
-   * @param {FieldReference} foreignTableField - The referenced table and column
+   * @param constraintName - The constraint name
+   * @param foreignTableField - The referenced table and column
    */
   public setForeignKeyField(constraintName: string, foreignTableField: FieldReference): void {
     this.foreignKeys.set(constraintName, foreignTableField);
@@ -158,8 +139,7 @@ export class Field {
   /**
    * Test if this field is part of the given index
    *
-   * @param {string} indexName
-   * @returns {boolean}
+   * @param indexName
    */
   public isIndexField(indexName: string): boolean {
     return this.indexKeys.has(indexName);
@@ -168,8 +148,7 @@ export class Field {
   /**
    * Set this field as part of the given index
    *
-   * @param {string} indexName
-   * @returns {void}
+   * @param indexName
    */
   public setIndexField(indexName: string): void {
     this.indexKeys.add(indexName);

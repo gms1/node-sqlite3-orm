@@ -18,20 +18,20 @@ export const METADATA_TABLE_KEY = 'schema:table';
 export interface TableOpts {
   /**
    * The name of the table
-   * @type {string}
+   * @type
    */
   name?: string;
 
   /**
    * Flag to indicate if table should be created using the 'WITHOUT ROWID'
    * clause
-   * @type {boolean}
+   * @type
    */
   withoutRowId?: boolean;
   /**
    * Flag to indicate if AUTOINCREMENT should be added to single-column INTEGER
    * primary keys
-   * @type {boolean}
+   * @type
    */
   autoIncrement?: boolean;
 }
@@ -45,17 +45,17 @@ export interface TableOpts {
 export interface FieldOpts {
   /**
    * The name of the table field
-   * @type {string}
+   * @type
    */
   name?: string;
   /**
    * The column definition
-   * @type {string}
+   * @type
    */
   dbtype?: string;
   /**
    * Flag to indicate if field should be persisted to json string
-   * @type {boolean}
+   * @type
    */
   isJson?: boolean;
 }
@@ -63,8 +63,8 @@ export interface FieldOpts {
 /**
  * Get the table metadata
  *
- * @param {Function} target - The constructor of the class
- * @returns {Table}
+ * @param target - The constructor of the class
+ * @returns The table class instance
  */
 function getTableMetadata(target: Function): Table {
   if (!Reflect.hasOwnMetadata(METADATA_TABLE_KEY, target.prototype)) {
@@ -76,9 +76,9 @@ function getTableMetadata(target: Function): Table {
 /**
  * Get the field metadata
  *
- * @param {Table} table - The table of this field
- * @param {(string | symbol)} key - The property key
- * @returns {Field}
+ * @param table - The table of this field
+ * @param key - The property key
+ * @returns The field class instance
  */
 function getFieldMetadata(metaTable: Table, key: string|symbol): Field {
   let metaField: Field;
@@ -94,9 +94,8 @@ function getFieldMetadata(metaTable: Table, key: string|symbol): Field {
 /**
  * Helper function for decorating a class and map it to a database table
  *
- * @param {Function} target - The constructor of the class
- * @param {TableOpts} [opts]
- * @returns {Table}
+ * @param target - The constructor of the class
+ * @param [opts] - The options for this table
  */
 function decorateTableClass(target: Function, opts: TableOpts): void {
   const metaTable = getTableMetadata(target);
@@ -125,12 +124,12 @@ function decorateTableClass(target: Function, opts: TableOpts): void {
 /**
  * Helper function for decorating a property and map it to a table field
  *
- * @param {Object} target - The decorated class
- * @param {(string|symbol)} key - The decorated property
- * @param {FieldOpts} [opts]
- * @param {boolean} [isIdentity=false] - Indicator if this field belongs to the
+ * @param target - The decorated class
+ * @param key - The decorated property
+ * @param [opts] - The options for this field
+ * @param [isIdentity=false] - Indicator if this field belongs to the
  * primary key
- * @returns {Field}
+ * @returns The field class instance
  */
 function decorateFieldProperty(
     target: Object|Function, key: string|symbol, opts: FieldOpts, isIdentity: boolean = false): Field {
@@ -161,12 +160,12 @@ function decorateFieldProperty(
 /**
  * Helper function for decorating a property and map it to a foreign key field
  *
- * @param {Object} target - The decorated class
- * @param {(string|symbol)} key - The decorated property
- * @param {string} constraintName - The name for the foreign key constraint
- * @param {string} foreignTableName - The referenced table name
- * @param {string} foreignTableField - The referenced table field
- * @returns {Field}
+ * @param target - The decorated class
+ * @param key - The decorated property
+ * @param constraintName - The name for the foreign key constraint
+ * @param foreignTableName - The referenced table name
+ * @param foreignTableField - The referenced table field
+ * @returns - The field class instance
  */
 function decorateForeignKeyProperty(
     target: Object|Function, key: string|symbol, constraintName: string, foreignTableName: string,
@@ -197,10 +196,10 @@ function decorateForeignKeyProperty(
 /**
  * Helper function for decorating a property and map it to an index field
  *
- * @param {Object} target - The decorated class
- * @param {(string|symbol)} key - The decorated property
- * @param {string} indexName - The name for the index
- * @returns {Field}
+ * @param target - The decorated class
+ * @param key - The decorated property
+ * @param indexName - The name for the index
+ * @returns The field class instance
  */
 function decorateIndexProperty(target: Object|Function, key: string|symbol, indexName: string): Field {
   if (typeof target === 'function') {
@@ -226,8 +225,8 @@ function decorateIndexProperty(target: Object|Function, key: string|symbol, inde
  * The class decorator for mapping a database table to a class
  *
  * @export
- * @param {TableOpts} [opts]
- * @returns {(target: Function) => void}
+ * @param [opts]
+ * @returns The decorator function
  */
 export function table(opts: TableOpts = {}): (target: Function) => void {
   return ((target: Function) => decorateTableClass(target, opts));
@@ -237,10 +236,9 @@ export function table(opts: TableOpts = {}): (target: Function) => void {
  * The property decorator for mapping a table field to a class property
  *
  * @export
- * @param {string} [name] - The name of the field; defaults to the property name
- * @param {string} [dbtype] - The type of the field; defaults to 'TEXT'
- * @returns {((
- *     target: Object, key: string|symbol) => void)}
+ * @param [name] - The name of the field; defaults to the property name
+ * @param [dbtype] - The type of the field; defaults to 'TEXT'
+ * @returns The decorator function
  */
 export function field(opts: FieldOpts = {}): (target: Object, key: string|symbol) => void {
   return ((target: Object, key: string | symbol) => {
@@ -252,10 +250,9 @@ export function field(opts: FieldOpts = {}): (target: Object, key: string|symbol
  * The id decorator for mapping a field of the primary key to a class property
  *
  * @export
- * @param {string} [name] - The name of the field; defaults to the property name
- * @param {string} [dbtype] - The type of the field; defaults to 'TEXT'
- * @returns {((
- *     target: Object, key: string|symbol) => void)}
+ * @param [name] - The name of the field; defaults to the property name
+ * @param [dbtype] - The type of the field; defaults to 'TEXT'
+ * @returns The decorator function
  */
 export function id(opts: FieldOpts = {}): (target: Object, key: string|symbol) => void {
   return ((target: Object, key: string | symbol) => {
@@ -268,11 +265,10 @@ export function id(opts: FieldOpts = {}): (target: Object, key: string|symbol) =
  * constraint
  *
  * @export
- * @param {string} constraintName - The constraint name
- * @param {string} foreignTableName - The referenced table name
- * @param {string} foreignTableField - The referenced table field
- * @returns {((target: Object, key: string|symbol) =>
- *     void)}
+ * @param constraintName - The constraint name
+ * @param foreignTableName - The referenced table name
+ * @param foreignTableField - The referenced table field
+ * @returns The decorator function
  */
 export function fk(constraintName: string, foreignTableName: string, foreignTableField: string): (
     target: Object, key: string|symbol) => void {
@@ -285,9 +281,8 @@ export function fk(constraintName: string, foreignTableName: string, foreignTabl
  * The index decorator for mapping a class property to be part of an index
  *
  * @export
- * @param {string} indexName - The index name
- * @returns {((target: Object, key: string|symbol) =>
- *     void)}
+ * @param indexName - The index name
+ * @returns The decorator function
  */
 export function index(indexName: string): (target: Object, key: string|symbol) => void {
   return ((target: Object, key: string | symbol) => {

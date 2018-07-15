@@ -14,8 +14,6 @@ const TABLEALIAS = 'T';
 export class Table {
   /**
    * The table name (containing the schema name if specified)
-   *
-   * @type {string}
    */
   name!: string;
 
@@ -25,16 +23,12 @@ export class Table {
 
   /**
    * The class name
-   *
-   * @type {string}
    */
   className: string;
 
   /**
    * Flag to indicate if this table should be created with the 'WITHOUT
    * ROWID'-clause
-   *
-   * @type {boolean}
    */
   withoutRowId: boolean;
 
@@ -42,22 +36,16 @@ export class Table {
    * Flag to indicate if AUTOINCREMENT should be enabled for a table having a
    * single-column INTEGER primary key
    * and withoutRowId is disabled
-   *
-   * @type {boolean}
    */
   autoIncrement: boolean;
 
   /**
    * The fields defined for this table
-   *
-   * @type {Field[]}
    */
   fields: Field[] = [];
 
   /**
    * This contains the generated SQL-statements/fragments
-   *
-   * @type {SqlStatementText}
    */
   private _statementsText?: SqlStatementText;
 
@@ -71,8 +59,6 @@ export class Table {
   /**
    * The field mapped to the primary key; only set if the
    * AUTOINCREMENT feature can be used
-   *
-   * @type {string|symbol}
    */
   private _autoIncrementField: Field|undefined;
 
@@ -95,7 +81,7 @@ export class Table {
   /**
    * Creates an instance of Table.
    *
-   * @param {string} className
+   * @param className - The name or the class bound to this table definition
    */
   public constructor(className: string) {
     this.className = className;
@@ -113,8 +99,7 @@ export class Table {
   /**
    * Test if property has been mapped to a column of this table
    *
-   * @param {(string|symbol)} key - The property key
-   * @returns {boolean}
+   * @param key - The property key
    */
   public hasPropertyField(key: string|symbol): boolean {
     return this.mapPropToField.has(key);
@@ -123,8 +108,8 @@ export class Table {
   /**
    * Get the field definition for the mapped property key
    *
-   * @param {(string|symbol)} key - The property key
-   * @returns {Field}
+   * @param key - The property key
+   * @returns The field definition
    */
   public getPropertyField(key: string|symbol): Field {
     const field = this.mapPropToField.get(key);
@@ -137,8 +122,8 @@ export class Table {
   /**
    * Add a property key mapped to field definition to this table
    *
-   * @param {(string|symbol)} key - The property key
-   * @param {Field} field
+   * @param key - The property key
+   * @param field - The field definition
    */
   public addPropertyField(field: Field): void {
     if (this.mapPropToField.has(field.propertyKey)) {
@@ -155,8 +140,7 @@ export class Table {
   /**
    * Test if table has a column with the given column name
    *
-   * @param {string} colName - The name of the column
-   * @returns {boolean}
+   * @param colName - The name of the column
    */
   public hasTableField(name: string): boolean {
     return this.mapNameToField.has(name);
@@ -165,8 +149,8 @@ export class Table {
   /**
    * Get the field definition for the given column name
    *
-   * @param {string} colName - The name of the column
-   * @returns {Field}
+   * @param colName - The name of the column
+   * @returns The field definition
    */
   public getTableField(name: string): Field {
     const field = this.mapNameToField.get(name) as Field;
@@ -179,8 +163,8 @@ export class Table {
   /**
    * Add a table field to this table
    *
-   * @param {string} colName - The name of the column
-   * @returns {Field}
+   * @param colName - The name of the column
+   * @returns The field definition
    */
   public addTableField(field: Field): Field {
     this._statementsText = undefined;
@@ -235,7 +219,7 @@ export class Table {
   /**
    * Get 'CREATE TABLE'-statement using 'IF NOT EXISTS'-clause
    *
-   * @returns {string}
+   * @returns The sql-statement
    */
   public getCreateTableStatement(): string {
     return this.statementsText.createTable;
@@ -253,8 +237,8 @@ export class Table {
   /**
    * Get 'ALTER TABLE...ADD COLUMN'-statement for the given column
    *
-   * @param {string} colName - The name of the column to add to the table
-   * @returns {string}
+   * @param colName - The name of the column to add to the table
+   * @returns The sql-statment
    */
   public getAlterTableAddColumnStatement(colName: string): string {
     let stmt = `ALTER TABLE ${this.quotedName}`;
@@ -267,7 +251,7 @@ export class Table {
   /**
    * Get 'CREATE [UNIQUE] INDEX'-statement using 'IF NOT EXISTS'-clause
    *
-   * @returns {string}
+   * @returns The sql-statement
    */
   public getCreateIndexStatement(idxName: string, unique?: boolean): string {
     const stmtText = this.statementsText.indexKeys.get(idxName);
@@ -284,7 +268,7 @@ export class Table {
   /**
    * Get 'DROP TABLE'-statement
    *
-   * @returns {string}
+   * @returns The sql-statement
    */
   public getDropIndexStatement(idxName: string): string {
     const stmtText = this.statementsText.indexKeys.get(idxName);
@@ -298,7 +282,7 @@ export class Table {
   /**
    * Get 'INSERT INTO'-statement
    *
-   * @returns {string}
+   * @returns The sql-statement
    */
   public getInsertIntoStatement(): string {
     return this.statementsText.insertInto;
@@ -308,7 +292,7 @@ export class Table {
    * Get 'UPDATE SET'-statement
    * @deprecated use getUpdateByIdStatement instead
    *
-   * @returns {string}
+   * @returns The sql-statement
    */
   public getUpdateSetStatement(): string {
     return this.statementsText.updateById;
@@ -317,7 +301,7 @@ export class Table {
   /**
    * Get 'UPDATE BY PRIMARY KEY' statement
    *
-   * @returns {string}
+   * @returns The sql-statement
    */
   public getUpdateByIdStatement(): string {
     return this.statementsText.updateById;
@@ -327,16 +311,16 @@ export class Table {
    * Get 'DELETE FROM'-statement
    * @deprecated use getDeleteByIdStatement instead
    *
-   * @returns {string}
+   * @returns The sql-statement
    */
   public getDeleteFromStatement(): string {
     return this.statementsText.deleteById;
   }
 
   /**
-   * Get 'DELETE BY PRIMARY KE'-statement
+   * Get 'DELETE BY PRIMARY KEY'-statement
    *
-   * @returns {string}
+   * @returns The sql-statement
    */
   public getDeleteByIdStatement(): string {
     return this.statementsText.deleteById;
@@ -345,7 +329,7 @@ export class Table {
   /**
    * Get 'SELECT' all-statement
    *
-   * @returns {string}
+   * @returns The sql-statement
    */
   public getSelectAllStatement(): string {
     return this.statementsText.selectAll;
@@ -355,7 +339,7 @@ export class Table {
    * Get 'SELECT' one-statement
    * @deprecated use getSelectByIdStatement instead
    *
-   * @returns {string}
+   * @returns The sql-statement
    */
   public getSelectOneStatement(): string {
     return this.statementsText.selectById;
@@ -364,7 +348,7 @@ export class Table {
   /**
    * Get 'SELECT BY PRIMARY KEY'-statement
    *
-   * @returns {string}
+   * @returns The sql-statement
    */
   public getSelectByIdStatement(): string {
     return this.statementsText.selectById;
@@ -373,8 +357,8 @@ export class Table {
   /**
    * Get a select-condition for a foreign key constraint
    *
-   * @param {string} constraintName - The constraint name
-   * @returns {string}
+   * @param constraintName - The constraint name
+   * @returns The partial where-clause
    */
   public getForeignKeySelects(constraintName: string): string|undefined {
     return this.statementsText.foreignKeySelects.get(constraintName);
@@ -383,8 +367,8 @@ export class Table {
   /**
    * Get the reference fields for a foreign key constraint
    *
-   * @param {string} constraintName - The constraint name
-   * @returns {string}
+   * @param constraintName - The constraint name
+   * @returns The fields holding the foreign key
    */
   public getForeignKeyFields(constraintName: string): Field[]|undefined {
     return this.statementsText.foreignKeyFields.get(constraintName);

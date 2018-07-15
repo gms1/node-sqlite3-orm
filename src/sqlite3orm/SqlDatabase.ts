@@ -55,12 +55,12 @@ export class SqlDatabase {
   /**
    * Open a database connection
    *
-   * @param {string} databaseFile - The path to the database file or URI
+   * @param databaseFile - The path to the database file or URI
    * filename (see SQL_MEMORY_DB_SHARED/SQL_MEMORY_DB_PRIVATE for an in-memory
    * database)
-   * @param {number} [mode=SQL_OPEN_DEFAULT] - A bit flag combination of: SQL_OPEN_CREATE |
+   * @param [mode=SQL_OPEN_DEFAULT] - A bit flag combination of: SQL_OPEN_CREATE |
    * SQL_OPEN_READONLY | SQL_OPEN_READWRITE
-   * @returns {Promise<void>}
+   * @returns A promise
    */
   public async open(databaseFile: string, mode?: number): Promise<void> {
     if (this.pool) {
@@ -117,10 +117,10 @@ export class SqlDatabase {
   /**
    * Runs a SQL statement with the specified parameters
    *
-   * @param {string} sql - The SQL statment
-   * @param {*} [params] - The parameters referenced in the statement; you can
+   * @param sql - The SQL statment
+   * @param [params] - The parameters referenced in the statement; you can
    * provide multiple parameters as array
-   * @returns {Promise<SqlRunResult>}
+   * @returns A promise
    */
   public async run(sql: string, params?: any): Promise<SqlRunResult> {
     return new Promise<SqlRunResult>((resolve, reject) => {
@@ -148,10 +148,10 @@ export class SqlDatabase {
   /**
    * Runs a SQL query with the specified parameters, fetching only the first row
    *
-   * @param {string} sql - The DQL statement
-   * @param {*} [params] - The parameters referenced in the statement; you can
+   * @param sql - The DQL statement
+   * @param [params] - The parameters referenced in the statement; you can
    * provide multiple parameters as array
-   * @returns {Promise<any>}
+   * @returns A promise
    */
   public async get(sql: string, params?: any): Promise<any> {
     return new Promise<any>((resolve, reject) => {
@@ -176,10 +176,10 @@ export class SqlDatabase {
   /**
    * Runs a SQL query with the specified parameters, fetching all rows
    *
-   * @param {string} sql - The DQL statement
-   * @param {*} [params] - The parameters referenced in the statement; you can
+   * @param sql - The DQL statement
+   * @param [params] - The parameters referenced in the statement; you can
    * provide multiple parameters as array
-   * @returns {Promise<any[]>}
+   * @returns A promise
    */
   public async all(sql: string, params?: any): Promise<any[]> {
     return new Promise<any[]>((resolve, reject) => {
@@ -205,11 +205,11 @@ export class SqlDatabase {
    * Runs a SQL query with the specified parameters, fetching all rows
    * using a callback for each row
    *
-   * @param {string} sql - The DQL statement
-   * @param {*} [params] - The parameters referenced in the statement; you can
+   * @param sql - The DQL statement
+   * @param [params] - The parameters referenced in the statement; you can
    * provide multiple parameters as array
-   * @param {(err: Error, row: any) => void} [callback]
-   * @returns {Promise<number>}
+   * @param [callback] - The callback function
+   * @returns A promise
    */
   public async each(sql: string, params?: any, callback?: (err: Error, row: any) => void): Promise<number> {
     return new Promise<number>((resolve, reject) => {
@@ -230,8 +230,8 @@ export class SqlDatabase {
   /**
    * Execute a SQL statement
    *
-   * @param {string} sql - The SQL statement
-   * @returns {Promise<void>}
+   * @param sql - The SQL statement
+   * @returns A promise
    */
   public async exec(sql: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
@@ -253,10 +253,10 @@ export class SqlDatabase {
   /**
    * Prepare a SQL statement
    *
-   * @param {string} sql - The SQL statement
-   * @param {*} [params] - The parameters referenced in the statement; you can
+   * @param sql - The SQL statement
+   * @param [params] - The parameters referenced in the statement; you can
    * provide multiple parameters as array
-   * @returns {Promise<SqlStatement>}
+   * @returns A promise
    */
   public async prepare(sql: string, params?: any): Promise<SqlStatement> {
     return new Promise<SqlStatement>((resolve, reject) => {
@@ -280,8 +280,7 @@ export class SqlDatabase {
    * if callback is provided, run callback in serialized mode
    * otherwise, switch connection to serialized mode
    *
-   * @param {() => void} [callback]
-   * @returns {void}
+   * @param [callback]
    */
   public serialize(callback?: () => void): void {
     if (!this.db) {
@@ -295,8 +294,7 @@ export class SqlDatabase {
    * if callback is provided, run callback in parallel mode
    * otherwise, switch connection to parallel mode
    *
-   * @param {() => void} [callback]
-   * @returns {void}
+   * @param [callback]
    */
   public parallelize(callback?: () => void): void {
     if (!this.db) {
@@ -308,8 +306,7 @@ export class SqlDatabase {
   /**
    * Run callback inside a database transaction
    *
-   * @param {() => void} [callback]
-   * @returns {void}
+   * @param [callback]
    */
   public async transactionalize<T>(callback: () => Promise<T>): Promise<T> {
     return this.run('BEGIN IMMEDIATE TRANSACTION')
@@ -322,50 +319,43 @@ export class SqlDatabase {
 
   /**
    *
-   *
-   * @param {'trace'} event
-   * @param {(sql: string) => void} listener
-   * @returns {this}
+   * @param event
+   * @param listener
    */
   public on(event: 'trace', listener: (sql: string) => void): this;
   /**
    *
    *
-   * @param {'profile'} event
-   * @param {(sql: string) => void} listener
-   * @returns {this}
+   * @param event
+   * @param listener
    */
   public on(event: 'profile', listener: (sql: string) => void): this;
   /**
    *
    *
-   * @param {'error'} event
-   * @param {(sql: string) => void} listener
-   * @returns {this}
+   * @param event
+   * @param listener
    */
   public on(event: 'error', listener: (sql: string) => void): this;
   /**
    *
    *
-   * @param {'open'} event
-   * @param {(sql: string) => void} listener
-   * @returns {this}
+   * @param event
+   * @param listener
    */
   public on(event: 'open', listener: (sql: string) => void): this;
   /**
    *
    *
-   * @param {'close'} event
-   * @param {(sql: string) => void} listener
-   * @returns {this}
+   * @param event
+   * @param listener
    */
   public on(event: 'close', listener: (sql: string) => void): this;
   /**
    *
    *
-   * @param {string} event
-   * @param {(sql: string) => void} listener
-   * @returns {this}
+   * @param event
+   * @param listener
    */
   public on(event: string, listener: (sql: string) => void): this {
     if (!this.db) {
@@ -377,8 +367,7 @@ export class SqlDatabase {
 
   /**
    * Get the 'user_version' from the database
-   *
-   * @returns {Promise<number>}
+   * @returns A promise of the user version number
    */
   public async getUserVersion(): Promise<number> {
     let userVersion = 0;
@@ -396,8 +385,8 @@ export class SqlDatabase {
   /**
    * Set the 'user_version' in the database
    *
-   * @param {number} newver
-   * @returns {Promise<void>}
+   * @param newver
+   * @returns A promise
    */
   public async setUserVersion(newver: number): Promise<void> {
     return this.exec(`PRAGMA user_version = ${newver}`);
@@ -407,8 +396,7 @@ export class SqlDatabase {
    * Set the execution mode to verbose to produce long stack traces. There is no way to reset this.
    * See https://github.com/mapbox/node-sqlite3/wiki/Debugging
    *
-   * @param {number} newver
-   * @returns {Promise<void>}
+   * @param newver
    */
   public static verbose(): void {
     sqlverbose();

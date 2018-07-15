@@ -35,14 +35,14 @@ export class SqlConnectionPool {
   /**
    * Open a database connection pool
    *
-   * @param {string} databaseFile - The path to the database file or URI
+   * @param databaseFile - The path to the database file or URI
    * filename (see SQL_MEMORY_DB_SHARED/SQL_MEMORY_DB_PRIVATE for an in-memory
    * database)
-   * @param {number} [mode=SQL_OPEN_DEFAULT] - A bit flag combination of: SQL_OPEN_CREATE |
+   * @param [mode=SQL_OPEN_DEFAULT] - A bit flag combination of: SQL_OPEN_CREATE |
    * SQL_OPEN_READONLY | SQL_OPEN_READWRITE
-   * @param {number} [min=1] minimum connections whihc should be opened by this connection pool
-   * @param {number} [max=0] maximum connections which can be opened by this connection pool
-   * @returns {Promise<void>}
+   * @param [min=1] minimum connections whihc should be opened by this connection pool
+   * @param [max=0] maximum connections which can be opened by this connection pool
+   * @returns A promise
    */
   async open(databaseFile: string, mode: number = SQL_OPEN_DEFAULT, min: number = 1, max: number = 0): Promise<void> {
     return new Promise<void>(async (resolve, reject) => {
@@ -83,7 +83,7 @@ export class SqlConnectionPool {
   /**
    * Close the database connection pool
    *
-   * @returns {Promise<void>}
+   * @returns A promise
    */
   async close(): Promise<void> {
     return new Promise<void>(async (resolve, reject) => {
@@ -107,6 +107,9 @@ export class SqlConnectionPool {
     });
   }
 
+  /**
+   * test if this connection pool is connected to a database file
+   */
   isOpen(): boolean {
     return !!this.databaseFile;
   }
@@ -114,8 +117,8 @@ export class SqlConnectionPool {
   /**
    * get a connection from the pool
    *
-   * @param {number} [timeout=0] The timeout to wait for a connection ( 0 is infinite )
-   * @returns {Promise<SqlDatabase>}
+   * @param [timeout=0] The timeout to wait for a connection ( 0 is infinite )
+   * @returns A promise of the db connection
    */
   async get(timeout: number = 0): Promise<SqlDatabase> {
     return new Promise<SqlDatabase>(async (resolve, reject) => {
@@ -152,8 +155,7 @@ export class SqlConnectionPool {
   /**
    * release a connection to the pool
    *
-   * @param {SqlDatabase} sqldb
-   * @returns {void}
+   * @param sqldb - The db connection
    */
   release(sqldb: SqlDatabase): void {
     if (this !== sqldb.getPool()) {

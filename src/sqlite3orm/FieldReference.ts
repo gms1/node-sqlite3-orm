@@ -9,14 +9,10 @@ import {TableReference} from './TableReference';
 export class FieldReference {
   /**
    * A table name
-   *
-   * @type {string}
    */
   tableRef: TableReference;
   /**
    * A column name
-   *
-   * @type {string}
    */
   colName: string;
 
