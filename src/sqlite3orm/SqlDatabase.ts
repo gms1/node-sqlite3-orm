@@ -9,6 +9,9 @@ export const SQL_OPEN_CREATE = OPEN_CREATE;
 
 export const SQL_MEMORY_DB_SHARED = 'file::memory:?cache=shared';
 export const SQL_MEMORY_DB_PRIVATE = ':memory:';
+export const SQL_DEFAULT_SCHEMA = 'main';
+
+
 // NOTE:
 // our tests defined in 'SqlDatabase.spec.ts' are working fine using
 // private-cache mode:

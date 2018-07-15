@@ -1,3 +1,12 @@
+import {SQL_DEFAULT_SCHEMA} from './SqlDatabase';
+
+export function getQualifiedIdentifierName(name: string): string {
+  if (name.indexOf('.') >= 0) {
+    return name;
+  }
+  return SQL_DEFAULT_SCHEMA + '.' + name;
+}
+
 
 export function quotedIdentifierName(name: string): string {
   return '"' + name.replace(/["]/g, '""') + '"';
