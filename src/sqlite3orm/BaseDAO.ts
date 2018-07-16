@@ -1,9 +1,10 @@
-import {METADATA_TABLE_KEY} from './decorators';
+import {METADATA_MODEL_KEY} from './decorators';
 import {SqlDatabase} from './SqlDatabase';
 import {Table} from './Table';
 import {Field} from './Field';
 import {FieldReference} from './FieldReference';
 import {PropertyType} from './PropertyType';
+import {MetaModel} from './MetaModel';
 
 /**
  *
@@ -25,10 +26,11 @@ export class BaseDAO<T extends Object> {
    */
   public constructor(type: {new(): T}, sqldb: SqlDatabase) {
     this.type = type;
-    this.table = Reflect.getMetadata(METADATA_TABLE_KEY, type.prototype);
-    if (!this.table) {
+    const metaModel = Reflect.getMetadata(METADATA_MODEL_KEY, type.prototype);
+    if (!metaModel) {
       throw new Error(`no table-definition defined on prototype of ${this.type.name}'`);
     }
+    this.table = metaModel.table;
     this.sqldb = sqldb;
   }
 

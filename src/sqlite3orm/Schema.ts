@@ -70,7 +70,6 @@ export class Schema {
       throw new Error(`table '${table.name}' already registered`);
     }
     this.mapNameToTable.set(name, table);
-    table.fields.forEach((field) => table.addTableField(field));
     return table;
   }
 

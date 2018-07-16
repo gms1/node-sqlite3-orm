@@ -1,4 +1,4 @@
-import {SQL_DEFAULT_SCHEMA} from './SqlDatabase';
+import {SQL_DEFAULT_SCHEMA} from '../SqlDatabase';
 
 export function getQualifiedIdentifierName(name: string): string {
   if (name.indexOf('.') >= 0) {

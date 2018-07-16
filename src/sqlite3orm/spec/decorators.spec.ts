@@ -3,7 +3,43 @@ import {field, fk, id, index, table} from '..';
 
 // ---------------------------------------------
 
-describe('test schema', () => {
+describe('test decorators', () => {
+
+  // ---------------------------------------------
+  it('expect decorating class twice for same table to throw', (done) => {
+    try {
+      @table({name: 'TABLE1_FOR_SAME_CLASS', autoIncrement: true})
+      @table({name: 'TABLE1_FOR_SAME_CLASS', autoIncrement: true})
+      class ClassUsingDifferentTables {
+        @id({name: 'ID', dbtype: 'INTEGER NOT NULL'}) id: number;
+
+        constructor() {
+          this.id = 0;
+        }
+      }
+      fail('should have thrown');
+    } catch (err) {
+    }
+    done();
+  });
+
+  // ---------------------------------------------
+  it('expect decorating class for different tables to throw', (done) => {
+    try {
+      @table({name: 'TABLE1_FOR_SAME_CLASS', autoIncrement: true})
+      @table({name: 'TABLE2_FOR_SAME_CLASS', autoIncrement: true})
+      class ClassUsingDifferentTables {
+        @id({name: 'ID', dbtype: 'INTEGER NOT NULL'}) id: number;
+
+        constructor() {
+          this.id = 0;
+        }
+      }
+      fail('should have thrown');
+    } catch (err) {
+    }
+    done();
+  });
 
   // ---------------------------------------------
   it('expect decorating static property as field to throw', (done) => {
@@ -57,9 +93,48 @@ describe('test schema', () => {
     done();
   });
 
+  // ---------------------------------------------
+  it('expect decorating property twice as same field to throw', (done) => {
+    try {
+      @table({name: 'TABLE_USING_DUPLICATE_FIELD', autoIncrement: true})
+      class TableUsingDuplicateIndexOnField {
+        @field({name: 'PARENTID', dbtype: 'INTEGER'})
+        parentId?: number;
+
+        @id({name: 'ID', dbtype: 'INTEGER NOT NULL'}) @field({name: 'ID', dbtype: 'INTEGER NOT NULL'}) id: number;
+
+        constructor() {
+          this.id = 0;
+        }
+      }
+      fail('should have thrown');
+    } catch (err) {
+    }
+    done();
+  });
 
   // ---------------------------------------------
-  it('expect decorating duplicate indexes to throw', (done) => {
+  it('expect decorating property as different fields to throw', (done) => {
+    try {
+      @table({name: 'TABLE_USING_DUPLICATE_FIELD', autoIncrement: true})
+      class TableUsingDuplicateIndexOnField {
+        @field({name: 'PARENTID', dbtype: 'INTEGER'})
+        parentId?: number;
+
+        @id({name: 'ID', dbtype: 'INTEGER NOT NULL'}) @field({name: 'PARENTID', dbtype: 'INTEGER'}) id: number;
+
+        constructor() {
+          this.id = 0;
+        }
+      }
+      fail('should have thrown');
+    } catch (err) {
+    }
+    done();
+  });
+
+  // ---------------------------------------------
+  it('expect decorating property twice for same index to throw', (done) => {
     try {
       @table({name: 'TABLE_USING_DUPLICATE_INDEX_ON_FIELD', autoIncrement: true})
       class TableUsingDuplicateIndexOnField {
@@ -79,26 +154,7 @@ describe('test schema', () => {
   });
 
   // ---------------------------------------------
-  it('expect decorating class for different tables to throw', (done) => {
-    try {
-      @table({name: 'TABLE1_FOR_SAME_CLASS', autoIncrement: true})
-      @table({name: 'TABLE2_FOR_SAME_CLASS', autoIncrement: true})
-      class ClassUsingDifferentTables {
-        @id({name: 'ID', dbtype: 'INTEGER NOT NULL'}) id: number;
-
-        constructor() {
-          this.id = 0;
-        }
-      }
-      fail('should have thrown');
-    } catch (err) {
-    }
-    done();
-  });
-
-
-  // ---------------------------------------------
-  it('expect decorating duplicate foreign key constraint names to throw', (done) => {
+  it('expect decorating foreign key twice for same constraint name to throw', (done) => {
     try {
       @table({name: 'PARENT_TABLE_FOR_DUPLICATE_FKS'})
       class ParentTableForDuplicateFKs {

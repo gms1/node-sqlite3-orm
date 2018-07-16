@@ -6,8 +6,10 @@ import {FieldReference} from './FieldReference';
 import {TableReference} from './TableReference';
 import {schema} from './Schema';
 import {Table} from './Table';
+import {MetaModel} from './MetaModel';
+import {MetaProperty} from './MetaProperty';
 
-export const METADATA_TABLE_KEY = 'schema:table';
+export const METADATA_MODEL_KEY = 'sqlite3orm:model';
 
 /**
  * Options for the '@table' class decorator
@@ -15,6 +17,7 @@ export const METADATA_TABLE_KEY = 'schema:table';
  * @export
  * @interface TableOpts
  */
+
 export interface TableOpts {
   /**
    * The name of the table
@@ -36,12 +39,14 @@ export interface TableOpts {
   autoIncrement?: boolean;
 }
 
+
 /**
  * Options for the property decorators '@field' and '@id'
  *
  * @export
  * @interface FieldOpts
  */
+
 export interface FieldOpts {
   /**
    * The name of the table field
@@ -60,36 +65,20 @@ export interface FieldOpts {
   isJson?: boolean;
 }
 
-/**
- * Get the table metadata
- *
- * @param target - The constructor of the class
- * @returns The table class instance
- */
-function getTableMetadata(target: Function): Table {
-  if (!Reflect.hasOwnMetadata(METADATA_TABLE_KEY, target.prototype)) {
-    Reflect.defineMetadata(METADATA_TABLE_KEY, new Table(target.name), target.prototype);
-  }
-  return Reflect.getMetadata(METADATA_TABLE_KEY, target.prototype);
-}
 
 /**
- * Get the field metadata
+ * Get the model metadata
  *
- * @param table - The table of this field
- * @param key - The property key
- * @returns The field class instance
+ * @param target - The constructor of the class
+ * @returns The meta model
  */
-function getFieldMetadata(metaTable: Table, key: string|symbol): Field {
-  let metaField: Field;
-  if (metaTable.hasPropertyField(key)) {
-    metaField = metaTable.getPropertyField(key);
-  } else {
-    metaField = new Field(key);
-    metaTable.addPropertyField(metaField);
+function getModelMetadata(target: Function): MetaModel {
+  if (!Reflect.hasOwnMetadata(METADATA_MODEL_KEY, target.prototype)) {
+    Reflect.defineMetadata(METADATA_MODEL_KEY, new MetaModel(target.name), target.prototype);
   }
-  return metaField;
+  return Reflect.getMetadata(METADATA_MODEL_KEY, target.prototype);
 }
+
 
 /**
  * Helper function for decorating a class and map it to a database table
@@ -98,27 +87,8 @@ function getFieldMetadata(metaTable: Table, key: string|symbol): Field {
  * @param [opts] - The options for this table
  */
 function decorateTableClass(target: Function, opts: TableOpts): void {
-  const metaTable = getTableMetadata(target);
-  const newTableName = opts.name || target.name;
-
-  if (!!metaTable.name && newTableName !== metaTable.name) {
-    throw new Error(
-        `failed to map class '${
-                                target.name
-                              }' to table name '${
-                                                  newTableName
-                                                }': This class is already mapped to the table '${metaTable.name}'`);
-  }
-
-
-  metaTable.name = newTableName;
-  if (!!opts.withoutRowId) {
-    metaTable.withoutRowId = true;
-  }
-  if (!!opts.autoIncrement) {
-    metaTable.autoIncrement = true;
-  }
-  schema().addTable(metaTable);
+  const metaModel = getModelMetadata(target);
+  metaModel.buildTableDefinition(opts);
 }
 
 /**
@@ -132,28 +102,16 @@ function decorateTableClass(target: Function, opts: TableOpts): void {
  * @returns The field class instance
  */
 function decorateFieldProperty(
-    target: Object|Function, key: string|symbol, opts: FieldOpts, isIdentity: boolean = false): Field {
+    target: Object|Function, key: string|symbol, opts: FieldOpts, isIdentity: boolean = false): void {
   if (typeof target === 'function') {
     // not decorating static property
     throw new Error(`decorating static property '${key.toString()}' using field-decorator is not supported`);
   }
 
-  const metaTable: Table = getTableMetadata(target.constructor);
-  const metaField: Field = getFieldMetadata(metaTable, key);
-
-  metaField.propertyType = Reflect.getMetadata('design:type', target, key);
-  metaField.name = opts.name || key.toString();
-
-  if (!!opts.dbtype) {
-    metaField.dbtype = opts.dbtype;
-  }
-  if (!!opts.isJson) {
-    metaField.isJson = opts.isJson;
-  }
-  if (!!isIdentity) {
-    metaField.isIdentity = isIdentity;
-  }
-  return metaField;
+  const metaModel = getModelMetadata(target.constructor);
+  const metaProp = metaModel.properties.getAlways(key);
+  metaProp.setPropertyType(Reflect.getMetadata('design:type', target, key));
+  metaProp.setFieldProperties(opts.name || key.toString(), isIdentity, opts);
 }
 
 
@@ -169,28 +127,15 @@ function decorateFieldProperty(
  */
 function decorateForeignKeyProperty(
     target: Object|Function, key: string|symbol, constraintName: string, foreignTableName: string,
-    foreignTableField: string): Field {
+    foreignTableField: string): void {
   if (typeof target === 'function') {
     // not decorating static property
     throw new Error(`decorating static property '${key.toString()}' using fk-decorator is not supported`);
   }
 
-  const metaTable: Table = getTableMetadata(target.constructor);
-  let tableRef = metaTable.hasTableReference(constraintName);
-  if (!tableRef) {
-    tableRef = new TableReference(constraintName, foreignTableName);
-    metaTable.addTableReference(tableRef);
-  }
-
-  const metaField: Field = getFieldMetadata(metaTable, key);
-  if (metaField.hasForeignKeyField(constraintName)) {
-    throw new Error(`decorating property '${
-                                            target.constructor.name
-                                          }.${key.toString()}': duplicate foreign key constraint '${constraintName}'`);
-  }
-
-  metaField.setForeignKeyField(constraintName, new FieldReference(tableRef, foreignTableField));
-  return metaField;
+  const metaModel = getModelMetadata(target.constructor);
+  const metaProp = metaModel.properties.getAlways(key);
+  metaProp.addForeignKeyProperties(constraintName, foreignTableName, foreignTableField);
 }
 
 /**
@@ -201,21 +146,16 @@ function decorateForeignKeyProperty(
  * @param indexName - The name for the index
  * @returns The field class instance
  */
-function decorateIndexProperty(target: Object|Function, key: string|symbol, indexName: string): Field {
+function decorateIndexProperty(
+    target: Object|Function, key: string|symbol, indexName: string, isUnique?: boolean): void {
   if (typeof target === 'function') {
     // not decorating static property
     throw new Error(`decorating static property '${key.toString()}' using index-decorator is not supported`);
   }
 
-  const metaTable: Table = getTableMetadata(target.constructor);
-  const metaField: Field = getFieldMetadata(metaTable, key);
-  if (metaField.isIndexField(indexName)) {
-    throw new Error(
-        `decorating property '${target.constructor.name}.${key.toString()}': duplicate index key '${indexName}'`);
-  }
-
-  metaField.setIndexField(indexName);
-  return metaField;
+  const metaModel = getModelMetadata(target.constructor);
+  const metaProp = metaModel.properties.getAlways(key);
+  metaProp.addIndex(indexName, isUnique);
 }
 
 /*****************************************************************************************/
@@ -284,7 +224,7 @@ export function fk(constraintName: string, foreignTableName: string, foreignTabl
  * @param indexName - The index name
  * @returns The decorator function
  */
-export function index(indexName: string): (target: Object, key: string|symbol) => void {
+export function index(indexName: string, isUnique: boolean = false): (target: Object, key: string|symbol) => void {
   return ((target: Object, key: string | symbol) => {
     decorateIndexProperty(target, key, indexName);
   });
