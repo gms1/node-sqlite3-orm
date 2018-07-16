@@ -1,7 +1,7 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
 import {SqlDatabase, BaseDAO, SQL_MEMORY_DB_PRIVATE, schema, field, id, table} from '..';
 
-const DATATYPE_JSON_TABLE = 'DATATYPE_JSON';
+const DATATYPE_JSON_TABLE = 'DJ:DATATYPE_JSON';
 
 interface JsonData {
   notes: string;

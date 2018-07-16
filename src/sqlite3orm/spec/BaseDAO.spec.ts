@@ -2,8 +2,9 @@
 import {SqlDatabase, BaseDAO, SQL_MEMORY_DB_PRIVATE, field, fk, id, table} from '..';
 
 
-const USERS_TABLE = 'USERS TABLE';
-const CONTACTS_TABLE = 'main.CONTACTS TABLE';
+const USERS_TABLE = 'BD:USERS TABLE';
+const CONTACTS_TABLE = 'main.BD:CONTACTS TABLE';
+const TEST_SET_PROP_TABLE = 'BD:TEST_SET_PROP_TABLE';
 
 @table({name: USERS_TABLE})
 class User {
@@ -361,7 +362,7 @@ describe('test BaseDAO', () => {
 
   // ---------------------------------------------
 
-  @table({name: 'TEST_SET_PROP_TABLE'})
+  @table({name: TEST_SET_PROP_TABLE})
   class TestSetProperty {
     @id({name: 'id', dbtype: 'INTEGER NOT NULL'})
     id: number;
@@ -390,7 +391,7 @@ describe('test BaseDAO', () => {
     try {
       await testDao.createTable();
       await sqldb.exec(`
-        INSERT INTO TEST_SET_PROP_TABLE (
+        INSERT INTO "${TEST_SET_PROP_TABLE}" (
           id,
           my_bool_text,
           my_number_text,

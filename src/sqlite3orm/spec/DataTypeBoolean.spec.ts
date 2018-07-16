@@ -1,7 +1,7 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
 import {SqlDatabase, BaseDAO, SQL_MEMORY_DB_PRIVATE, schema, field, id, table} from '..';
 
-const DATATYPE_BOOLEAN_TABLE = 'DATATYPE_BOOLEAN';
+const DATATYPE_BOOLEAN_TABLE = 'DB:DATATYPE_BOOLEAN';
 
 @table({name: DATATYPE_BOOLEAN_TABLE})
 class DataTypeBoolean {
@@ -46,7 +46,7 @@ describe('test boolean type', () => {
     try {
       let sqlstmt = await sqldb.prepare(`SELECT
               id, my_bool_text, my_bool_int, my_bool_real
-            FROM ${DATATYPE_BOOLEAN_TABLE}
+            FROM "${DATATYPE_BOOLEAN_TABLE}"
             WHERE id = :id`);
 
       let row: any;
@@ -98,7 +98,7 @@ describe('test boolean type', () => {
 
   it('expect reading boolean properties from database to succeed', async (done) => {
     try {
-      let sqlstmt = await sqldb.prepare(`INSERT INTO ${DATATYPE_BOOLEAN_TABLE}
+      let sqlstmt = await sqldb.prepare(`INSERT INTO "${DATATYPE_BOOLEAN_TABLE}"
               (id, my_bool_text, my_bool_int, my_bool_real)
             values
               (:id, :my_bool_text, :my_bool_int, :my_bool_real)`);

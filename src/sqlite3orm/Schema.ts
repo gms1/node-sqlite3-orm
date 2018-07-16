@@ -1,6 +1,8 @@
+// import * as core from './core';
+
 import {Table} from './Table';
 import {SqlDatabase} from './SqlDatabase';
-import {getQualifiedIdentifierName} from './utils';
+import {qualifiyIdentifier} from './utils';
 
 /**
  * A singleton holding the database schema definitions
@@ -40,7 +42,7 @@ export class Schema {
    */
 
   public hasTable(name: string): Table|undefined {
-    return this.mapNameToTable.get(getQualifiedIdentifierName(name));
+    return this.mapNameToTable.get(qualifiyIdentifier(name));
   }
 
   /**
@@ -50,7 +52,7 @@ export class Schema {
    * @returns The table definition
    */
   public getTable(name: string): Table {
-    const table = this.mapNameToTable.get(getQualifiedIdentifierName(name));
+    const table = this.mapNameToTable.get(qualifiyIdentifier(name));
     if (!table) {
       throw new Error(`table '${name}' not registered yet`);
     }
@@ -65,7 +67,7 @@ export class Schema {
    * @returns The table definition
    */
   public addTable(table: Table): Table {
-    const name = getQualifiedIdentifierName(table.name);
+    const name = qualifiyIdentifier(table.name);
     if (this.mapNameToTable.has(name)) {
       throw new Error(`table '${table.name}' already registered`);
     }

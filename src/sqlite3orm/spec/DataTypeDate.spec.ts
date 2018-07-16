@@ -1,7 +1,7 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
 import {SqlDatabase, BaseDAO, SQL_MEMORY_DB_PRIVATE, schema, field, id, table} from '..';
 
-const DATATYPE_DATE_TABLE = 'DATATYPE_DATE';
+const DATATYPE_DATE_TABLE = 'DD:DATATYPE_DATE';
 
 @table({name: DATATYPE_DATE_TABLE})
 class DataTypeDate {
@@ -43,7 +43,7 @@ describe('test Date type', () => {
     try {
       let sqlstmt = await sqldb.prepare(`SELECT
               id, my_date_text, my_date_int
-            FROM ${DATATYPE_DATE_TABLE}
+            FROM "${DATATYPE_DATE_TABLE}"
             WHERE id = :id`);
 
       let row: any;
@@ -67,7 +67,7 @@ describe('test Date type', () => {
 
   it('expect reading Date properties from database to succeed', async (done) => {
     try {
-      let sqlstmt = await sqldb.prepare(`INSERT INTO ${DATATYPE_DATE_TABLE}
+      let sqlstmt = await sqldb.prepare(`INSERT INTO "${DATATYPE_DATE_TABLE}"
               (id, my_date_text, my_date_int)
             values
               (:id, :my_date_text, :my_date_int)`);

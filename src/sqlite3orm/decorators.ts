@@ -1,13 +1,8 @@
 // tslint:disable-next-line: no-import-side-effect
 import 'reflect-metadata';
+// import * as core from './core';
 
-import {Field} from './Field';
-import {FieldReference} from './FieldReference';
-import {TableReference} from './TableReference';
-import {schema} from './Schema';
-import {Table} from './Table';
 import {MetaModel} from './MetaModel';
-import {MetaProperty} from './MetaProperty';
 
 export const METADATA_MODEL_KEY = 'sqlite3orm:model';
 
@@ -72,7 +67,7 @@ export interface FieldOpts {
  * @param target - The constructor of the class
  * @returns The meta model
  */
-function getModelMetadata(target: Function): MetaModel {
+export function getModelMetadata(target: Function): MetaModel {
   if (!Reflect.hasOwnMetadata(METADATA_MODEL_KEY, target.prototype)) {
     Reflect.defineMetadata(METADATA_MODEL_KEY, new MetaModel(target.name), target.prototype);
   }
@@ -88,7 +83,7 @@ function getModelMetadata(target: Function): MetaModel {
  */
 function decorateTableClass(target: Function, opts: TableOpts): void {
   const metaModel = getModelMetadata(target);
-  metaModel.buildTableDefinition(opts);
+  metaModel.init(opts);
 }
 
 /**
@@ -102,14 +97,14 @@ function decorateTableClass(target: Function, opts: TableOpts): void {
  * @returns The field class instance
  */
 function decorateFieldProperty(
-    target: Object|Function, key: string|symbol, opts: FieldOpts, isIdentity: boolean = false): void {
+    target: Object|Function, key: string|symbol, opts: FieldOpts, isIdentity: boolean): void {
   if (typeof target === 'function') {
     // not decorating static property
     throw new Error(`decorating static property '${key.toString()}' using field-decorator is not supported`);
   }
 
   const metaModel = getModelMetadata(target.constructor);
-  const metaProp = metaModel.properties.getAlways(key);
+  const metaProp = metaModel.getPropertyAlways(key);
   metaProp.setPropertyType(Reflect.getMetadata('design:type', target, key));
   metaProp.setFieldProperties(opts.name || key.toString(), isIdentity, opts);
 }
@@ -134,7 +129,7 @@ function decorateForeignKeyProperty(
   }
 
   const metaModel = getModelMetadata(target.constructor);
-  const metaProp = metaModel.properties.getAlways(key);
+  const metaProp = metaModel.getPropertyAlways(key);
   metaProp.addForeignKeyProperties(constraintName, foreignTableName, foreignTableField);
 }
 
@@ -154,7 +149,7 @@ function decorateIndexProperty(
   }
 
   const metaModel = getModelMetadata(target.constructor);
-  const metaProp = metaModel.properties.getAlways(key);
+  const metaProp = metaModel.getPropertyAlways(key);
   metaProp.addIndex(indexName, isUnique);
 }
 

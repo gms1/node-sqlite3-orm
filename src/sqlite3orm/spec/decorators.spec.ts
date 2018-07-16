@@ -8,8 +8,8 @@ describe('test decorators', () => {
   // ---------------------------------------------
   it('expect decorating class twice for same table to throw', (done) => {
     try {
-      @table({name: 'TABLE1_FOR_SAME_CLASS', autoIncrement: true})
-      @table({name: 'TABLE1_FOR_SAME_CLASS', autoIncrement: true})
+      @table({name: 'D:TABLE1_FOR_SAME_CLASS', autoIncrement: true})
+      @table({name: 'D:TABLE1_FOR_SAME_CLASS', autoIncrement: true})
       class ClassUsingDifferentTables {
         @id({name: 'ID', dbtype: 'INTEGER NOT NULL'}) id: number;
 
@@ -26,8 +26,8 @@ describe('test decorators', () => {
   // ---------------------------------------------
   it('expect decorating class for different tables to throw', (done) => {
     try {
-      @table({name: 'TABLE1_FOR_SAME_CLASS', autoIncrement: true})
-      @table({name: 'TABLE2_FOR_SAME_CLASS', autoIncrement: true})
+      @table({name: 'D:TABLE1_FOR_SAME_CLASS', autoIncrement: true})
+      @table({name: 'D:TABLE2_FOR_SAME_CLASS', autoIncrement: true})
       class ClassUsingDifferentTables {
         @id({name: 'ID', dbtype: 'INTEGER NOT NULL'}) id: number;
 
@@ -44,7 +44,7 @@ describe('test decorators', () => {
   // ---------------------------------------------
   it('expect decorating static property as field to throw', (done) => {
     try {
-      @table({name: 'TABLE_USING_STATIC_PROPERTY_FOR_FIELD', autoIncrement: true})
+      @table({name: 'D:TABLE_USING_STATIC_PROPERTY_FOR_FIELD', autoIncrement: true})
       class TableUsingStaticProperyForField {
         @id({name: 'ID', dbtype: 'INTEGER NOT NULL'}) static id: number = 5;
         constructor() {}
@@ -58,7 +58,7 @@ describe('test decorators', () => {
   // ---------------------------------------------
   it('expect decorating static property as index to throw', (done) => {
     try {
-      @table({name: 'TABLE_USING_STATIC_PROPERTY_FOR_INDEX', autoIncrement: true})
+      @table({name: 'D:TABLE_USING_STATIC_PROPERTY_FOR_INDEX', autoIncrement: true})
       class TableUsingStaticProperyForIndex {
         @index('PARENTIDX') static parentId?: number;
 
@@ -77,7 +77,7 @@ describe('test decorators', () => {
   // ---------------------------------------------
   it('expect decorating static property as foreign key to throw', (done) => {
     try {
-      @table({name: 'TABLE_USING_STATIC_PROPERTY_FOR_FK', autoIncrement: true})
+      @table({name: 'D:TABLE_USING_STATIC_PROPERTY_FOR_FK', autoIncrement: true})
       class TableUsingStaticProperyForFk {
         @fk('PARENTIDX', 'ANOTHER_TABLE', 'ANOTHER_FIELD') static parentId?: number;
 
@@ -96,7 +96,7 @@ describe('test decorators', () => {
   // ---------------------------------------------
   it('expect decorating property twice as same field to throw', (done) => {
     try {
-      @table({name: 'TABLE_USING_DUPLICATE_FIELD', autoIncrement: true})
+      @table({name: 'D:TABLE_USING_DUPLICATE_FIELD', autoIncrement: true})
       class TableUsingDuplicateIndexOnField {
         @field({name: 'PARENTID', dbtype: 'INTEGER'})
         parentId?: number;
@@ -116,7 +116,7 @@ describe('test decorators', () => {
   // ---------------------------------------------
   it('expect decorating property as different fields to throw', (done) => {
     try {
-      @table({name: 'TABLE_USING_DUPLICATE_FIELD', autoIncrement: true})
+      @table({name: 'D:TABLE_USING_DUPLICATE_FIELD', autoIncrement: true})
       class TableUsingDuplicateIndexOnField {
         @field({name: 'PARENTID', dbtype: 'INTEGER'})
         parentId?: number;
@@ -136,7 +136,7 @@ describe('test decorators', () => {
   // ---------------------------------------------
   it('expect decorating property twice for same index to throw', (done) => {
     try {
-      @table({name: 'TABLE_USING_DUPLICATE_INDEX_ON_FIELD', autoIncrement: true})
+      @table({name: 'D:TABLE_USING_DUPLICATE_INDEX_ON_FIELD', autoIncrement: true})
       class TableUsingDuplicateIndexOnField {
         @index('PARENTIDX') @index('PARENTIDX') @field({name: 'PARENTID', dbtype: 'INTEGER'})
         parentId?: number;
@@ -156,7 +156,7 @@ describe('test decorators', () => {
   // ---------------------------------------------
   it('expect decorating foreign key twice for same constraint name to throw', (done) => {
     try {
-      @table({name: 'PARENT_TABLE_FOR_DUPLICATE_FKS'})
+      @table({name: 'D:PARENT_TABLE_FOR_DUPLICATE_FKS'})
       class ParentTableForDuplicateFKs {
         @id({name: 'ID', dbtype: 'INTEGER NOT NULL'}) id: number;
         @id({name: 'ID2', dbtype: 'INTEGER NOT NULL'}) id2: number;
@@ -167,7 +167,7 @@ describe('test decorators', () => {
         }
       }
 
-      @table({name: 'TABLE_USING_DUPLICATE_FK', autoIncrement: true})
+      @table({name: 'D:TABLE_USING_DUPLICATE_FK', autoIncrement: true})
       class TableUsingDuplicateFKs {
         @fk('PARENTIDX', 'PARENT_TABLE_FOR_DUPLICATE_FKS', 'ID')
         @fk('PARENTIDX', 'PARENT_TABLE_FOR_DUPLICATE_FKS', 'ID2')

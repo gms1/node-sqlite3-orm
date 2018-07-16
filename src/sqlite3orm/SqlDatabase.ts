@@ -1,3 +1,8 @@
+// import * as core from './core';
+
+// tslint:disable-next-line no-require-imports
+import * as _dbg from 'debug';
+
 import {Database, OPEN_CREATE, OPEN_READONLY, OPEN_READWRITE, Statement, verbose as sqlverbose} from 'sqlite3';
 
 import {SqlStatement, SqlRunResult} from './SqlStatement';
@@ -10,6 +15,8 @@ export const SQL_OPEN_CREATE = OPEN_CREATE;
 export const SQL_MEMORY_DB_SHARED = 'file::memory:?cache=shared';
 export const SQL_MEMORY_DB_PRIVATE = ':memory:';
 export const SQL_DEFAULT_SCHEMA = 'main';
+
+const debug = _dbg('sqlite3orm:database');
 
 
 // NOTE:
@@ -72,6 +79,7 @@ export class SqlDatabase {
     return new Promise<void>((resolve, reject) => {
       const db = new Database(databaseFile, mode || SQL_OPEN_DEFAULT, (err) => {
         if (err) {
+          debug(`opening connection to ${databaseFile} failed: ${err.message}`);
           reject(err);
         } else {
           this.db = db;
@@ -99,6 +107,7 @@ export class SqlDatabase {
         db.close((err) => {
           db.removeAllListeners();
           if (err) {
+            debug(`closing connection failed: ${err.message}`);
             reject(err);
           } else {
             resolve();
@@ -138,6 +147,8 @@ export class SqlDatabase {
         // do not use arrow function for this callback
         // the below 'this' should not reference our self
         if (err) {
+          debug(`failed sql: ${err.message}
+${sql}`);
           reject(err);
         } else {
           // tslint:disable-next-line: no-invalid-this
@@ -166,7 +177,8 @@ export class SqlDatabase {
       }
       this.db.get(sql, params, (err, row) => {
         if (err) {
-          // trace('>error: ' + err.message);
+          debug(`failed sql: ${err.message}
+${sql}`);
           reject(err);
         } else {
           // trace('>succeeded: ' + JSON.stringify(row));
@@ -194,7 +206,8 @@ export class SqlDatabase {
       }
       this.db.all(sql, params, (err, rows) => {
         if (err) {
-          // trace('>error: ' + err.message);
+          debug(`failed sql: ${err.message}
+${sql}`);
           reject(err);
         } else {
           // trace('>succeeded: ' + JSON.stringify(rows));
@@ -222,6 +235,8 @@ export class SqlDatabase {
       }
       this.db.each(sql, params, callback, (err: Error, count: number) => {
         if (err) {
+          debug(`failed sql: ${err.message}
+${sql}`);
           reject(err);
         } else {
           resolve(count);
@@ -245,6 +260,8 @@ export class SqlDatabase {
       }
       this.db.exec(sql, (err) => {
         if (err) {
+          debug(`failed sql: ${err.message}
+${sql}`);
           reject(err);
         } else {
           resolve();
@@ -270,6 +287,8 @@ export class SqlDatabase {
       let dbstmt: Statement;
       dbstmt = this.db.prepare(sql, params, (err) => {
         if (err) {
+          debug(`failed sql: ${err.message}
+${sql}`);
           reject(err);
         } else {
           resolve(new SqlStatement(dbstmt));

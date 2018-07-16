@@ -1,4 +1,12 @@
+// import * as core from './core';
+
+// tslint:disable-next-line no-require-imports
+import * as _dbg from 'debug';
+
 import {SqlDatabase, SQL_OPEN_DEFAULT} from './SqlDatabase';
+
+
+const debug = _dbg('sqlite3orm:connectionpool');
 
 /**
  * A simple connection pool
@@ -15,6 +23,8 @@ export class SqlConnectionPool {
 
   private max: number;
 
+  private curr: number;
+
   private inPool: SqlDatabase[];
 
   private inUse: Set<SqlDatabase>;
@@ -30,6 +40,7 @@ export class SqlConnectionPool {
     this.inUse = new Set<SqlDatabase>();
     this.inPool = [];
     this.min = this.max = 0;
+    this.curr = 0;
   }
 
   /**
@@ -69,12 +80,15 @@ export class SqlConnectionPool {
           promises.push(sqldb.openByPool(this, this.databaseFile, this.mode));
         }
         await Promise.all(promises);
+        this.curr += this.min;
+        debug(`pool: ${this.curr} connections open (${this.inPool.length} in pool)`);
         resolve();
       } catch (err) {
         try {
           await this.close();
         } catch (_ignore) {
         }
+        debug(`opening pool to ${databaseFile} failed: ${err.message}`);
         reject(err);
       }
     });
@@ -102,6 +116,7 @@ export class SqlConnectionPool {
         await Promise.all(promises);
         resolve();
       } catch (err) /* istanbul ignore next */ {
+        debug(`closing pool failed: ${err.message}`);
         reject(err);
       }
     });
@@ -142,11 +157,14 @@ export class SqlConnectionPool {
         }
         sqldb = new SqlDatabase();
         await sqldb.openByPool(this, this.databaseFile, this.mode);
+        this.curr++;
+        debug(`pool: ${this.curr} connections open (${this.inPool.length} in pool)`);
         if (this.max > 0) {
           this.inUse.add(sqldb);
         }
         resolve(sqldb);
       } catch (err) {
+        debug(`getting connection from pool failed: ${err.message}`);
         reject(err);
       }
     });
@@ -170,6 +188,7 @@ export class SqlConnectionPool {
       const newsqldb = new SqlDatabase();
       newsqldb.recycleByPool(this, sqldb);
       this.inPool.push(newsqldb);
+      debug(`pool: ${this.curr} connections open (${this.inPool.length} in pool)`);
     }
   }
 }
@@ -186,6 +205,7 @@ async function wait(cond: () => boolean, timeout: number = 0, intervall: number 
       }
       if (timeout > 0 && (++counter * intervall) >= timeout) {
         clearInterval(timer);
+        debug(`getting connection timed out`);
         reject(new Error('timeout reached'));
         return;
       }
