@@ -221,6 +221,6 @@ export function fk(constraintName: string, foreignTableName: string, foreignTabl
  */
 export function index(indexName: string, isUnique: boolean = false): (target: Object, key: string|symbol) => void {
   return ((target: Object, key: string | symbol) => {
-    decorateIndexProperty(target, key, indexName);
+    decorateIndexProperty(target, key, indexName, isUnique);
   });
 }

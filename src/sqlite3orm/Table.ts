@@ -225,6 +225,11 @@ export class Table {
     if (!idxDef) {
       throw new Error(`index '${idxName}' is not defined on table '${this.name}'`);
     }
+    // tslint:disable-next-line triple-equals
+    if (unique == undefined) {
+      unique = idxDef.isUnique ? true : false;
+    }
+
     const quotedIdxName = quoteIdentifier(idxName);
     const quotedTableName = quoteAndUnqualiyIdentifier(this.name);
     const idxCols = idxDef.fields.map((field) => field.quotedName);

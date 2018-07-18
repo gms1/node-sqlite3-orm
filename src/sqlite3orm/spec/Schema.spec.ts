@@ -39,6 +39,10 @@ const TABLE_CHILD_IDX_NAMEQ = qualifiyIdentifier(TABLE_CHILD_IDX_NAME);
 
 const TABLE_TESTTABLE_NAME = 'S:TESTTABLE';
 
+const TABLE_TESTIDX_NAME = 'S:TESTIDX';
+const TABLE_TESTIDX_IDX_NAME_U = 'S:TEST_IDU';
+const TABLE_TESTIDX_IDX_NAME_N = 'S:TEST_IDN';
+
 
 @table({name: 'sqlite_master'})
 class CatalogTable {
@@ -112,6 +116,17 @@ class TestTable {
 
   public constructor() {}
 }
+
+
+@table({name: TABLE_TESTIDX_NAME})
+class TestIdx {
+  @id({name: 'ID', dbtype: 'INTEGER NOT NULL'}) public id!: number;
+
+  @field({name: 'COL1', dbtype: 'TEXT'}) @index(TABLE_TESTIDX_IDX_NAME_U, true) public col1?: string;
+
+  @field({name: 'COL2', dbtype: 'TEXT'}) @index(TABLE_TESTIDX_IDX_NAME_N) public col2?: string;
+}
+
 
 
 // ---------------------------------------------
@@ -200,6 +215,65 @@ describe('test schema', () => {
     } catch (err) {
       fail(err);
     }
+  });
+
+
+  // ---------------------------------------------
+  it('expect create (unique) index to work', async (done) => {
+    let catalogDAO = new BaseDAO<CatalogTable>(CatalogTable, sqldb);
+    let catalogItem = new CatalogTable();
+    try {
+      await schema().createTable(sqldb, TABLE_TESTIDX_NAME);
+      await schema().createIndex(sqldb, TABLE_TESTIDX_NAME, TABLE_TESTIDX_IDX_NAME_U);
+      await schema().createIndex(sqldb, TABLE_TESTIDX_NAME, TABLE_TESTIDX_IDX_NAME_N);
+    } catch (e) {
+      fail(`creating table '${TABLE_TESTIDX_NAME}' and indexes failed: ${e.message}`);
+    }
+
+    catalogItem.objType = 'index';
+    catalogItem.objName = unqualifyIdentifier(TABLE_TESTIDX_IDX_NAME_U);
+    catalogItem = await catalogDAO.select(catalogItem);
+    expect(catalogItem.tblName === unqualifyIdentifier(TABLE_TESTIDX_NAME));
+    expect(catalogItem.sql).toBeDefined();
+    expect(catalogItem.sql!.indexOf('CREATE UNIQUE'))
+        .not.toBe(-1, `for '${TABLE_TESTIDX_IDX_NAME_U}: ${catalogItem.sql}`);
+
+    catalogItem.objType = 'index';
+    catalogItem.objName = unqualifyIdentifier(TABLE_TESTIDX_IDX_NAME_N);
+    catalogItem = await catalogDAO.select(catalogItem);
+    expect(catalogItem.tblName === unqualifyIdentifier(TABLE_TESTIDX_NAME));
+    expect(catalogItem.sql).toBeDefined();
+    expect(catalogItem.sql!.indexOf('CREATE UNIQUE')).toBe(-1, `for '${TABLE_TESTIDX_IDX_NAME_N}`);
+
+    try {
+      await schema().dropIndex(sqldb, TABLE_TESTIDX_NAME, TABLE_TESTIDX_IDX_NAME_U);
+      await schema().dropIndex(sqldb, TABLE_TESTIDX_NAME, TABLE_TESTIDX_IDX_NAME_N);
+    } catch (e) {
+      fail(`dropping indexes on table '${TABLE_TESTIDX_NAME} failed: ${e.message}`);
+    }
+
+    try {
+      // explictly setting isUnique takes precedence
+      await schema().createIndex(sqldb, TABLE_TESTIDX_NAME, TABLE_TESTIDX_IDX_NAME_U, false);
+      await schema().createIndex(sqldb, TABLE_TESTIDX_NAME, TABLE_TESTIDX_IDX_NAME_N, true);
+    } catch (e) {
+      fail(`creating indexes on '${TABLE_TESTIDX_NAME}' failed: ${e.message}`);
+    }
+    catalogItem.objType = 'index';
+    catalogItem.objName = unqualifyIdentifier(TABLE_TESTIDX_IDX_NAME_U);
+    catalogItem = await catalogDAO.select(catalogItem);
+    expect(catalogItem.tblName === unqualifyIdentifier(TABLE_TESTIDX_NAME));
+    expect(catalogItem.sql).toBeDefined();
+    expect(catalogItem.sql!.indexOf('CREATE UNIQUE')).toBe(-1, `for '${TABLE_TESTIDX_IDX_NAME_U}: ${catalogItem.sql}`);
+
+    catalogItem.objType = 'index';
+    catalogItem.objName = unqualifyIdentifier(TABLE_TESTIDX_IDX_NAME_N);
+    catalogItem = await catalogDAO.select(catalogItem);
+    expect(catalogItem.tblName === unqualifyIdentifier(TABLE_TESTIDX_NAME));
+    expect(catalogItem.sql).toBeDefined();
+    expect(catalogItem.sql!.indexOf('CREATE UNIQUE')).not.toBe(-1, `for '${TABLE_TESTIDX_IDX_NAME_N}`);
+
+    done();
   });
 
   // ---------------------------------------------
