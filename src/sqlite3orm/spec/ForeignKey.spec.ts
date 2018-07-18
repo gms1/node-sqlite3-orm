@@ -169,11 +169,20 @@ describe('test Foreign Keys', () => {
       parent.id2 = 1;
       parent = await parentDAO.selectById(parent);
 
-      let childs = await childDAO.selectAllOf(CHILD_FK_ID_NAME, Parent, parent);
+      let childs: Child[];
+
+      childs = await childDAO.selectAllOf(CHILD_FK_ID_NAME, Parent, parent);
       childs = childs.sort((a, b) => a.id - b.id);
       expect(childs.length).toBe(2);
       expect(childs[0].id).toBe(2);
       expect(childs[1].id).toBe(4);
+
+      childs = await parentDAO.selectAllChildsOf(CHILD_FK_ID_NAME, Child, parent);
+      childs = childs.sort((a, b) => a.id - b.id);
+      expect(childs.length).toBe(2);
+      expect(childs[0].id).toBe(2);
+      expect(childs[1].id).toBe(4);
+
     } catch (err) {
       fail(err);
     }

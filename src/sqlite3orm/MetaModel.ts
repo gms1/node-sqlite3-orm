@@ -143,7 +143,7 @@ export class MetaModel {
   }
 
   /**
-   * Get the reference fields for a foreign key constraint
+   * Get the foreign key (child) properties for a foreign key constraint
    *
    * @param constraintName - The constraint name
    * @returns The properties holding the foreign key
@@ -154,7 +154,7 @@ export class MetaModel {
 
 
   /**
-   * Get the reference fields for a foreign key constraint
+   * Get the reference (parent) columns for a foreign key constraint
    *
    * @param constraintName - The constraint name
    * @returns The referenced column names

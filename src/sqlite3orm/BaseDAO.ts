@@ -245,16 +245,16 @@ export class BaseDAO<T extends Object> {
 
   /**
    *
-   * @template F - The class mapped to the foreign table
+   * @template P - The class mapped to the parent table
    * @param constraintName - The foreign key constraint
-   * @param foreignType - The class mapped to the foreign table
-   * @param foreignObj - An instance of the class mapped to the foreign table
+   * @param parentType - The class mapped to the parent table
+   * @param parentObj - An instance of the class mapped to the parent table
    * @param [sql] - An optional sql-text which will be added to the select-statement
    * @param [params] - An optional object with additional host parameter
    * @returns A promise of array of model class instances
    */
-  public async selectAllOf<F extends Object>(
-      constraintName: string, foreignType: {new(): F}, foreignObj: F, sql?: string, params?: Object): Promise<T[]> {
+  public async selectAllOf<P extends Object>(
+      constraintName: string, parentType: {new(): P}, parentObj: P, sql?: string, params?: Object): Promise<T[]> {
     return new Promise<T[]>(async (resolve, reject) => {
       try {
         const fkSelCondition = this.metaModel.getForeignKeySelects(constraintName);
@@ -265,12 +265,12 @@ export class BaseDAO<T extends Object> {
         stmt += '\nWHERE\n  ';
         stmt += fkSelCondition;
 
-        const foreignDAO = new BaseDAO<F>(foreignType, this.sqldb);
-        const foreignParams = this.bindForeignParams(foreignDAO, constraintName, foreignObj, params);
+        const parentDAO = new BaseDAO<P>(parentType, this.sqldb);
+        const parentParams = this.bindForeignParams(parentDAO, constraintName, parentObj, params);
         if (!!sql) {
           stmt += sql;
         }
-        const rows: any[] = await this.sqldb.all(stmt, foreignParams);
+        const rows: any[] = await this.sqldb.all(stmt, parentParams);
         const results: T[] = [];
         rows.forEach((row) => {
           results.push(this.readResultRow(new this.type(), row));
@@ -282,6 +282,23 @@ export class BaseDAO<T extends Object> {
       }
     });
   }
+
+  /**
+   *
+   * @template C - The class mapped to the child table
+   * @param constraintName - The foreign key constraint (defined in the child table)
+   * @param childType - The class mapped to the childtable
+   * @param parentObj - An instance of the class mapped to the parent table
+   * @param [sql] - An optional sql-text which will be added to the select-statement
+   * @param [params] - An optional object with additional host parameter
+   * @returns A promise of array of model class instances
+   */
+  public async selectAllChildsOf<C extends Object>(
+      constraintName: string, childType: {new(): C}, parentObj: T, sql?: string, params?: Object): Promise<C[]> {
+    const childDAO = new BaseDAO<C>(childType, this.sqldb);
+    return childDAO.selectAllOf(constraintName, this.type, parentObj, sql, params);
+  }
+
 
   protected bindAllInputParams(model: T): Object {
     const hostParams: Object = {};
