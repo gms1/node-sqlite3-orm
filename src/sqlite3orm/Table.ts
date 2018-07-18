@@ -21,14 +21,38 @@ export class Table {
    * Flag to indicate if this table should be created with the 'WITHOUT
    * ROWID'-clause
    */
-  withoutRowId: boolean;
+  private _withoutRowId?: boolean;
+
+  get withoutRowId(): boolean {
+    // tslint:disable-next-line triple-equals
+    return this._withoutRowId == undefined ? false : this._withoutRowId;
+  }
+  set withoutRowId(withoutRowId: boolean) {
+    this._withoutRowId = withoutRowId;
+  }
+  get isWithoutRowIdDefined(): boolean {
+    // tslint:disable-next-line triple-equals
+    return this._withoutRowId == undefined ? false : true;
+  }
 
   /**
    * Flag to indicate if AUTOINCREMENT should be enabled for a table having a
    * single-column INTEGER primary key
    * and withoutRowId is disabled
    */
-  autoIncrement: boolean;
+  private _autoIncrement?: boolean;
+
+  get autoIncrement(): boolean {
+    // tslint:disable-next-line triple-equals
+    return this._autoIncrement == undefined ? false : this._autoIncrement;
+  }
+  set autoIncrement(autoIncrement: boolean) {
+    this._autoIncrement = autoIncrement;
+  }
+  get isAutoIncrementDefined(): boolean {
+    // tslint:disable-next-line triple-equals
+    return this._autoIncrement == undefined ? false : true;
+  }
 
   /**
    * The fields defined for this table
@@ -68,8 +92,6 @@ export class Table {
     this.mapNameToFKDef = new Map<string, FKDefinition>();
     this.mapNameToIDXDef = new Map<string, IDXDefinition>();
     this.fields = [];
-    this.withoutRowId = false;
-    this.autoIncrement = false;
   }
 
 

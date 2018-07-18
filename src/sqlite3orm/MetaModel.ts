@@ -1,6 +1,6 @@
 // import * as core from './core';
 
-// tslint:disable no-use-before-declare
+// tslint:disable no-use-before-declare triple-equals
 // tslint:disable-next-line no-require-imports
 import * as _dbg from 'debug';
 
@@ -73,15 +73,31 @@ export class MetaModel {
     if (!this._table) {
       this._table = new Table(tableName);
       schema().addTable(this.table);
+      // tslint:disable-next-line triple-equals
+      if (opts.withoutRowId != undefined) {
+        this._table.withoutRowId = opts.withoutRowId;
+      }
+      // tslint:disable-next-line triple-equals
+      if (opts.autoIncrement != undefined) {
+        this._table.autoIncrement = opts.autoIncrement;
+      }
+    } else {
+      // tslint:disable-next-line triple-equals
+      if (opts.withoutRowId != undefined) {
+        if (this._table.isWithoutRowIdDefined && opts.withoutRowId != this._table.withoutRowId) {
+          throw new Error(`in class '${this.name}': detected conflicting withoutRowId settings`);
+        }
+        this._table.withoutRowId = opts.withoutRowId;
+      }
+      // tslint:disable-next-line triple-equals
+      if (opts.autoIncrement != undefined) {
+        if (this._table.isAutoIncrementDefined && opts.autoIncrement != this._table.autoIncrement) {
+          throw new Error(`in class '${this.name}': detected conflicting autoIncrement settings`);
+        }
+        this._table.autoIncrement = opts.autoIncrement;
+      }
     }
-    const metaTable = this._table;
 
-    if (!!opts.withoutRowId) {
-      metaTable.withoutRowId = true;
-    }
-    if (!!opts.autoIncrement) {
-      metaTable.autoIncrement = true;
-    }
     this.properties.forEach((prop) => {
       prop.init(this);
     });

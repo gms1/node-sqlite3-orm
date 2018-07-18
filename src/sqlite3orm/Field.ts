@@ -23,11 +23,44 @@ export class Field {
     return quoteSimpleIdentifier(this.name);
   }
 
-
   /**
    * The type of the table column
    */
-  dbtype: string;
+  private _dbtype?: string;
+
+  get dbtype(): string {
+    // tslint:disable-next-line triple-equals
+    return this._dbtype == undefined ? 'TEXT' : this._dbtype;
+  }
+  set dbtype(dbType: string) {
+    this._dbtype = dbType;
+  }
+  get isDbTypeDefined(): boolean {
+    // tslint:disable-next-line triple-equals
+    return this._dbtype == undefined ? false : true;
+  }
+
+  /**
+   * If this property should be serialized/deserialized to the database as Json data
+   */
+  private _isJson?: boolean;
+
+  get isJson(): boolean {
+    // tslint:disable-next-line triple-equals
+    if (this._isJson == undefined) {
+      return false;
+    }
+    return this._isJson;
+  }
+  set isJson(isJson: boolean) {
+    this._isJson = isJson;
+  }
+  get isIsJsonDefined(): boolean {
+    // tslint:disable-next-line triple-equals
+    return this._isJson == undefined ? false : true;
+  }
+
+
   /**
    * Flag if this field is part of the primary key
    */
@@ -42,10 +75,6 @@ export class Field {
    */
   indexKeys: Map<string, IDXFieldDefinition>;
 
-  /**
-   * If this property should be serialized/deserialized to the database as Json data
-   */
-  isJson: boolean;
 
   /**
    * Creates an instance of Field.
@@ -56,10 +85,8 @@ export class Field {
       this.name = name;
     }
     this.isIdentity = false;
-    this.dbtype = 'TEXT';
     this.foreignKeys = new Map<string, FKFieldDefinition>();
     this.indexKeys = new Map<string, IDXFieldDefinition>();
-    this.isJson = false;
   }
 
 

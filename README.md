@@ -3,7 +3,6 @@
 [![Coverage Status](https://img.shields.io/coveralls/github/gms1/node-sqlite3-orm/master.svg)](https://coveralls.io/github/gms1/node-sqlite3-orm?branch=master)
 [![DeepScan Grade](https://deepscan.io/api/projects/699/branches/1107/badge/grade.svg)](https://deepscan.io/dashboard/#view=project&pid=699&bid=1107)
 [![Dependency Status](https://david-dm.org/gms1/node-sqlite3-orm.svg)](https://david-dm.org/gms1/node-sqlite3-orm)
-[![devDependency Status](https://david-dm.org/gms1/node-sqlite3-orm/dev-status.svg)](https://david-dm.org/gms1/node-sqlite3-orm#info=devDependencies)
 [![Known Vulnerabilities](https://snyk.io/test/github/gms1/node-sqlite3-orm/badge.svg)](https://snyk.io/test/github/gms1/node-sqlite3-orm)
 [![Greenkeeper badge](https://badges.greenkeeper.io/gms1/node-sqlite3-orm.svg)](https://greenkeeper.io/)
 
@@ -152,7 +151,7 @@ In order to read from or write to the database, you can use the `BaseDAO<Model>'
 
 ```
 
-## Supported data types using DAO:
+## Supported data types using DAO
 
 All primitive JavaScript data types ('String', 'Number', 'Boolean') and properties of type 'Date' are supported.
 Type safety is guaranteed, when reading properties of these types from the database (NULL values are treated as 'undefined').
@@ -174,7 +173,7 @@ One possibility to achieve this could be to use a connection pool and to perform
   let pool = new SqlConnectionPool();
 
   // open the database connection pool with 1 to 2 database connections:
-  //    do not use a private memory database for the connection pool :hint: 
+  //    do not use a private memory database for the connection pool :hint:
   await pool.open(SQL_MEMORY_DB_SHARED, SQL_OPEN_DEFAULT, 1, 2);
 
   let con1 = await pool.get();
@@ -217,4 +216,3 @@ tsconfig.json:
 ## Release Notes
 
 [CHANGELOG](./CHANGELOG.md)
-
