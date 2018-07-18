@@ -22,7 +22,7 @@ export {Table} from './Table';
 
 export {Field} from './Field';
 
-export {MetaModel} from './MetaModel';
+export {MetaModel, TABLEALIAS} from './MetaModel';
 
 export {MetaProperty} from './MetaProperty';
 

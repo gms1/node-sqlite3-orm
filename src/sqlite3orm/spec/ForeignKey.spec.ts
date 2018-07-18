@@ -183,6 +183,21 @@ describe('test Foreign Keys', () => {
       expect(childs[0].id).toBe(2);
       expect(childs[1].id).toBe(4);
 
+      parent = new Parent();
+      parent = await childDAO.selectParentOf(CHILD_FK_ID_NAME, Parent, childs[0]);
+      expect(parent).toBeDefined();
+      expect(parent.id1).toBe(2);
+      expect(parent.id2).toBe(1);
+      expect(parent.parentInfo).toBe('2.1');
+
+      parent = new Parent();
+      parent = await parentDAO.selectByChild(CHILD_FK_ID_NAME, Child, childs[1]);
+      expect(parent).toBeDefined();
+      expect(parent.id1).toBe(2);
+      expect(parent.id2).toBe(1);
+      expect(parent.parentInfo).toBe('2.1');
+
+
     } catch (err) {
       fail(err);
     }

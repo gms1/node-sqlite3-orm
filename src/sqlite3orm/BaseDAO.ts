@@ -4,7 +4,7 @@
 import {METADATA_MODEL_KEY} from './decorators';
 import {SqlDatabase} from './SqlDatabase';
 import {Table} from './Table';
-import {MetaModel} from './MetaModel';
+import {MetaModel, TABLEALIASPREFIX} from './MetaModel';
 import {MetaProperty} from './MetaProperty';
 
 /**
@@ -244,6 +244,7 @@ export class BaseDAO<T extends Object> {
   }
 
   /**
+   * select all childs using a foreign key constraint and a given parent instance
    *
    * @template P - The class mapped to the parent table
    * @param constraintName - The foreign key constraint
@@ -264,13 +265,13 @@ export class BaseDAO<T extends Object> {
         let stmt = this.metaModel.getSelectAllStatement();
         stmt += '\nWHERE\n  ';
         stmt += fkSelCondition;
-
-        const parentDAO = new BaseDAO<P>(parentType, this.sqldb);
-        const parentParams = this.bindForeignParams(parentDAO, constraintName, parentObj, params);
         if (!!sql) {
           stmt += sql;
         }
-        const rows: any[] = await this.sqldb.all(stmt, parentParams);
+        const parentDAO = new BaseDAO<P>(parentType, this.sqldb);
+        const childParams = this.bindForeignParams(parentDAO, constraintName, parentObj, params);
+
+        const rows: any[] = await this.sqldb.all(stmt, childParams);
         const results: T[] = [];
         rows.forEach((row) => {
           results.push(this.readResultRow(new this.type(), row));
@@ -284,6 +285,7 @@ export class BaseDAO<T extends Object> {
   }
 
   /**
+   * select all childs using a foreign key constraint and a given parent instance
    *
    * @template C - The class mapped to the child table
    * @param constraintName - The foreign key constraint (defined in the child table)
@@ -298,6 +300,75 @@ export class BaseDAO<T extends Object> {
     const childDAO = new BaseDAO<C>(childType, this.sqldb);
     return childDAO.selectAllOf(constraintName, this.type, parentObj, sql, params);
   }
+
+  /**
+   * select parent by using a foreign key constraint and a given child instance
+   *
+   * @template C - The class mapped to the child table
+   * @param constraintName - The foreign key constraint (defined in the child table)
+   * @param childType - The class mapped to the childtable
+   * @param childObj - An instance of the class mapped to the child table
+   * @returns A promise of model class instance
+   */
+  public async selectByChild<C extends Object>(constraintName: string, childType: {new(): C}, childObj: C): Promise<T> {
+    return new Promise<T>(async (resolve, reject) => {
+      // create child DAO
+      const childDAO = new BaseDAO<C>(childType, this.sqldb);
+      let output: T;
+      try {
+        // get child properties
+        const fkProps = childDAO.metaModel.getForeignKeyProps(constraintName);
+        const cols = childDAO.metaModel.getForeignKeyRefCols(constraintName);
+        if (!fkProps || !cols) {
+          throw new Error(`in '${childDAO.metaModel.name}': constraint '${constraintName}' is not defined`);
+        }
+        const refNotFoundCols: string[] = [];
+
+        // get parent (our) properties
+        const props = this.metaModel.getPropertyList(cols, refNotFoundCols);
+        /* istanbul ignore if */
+        if (!props || refNotFoundCols.length) {
+          const s = '"' + refNotFoundCols.join('", "') + '"';
+          throw new Error(`in '${this.metaModel.name}': no property mapped to these fields: ${s}`);
+        }
+        // bind parameters
+        const hostParams: Object = {};
+        for (let i = 0; i < fkProps.length; ++i) {
+          this.setHostParamValue(hostParams, props[i], fkProps[i].getPropertyValue(childObj));
+        }
+
+        // generate statement
+        let stmt = this.metaModel.getSelectAllStatement();
+        stmt += '\nWHERE\n  ';
+        stmt += props.map((prop) => `${TABLEALIASPREFIX}${prop.field.quotedName}=${prop.getHostParameterName()}`)
+                    .join(' AND ');
+
+        const row = await this.sqldb.get(stmt, hostParams);
+        output = this.readResultRow(new this.type(), row);
+
+      } catch (e) {
+        reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
+        return;
+      }
+      resolve(output);
+    });
+  }
+
+  /**
+   * select parent by using a foreign key constraint and a given child instance
+   *
+   * @template P - The class mapped to the parent table
+   * @param constraintName - The foreign key constraint (defined in the child table)
+   * @param parentType - The class mapped to the parent table
+   * @param childObj - An instance of the class mapped to the child table
+   * @returns A promise of model class instance
+   */
+  public async selectParentOf<P extends Object>(constraintName: string, parentType: {new(): P}, childObj: T):
+      Promise<P> {
+    const parentDAO = new BaseDAO<P>(parentType, this.sqldb);
+    return parentDAO.selectByChild(constraintName, this.type, childObj);
+  }
+
 
 
   protected bindAllInputParams(model: T): Object {
@@ -341,19 +412,10 @@ export class BaseDAO<T extends Object> {
       throw new Error(`bind information for '${constraintName}' in table '${this.table.name}' is incomplete`);
     }
 
-    const refProps: MetaProperty[] = [];
     const refNotFoundCols: string[] = [];
-    refCols.forEach((colName) => {
-      const refProp = refMetaModel.mapColNameToProp.get(colName);
-      /* istanbul ignore else */
-      if (refProp) {
-        refProps.push(refProp);
-      } else {
-        refNotFoundCols.push(colName);
-      }
-    });
+    const refProps = refMetaModel.getPropertyList(refCols, refNotFoundCols);
     /* istanbul ignore if */
-    if (refNotFoundCols.length) {
+    if (!refProps || refNotFoundCols.length) {
       const s = '"' + refNotFoundCols.join('", "') + '"';
       throw new Error(`in '${refMetaModel.name}': no property mapped to these fields: ${s}`);
     }

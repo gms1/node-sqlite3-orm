@@ -12,7 +12,8 @@ import {schema} from './Schema';
 
 export const debugModel = _dbg('sqlite3orm:model');
 
-const TABLEALIAS = 'T';
+export const TABLEALIAS = 'T';
+export const TABLEALIASPREFIX = TABLEALIAS.length ? TABLEALIAS + '.' : '';
 
 
 export class MetaModel {
@@ -164,6 +165,26 @@ export class MetaModel {
   }
 
 
+  public getPropertyList(cols: string[], notFoundCols?: string[]): MetaProperty[]|undefined {
+    const resProps: MetaProperty[] = [];
+    /* istanbul ignore else */
+    if (!notFoundCols) {
+      notFoundCols = [];
+    }
+    cols.forEach((colName) => {
+      const refProp = this.mapColNameToProp.get(colName);
+      /* istanbul ignore else */
+      if (refProp) {
+        resProps.push(refProp);
+      } else {
+        (notFoundCols as string[]).push(colName);
+      }
+    });
+    if (notFoundCols.length) {
+      return undefined;
+    }
+    return resProps;
+  }
 
   /**
    * Generate SQL Statements
@@ -235,7 +256,6 @@ export class MetaModel {
 
     // --------------------------------------------------------------
     // generate SELECT-all statement
-    const TABLEALIASPREFIX = TABLEALIAS.length ? TABLEALIAS + '.' : '';
 
     stmts.selectAll = 'SELECT\n  ';
     stmts.selectAll += `${TABLEALIASPREFIX}` + colNames.join(`, ${TABLEALIASPREFIX}`);

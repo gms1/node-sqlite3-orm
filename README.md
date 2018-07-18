@@ -52,7 +52,10 @@ class Contact {
 ```
 
 With **node-sqlite3-orm** you have full control over the names for tables, fields and foreign key constraints in the mapped database schema.
-Properties without a *node-sqlite3-orm* decorator will not be mapped to the database.
+
+> NOTE: Properties without a *node-sqlite3-orm* decorator will not be mapped to the database.
+> NOTE: you can use the 'temp' qualifier to create a temporary table. e.g "@table({name: 'temp.MYTEMPTABLE'"
+> NOTE: you can map the same table to different model classes, e.g for using a partial model class
 
 ## Database Connection
 
@@ -123,9 +126,10 @@ In order to read from or write to the database, you can use the `BaseDAO<Model>'
   // read a user:
   let userDonald = await userDAO.select(user);
 
-  // read all contacts from user 'donald':
-  let contactsDonald =
-      await contactDAO.selectAllOf('fk_user_contacts', User, userDonald);
+  // read all contacts (child) for a given user (parent):
+  let contactsDonald1 = await contactDAO.selectAllOf('fk_user_contacts', User, userDonald);
+  //   or
+  let contactsDonald2 = await userDAO.selectAllChildsOf('fk_user_contacts', Contact, userDonald);
 
   // read all users:
   let allUsers = await userDAO.selectAll();
@@ -138,6 +142,11 @@ In order to read from or write to the database, you can use the `BaseDAO<Model>'
   let allContactsFromDuckDotCom = await contactDAO.selectAll(
       'WHERE contact_email like $contact_email',
       {$contact_email: '%@duck.com'});
+
+  // read user (parent) for a given contact (child)
+  let userDonald1 = await userDAO.selectByChild('fk_user_contacts', Contact, contactsDonald1[0]);
+  // or
+  let userDonald2 = await contactDAO.selectParentOf('fk_user_contacts', User, contactsDonald2[0]);
 
 })();
 
