@@ -53,7 +53,9 @@ class Contact {
 With **node-sqlite3-orm** you have full control over the names for tables, fields and foreign key constraints in the mapped database schema.
 
 > NOTE: Properties without a *node-sqlite3-orm* decorator will not be mapped to the database.
-> NOTE: you can use the 'temp' qualifier to create a temporary table. e.g "@table({name: 'temp.MYTEMPTABLE'"
+<!-- -->
+> NOTE: you can use the 'temp' qualifier to create a temporary table. e.g `@table({name: 'temp.MYTEMPTABLE'`
+<!-- -->
 > NOTE: you can map the same table to different model classes, e.g for using a partial model class
 
 ## Database Connection
