@@ -351,35 +351,35 @@ ${sql}`);
    * @param event
    * @param listener
    */
-  public on(event: 'profile', listener: (sql: string) => void): this;
+  public on(event: 'profile', listener: (sql: string, time: number) => void): this;
   /**
    *
    *
    * @param event
    * @param listener
    */
-  public on(event: 'error', listener: (sql: string) => void): this;
+  public on(event: 'error', listener: (err: Error) => void): this;
   /**
    *
    *
    * @param event
    * @param listener
    */
-  public on(event: 'open', listener: (sql: string) => void): this;
+  public on(event: 'open', listener: () => void): this;
   /**
    *
    *
    * @param event
    * @param listener
    */
-  public on(event: 'close', listener: (sql: string) => void): this;
+  public on(event: 'close', listener: () => void): this;
   /**
    *
    *
    * @param event
    * @param listener
    */
-  public on(event: string, listener: (sql: string) => void): this {
+  public on(event: string, listener: (...args: any[]) => void): this {
     if (!this.db) {
       throw new Error('database connection not open');
     }
