@@ -209,10 +209,14 @@ tsconfig.json:
 }
 ```
 
-## License
-
-**node-sqlite3-orm** is licensed under the MIT License: [LICENSE](./LICENSE)
-
 ## Release Notes
 
 [CHANGELOG](./CHANGELOG.md)
+
+## TODOs
+
+[TODO](./TODO.md)
+
+## License
+
+**node-sqlite3-orm** is licensed under the MIT License: [LICENSE](./LICENSE)
