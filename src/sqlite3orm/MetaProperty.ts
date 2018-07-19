@@ -251,7 +251,7 @@ export class MetaProperty {
                 value = new Date((value as number) * 1000);
               } else {
                 // Julian day numbers ?
-                // TODO: currently not supported
+                // TODO: convert real-number to Date is currently not supported
                 value = NaN;
               }
               break;

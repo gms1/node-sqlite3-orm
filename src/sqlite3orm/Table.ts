@@ -113,7 +113,7 @@ export class Table {
   public getTableField(name: string): Field {
     const field = this.mapNameToField.get(name) as Field;
     if (!field) {
-      throw new Error(`field '${name}' not registered yet`);
+      throw new Error(`table '${this.name}': field '${name}' not registered yet`);
     }
     return field;
   }
@@ -127,7 +127,7 @@ export class Table {
   public addTableField(field: Field): Field {
     /* istanbul ignore if */
     if (this.mapNameToField.has(field.name)) {
-      throw new Error(`TODO: addTableField(Field(${field.name})) already defined`);
+      throw new Error(`table '${this.name}': field '${field.name}' on table  already defined`);
     }
     this.fields.push(field);
     this.mapNameToField.set(field.name, field);
@@ -169,7 +169,7 @@ export class Table {
   public getFKDefinition(name: string): FKDefinition {
     const constraint = this.mapNameToFKDef.get(name);
     if (!constraint) {
-      throw new Error(`foreign key constraint ${name} not registered yet`);
+      throw new Error(`table '${this.name}': foreign key constraint ${name} not registered yet`);
     }
     return constraint;
   }
@@ -177,7 +177,7 @@ export class Table {
   public addFKDefinition(fkDef: FKDefinition): void {
     /* istanbul ignore if */
     if (this.mapNameToFKDef.has(fkDef.name)) {
-      throw new Error(`foreign key constraint ${fkDef.name} already registered`);
+      throw new Error(`table '${this.name}': foreign key constraint ${fkDef.name} already registered`);
     }
     this.mapNameToFKDef.set(fkDef.name, fkDef);
   }
@@ -189,7 +189,7 @@ export class Table {
   public getIDXDefinition(name: string): IDXDefinition {
     const idxDef = this.mapNameToIDXDef.get(qualifiyIdentifier(name));
     if (!idxDef) {
-      throw new Error(`foreign key constraint ${name} not registered yet`);
+      throw new Error(`table '${this.name}': foreign key constraint ${name} not registered yet`);
     }
     return idxDef;
   }
@@ -198,7 +198,7 @@ export class Table {
     const name = qualifiyIdentifier(idxDef.name);
     /* istanbul ignore if */
     if (this.mapNameToIDXDef.has(name)) {
-      throw new Error(`foreign key constraint ${idxDef.name} already registered`);
+      throw new Error(`table '${this.name}': foreign key constraint ${idxDef.name} already registered`);
     }
     this.mapNameToIDXDef.set(name, idxDef);
   }
@@ -245,7 +245,7 @@ export class Table {
   public getCreateIndexStatement(idxName: string, unique?: boolean): string {
     const idxDef = this.hasIDXDefinition(idxName);
     if (!idxDef) {
-      throw new Error(`index '${idxName}' is not defined on table '${this.name}'`);
+      throw new Error(`table '${this.name}': index '${idxName}' is not defined on table '${this.name}'`);
     }
     // tslint:disable-next-line triple-equals
     if (unique == undefined) {
@@ -268,7 +268,7 @@ export class Table {
   public getDropIndexStatement(idxName: string): string {
     const idxDef = this.hasIDXDefinition(idxName);
     if (!idxDef) {
-      throw new Error(`index '${idxName}' is not defined on table '${this.name}'`);
+      throw new Error(`table '${this.name}': index '${idxName}' is not defined on table '${this.name}'`);
     }
     const quotedIdxName = quoteIdentifier(idxName);
     return `DROP INDEX IF EXISTS ${quotedIdxName}`;
