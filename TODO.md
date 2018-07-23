@@ -42,6 +42,8 @@ recommendation:
 
 ## support for sqlite3 expressions for @field and @index decorators
 
-## implement a @view decorator?
+## implement a @view decorator (?)
 
-## other todo?
+## add support for user provided serialize/deserialize functions
+
+## what else (?)
