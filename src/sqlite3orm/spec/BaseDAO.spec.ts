@@ -5,6 +5,7 @@ import {SqlDatabase, BaseDAO, SQL_MEMORY_DB_PRIVATE, field, fk, id, table} from 
 const USERS_TABLE = 'BD:USERS TABLE';
 const CONTACTS_TABLE = 'main.BD:CONTACTS TABLE';
 const TEST_SET_PROP_TABLE = 'BD:TEST_SET_PROP_TABLE';
+const TEST_DB_DEFAULTS = 'BD:TEST_DB_DEFAULTS_TABLE';
 
 @table({name: USERS_TABLE})
 class User {
@@ -384,6 +385,8 @@ describe('test BaseDAO', () => {
     }
   }
 
+
+
   // ---------------------------------------------
   it('expect setProperty to work', async (done) => {
     let testDao: BaseDAO<TestSetProperty> = new BaseDAO(TestSetProperty, sqldb);
@@ -416,5 +419,63 @@ describe('test BaseDAO', () => {
     done();
 
   });
+
+
+  @table({name: TEST_DB_DEFAULTS})
+  class TestDbDefaultsFull {
+    @id({name: 'id', dbtype: 'INTEGER NOT NULL'})
+    id: number;
+
+    @field({name: 'my_bool', dbtype: 'TEXT DEFAULT 1'})
+    myBool?: boolean;
+
+    @field({name: 'my_integer', dbtype: 'INTEGER DEFAULT 42'})
+    myInt?: number;
+
+    @field({name: 'my_string', dbtype: 'TEXT DEFAULT \'sqlite3orm\''})
+    myString?: string;
+
+    @field({name: 'my_real', dbtype: 'REAL DEFAULT 3.1415692'})
+    myReal?: number;
+
+    constructor() {
+      this.id = 0;
+    }
+  }
+
+  @table({name: TEST_DB_DEFAULTS})
+  class TestDbDefaultsMin {
+    @id({name: 'id', dbtype: 'INTEGER NOT NULL'})
+    id: number;
+
+    constructor() {
+      this.id = 0;
+    }
+  }
+
+  // ---------------------------------------------
+  it('expect default-clause to work', async (done) => {
+    const fullDao: BaseDAO<TestDbDefaultsFull> = new BaseDAO(TestDbDefaultsFull, sqldb);
+    const minDao: BaseDAO<TestDbDefaultsMin> = new BaseDAO(TestDbDefaultsMin, sqldb);
+    const writeRow: TestDbDefaultsMin = new TestDbDefaultsMin();
+    try {
+      await fullDao.createTable();
+
+      writeRow.id = 1;
+      await minDao.insert(writeRow);
+      let readRow = await fullDao.selectById({id: 1});
+      expect(readRow.myBool).toBeTruthy();
+      expect(readRow.myInt).toBe(42);
+      expect(readRow.myString).toBe('sqlite3orm');
+      expect(readRow.myReal).toBe(3.1415692);
+
+    } catch (err) {
+      fail(err);
+    }
+    done();
+
+  });
+
+
 
 });
