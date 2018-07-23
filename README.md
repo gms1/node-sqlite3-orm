@@ -158,7 +158,8 @@ In order to read from or write to the database, you can use the `BaseDAO<Model>'
 All primitive JavaScript data types ('String', 'Number', 'Boolean') and properties of type 'Date' are supported.
 Type safety is guaranteed, when reading properties of these types from the database (NULL values are treated as 'undefined').
 
-**Date** properties can be mapped to either the 'TEXT' or to the 'INTEGER' storage class and their values will be converted accordlingly by **sqlite3orm** as UTC.
+**Date** properties can be mapped to either the 'TEXT' or to the 'INTEGER' storage class and their their values will be stored as UTC. Using 'INTEGER' converts to Unix-Time, so fractions of seconds are lost.
+
 These are the corresponding defaults for the 'current timestamp':
 
 default for 'TEXT':
