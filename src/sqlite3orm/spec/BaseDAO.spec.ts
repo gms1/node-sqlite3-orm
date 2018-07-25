@@ -8,6 +8,7 @@ const TEST_SET_PROP_TABLE = 'BD:TEST_SET_PROP_TABLE';
 const TEST_INDEX_TABLE1 = 'main.BD:INDEX_TABLE';
 const TEST_INDEX_TABLE2 = 'temp.BD:INDEX_TABLE';
 const TEST_DB_DEFAULTS = 'BD:TEST_DB_DEFAULTS_TABLE';
+const TEST_DB_DEFAULTS2 = 'BD:TEST_DB_DEFAULTS_TABLE2';
 
 @table({name: USERS_TABLE})
 class User {
@@ -507,6 +508,30 @@ describe('test BaseDAO', () => {
     }
   }
 
+
+  @table({name: TEST_DB_DEFAULTS2, autoIncrement: false})
+  class TestDbDefaultsFull2 {
+    @id({name: 'id', dbtype: 'INTEGER NOT NULL'})
+    id: number;
+
+    @field({name: 'my_bool', dbtype: 'TEXT DEFAULT 1'})
+    myBool?: boolean;
+
+    @field({name: 'my_integer', dbtype: 'INTEGER DEFAULT 42'})
+    myInt?: number;
+
+    @field({name: 'my_string', dbtype: 'TEXT DEFAULT \'sqlite3orm\''})
+    myString?: string;
+
+    @field({name: 'my_real', dbtype: 'REAL DEFAULT 3.1415692'})
+    myReal?: number;
+
+    constructor() {
+      this.id = 0;
+    }
+  }
+
+
   // ---------------------------------------------
   it('expect default-clause to work: using additional model', async (done) => {
     const fullDao: BaseDAO<TestDbDefaultsFull> = new BaseDAO(TestDbDefaultsFull, sqldb);
@@ -602,6 +627,287 @@ describe('test BaseDAO', () => {
     } catch (err) {
     }
     done();
+  });
+
+
+  // ---------------------------------------------
+  it('expect default-clause to work: using partial insert and empty partial model (autoincrement)', async (done) => {
+    const fullDao: BaseDAO<TestDbDefaultsFull> = new BaseDAO(TestDbDefaultsFull, sqldb);
+    const writeRow: TestDbDefaultsFull = new TestDbDefaultsFull();
+    try {
+      await fullDao.createTable();
+
+      const insertedPartial = await fullDao.partialInsert({});
+      let readRow = await fullDao.selectById({id: insertedPartial.id});
+      expect(readRow.myBool).toBeTruthy();
+      expect(readRow.myInt).toBe(42);
+      expect(readRow.myString).toBe('sqlite3orm');
+      expect(readRow.myReal).toBe(3.1415692);
+
+    } catch (err) {
+      fail(err);
+    }
+    try {
+      await fullDao.dropTable();
+    } catch (err) {
+      fail(err);
+    }
+    done();
+
+  });
+
+  // ---------------------------------------------
+  it('expect default-clause to work: using partial insert and empty partial model (no autoincrement)', async (done) => {
+    const fullDao: BaseDAO<TestDbDefaultsFull2> = new BaseDAO(TestDbDefaultsFull2, sqldb);
+    const writeRow: TestDbDefaultsFull2 = new TestDbDefaultsFull2();
+    try {
+      await fullDao.createTable();
+
+      const insertedPartial = await fullDao.partialInsert({id: 1});
+      let readRow = await fullDao.selectById({id: insertedPartial.id});
+      expect(readRow.myBool).toBeTruthy();
+      expect(readRow.myInt).toBe(42);
+      expect(readRow.myString).toBe('sqlite3orm');
+      expect(readRow.myReal).toBe(3.1415692);
+
+    } catch (err) {
+      fail(err);
+    }
+    try {
+      await fullDao.dropTable();
+    } catch (err) {
+      fail(err);
+    }
+    done();
+
+  });
+
+  // ---------------------------------------------
+  it('expect partial insert to fail for invalid property in partial model', async (done) => {
+    const fullDao: BaseDAO<TestDbDefaultsFull> = new BaseDAO(TestDbDefaultsFull, sqldb);
+    const writeRow: TestDbDefaultsFull = new TestDbDefaultsFull();
+    try {
+      await fullDao.createTable();
+
+      await fullDao.partialInsert({notExist: true} as any as Partial<TestDbDefaultsFull>);
+      fail('should have thrown');
+    } catch (err) {
+    }
+    try {
+      await fullDao.dropTable();
+    } catch (err) {
+      fail(err);
+    }
+    done();
+
+  });
+
+  // ---------------------------------------------
+  it('expect partial update to fail for empty partial model', async (done) => {
+    const fullDao: BaseDAO<TestDbDefaultsFull> = new BaseDAO(TestDbDefaultsFull, sqldb);
+    const writeRow: TestDbDefaultsFull = new TestDbDefaultsFull();
+    let insertedPartial: Partial<TestDbDefaultsFull>;
+    try {
+      await fullDao.createTable();
+
+      insertedPartial = await fullDao.partialInsert({});
+    } catch (err) {
+      fail(err);
+      return;
+    }
+    try {
+      await fullDao.partialUpdate({});
+      fail('should have thrown');
+    } catch (err) {
+    }
+    try {
+      await fullDao.dropTable();
+    } catch (err) {
+      fail(err);
+    }
+    done();
+
+  });
+
+  it('expect partial update to fail for only identity properties in partial model', async (done) => {
+    const fullDao: BaseDAO<TestDbDefaultsFull> = new BaseDAO(TestDbDefaultsFull, sqldb);
+    const writeRow: TestDbDefaultsFull = new TestDbDefaultsFull();
+    let insertedPartial: Partial<TestDbDefaultsFull>;
+    try {
+      await fullDao.createTable();
+
+      insertedPartial = await fullDao.partialInsert({});
+    } catch (err) {
+      fail(err);
+      return;
+    }
+    try {
+      await fullDao.partialUpdate({id: insertedPartial.id});
+      fail('should have thrown');
+    } catch (err) {
+    }
+    try {
+      await fullDao.dropTable();
+    } catch (err) {
+      fail(err);
+    }
+    done();
+
+  });
+
+  it('expect partial update to succeed for partial model', async (done) => {
+    const fullDao: BaseDAO<TestDbDefaultsFull> = new BaseDAO(TestDbDefaultsFull, sqldb);
+    const writeRow: TestDbDefaultsFull = new TestDbDefaultsFull();
+    let insertedPartial: Partial<TestDbDefaultsFull>;
+    try {
+      await fullDao.createTable();
+
+      insertedPartial = await fullDao.partialInsert({});
+      await fullDao.partialUpdate({id: insertedPartial.id, myBool: false, myString: 'foo'});
+      let readRow = await fullDao.selectById({id: insertedPartial.id});
+      expect(readRow.myBool).toBe(false, 'wrong myBool');
+      expect(readRow.myInt).toBe(42, 'wrong myInt');
+      expect(readRow.myString).toBe('foo', 'wrong myString');
+      expect(readRow.myReal).toBe(3.1415692, 'wrong myReal');
+    } catch (err) {
+      fail(err);
+    }
+    try {
+      await fullDao.dropTable();
+    } catch (err) {
+      fail(err);
+    }
+    done();
+
+  });
+
+  it('expect partial update to succeed for full model', async (done) => {
+    const fullDao: BaseDAO<TestDbDefaultsFull> = new BaseDAO(TestDbDefaultsFull, sqldb);
+    const writeRow: TestDbDefaultsFull = new TestDbDefaultsFull();
+    let insertedPartial: Partial<TestDbDefaultsFull>;
+    try {
+      await fullDao.createTable();
+
+      insertedPartial = await fullDao.partialInsert({});
+      const readRow = await fullDao.selectById({id: insertedPartial.id});
+      readRow.myBool = false;
+      readRow.myInt = readRow.myInt || 0;
+      readRow.myInt += insertedPartial.id as number;
+      await fullDao.partialUpdate(readRow);
+      const readRow2 = await fullDao.selectById({id: insertedPartial.id});
+      expect(readRow2.myBool).toBe(false);
+      expect(readRow2.myInt).toBe(42 + (insertedPartial.id as number));
+    } catch (err) {
+      fail(err);
+    }
+    try {
+      await fullDao.dropTable();
+    } catch (err) {
+      fail(err);
+    }
+    done();
+
+  });
+
+  it('expect update/delete all (without condition) to succeed for partial model', async (done) => {
+    const fullDao: BaseDAO<TestDbDefaultsFull> = new BaseDAO(TestDbDefaultsFull, sqldb);
+    const writeRow: TestDbDefaultsFull = new TestDbDefaultsFull();
+    let insertedPartial: Partial<TestDbDefaultsFull>;
+    try {
+      await fullDao.createTable();
+
+      insertedPartial = await fullDao.partialInsert({});
+      insertedPartial.myInt = 59;
+      await fullDao.updateAll({myInt: insertedPartial.myInt});
+      let readRow = await fullDao.selectById({id: insertedPartial.id});
+      expect(readRow.myBool).toBe(true);
+      expect(readRow.myInt).toBe(59);
+      expect(readRow.myString).toBe('sqlite3orm');
+      expect(readRow.myReal).toBe(3.1415692);
+      await fullDao.deleteAll();
+      try {
+        // TODO: use exist instead of update
+        insertedPartial.myBool = false;
+        await fullDao.partialUpdate({id: insertedPartial.id, myBool: insertedPartial.myBool});
+        fail(`update should have failed`);
+      } catch (err) {
+      }
+    } catch (err) {
+      fail(err);
+    }
+    try {
+      await fullDao.dropTable();
+    } catch (err) {
+      fail(err);
+    }
+    done();
+
+  });
+
+  it('expect update/delete all (with condition) to succeed for partial model', async (done) => {
+    const fullDao: BaseDAO<TestDbDefaultsFull> = new BaseDAO(TestDbDefaultsFull, sqldb);
+    const writeRow: TestDbDefaultsFull = new TestDbDefaultsFull();
+    let insertedPartial: Partial<TestDbDefaultsFull>;
+    try {
+      await fullDao.createTable();
+
+      insertedPartial = await fullDao.partialInsert({});
+      insertedPartial.myInt = 59;
+      await fullDao.updateAll({id: insertedPartial.id, myInt: insertedPartial.myInt}, 'where ID=:id');
+      let readRow = await fullDao.selectById({id: insertedPartial.id});
+      expect(readRow.myBool).toBe(true);
+      expect(readRow.myInt).toBe(59);
+      expect(readRow.myString).toBe('sqlite3orm');
+      expect(readRow.myReal).toBe(3.1415692);
+      await fullDao.deleteAll('where ID=:id', {':id': insertedPartial.id});
+      try {
+        // TODO: use exist instead of update
+        insertedPartial.myBool = false;
+        await fullDao.partialUpdate({id: insertedPartial.id, myBool: insertedPartial.myBool});
+        fail(`update should have failed`);
+      } catch (err) {
+      }
+    } catch (err) {
+      fail(err);
+    }
+    try {
+      await fullDao.dropTable();
+    } catch (err) {
+      fail(err);
+    }
+    done();
+
+  });
+
+  it('expect update/delete all to fail if nothing changed', async (done) => {
+    const fullDao: BaseDAO<TestDbDefaultsFull> = new BaseDAO(TestDbDefaultsFull, sqldb);
+    const writeRow: TestDbDefaultsFull = new TestDbDefaultsFull();
+    let insertedPartial: Partial<TestDbDefaultsFull> = new TestDbDefaultsFull();
+    try {
+      await fullDao.createTable();
+
+      insertedPartial = await fullDao.partialInsert({});
+      insertedPartial.myInt = 59;
+    } catch (err) {
+      fail(err);
+    }
+    try {
+      await fullDao.updateAll({id: insertedPartial.id as number + 1, myInt: insertedPartial.myInt}, 'where ID=:id');
+      fail('updateAll should have failed');
+    } catch (err) {
+    }
+    try {
+      await fullDao.deleteAll('where ID=:id', {':id': insertedPartial.id as number + 1});
+      fail('deleteAll should have failed');
+    } catch (err) {
+    }
+    try {
+      await fullDao.dropTable();
+    } catch (err) {
+      fail(err);
+    }
+    done();
+
   });
 
 

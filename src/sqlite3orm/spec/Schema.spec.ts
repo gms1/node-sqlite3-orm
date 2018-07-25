@@ -450,4 +450,10 @@ describe('test schema', () => {
   });
 
 
+  // ---------------------------------------------
+  it('getAllTables should not throw', () => {
+
+    schema().getAllTables();
+  });
+
 });

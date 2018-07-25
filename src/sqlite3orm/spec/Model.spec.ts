@@ -355,5 +355,41 @@ describe('test metaModels', () => {
   });
 
 
+  // ---------------------------------------------
+  it('conflicting dbtype-field option', async (done) => {
+    try {
+      @table({name: 'MPT13:T1'})
+      class Model1 {
+        @id()
+        col!: number;
+
+        @field()
+        b?: boolean;
+
+        @field()
+        d?: Date;
+
+        @field()
+        n?: number;
+
+        @field()
+        s?: string;
+      }
+
+      const metaModel1 = Reflect.getMetadata(METADATA_MODEL_KEY, Model1.prototype) as MetaModel;
+
+      expect(metaModel1.table.fields.length).toBe(5);
+      expect(metaModel1.table.fields[0].dbTypeInfo.typeAffinity).toBe('INTEGER');  // number (id)
+      expect(metaModel1.table.fields[1].dbTypeInfo.typeAffinity).toBe('INTEGER');  // boolean
+      expect(metaModel1.table.fields[2].dbTypeInfo.typeAffinity).toBe('INTEGER');  // date
+      expect(metaModel1.table.fields[3].dbTypeInfo.typeAffinity).toBe('REAL');     // number (no-id)
+      expect(metaModel1.table.fields[4].dbTypeInfo.typeAffinity).toBe('TEXT');     // string
+
+
+    } catch (err) {
+      fail('err');
+    }
+    done();
+  });
 
 });
