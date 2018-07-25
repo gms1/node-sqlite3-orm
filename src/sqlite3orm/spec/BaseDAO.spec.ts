@@ -421,7 +421,7 @@ describe('test BaseDAO', () => {
   });
 
 
-  @table({name: TEST_DB_DEFAULTS})
+  @table({name: TEST_DB_DEFAULTS, autoIncrement: true})
   class TestDbDefaultsFull {
     @id({name: 'id', dbtype: 'INTEGER NOT NULL'})
     id: number;
@@ -454,16 +454,15 @@ describe('test BaseDAO', () => {
   }
 
   // ---------------------------------------------
-  it('expect default-clause to work', async (done) => {
+  it('expect default-clause to work: using additional model', async (done) => {
     const fullDao: BaseDAO<TestDbDefaultsFull> = new BaseDAO(TestDbDefaultsFull, sqldb);
     const minDao: BaseDAO<TestDbDefaultsMin> = new BaseDAO(TestDbDefaultsMin, sqldb);
     const writeRow: TestDbDefaultsMin = new TestDbDefaultsMin();
     try {
       await fullDao.createTable();
 
-      writeRow.id = 1;
-      await minDao.insert(writeRow);
-      let readRow = await fullDao.selectById({id: 1});
+      const writtenRow = await minDao.insert(writeRow);
+      let readRow = await fullDao.selectById({id: writtenRow.id});
       expect(readRow.myBool).toBeTruthy();
       expect(readRow.myInt).toBe(42);
       expect(readRow.myString).toBe('sqlite3orm');
@@ -472,10 +471,13 @@ describe('test BaseDAO', () => {
     } catch (err) {
       fail(err);
     }
+    try {
+      await fullDao.dropTable();
+    } catch (err) {
+      fail(err);
+    }
     done();
 
   });
-
-
 
 });

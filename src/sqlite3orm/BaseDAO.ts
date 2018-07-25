@@ -145,6 +145,7 @@ export class BaseDAO<T extends Object> {
     });
   }
 
+
   /**
    * select using primary key
    *
@@ -192,6 +193,7 @@ export class BaseDAO<T extends Object> {
    * select T.<col1>,.. FROM <table> T
    *
    * @param [sql] - An optional sql-text which will be added to the select-statement
+   *                (e.g 'WHERE <your condition>', 'ORDER BY <columns>')
    * @param [params] - An optional object with additional host parameter
    * @returns A promise of array of class instances
    */
@@ -200,6 +202,7 @@ export class BaseDAO<T extends Object> {
       try {
         let stmt = this.metaModel.getSelectAllStatement();
         if (!!sql) {
+          stmt += ' ';
           stmt += sql;
         }
         const rows: any[] = await this.sqldb.all(stmt, params);
@@ -221,6 +224,7 @@ export class BaseDAO<T extends Object> {
    *
    * @param callback - The callback called for each row
    * @param [sql] - An optional sql-text which will be added to the select-statement
+   *                (e.g ')
    * @param [params] - An optional object with additional host parameter
    * @returns A promise
    */
@@ -229,6 +233,7 @@ export class BaseDAO<T extends Object> {
       try {
         let stmt = this.metaModel.getSelectAllStatement();
         if (!!sql) {
+          stmt += ' ';
           stmt += sql;
         }
         const res = await this.sqldb.each(stmt, params, (err, row) => {
@@ -250,7 +255,7 @@ export class BaseDAO<T extends Object> {
    * @param constraintName - The foreign key constraint
    * @param parentType - The class mapped to the parent table
    * @param parentObj - An instance of the class mapped to the parent table
-   * @param [sql] - An optional sql-text which will be added to the select-statement
+   * @param [sql] - An optional sql-text which will be added to the where-clause of the select-statement
    * @param [params] - An optional object with additional host parameter
    * @returns A promise of array of model class instances
    */
@@ -266,6 +271,7 @@ export class BaseDAO<T extends Object> {
         stmt += '\nWHERE\n  ';
         stmt += fkSelCondition;
         if (!!sql) {
+          stmt += ' ';
           stmt += sql;
         }
         const parentDAO = new BaseDAO<P>(parentType, this.sqldb);
@@ -291,7 +297,7 @@ export class BaseDAO<T extends Object> {
    * @param constraintName - The foreign key constraint (defined in the child table)
    * @param childType - The class mapped to the childtable
    * @param parentObj - An instance of the class mapped to the parent table
-   * @param [sql] - An optional sql-text which will be added to the select-statement
+   * @param [sql] - An optional sql-text which will be added to the where-clause of the select-statement
    * @param [params] - An optional object with additional host parameter
    * @returns A promise of array of model class instances
    */
@@ -325,7 +331,7 @@ export class BaseDAO<T extends Object> {
         const refNotFoundCols: string[] = [];
 
         // get parent (our) properties
-        const props = this.metaModel.getPropertyList(cols, refNotFoundCols);
+        const props = this.metaModel.getPropertiesFromColumnNames(cols, refNotFoundCols);
         /* istanbul ignore if */
         if (!props || refNotFoundCols.length) {
           const s = '"' + refNotFoundCols.join('", "') + '"';
@@ -371,31 +377,29 @@ export class BaseDAO<T extends Object> {
 
 
 
-  protected bindAllInputParams(model: T): Object {
+  protected bindAllInputParams(model: T, subset?: (string|symbol)[], addIdentity?: boolean): Object {
     const hostParams: Object = {};
-    this.metaModel.properties.forEach((prop) => {
+    const props = this.metaModel.getPropertiesFromKeys(subset, addIdentity);
+    props.forEach((prop) => {
       this.setHostParam(hostParams, prop, model);
     });
+    return hostParams;
+  }
 
+  protected bindNonPrimaryKeyInputParams(model: T, subset?: (string|symbol)[]): Object {
+    const hostParams: Object = {};
+    const props = this.metaModel.getPropertiesFromKeys(subset);
+    props.filter((prop) => !prop.field.isIdentity).forEach((prop) => {
+      this.setHostParam(hostParams, prop, model);
+    });
     return hostParams;
   }
 
   protected bindPrimaryKeyInputParams(model: T): Object {
     const hostParams: Object = {};
-    this.metaModel.properties.forEach((prop) => {
-      if (prop.field.isIdentity) {
-        this.setHostParam(hostParams, prop, model);
-      }
-    });
-    return hostParams;
-  }
-
-  protected bindNonPrimaryKeyInputParams(model: T): Object {
-    const hostParams: Object = {};
-    this.metaModel.properties.forEach((prop) => {
-      if (!prop.field.isIdentity) {
-        this.setHostParam(hostParams, prop, model);
-      }
+    const props = Array.from(this.metaModel.properties.values());
+    props.filter((prop) => prop.field.isIdentity).forEach((prop) => {
+      this.setHostParam(hostParams, prop, model);
     });
     return hostParams;
   }
@@ -413,7 +417,7 @@ export class BaseDAO<T extends Object> {
     }
 
     const refNotFoundCols: string[] = [];
-    const refProps = refMetaModel.getPropertyList(refCols, refNotFoundCols);
+    const refProps = refMetaModel.getPropertiesFromColumnNames(refCols, refNotFoundCols);
     /* istanbul ignore if */
     if (!refProps || refNotFoundCols.length) {
       const s = '"' + refNotFoundCols.join('", "') + '"';

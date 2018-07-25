@@ -109,8 +109,8 @@ export class MetaModel {
    *
    * @returns The sql-statement
    */
-  public getInsertIntoStatement(): string {
-    return this.statementsText.insertInto;
+  public getInsertIntoStatement(keys?: (string|symbol)[]): string {
+    return this.statementsText.insertInto(this.getPropertiesFromKeys(keys));
   }
 
   /**
@@ -118,8 +118,17 @@ export class MetaModel {
    *
    * @returns The sql-statement
    */
-  public getUpdateByIdStatement(): string {
-    return this.statementsText.updateById;
+  public getUpdateByIdStatement(keys?: (string|symbol)[]): string {
+    return this.statementsText.updateById(this.getPropertiesFromKeys(keys));
+  }
+
+  /**
+   * Get 'UPDATE ALL' statement
+   *
+   * @returns The sql-statement
+   */
+  public getUpdateAllStatement(keys?: (string|symbol)[]): string {
+    return this.statementsText.updateAll(this.getPropertiesFromKeys(keys));
   }
 
   /**
@@ -132,7 +141,16 @@ export class MetaModel {
   }
 
   /**
-   * Get 'SELECT' all-statement
+   * Get 'DELETE BY PRIMARY KEY'-statement
+   *
+   * @returns The sql-statement
+   */
+  public getDeleteAllStatement(): string {
+    return this.statementsText.deleteAll;
+  }
+
+  /**
+   * Get 'SELECT ALL'-statement
    *
    * @returns The sql-statement
    */
@@ -181,7 +199,34 @@ export class MetaModel {
   }
 
 
-  public getPropertyList(cols: string[], notFoundCols?: string[]): MetaProperty[]|undefined {
+  public getPropertiesFromKeys(keys?: (string|symbol)[], addIdentity?: boolean): MetaProperty[] {
+    let props: MetaProperty[];
+    if (keys) {
+      const addedMap = new Set<string|symbol>();
+      props = [];
+      keys.forEach((key) => {
+        const prop = this.properties.get(key);
+        if (!prop) {
+          throw new Error(`property '${key.toString()}' not defined for model '${this.name}'`);
+        }
+        if (!addedMap.has(key)) {
+          props.push(prop);
+          addedMap.add(key);
+        }
+      });
+      if (addIdentity) {
+        props.push(
+            ...Array.from(this.properties.values()).filter((prop) => prop.field.isIdentity && !addedMap.has(prop.key)));
+      }
+    } else {
+      props = Array.from(this.properties.values());
+    }
+    return props;
+  }
+
+
+
+  public getPropertiesFromColumnNames(cols: string[], notFoundCols?: string[]): MetaProperty[]|undefined {
     const resProps: MetaProperty[] = [];
     /* istanbul ignore else */
     if (!notFoundCols) {
@@ -207,52 +252,15 @@ export class MetaModel {
    *
    */
   private generateStatementsText(): SqlStatementText {
-    const colNames: string[] = [];
-    const colNamesNoPK: string[] = [];
-    const colParms: string[] = [];
-    const colParmsNoPK: string[] = [];
-    const colSetsNoPK: string[] = [];
-    const colSelPK: string[] = [];
     const stmts = new SqlStatementText();
-
-    const table = this.table;
-    const quotedTableName = table.quotedName;
 
     if (!this.properties.size) {
       throw new Error(`class '${this.name}': does not have any mapped properties`);
     }
 
-    this.properties.forEach((prop) => {
-      const field = prop.field;
-      const quotedFieldName = field.quotedName;
-      const hostParmName = prop.getHostParameterName();
-
-      colNames.push(quotedFieldName);
-      colParms.push(hostParmName);
-      if (field.isIdentity) {
-        colSelPK.push(`${quotedFieldName}=${hostParmName}`);
-      } else {
-        colNamesNoPK.push(quotedFieldName);
-        colParmsNoPK.push(hostParmName);
-        colSetsNoPK.push(`${quotedFieldName} = ${hostParmName}`);
-      }
-    });
-
-    // --------------------------------------------------------------
-    // generate INSERT INTO statement
-    stmts.insertInto = `INSERT INTO ${quotedTableName} (\n  `;
-    if (!table.autoIncrementField) {
-      stmts.insertInto += colNames.join(', ');
-    } else {
-      stmts.insertInto += colNamesNoPK.join(', ');
-    }
-    stmts.insertInto += '\n) VALUES (\n  ';
-    if (!table.autoIncrementField) {
-      stmts.insertInto += colParms.join(', ');
-    } else {
-      stmts.insertInto += colParmsNoPK.join(', ');
-    }
-    stmts.insertInto += '\n)';
+    const properties = Array.from(this.properties.values());
+    const colSelPK = properties.filter((prop) => prop.field.isIdentity)
+                         .map((prop) => `${prop.field.quotedName}=${prop.getHostParameterName()}`);
 
     // --------------------------------------------------------------
     // generate simple where clause for selecting via primary key
@@ -260,22 +268,66 @@ export class MetaModel {
     wherePrimaryKeyClause += colSelPK.join(' AND ');
 
     // --------------------------------------------------------------
-    // generate UPDATE SET statement
-    stmts.updateById = `UPDATE ${quotedTableName} SET\n  `;
-    stmts.updateById += colSetsNoPK.join(',\n  ');
-    stmts.updateById += wherePrimaryKeyClause;
+    // generate INSERT INTO statement
+
+    stmts.insertInto = (props: MetaProperty[]): string => {
+      if (this.table.autoIncrementField) {
+        props = props.filter((prop) => !prop.field.isIdentity);
+      }
+      if (!props.length) {
+        return `INSERT INTO ${this.table.quotedName} DEFAULT VALUES`;
+      }
+
+      let stmt = `INSERT INTO ${this.table.quotedName} (\n  `;
+      stmt += props.map((prop) => prop.field.quotedName).join(', ');
+      stmt += '\n) VALUES (\n  ';
+      stmt += props.map((prop) => prop.getHostParameterName()).join(', ');
+      stmt += '\n)';
+      return stmt;
+    };
+
+    // --------------------------------------------------------------
+    // generate UPDATE ALL statement
+
+    stmts.updateAll = (props: MetaProperty[]): string => {
+      props = props.filter((prop) => !prop.field.isIdentity);
+      if (!props.length) {
+        throw new Error(`no columns to update'`);
+      }
+
+      let stmt = `UPDATE ${this.table.quotedName} SET\n  `;
+      stmt += props.map((prop) => `${prop.field.quotedName} = ${prop.getHostParameterName()}`).join(',\n  ');
+      return stmt;
+    };
+
+    // tslint:disable
+
+    // --------------------------------------------------------------
+    // generate UPDATE BY PRIMARY KEY statement
+
+    // tslint:disable
+    stmts.updateById = (props: MetaProperty[]): string => {
+      let stmt = stmts.updateAll(props);
+      stmt += wherePrimaryKeyClause;
+      return stmt;
+    };
+
+    // --------------------------------------------------------------
+    // generate DELETE ALL statement
+    stmts.deleteAll = `DELETE FROM ${this.table.quotedName}`;
 
     // --------------------------------------------------------------
     // generate DELETE FROM statement
-    stmts.deleteById = `DELETE FROM ${quotedTableName}`;
+    stmts.deleteById = stmts.deleteAll;
     stmts.deleteById += wherePrimaryKeyClause;
 
     // --------------------------------------------------------------
     // generate SELECT-all statement
 
     stmts.selectAll = 'SELECT\n  ';
-    stmts.selectAll += `${TABLEALIASPREFIX}` + colNames.join(`, ${TABLEALIASPREFIX}`);
-    stmts.selectAll += `\nFROM ${quotedTableName} ${TABLEALIAS} `;
+    stmts.selectAll +=
+        `${TABLEALIASPREFIX}` + properties.map((prop) => prop.field.quotedName).join(`, ${TABLEALIASPREFIX}`);
+    stmts.selectAll += `\nFROM ${this.table.quotedName} ${TABLEALIAS} `;
 
     // --------------------------------------------------------------
     // generate SELECT-one statement
@@ -286,7 +338,7 @@ export class MetaModel {
     // --------------------------------------------------------------
     // generate SELECT-fk condition
 
-    table.mapNameToFKDef.forEach((fkDef, constraintName) => {
+    this.table.mapNameToFKDef.forEach((fkDef, constraintName) => {
       const props: MetaProperty[] = [];
       fkDef.fields.forEach((fkField) => {
         const prop = this.mapColNameToProp.get(fkField.name);
@@ -316,9 +368,11 @@ export class MetaModel {
  * @class SqlStatementText
  */
 class SqlStatementText {
-  insertInto!: string;
-  updateById!: string;
+  insertInto!: (props: MetaProperty[]) => string;
+  updateById!: (props: MetaProperty[]) => string;
   deleteById!: string;
+  updateAll!: (props: MetaProperty[]) => string;
+  deleteAll!: string;
   selectAll!: string;
   selectById!: string;
 

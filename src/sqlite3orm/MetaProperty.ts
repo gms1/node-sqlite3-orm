@@ -36,23 +36,22 @@ export class MetaProperty {
   }
 
   // called from decorator
-  setPropertyType(propertyType: string|undefined): void {
-    // tslint:disable: triple-equals
-    if (propertyType == 'function Boolean() { [native code] }') {
+  setPropertyType(propertyType: Function): void {
+    if (propertyType.name === 'Boolean') {
       this._propertyType = PropertyType.BOOLEAN;
-    } else if (propertyType == 'function String() { [native code] }') {
+    } else if (propertyType.name === 'String') {
       this._propertyType = PropertyType.STRING;
-    } else if (propertyType == 'function Number() { [native code] }') {
+    } else if (propertyType.name === 'Number') {
       this._propertyType = PropertyType.NUMBER;
-    } else if (propertyType == 'function Date() { [native code] }') {
+    } else if (propertyType.name === 'Date') {
       this._propertyType = PropertyType.DATE;
     } else {
       this._propertyType = PropertyType.UNKNOWN;
     }
-    // tslint:enable: triple-equals
   }
 
-  setFieldProperties(name: string, isIdentity: boolean, opts: FieldOpts): void {
+  setFieldProperties(name: string, isIdentity: boolean, opts?: FieldOpts): void {
+    opts = opts || {};
     if (this._tmpField) {
       if (this._tmpField.name) {
         throw new Error(`in class '${this.className}': property '${

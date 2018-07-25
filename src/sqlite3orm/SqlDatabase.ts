@@ -148,7 +148,7 @@ export class SqlDatabase {
         // the below 'this' should not reference our self
         if (err) {
           debug(`failed sql: ${err.message}
-${sql}`);
+${sql}\nparams: `, params);
           reject(err);
         } else {
           // tslint:disable-next-line: no-invalid-this
