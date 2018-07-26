@@ -1,5 +1,5 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-import {BaseDAO, table, id, field, index, fk, SqlDatabase, schema} from '../index';
+import {BaseDAO, table, id, field, index, fk, SqlDatabase, schema} from '..';
 
 // definition-part:
 
@@ -100,8 +100,10 @@ async function runSample(): Promise<void> {
         // read a user:
         let userDonald = await userDAO.select(user);
 
-        // read all contacts from user 'donald':
-        let contactsDonald = await contactDAO.selectAllOf('fk_user_contacts', User, userDonald);
+        // read all contacts (child) for a given user (parent):
+        let contactsDonald1 = await contactDAO.selectAllOf('fk_user_contacts', User, userDonald);
+        // or
+        let contactsDonald2 = await userDAO.selectAllChildsOf('fk_user_contacts', Contact, userDonald);
 
         // read all users:
         let allUsers = await userDAO.selectAll();
@@ -114,16 +116,37 @@ async function runSample(): Promise<void> {
         let allContactsFromDuckDotCom =
             await contactDAO.selectAll('WHERE contact_email like $contact_email', {$contact_email: '%@duck.com'});
 
+        // read user (parent) for a given contact (child)
+        let userDonald1 = await userDAO.selectByChild('fk_user_contacts', Contact, contactsDonald1[0]);
+        // or
+        let userDonald2 = await contactDAO.selectParentOf('fk_user_contacts', User, contactsDonald2[0]);
+
         expect(userDonald.userId).toBe(user.userId, 'wrong userDonald.userId');
         expect(userDonald.userLoginName).toBe(user.userLoginName, 'wrong userDonald.userLoginName');
-
         expect(userDonald.userJsonData.lastScores.length)
             .toBe(user.userJsonData.lastScores.length, 'wrong userDonald.userJsonData.lastScores.length');
 
-        expect(contactsDonald.length).toBe(1, 'wrong contactsDonald.length');
-        expect(contactsDonald[0].userId).toBe(contact.userId, 'wrong contactsDonald[0].userId');
-        expect(contactsDonald[0].emailAddress).toBe(contact.emailAddress, 'wrong contactsDonald[0].emailAddress');
-        expect(contactsDonald[0].mobile).toBe(contact.mobile, 'wrong contactsDonald[0].mobile');
+        expect(userDonald1.userId).toBe(user.userId, 'wrong userDonald1.userId');
+        expect(userDonald1.userLoginName).toBe(user.userLoginName, 'wrong userDonald1.userLoginName');
+        expect(userDonald1.userJsonData.lastScores.length)
+            .toBe(user.userJsonData.lastScores.length, 'wrong userDonald1.userJsonData.lastScores.length');
+
+        expect(userDonald2.userId).toBe(user.userId, 'wrong userDonald2.userId');
+        expect(userDonald2.userLoginName).toBe(user.userLoginName, 'wrong userDonald2.userLoginName');
+        expect(userDonald2.userJsonData.lastScores.length)
+            .toBe(user.userJsonData.lastScores.length, 'wrong userDonald2.userJsonData.lastScores.length');
+
+
+
+        expect(contactsDonald1.length).toBe(1, 'wrong contactsDonald1.length');
+        expect(contactsDonald1[0].userId).toBe(contact.userId, 'wrong contactsDonald1[0].userId');
+        expect(contactsDonald1[0].emailAddress).toBe(contact.emailAddress, 'wrong contactsDonald1[0].emailAddress');
+        expect(contactsDonald1[0].mobile).toBe(contact.mobile, 'wrong contactsDonald1[0].mobile');
+
+        expect(contactsDonald2.length).toBe(1, 'wrong contactsDonald2.length');
+        expect(contactsDonald2[0].userId).toBe(contact.userId, 'wrong contactsDonald2[0].userId');
+        expect(contactsDonald2[0].emailAddress).toBe(contact.emailAddress, 'wrong contactsDonald2[0].emailAddress');
+        expect(contactsDonald2[0].mobile).toBe(contact.mobile, 'wrong contactsDonald2[0].mobile');
 
         expect(allUsersHavingContacts.length).toBe(1, 'wrong allUsersHavingContacts.length');
         expect(allContactsFromDuckDotCom.length).toBe(1, 'wrong allContactsFromDuckDotCom.length');

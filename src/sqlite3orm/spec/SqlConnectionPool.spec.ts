@@ -1,14 +1,59 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-import {SqlConnectionPool, SqlDatabase, SQL_OPEN_DEFAULT} from '../index';
+import {SqlConnectionPool, SqlDatabase, SQL_OPEN_DEFAULT, SQL_OPEN_READWRITE, SQL_MEMORY_DB_SHARED} from '..';
 
 describe('test SqlConnectionPool', () => {
   // ---------------------------------------------
+
+  it('expect pool to be able to open a database using default settings', async (done) => {
+    try {
+      let pool = new SqlConnectionPool();
+      await pool.open(SQL_MEMORY_DB_SHARED);
+      expect(pool.isOpen()).toBeTruthy();
+
+      // getting first connection
+      let sqldb1 = await pool.get(100);
+      expect(sqldb1).toBeDefined();
+      expect(sqldb1.isOpen()).toBeTruthy();
+
+      await sqldb1.close();
+      await pool.close();
+      expect(pool.isOpen()).toBeFalsy();
+
+    } catch (err) {
+      fail(err);
+    }
+    done();
+
+  });
+
+  it('expect pool to be able to open a database using min < 1', async (done) => {
+    try {
+      let pool = new SqlConnectionPool();
+      await pool.open(SQL_MEMORY_DB_SHARED, SQL_OPEN_DEFAULT, 0);
+      expect(pool.isOpen()).toBeTruthy();
+
+      // getting first connection
+      let sqldb1 = await pool.get(100);
+      expect(sqldb1).toBeDefined();
+      expect(sqldb1.isOpen()).toBeTruthy();
+
+      await sqldb1.close();
+      await pool.close();
+      expect(pool.isOpen()).toBeFalsy();
+
+    } catch (err) {
+      fail(err);
+    }
+    done();
+
+  });
 
 
   it('expect pool to be able to open a database', async (done) => {
     try {
       let pool = new SqlConnectionPool();
       await pool.open('testsqlite3.db', SQL_OPEN_DEFAULT, 1, 2);
+      expect(pool.isOpen()).toBeTruthy();
 
       // getting first connection
       let sqldb1 = await pool.get(100);
@@ -54,6 +99,7 @@ describe('test SqlConnectionPool', () => {
       expect(ver3).toBe(ver1, 'got wrong user version from connection 3');
 
       await pool.close();
+      expect(pool.isOpen()).toBeFalsy();
 
     } catch (err) {
       fail(err);
@@ -62,5 +108,43 @@ describe('test SqlConnectionPool', () => {
 
   });
 
+
+  it('expect pool to be closed after failed attempt to open a database', async (done) => {
+    try {
+      let pool = new SqlConnectionPool();
+      await pool.open('testsqlite4.db', SQL_OPEN_READWRITE);
+      expect(pool.isOpen()).toBeFalsy();
+
+      // getting first connection
+      let sqldb1 = await pool.get(100);
+      fail('got invalid connection');
+    } catch (err) {
+    }
+    done();
+
+  });
+
+
+  it('expect getting connection after pool has closed to fail', async (done) => {
+    let pool = new SqlConnectionPool();
+    try {
+      await pool.open(SQL_MEMORY_DB_SHARED, SQL_OPEN_DEFAULT, 0);
+      expect(pool.isOpen()).toBeTruthy();
+
+      await pool.close();
+      expect(pool.isOpen()).toBeFalsy();
+    } catch (err) {
+      fail(err);
+    }
+
+    try {
+      let sqldb1 = await pool.get(100);
+      fail('should not get a connection');
+
+    } catch (err) {
+      done();
+    }
+
+  });
 
 });

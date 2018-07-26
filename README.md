@@ -1,9 +1,8 @@
 [![npm version](https://badge.fury.io/js/sqlite3orm.svg)](https://badge.fury.io/js/sqlite3orm)
 [![Build Status](https://api.travis-ci.org/gms1/node-sqlite3-orm.svg?branch=master)](https://travis-ci.org/gms1/node-sqlite3-orm)
-[![Coverage Status](https://img.shields.io/coveralls/github/gms1/node-sqlite3-orm/master.svg)](https://coveralls.io/github/gms1/node-sqlite3-orm?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/gms1/node-sqlite3-orm/badge.svg?branch=master)](https://coveralls.io/github/gms1/node-sqlite3-orm?branch=master)
 [![DeepScan Grade](https://deepscan.io/api/projects/699/branches/1107/badge/grade.svg)](https://deepscan.io/dashboard/#view=project&pid=699&bid=1107)
 [![Dependency Status](https://david-dm.org/gms1/node-sqlite3-orm.svg)](https://david-dm.org/gms1/node-sqlite3-orm)
-[![devDependency Status](https://david-dm.org/gms1/node-sqlite3-orm/dev-status.svg)](https://david-dm.org/gms1/node-sqlite3-orm#info=devDependencies)
 [![Known Vulnerabilities](https://snyk.io/test/github/gms1/node-sqlite3-orm/badge.svg)](https://snyk.io/test/github/gms1/node-sqlite3-orm)
 [![Greenkeeper badge](https://badges.greenkeeper.io/gms1/node-sqlite3-orm.svg)](https://greenkeeper.io/)
 
@@ -52,7 +51,12 @@ class Contact {
 ```
 
 With **node-sqlite3-orm** you have full control over the names for tables, fields and foreign key constraints in the mapped database schema.
-Properties without a *node-sqlite3-orm* decorator will not be mapped to the database.
+
+> NOTE: Properties without a *node-sqlite3-orm* decorator will not be mapped to the database.
+<!-- -->
+> NOTE: you can use the 'temp' qualifier to create a temporary table. e.g `@table({name: 'temp.MYTEMPTABLE'`
+<!-- -->
+> NOTE: you can map the same table to different model classes, e.g for using a partial model class
 
 ## Database Connection
 
@@ -123,9 +127,10 @@ In order to read from or write to the database, you can use the `BaseDAO<Model>'
   // read a user:
   let userDonald = await userDAO.select(user);
 
-  // read all contacts from user 'donald':
-  let contactsDonald =
-      await contactDAO.selectAllOf('fk_user_contacts', User, userDonald);
+  // read all contacts (child) for a given user (parent):
+  let contactsDonald1 = await contactDAO.selectAllOf('fk_user_contacts', User, userDonald);
+  //   or
+  let contactsDonald2 = await userDAO.selectAllChildsOf('fk_user_contacts', Contact, userDonald);
 
   // read all users:
   let allUsers = await userDAO.selectAll();
@@ -139,17 +144,39 @@ In order to read from or write to the database, you can use the `BaseDAO<Model>'
       'WHERE contact_email like $contact_email',
       {$contact_email: '%@duck.com'});
 
+  // read user (parent) for a given contact (child)
+  let userDonald1 = await userDAO.selectByChild('fk_user_contacts', Contact, contactsDonald1[0]);
+  // or
+  let userDonald2 = await contactDAO.selectParentOf('fk_user_contacts', User, contactsDonald2[0]);
+
 })();
 
 ```
 
-## Supported data types using DAO:
+## Supported data types using DAO
 
 All primitive JavaScript data types ('String', 'Number', 'Boolean') and properties of type 'Date' are supported.
 Type safety is guaranteed, when reading properties of these types from the database (NULL values are treated as 'undefined').
-Other data types can be serialized to a database field of type TEXT in JSON format, by setting the option 'isJson' to true (see sample above).
 
-> TODO: add support for user provided serialize/deserialize functions
+**Date** properties can be mapped to either the 'TEXT' or to the 'INTEGER' storage class and their their values will be stored as UTC. Using 'INTEGER' converts to Unix-Time, so fractions of seconds are lost.
+
+These are the corresponding defaults for the 'current timestamp':
+
+default for 'TEXT':
+
+```TypeScript
+ dbtype: 'TEXT    DEFAULT(datetime(\'now\') || \'Z\')'})
+ ```
+
+default for 'INTEGER':
+
+```TypeScript
+ dbtype: 'INTEGER DEFAULT(strftime(\'%s\',\'now\'))'})
+ ```
+
+**Boolean** properties can either be mapped to 'TEXT' or to 'INTEGER'. On storing a boolean value **false** will be converted to '0' and **true** will be converted to '1', on reading '0' or 'false' will be converted to **false** and '1' or 'true' will be converted to **true**. All other values will result in **undefined**
+
+Other data types can be serialized to a database field of type TEXT in JSON format, by setting the option 'isJson' to true (see sample above).
 
 ## Connection pool
 
@@ -165,7 +192,7 @@ One possibility to achieve this could be to use a connection pool and to perform
   let pool = new SqlConnectionPool();
 
   // open the database connection pool with 1 to 2 database connections:
-  //    do not use a private memory database for the connection pool :hint: 
+  //    do not use a private memory database for the connection pool :hint:
   await pool.open(SQL_MEMORY_DB_SHARED, SQL_OPEN_DEFAULT, 1, 2);
 
   let con1 = await pool.get();
@@ -201,11 +228,14 @@ tsconfig.json:
 }
 ```
 
-## License
-
-**node-sqlite3-orm** is licensed under the MIT License: [LICENSE](./LICENSE)
-
 ## Release Notes
 
 [CHANGELOG](./CHANGELOG.md)
 
+## TODOs
+
+[TODO](./TODO.md)
+
+## License
+
+**node-sqlite3-orm** is licensed under the MIT License: [LICENSE](./LICENSE)

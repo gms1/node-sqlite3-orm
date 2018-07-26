@@ -1,7 +1,10 @@
+// import * as core from './core';
+
 // tslint:disable no-use-before-declare
 import {Field} from './Field';
-
-const TABLEALIAS = 'T';
+import {FKDefinition} from './FKDefinition';
+import {IDXDefinition} from './IDXDefinition';
+import {quoteIdentifier, quoteAndUnqualiyIdentifier, quoteSimpleIdentifier, qualifiyIdentifier} from './utils';
 
 /**
  * Class holding a table definition (name of the table and fields in the table)
@@ -10,63 +13,55 @@ const TABLEALIAS = 'T';
  * @class Table
  */
 export class Table {
-  /**
-   * The table name
-   *
-   * @type {string}
-   */
-  name!: string;
-
-  /**
-   * The class name
-   *
-   * @type {string}
-   */
-  className: string;
+  get quotedName(): string {
+    return quoteIdentifier(this.name);
+  }
 
   /**
    * Flag to indicate if this table should be created with the 'WITHOUT
    * ROWID'-clause
-   *
-   * @type {boolean}
    */
-  withoutRowId: boolean;
+  private _withoutRowId?: boolean;
+
+  get withoutRowId(): boolean {
+    // tslint:disable-next-line triple-equals
+    return this._withoutRowId == undefined ? false : this._withoutRowId;
+  }
+  set withoutRowId(withoutRowId: boolean) {
+    this._withoutRowId = withoutRowId;
+  }
+  get isWithoutRowIdDefined(): boolean {
+    // tslint:disable-next-line triple-equals
+    return this._withoutRowId == undefined ? false : true;
+  }
 
   /**
    * Flag to indicate if AUTOINCREMENT should be enabled for a table having a
    * single-column INTEGER primary key
    * and withoutRowId is disabled
-   *
-   * @type {boolean}
    */
-  autoIncrement: boolean;
+  private _autoIncrement?: boolean;
+
+  get autoIncrement(): boolean {
+    // tslint:disable-next-line triple-equals
+    return this._autoIncrement == undefined ? false : this._autoIncrement;
+  }
+  set autoIncrement(autoIncrement: boolean) {
+    this._autoIncrement = autoIncrement;
+  }
+  get isAutoIncrementDefined(): boolean {
+    // tslint:disable-next-line triple-equals
+    return this._autoIncrement == undefined ? false : true;
+  }
 
   /**
    * The fields defined for this table
-   *
-   * @type {Field[]}
    */
   fields: Field[] = [];
 
   /**
-   * This contains the generated SQL-statements/fragments
-   *
-   * @type {SqlStatementText}
-   */
-  private _statementsText?: SqlStatementText;
-
-  private get statementsText(): SqlStatementText {
-    if (!this._statementsText) {
-      this._statementsText = this.generateStatementsText();
-      }
-    return this._statementsText;
-  }
-
-  /**
    * The field mapped to the primary key; only set if the
    * AUTOINCREMENT feature can be used
-   *
-   * @type {string|symbol}
    */
   private _autoIncrementField: Field|undefined;
 
@@ -74,114 +69,67 @@ export class Table {
     return this._autoIncrementField;
   }
 
-  // map property keys to a field definition
-  private mapPropToField: Map<string|symbol, Field>;
-
   // map column name to a field definition
   private mapNameToField: Map<string, Field>;
 
-  // map column name to a field definition
+  // map column name to a identity field definition
   private mapNameToIdentityField: Map<string, Field>;
+
+  // map constraint name to foreign key definition
+  public readonly mapNameToFKDef: Map<string, FKDefinition>;
+
+  // map index name to index key definition
+  private mapNameToIDXDef: Map<string, IDXDefinition>;
 
   /**
    * Creates an instance of Table.
    *
-   * @param {string} className
+   * @param name - The table name (containing the schema name if specified)
    */
-  public constructor(className: string) {
-    this.className = className;
-    this.mapPropToField = new Map<string|symbol, Field>();
+  public constructor(public readonly name: string) {
     this.mapNameToField = new Map<string, Field>();
     this.mapNameToIdentityField = new Map<string, Field>();
+    this.mapNameToFKDef = new Map<string, FKDefinition>();
+    this.mapNameToIDXDef = new Map<string, IDXDefinition>();
     this.fields = [];
-    this.withoutRowId = false;
-    this.autoIncrement = false;
-    this._autoIncrementField = undefined;
-    this._statementsText = undefined;
   }
 
-  /**
-   * Test if property has been mapped to a column of this table
-   *
-   * @param {(string|symbol)} key - The property key
-   * @returns {boolean}
-   */
-  public hasPropertyField(key: string|symbol): boolean {
-    return this.mapPropToField.has(key);
-  }
-
-  /**
-   * Get the field definition for the mapped property key
-   *
-   * @param {(string|symbol)} key - The property key
-   * @returns {Field}
-   */
-  public getPropertyField(key: string|symbol): Field {
-    if (!this.mapPropToField.has(key)) {
-      throw new Error(`property '${key.toString()}' on class '${this.className}' not mapped to any field`);
-      }
-    return this.mapPropToField.get(key) as Field;
-  }
-
-  /**
-   * Add a property key mapped to field definition to this table
-   *
-   * @param {(string|symbol)} key - The property key
-   * @param {Field} field
-   */
-  public addPropertyField(field: Field): void {
-    if (this.mapPropToField.has(field.propertyKey)) {
-      if (field !== this.mapPropToField.get(field.propertyKey)) {
-        throw new Error(
-            `property '${field.propertyKey.toString()}' on class '${this.className}' is mapped to multiple fields`);
-        }
-      return;
-    }
-    this.fields.push(field);
-    this.mapPropToField.set(field.propertyKey, field);
-  }
 
   /**
    * Test if table has a column with the given column name
    *
-   * @param {string} colName - The name of the column
-   * @returns {boolean}
+   * @param colName - The name of the column
    */
-  public hasTableField(name: string): boolean {
-    return this.mapNameToField.has(name);
+  public hasTableField(name: string): Field|undefined {
+    return this.mapNameToField.get(name);
   }
 
   /**
    * Get the field definition for the given column name
    *
-   * @param {string} colName - The name of the column
-   * @returns {Field}
+   * @param colName - The name of the column
+   * @returns The field definition
    */
   public getTableField(name: string): Field {
-    if (!this.mapNameToField.has(name)) {
-      throw new Error(`field '${name}' not registered yet`);
-      }
-    return this.mapNameToField.get(name) as Field;
+    const field = this.mapNameToField.get(name) as Field;
+    if (!field) {
+      throw new Error(`table '${this.name}': field '${name}' not registered yet`);
+    }
+    return field;
   }
 
   /**
    * Add a table field to this table
    *
-   * @param {string} colName - The name of the column
-   * @returns {Field}
+   * @param colName - The name of the column
+   * @returns The field definition
    */
   public addTableField(field: Field): Field {
-    this._statementsText = undefined;
-    if (!field.name) {
-      throw new Error(`property '${field.propertyKey.toString()}' on class '${this.className}': field name missing`);
-      }
+    /* istanbul ignore if */
     if (this.mapNameToField.has(field.name)) {
-      const oldField = this.mapNameToField.get(field.name) as Field;
-      if (field !== oldField) {
-        throw new Error(`properties '${field.propertyKey.toString()}' and '${oldField.propertyKey
-                            .toString()}' on class '${this.className}' are mapped to the same column ${field.name}`);
-      }
+      throw new Error(`table '${this.name}': field '${field.name}' on table  already defined`);
     }
+    this.fields.push(field);
     this.mapNameToField.set(field.name, field);
     if (field.isIdentity) {
       this.mapNameToIdentityField.set(field.name, field);
@@ -192,17 +140,78 @@ export class Table {
       } else {
         this._autoIncrementField = undefined;
       }
+    }
+    field.indexKeys.forEach((idxFieldDef, idxName) => {
+      let idxDef = this.hasIDXDefinition(idxName);
+      if (!idxDef) {
+        idxDef = new IDXDefinition(idxName, idxFieldDef.isUnique);
+        this.addIDXDefinition(idxDef);
       }
+      idxDef.fields.push(field);
+    });
+    field.foreignKeys.forEach((fkFieldDef, constraintName) => {
+      let fkDef = this.hasFKDefinition(constraintName);
+      if (!fkDef) {
+        fkDef = new FKDefinition(constraintName, fkFieldDef.foreignTableName);
+        this.addFKDefinition(fkDef);
+      }
+      fkDef.fields.push(field);
+      fkDef.foreignColumNames.push(fkFieldDef.foreignColumName);
+    });
     return field;
   }
+
+
+  public hasFKDefinition(name: string): FKDefinition|undefined {
+    return this.mapNameToFKDef.get(name);
+  }
+
+  public getFKDefinition(name: string): FKDefinition {
+    const constraint = this.mapNameToFKDef.get(name);
+    if (!constraint) {
+      throw new Error(`table '${this.name}': foreign key constraint ${name} not registered yet`);
+    }
+    return constraint;
+  }
+
+  public addFKDefinition(fkDef: FKDefinition): void {
+    /* istanbul ignore if */
+    if (this.mapNameToFKDef.has(fkDef.name)) {
+      throw new Error(`table '${this.name}': foreign key constraint ${fkDef.name} already registered`);
+    }
+    this.mapNameToFKDef.set(fkDef.name, fkDef);
+  }
+
+  public hasIDXDefinition(name: string): IDXDefinition|undefined {
+    return this.mapNameToIDXDef.get(qualifiyIdentifier(name));
+  }
+
+  public getIDXDefinition(name: string): IDXDefinition {
+    const idxDef = this.mapNameToIDXDef.get(qualifiyIdentifier(name));
+    if (!idxDef) {
+      throw new Error(`table '${this.name}': foreign key constraint ${name} not registered yet`);
+    }
+    return idxDef;
+  }
+
+  public addIDXDefinition(idxDef: IDXDefinition): void {
+    const name = qualifiyIdentifier(idxDef.name);
+    /* istanbul ignore if */
+    if (this.mapNameToIDXDef.has(name)) {
+      throw new Error(`table '${this.name}': foreign key constraint ${idxDef.name} already registered`);
+    }
+    this.mapNameToIDXDef.set(name, idxDef);
+  }
+
+
 
   /**
    * Get 'CREATE TABLE'-statement using 'IF NOT EXISTS'-clause
    *
-   * @returns {string}
+   * @returns The sql-statement
    */
   public getCreateTableStatement(): string {
-    return this.statementsText.createTable;
+    return this.createCreateTableStatement();
   }
 
   /**
@@ -211,350 +220,128 @@ export class Table {
    * @returns {string}
    */
   public getDropTableStatement(): string {
-    return `DROP TABLE IF EXISTS ${this.name}`;
+    return `DROP TABLE IF EXISTS ${this.quotedName}`;
   }
 
   /**
    * Get 'ALTER TABLE...ADD COLUMN'-statement for the given column
    *
-   * @param {string} colName - The name of the column to add to the table
-   * @returns {string}
+   * @param colName - The name of the column to add to the table
+   * @returns The sql-statment
    */
   public getAlterTableAddColumnStatement(colName: string): string {
-    let stmt = `ALTER TABLE ${this.name}`;
+    let stmt = `ALTER TABLE ${this.quotedName}`;
 
     const field = this.getTableField(colName);
-    stmt += ` ADD COLUMN ${field.name} ${field.dbtype}`;
+    stmt += ` ADD COLUMN ${field.quotedName} ${field.dbtype}`;
     return stmt;
   }
 
   /**
-   * Get 'CREATE TABLE'-statement using 'IF NOT EXISTS'-clause
+   * Get 'CREATE [UNIQUE] INDEX'-statement using 'IF NOT EXISTS'-clause
    *
-   * @returns {string}
+   * @returns The sql-statement
    */
   public getCreateIndexStatement(idxName: string, unique?: boolean): string {
-    const stmtText = this.statementsText.indexKeys.get(idxName);
-    if (!stmtText) {
-      throw new Error(`index '${idxName}' is not defined on table '${this.name}'`);
-      }
+    const idxDef = this.hasIDXDefinition(idxName);
+    if (!idxDef) {
+      throw new Error(`table '${this.name}': index '${idxName}' is not defined on table '${this.name}'`);
+    }
+    // tslint:disable-next-line triple-equals
+    if (unique == undefined) {
+      unique = idxDef.isUnique ? true : false;
+    }
+
+    const quotedIdxName = quoteIdentifier(idxName);
+    const quotedTableName = quoteAndUnqualiyIdentifier(this.name);
+    const idxCols = idxDef.fields.map((field) => field.quotedName);
     // tslint:disable-next-line: restrict-plus-operands
-    return 'CREATE ' + (unique ? 'UNIQUE ' : '') + stmtText;
+    return 'CREATE ' + (unique ? 'UNIQUE ' : ' ') + `INDEX IF NOT EXISTS ${quotedIdxName} ON ${quotedTableName} ` +
+        `(` + idxCols.join(', ') + ')';
   }
 
   /**
    * Get 'DROP TABLE'-statement
    *
-   * @returns {string}
+   * @returns The sql-statement
    */
   public getDropIndexStatement(idxName: string): string {
-    const stmtText = this.statementsText.indexKeys.get(idxName);
-    if (!stmtText) {
-      throw new Error(`index '${idxName}' is defined on table '${this.name}'`);
-      }
-    return `DROP INDEX IF EXISTS ${idxName}`;
-  }
-
-  /**
-   * Get 'INSERT INTO'-statement
-   *
-   * @returns {string}
-   */
-  public getInsertIntoStatement(): string {
-    return this.statementsText.insertInto;
-  }
-
-  /**
-   * Get 'UPDATE SET'-statement
-   * @deprecated use getUpdateByIdStatement instead
-   *
-   * @returns {string}
-   */
-  public getUpdateSetStatement(): string {
-    return this.statementsText.updateById;
-  }
-
-  /**
-   * Get 'UPDATE BY PRIMARY KEY' statement
-   *
-   * @returns {string}
-   */
-  public getUpdateByIdStatement(): string {
-    return this.statementsText.updateById;
-  }
-
-  /**
-   * Get 'DELETE FROM'-statement
-   * @deprecated use getDeleteByIdStatement instead
-   *
-   * @returns {string}
-   */
-  public getDeleteFromStatement(): string {
-    return this.statementsText.deleteById;
-  }
-
-  /**
-   * Get 'DELETE BY PRIMARY KE'-statement
-   *
-   * @returns {string}
-   */
-  public getDeleteByIdStatement(): string {
-    return this.statementsText.deleteById;
-  }
-
-  /**
-   * Get 'SELECT' all-statement
-   *
-   * @returns {string}
-   */
-  public getSelectAllStatement(): string {
-    return this.statementsText.selectAll;
-  }
-
-  /**
-   * Get 'SELECT' one-statement
-   * @deprecated use getSelectByIdStatement instead
-   *
-   * @returns {string}
-   */
-  public getSelectOneStatement(): string {
-    return this.statementsText.selectById;
-  }
-
-  /**
-   * Get 'SELECT BY PRIMARY KEY'-statement
-   *
-   * @returns {string}
-   */
-  public getSelectByIdStatement(): string {
-    return this.statementsText.selectById;
-  }
-
-  /**
-   * Get a select-condition for a foreign key constraint
-   *
-   * @param {string} constraintName - The constraint name
-   * @returns {string}
-   */
-  public getForeignKeySelects(constraintName: string): string|undefined {
-    return this.statementsText.foreignKeySelects.get(constraintName);
-  }
-
-  /**
-   * Get the reference fields for a foreign key constraint
-   *
-   * @param {string} constraintName - The constraint name
-   * @returns {string}
-   */
-  public getForeignKeyFields(constraintName: string): Field[]|undefined {
-    return this.statementsText.foreignKeyFields.get(constraintName);
+    const idxDef = this.hasIDXDefinition(idxName);
+    if (!idxDef) {
+      throw new Error(`table '${this.name}': index '${idxName}' is not defined on table '${this.name}'`);
+    }
+    const quotedIdxName = quoteIdentifier(idxName);
+    return `DROP INDEX IF EXISTS ${quotedIdxName}`;
   }
 
   /**
    * Generate SQL Statements
    *
    */
-  private generateStatementsText(): SqlStatementText {
-    const colNames: string[] = [];
+  private createCreateTableStatement(): string {
     const colNamesPK: string[] = [];
-    const colNamesNoPK: string[] = [];
-    const colParms: string[] = [];
-    const colParmsNoPK: string[] = [];
-    const colSetsNoPK: string[] = [];
-    const colSelPK: string[] = [];
     const colDefs: string[] = [];
-    const stmts = new SqlStatementText();
-    const foreignKeys = new Map<string, ForeignKeyHelper>();
-    const indexKeys = new Map<string, string[]>();
 
+    const quotedTableName = this.quotedName;
+
+    /* istanbul ignore if */
     if (!this.fields.length) {
       throw new Error(`table '${this.name}': does not have any fields defined`);
     }
 
     this.fields.forEach((field) => {
-      let colDef = `${field.name} ${field.dbtype}`;
-      const hostParmName = field.getHostParameterName();
+      const quotedFieldName = field.quotedName;
+      let colDef = `${quotedFieldName} ${field.dbtype}`;
 
-      colNames.push(field.name);
-      colParms.push(hostParmName);
       if (field.isIdentity) {
-        colNamesPK.push(field.name);
-        colSelPK.push(`${field.name}=${hostParmName}`);
+        colNamesPK.push(quotedFieldName);
         if (this.mapNameToIdentityField.size === 1) {
           colDef += ' PRIMARY KEY';
           if (!!this.autoIncrementField) {
             colDef += ' AUTOINCREMENT';
           }
         }
-      } else {
-        colNamesNoPK.push(field.name);
-        colParmsNoPK.push(hostParmName);
-        colSetsNoPK.push(`${field.name}=${hostParmName}`);
       }
       colDefs.push(colDef);
-      field.foreignKeys.forEach((refColumn, constraintName) => {
-        let fk: ForeignKeyHelper = foreignKeys.get(constraintName) as ForeignKeyHelper;
-        if (!fk) {
-          fk = new ForeignKeyHelper(constraintName, refColumn.tableName);
-          foreignKeys.set(constraintName, fk);
-          }
-        if (refColumn.tableName !== fk.refTableName) {
-          // TODO: this error should be found earlier
-          throw new Error(`table '${this
-                              .name}': foreign key constraint '${constraintName
-                                   }' references different tables: '${refColumn.tableName}' vs '${fk.refTableName}'`);
-        }
-        fk.fields.push(field);
-        fk.refColumns.push(refColumn.colName);
-      });
-      field.indexKeys.forEach((indexName) => {
-        let idx: string[] = indexKeys.get(indexName) as string[];
-        if (!idx) {
-          idx = [];
-          indexKeys.set(indexName, idx);
-        }
-        idx.push(field.name);
-      });
     });
     // --------------------------------------------------------------
     // generate CREATE TABLE statement
-    stmts.createTable = `CREATE TABLE IF NOT EXISTS ${this.name} (\n  `;
+    let stmt = `CREATE TABLE IF NOT EXISTS ${quotedTableName} (\n  `;
 
     // add column definitions
-    stmts.createTable += colDefs.join(',\n  ');
+    stmt += colDefs.join(',\n  ');
     if (this.mapNameToIdentityField.size > 1) {
       // add multi-column primary key ćonstraint:
-      stmts.createTable += ',\n  CONSTRAINT PRIMARY_KEY PRIMARY KEY (';
-      stmts.createTable += colNamesPK.join(', ');
-      stmts.createTable += ')';
-      }
+      stmt += ',\n  CONSTRAINT PRIMARY_KEY PRIMARY KEY (';
+      stmt += colNamesPK.join(', ');
+      stmt += ')';
+    }
+
 
     // add foreign key constraint definition:
-    let i = foreignKeys.size - 1;
-    foreignKeys.forEach((fk, fkName) => {
-      if (!fk.fields.length || !fk.refColumns.length || fk.fields.length !== fk.refColumns.length) {
+    this.mapNameToFKDef.forEach((fk, fkName) => {
+      /* istanbul ignore if */
+      if (!fk.fields.length || !fk.foreignColumNames.length || fk.fields.length !== fk.foreignColumNames.length) {
         throw new Error(`table '${this.name}': foreign key constraint '${fkName}' definition is incomplete`);
       }
-      stmts.createTable += `,\n  CONSTRAINT ${fkName} FOREIGN KEY (`;
-      stmts.createTable += fk.fields.map((field) => field.name).join(', ');
-      stmts.createTable += ')\n';
+      stmt += `,\n  CONSTRAINT ${quoteSimpleIdentifier(fk.name)}\n`;
+      stmt += `    FOREIGN KEY (`;
+      stmt += fk.fields.map((field) => field.quotedName).join(', ');
+      stmt += ')\n';
 
-      stmts.createTable += `    REFERENCES ${fk.refTableName} (`;
+      const refTableName = quoteIdentifier(fk.foreignTableName);
+
+      stmt += `    REFERENCES ${refTableName} (`;
       // tslint:disable-next-line: restrict-plus-operands
-      stmts.createTable += fk.refColumns.join(', ') + ') ON DELETE CASCADE';  // TODO: hard-coded 'ON DELETE CASCADE'
-      if (i--) {
-        stmts.createTable += ',';
-      }
-      stmts.createTable += '\n';
+      stmt += fk.foreignColumNames.map((colName) => quoteSimpleIdentifier(colName)).join(', ') +
+          ') ON DELETE CASCADE';  // TODO: hard-coded 'ON DELETE CASCADE'
+      stmt += '\n';
 
     });
-    stmts.createTable += '\n)';
+    stmt += '\n)';
     if (this.withoutRowId) {
-      stmts.createTable += ' WITHOUT ROWID';
+      stmt += ' WITHOUT ROWID';
     }
-
-    // --------------------------------------------------------------
-    // generate INSERT INTO statement
-    stmts.insertInto = `INSERT INTO ${this.name} (\n  `;
-    if (!this.autoIncrementField) {
-      stmts.insertInto += colNames.join(', ');
-    } else {
-      stmts.insertInto += colNamesNoPK.join(', ');
-    }
-    stmts.insertInto += '\n) VALUES (\n  ';
-    if (!this.autoIncrementField) {
-      stmts.insertInto += colParms.join(', ');
-    } else {
-      stmts.insertInto += colParmsNoPK.join(', ');
-    }
-    stmts.insertInto += '\n)';
-
-    // --------------------------------------------------------------
-    // generate simple where clause for selecting via primary key
-    let wherePrimaryKeyClause = '\nWHERE\n  ';
-    wherePrimaryKeyClause += colSelPK.join(' AND ');
-
-    // --------------------------------------------------------------
-    // generate UPDATE SET statement
-    stmts.updateById = `UPDATE ${this.name} SET\n  `;
-    stmts.updateById += colSetsNoPK.join(',\n  ');
-    stmts.updateById += wherePrimaryKeyClause;
-
-    // --------------------------------------------------------------
-    // generate DELETE FROM statement
-    stmts.deleteById = `DELETE FROM ${this.name}\n  `;
-    stmts.deleteById += wherePrimaryKeyClause;
-
-    // --------------------------------------------------------------
-    // generate SELECT-all statement
-    const TABLEALIASPREFIX = TABLEALIAS.length ? TABLEALIAS + '.' : '';
-
-    stmts.selectAll = 'SELECT\n  ';
-    stmts.selectAll += `${TABLEALIASPREFIX}` + colNames.join(`, ${TABLEALIASPREFIX}`);
-    stmts.selectAll += `\nFROM ${this.name} ${TABLEALIAS} `;
-
-    // --------------------------------------------------------------
-    // generate SELECT-one statement
-    stmts.selectById = stmts.selectAll;
-    stmts.selectById += '\nWHERE\n  ';
-    stmts.selectById += `${TABLEALIASPREFIX}` + colSelPK.join(` AND ${TABLEALIASPREFIX}`);
-
-    // --------------------------------------------------------------
-    // generate SELECT-fk condition
-    foreignKeys.forEach((fk, constraintName) => {
-      const selectCondition =
-          fk.fields.map((field) => `${TABLEALIASPREFIX}${field.name}=${field.getHostParameterName()}`).join(' AND ');
-      stmts.foreignKeySelects.set(constraintName, selectCondition);
-      stmts.foreignKeyFields.set(constraintName, fk.fields);
-    });
-
-    indexKeys.forEach((cols, indexName) => {
-      // tslint:disable-next-line: restrict-plus-operands
-      const createIdxCols = `INDEX IF NOT EXISTS ${indexName} ON ${this.name} (` + cols.join(', ') + ')';
-      stmts.indexKeys.set(indexName, createIdxCols);
-    });
-
-    return stmts;
-  }
-  }
-
-/**
- * helper class holding sql-statements/fragments
- *
- * @class SqlStatementText
- */
-class SqlStatementText {
-  createTable!: string;
-  insertInto!: string;
-  updateById!: string;
-  deleteById!: string;
-  selectAll!: string;
-  selectById!: string;
-
-  foreignKeySelects: Map<string, string>;
-  foreignKeyFields: Map<string, Field[]>;
-  indexKeys: Map<string, string>;
-
-  public constructor() {
-    this.foreignKeySelects = new Map<string, string>();
-    this.foreignKeyFields = new Map<string, Field[]>();
-    this.indexKeys = new Map<string, string>();
-  }
-  }
-
-/**
- * helper class holding a foreign key definition
- *
- * @class ForeignKeyHelper
- */
-class ForeignKeyHelper {
-  name: string;
-  refTableName: string;
-  refColumns: string[] = [];
-  fields: Field[] = [];
-
-  public constructor(name: string, refTableName: string) {
-    this.name = name;
-    this.refTableName = refTableName;
+    return stmt;
   }
 }

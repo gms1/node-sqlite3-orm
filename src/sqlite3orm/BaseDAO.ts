@@ -1,9 +1,11 @@
-import {METADATA_TABLE_KEY} from './decorators';
+// tslint:disable-next-line: no-import-side-effect
+// import * as core from './core';
+
+import {METADATA_MODEL_KEY} from './decorators';
 import {SqlDatabase} from './SqlDatabase';
 import {Table} from './Table';
-import {Field} from './Field';
-import {FieldReference} from './FieldReference';
-import {PropertyType} from './PropertyType';
+import {MetaModel, TABLEALIASPREFIX} from './MetaModel';
+import {MetaProperty} from './MetaProperty';
 
 /**
  *
@@ -13,39 +15,41 @@ import {PropertyType} from './PropertyType';
  * @template T - The class mapped to the base table
  */
 export class BaseDAO<T extends Object> {
-  private type: {new(): T};
-  private table: Table;
+  private readonly type: {new(): T};
+  private readonly metaModel: MetaModel;
+  private readonly table: Table;
   private sqldb: SqlDatabase;
 
   /**
    * Creates an instance of BaseDAO.
    *
-   * @param {{new (): T}} type - The class mapped to the base table
-   * @param {SqlDatabase} sqldb - The database connection
+   * @param type - The class mapped to the base table
+   * @param sqldb - The database connection
    */
   public constructor(type: {new(): T}, sqldb: SqlDatabase) {
     this.type = type;
-    this.table = Reflect.getMetadata(METADATA_TABLE_KEY, type.prototype);
-    if (!this.table) {
+    this.metaModel = Reflect.getMetadata(METADATA_MODEL_KEY, type.prototype);
+    if (!this.metaModel) {
       throw new Error(`no table-definition defined on prototype of ${this.type.name}'`);
     }
+    this.table = this.metaModel.table;
     this.sqldb = sqldb;
   }
 
   /**
    * insert
    *
-   * @param {T} model
-   * @returns {Promise<T>}
+   * @param model - A model class instance
+   * @returns A promise of the inserted model class instance
    */
   public async insert(model: T): Promise<T> {
-    return new Promise<T>(async(resolve, reject) => {
+    return new Promise<T>(async (resolve, reject) => {
       try {
         if (!this.table.autoIncrementField) {
-          await this.sqldb.run(this.table.getInsertIntoStatement(), this.bindAllInputParams(model));
+          await this.sqldb.run(this.metaModel.getInsertIntoStatement(), this.bindAllInputParams(model));
         } else {
           const res: any =
-              await this.sqldb.run(this.table.getInsertIntoStatement(), this.bindNonPrimaryKeyInputParams(model));
+              await this.sqldb.run(this.metaModel.getInsertIntoStatement(), this.bindNonPrimaryKeyInputParams(model));
           /* istanbul ignore if */
           // tslint:disable-next-line: triple-equals
           if (res.lastID == undefined) {
@@ -54,7 +58,10 @@ export class BaseDAO<T extends Object> {
             return;
           }
           res[this.table.autoIncrementField.name] = res.lastID;
-          this.setProperty(model, this.table.autoIncrementField, res);
+          const autoProp = this.metaModel.mapColNameToProp.get(this.table.autoIncrementField.name);
+          if (autoProp) {
+            autoProp.setPropertyValue(model, res.lastID);
+          }
         }
       } catch (e) {
         reject(new Error(`insert into '${this.table.name}' failed: ${e.message}`));
@@ -67,13 +74,13 @@ export class BaseDAO<T extends Object> {
   /**
    * update
    *
-   * @param {T} model
-   * @returns {Promise<T>}
+   * @param model - A model class instance
+   * @returns A promise of the updated model class instance
    */
   public async update(model: T): Promise<T> {
-    return new Promise<T>(async(resolve, reject) => {
+    return new Promise<T>(async (resolve, reject) => {
       try {
-        const res = await this.sqldb.run(this.table.getUpdateByIdStatement(), this.bindAllInputParams(model));
+        const res = await this.sqldb.run(this.metaModel.getUpdateByIdStatement(), this.bindAllInputParams(model));
         if (!res.changes) {
           reject(new Error(`update '${this.table.name}' failed: nothing changed`));
           return;
@@ -89,13 +96,14 @@ export class BaseDAO<T extends Object> {
   /**
    * delete using primary key
    *
-   * @param {T} model
-   * @returns {Promise<void>}
+   * @param model - A model class instance
+   * @returns A promise
    */
   public async delete(model: T): Promise<void> {
-    return new Promise<void>(async(resolve, reject) => {
+    return new Promise<void>(async (resolve, reject) => {
       try {
-        const res = await this.sqldb.run(this.table.getDeleteByIdStatement(), this.bindPrimaryKeyInputParams(model));
+        const res =
+            await this.sqldb.run(this.metaModel.getDeleteByIdStatement(), this.bindPrimaryKeyInputParams(model));
         if (!res.changes) {
           reject(new Error(`delete from '${this.table.name}' failed: nothing changed`));
           return;
@@ -114,14 +122,14 @@ export class BaseDAO<T extends Object> {
   /**
    * delete using primary key
    *
-   * @param {Partial<T>} input
-   * @returns {Promise<void>}
+   * @param input - A partial model class instance
+   * @returns A promise
    */
   public async deleteById(input: Partial<T>): Promise<void> {
-    return new Promise<void>(async(resolve, reject) => {
+    return new Promise<void>(async (resolve, reject) => {
       try {
         const res =
-            await this.sqldb.run(this.table.getDeleteByIdStatement(), this.bindPrimaryKeyInputParams(input as T));
+            await this.sqldb.run(this.metaModel.getDeleteByIdStatement(), this.bindPrimaryKeyInputParams(input as T));
         if (!res.changes) {
           reject(new Error(`delete from '${this.table.name}' failed: nothing changed`));
           return;
@@ -137,16 +145,18 @@ export class BaseDAO<T extends Object> {
     });
   }
 
+
   /**
    * select using primary key
    *
-   * @param {T} model
-   * @returns {Promise<T>}
+   * @param model - A model class instance
+   * @returns A promise of model class instance
    */
   public async select(model: T): Promise<T> {
-    return new Promise<T>(async(resolve, reject) => {
+    return new Promise<T>(async (resolve, reject) => {
       try {
-        const row = await this.sqldb.get(this.table.getSelectByIdStatement(), this.bindPrimaryKeyInputParams(model));
+        const row =
+            await this.sqldb.get(this.metaModel.getSelectByIdStatement(), this.bindPrimaryKeyInputParams(model));
         model = this.readResultRow(model, row);
       } catch (e) {
         reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
@@ -160,15 +170,15 @@ export class BaseDAO<T extends Object> {
   /**
    * select using primary key
    *
-   * @param {Partial<T>} input
-   * @returns {Promise<T>}
+   * @param input - A partial model class instance
+   * @returns A promise of model class instance
    */
   public async selectById(input: Partial<T>): Promise<T> {
-    return new Promise<T>(async(resolve, reject) => {
+    return new Promise<T>(async (resolve, reject) => {
       let output: T;
       try {
         const row =
-            await this.sqldb.get(this.table.getSelectByIdStatement(), this.bindPrimaryKeyInputParams(input as T));
+            await this.sqldb.get(this.metaModel.getSelectByIdStatement(), this.bindPrimaryKeyInputParams(input as T));
         output = this.readResultRow(new this.type(), row);
       } catch (e) {
         reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
@@ -182,17 +192,19 @@ export class BaseDAO<T extends Object> {
    * perform:
    * select T.<col1>,.. FROM <table> T
    *
-   * @param {string} [sql] - An optional sql-text which will be added to the select-statement
-   * @param {Object} [params] - An optional object with additional host parameter
-   * @returns {Promise<T[]>}
+   * @param [sql] - An optional sql-text which will be added to the select-statement
+   *                (e.g 'WHERE <your condition>', 'ORDER BY <columns>')
+   * @param [params] - An optional object with additional host parameter
+   * @returns A promise of array of class instances
    */
   public async selectAll(sql?: string, params?: Object): Promise<T[]> {
-    return new Promise<T[]>(async(resolve, reject) => {
+    return new Promise<T[]>(async (resolve, reject) => {
       try {
-        let stmt = this.table.getSelectAllStatement();
+        let stmt = this.metaModel.getSelectAllStatement();
         if (!!sql) {
+          stmt += ' ';
           stmt += sql;
-          }
+        }
         const rows: any[] = await this.sqldb.all(stmt, params);
         const results: T[] = [];
         rows.forEach((row) => {
@@ -210,18 +222,20 @@ export class BaseDAO<T extends Object> {
    * perform:
    * select T.<col1>,.. FROM <table> T
    *
-   * @param {(err: Error, model: T) => void} callback - The callback called for each row
-   * @param {string} [sql] - An optional sql-text which will be added to the select-statement
-   * @param {Object} [params] - An optional object with additional host parameter
-   * @returns {Promise<number>}
+   * @param callback - The callback called for each row
+   * @param [sql] - An optional sql-text which will be added to the select-statement
+   *                (e.g ')
+   * @param [params] - An optional object with additional host parameter
+   * @returns A promise
    */
   public async selectEach(callback: (err: Error, model: T) => void, sql?: string, params?: Object): Promise<number> {
-    return new Promise<number>(async(resolve, reject) => {
+    return new Promise<number>(async (resolve, reject) => {
       try {
-        let stmt = this.table.getSelectAllStatement();
+        let stmt = this.metaModel.getSelectAllStatement();
         if (!!sql) {
+          stmt += ' ';
           stmt += sql;
-          }
+        }
         const res = await this.sqldb.each(stmt, params, (err, row) => {
           // TODO: err?
           callback(err, this.readResultRow(new this.type(), row));
@@ -235,33 +249,35 @@ export class BaseDAO<T extends Object> {
   }
 
   /**
+   * select all childs using a foreign key constraint and a given parent instance
    *
-   * @template F - The class mapped to the foreign table
-   * @param {string} constraintName - The foreign key constraint
-   * @param {{new (): F}} foreignType - The class mapped to the foreign table
-   * @param {F} foreignObj - An instance of the class mapped to the foreign table
-   * @param {string} [sql] - An optional sql-text which will be added to the select-statement
-   * @param {Object} [params] - An optional object with additional host parameter
-   * @returns {Promise<T[]>}
+   * @template P - The class mapped to the parent table
+   * @param constraintName - The foreign key constraint
+   * @param parentType - The class mapped to the parent table
+   * @param parentObj - An instance of the class mapped to the parent table
+   * @param [sql] - An optional sql-text which will be added to the where-clause of the select-statement
+   * @param [params] - An optional object with additional host parameter
+   * @returns A promise of array of model class instances
    */
-  public async selectAllOf<F extends Object>(
-      constraintName: string, foreignType: {new(): F}, foreignObj: F, sql?: string, params?: Object): Promise<T[]> {
-    return new Promise<T[]>(async(resolve, reject) => {
+  public async selectAllOf<P extends Object>(
+      constraintName: string, parentType: {new(): P}, parentObj: P, sql?: string, params?: Object): Promise<T[]> {
+    return new Promise<T[]>(async (resolve, reject) => {
       try {
-        const fkSelCondition = this.table.getForeignKeySelects(constraintName);
+        const fkSelCondition = this.metaModel.getForeignKeySelects(constraintName);
         if (!fkSelCondition) {
           throw new Error(`constraint '${constraintName}' is not defined`);
-          }
-        let stmt = this.table.getSelectAllStatement();
+        }
+        let stmt = this.metaModel.getSelectAllStatement();
         stmt += '\nWHERE\n  ';
         stmt += fkSelCondition;
-
-        const foreignDAO = new BaseDAO<F>(foreignType, this.sqldb);
-        const foreignParams = this.bindForeignParams(foreignDAO, constraintName, foreignObj, params);
         if (!!sql) {
+          stmt += ' ';
           stmt += sql;
-          }
-        const rows: any[] = await this.sqldb.all(stmt, foreignParams);
+        }
+        const parentDAO = new BaseDAO<P>(parentType, this.sqldb);
+        const childParams = this.bindForeignParams(parentDAO, constraintName, parentObj, params);
+
+        const rows: any[] = await this.sqldb.all(stmt, childParams);
         const results: T[] = [];
         rows.forEach((row) => {
           results.push(this.readResultRow(new this.type(), row));
@@ -274,142 +290,164 @@ export class BaseDAO<T extends Object> {
     });
   }
 
-  protected bindAllInputParams(model: T): Object {
+  /**
+   * select all childs using a foreign key constraint and a given parent instance
+   *
+   * @template C - The class mapped to the child table
+   * @param constraintName - The foreign key constraint (defined in the child table)
+   * @param childType - The class mapped to the childtable
+   * @param parentObj - An instance of the class mapped to the parent table
+   * @param [sql] - An optional sql-text which will be added to the where-clause of the select-statement
+   * @param [params] - An optional object with additional host parameter
+   * @returns A promise of array of model class instances
+   */
+  public async selectAllChildsOf<C extends Object>(
+      constraintName: string, childType: {new(): C}, parentObj: T, sql?: string, params?: Object): Promise<C[]> {
+    const childDAO = new BaseDAO<C>(childType, this.sqldb);
+    return childDAO.selectAllOf(constraintName, this.type, parentObj, sql, params);
+  }
+
+  /**
+   * select parent by using a foreign key constraint and a given child instance
+   *
+   * @template C - The class mapped to the child table
+   * @param constraintName - The foreign key constraint (defined in the child table)
+   * @param childType - The class mapped to the childtable
+   * @param childObj - An instance of the class mapped to the child table
+   * @returns A promise of model class instance
+   */
+  public async selectByChild<C extends Object>(constraintName: string, childType: {new(): C}, childObj: C): Promise<T> {
+    return new Promise<T>(async (resolve, reject) => {
+      // create child DAO
+      const childDAO = new BaseDAO<C>(childType, this.sqldb);
+      let output: T;
+      try {
+        // get child properties
+        const fkProps = childDAO.metaModel.getForeignKeyProps(constraintName);
+        const cols = childDAO.metaModel.getForeignKeyRefCols(constraintName);
+        if (!fkProps || !cols) {
+          throw new Error(`in '${childDAO.metaModel.name}': constraint '${constraintName}' is not defined`);
+        }
+        const refNotFoundCols: string[] = [];
+
+        // get parent (our) properties
+        const props = this.metaModel.getPropertiesFromColumnNames(cols, refNotFoundCols);
+        /* istanbul ignore if */
+        if (!props || refNotFoundCols.length) {
+          const s = '"' + refNotFoundCols.join('", "') + '"';
+          throw new Error(`in '${this.metaModel.name}': no property mapped to these fields: ${s}`);
+        }
+        // bind parameters
+        const hostParams: Object = {};
+        for (let i = 0; i < fkProps.length; ++i) {
+          this.setHostParamValue(hostParams, props[i], fkProps[i].getPropertyValue(childObj));
+        }
+
+        // generate statement
+        let stmt = this.metaModel.getSelectAllStatement();
+        stmt += '\nWHERE\n  ';
+        stmt += props.map((prop) => `${TABLEALIASPREFIX}${prop.field.quotedName}=${prop.getHostParameterName()}`)
+                    .join(' AND ');
+
+        const row = await this.sqldb.get(stmt, hostParams);
+        output = this.readResultRow(new this.type(), row);
+
+      } catch (e) {
+        reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
+        return;
+      }
+      resolve(output);
+    });
+  }
+
+  /**
+   * select parent by using a foreign key constraint and a given child instance
+   *
+   * @template P - The class mapped to the parent table
+   * @param constraintName - The foreign key constraint (defined in the child table)
+   * @param parentType - The class mapped to the parent table
+   * @param childObj - An instance of the class mapped to the child table
+   * @returns A promise of model class instance
+   */
+  public async selectParentOf<P extends Object>(constraintName: string, parentType: {new(): P}, childObj: T):
+      Promise<P> {
+    const parentDAO = new BaseDAO<P>(parentType, this.sqldb);
+    return parentDAO.selectByChild(constraintName, this.type, childObj);
+  }
+
+
+
+  protected bindAllInputParams(model: T, subset?: (string|symbol)[], addIdentity?: boolean): Object {
     const hostParams: Object = {};
-    this.table.fields.forEach((field) => this.setHostParam(hostParams, field, model));
+    const props = this.metaModel.getPropertiesFromKeys(subset, addIdentity);
+    props.forEach((prop) => {
+      this.setHostParam(hostParams, prop, model);
+    });
+    return hostParams;
+  }
+
+  protected bindNonPrimaryKeyInputParams(model: T, subset?: (string|symbol)[]): Object {
+    const hostParams: Object = {};
+    const props = this.metaModel.getPropertiesFromKeys(subset);
+    props.filter((prop) => !prop.field.isIdentity).forEach((prop) => {
+      this.setHostParam(hostParams, prop, model);
+    });
     return hostParams;
   }
 
   protected bindPrimaryKeyInputParams(model: T): Object {
     const hostParams: Object = {};
-    this.table.fields.forEach((field) => {
-      if (field.isIdentity) {
-        this.setHostParam(hostParams, field, model);
-      }
-    });
-    return hostParams;
-  }
-
-  protected bindNonPrimaryKeyInputParams(model: T): Object {
-    const hostParams: Object = {};
-    this.table.fields.forEach((field) => {
-      if (!field.isIdentity) {
-        this.setHostParam(hostParams, field, model);
-      }
+    const props = Array.from(this.metaModel.properties.values());
+    props.filter((prop) => prop.field.isIdentity).forEach((prop) => {
+      this.setHostParam(hostParams, prop, model);
     });
     return hostParams;
   }
 
   protected bindForeignParams<F extends Object>(
-      foreignDAO: BaseDAO<F>, fkName: string, foreignObject: F, more: Object = {}): Object {
+      foreignDAO: BaseDAO<F>, constraintName: string, foreignObject: F, more: Object = {}): Object {
     const hostParams: Object = Object.assign({}, more);
-    const fkFields = this.table.getForeignKeyFields(fkName);
-    // istanbul ignore if */
-    if (!fkFields) {
-      // NOTE: should not happen
-      throw new Error(`internal error: fields for foreign key constraint '${fkName}' are not defined`);
+    const fkProps = this.metaModel.getForeignKeyProps(constraintName);
+    const refCols = this.metaModel.getForeignKeyRefCols(constraintName);
+    const refMetaModel = foreignDAO.metaModel;
+
+    /* istanbul ignore if */
+    if (!fkProps || !refCols || fkProps.length !== refCols.length) {
+      throw new Error(`bind information for '${constraintName}' in table '${this.table.name}' is incomplete`);
     }
 
-    fkFields.forEach((field) => {
-      const fieldref = field.foreignKeys.get(fkName) as FieldReference;
-      const foreignfield = foreignDAO.table.getTableField(fieldref.colName);
-      foreignDAO.setHostParam(hostParams, foreignfield, foreignObject);
-    });
+    const refNotFoundCols: string[] = [];
+    const refProps = refMetaModel.getPropertiesFromColumnNames(refCols, refNotFoundCols);
+    /* istanbul ignore if */
+    if (!refProps || refNotFoundCols.length) {
+      const s = '"' + refNotFoundCols.join('", "') + '"';
+      throw new Error(`in '${refMetaModel.name}': no property mapped to these fields: ${s}`);
+    }
+
+    for (let i = 0; i < fkProps.length; ++i) {
+      const fkProp = fkProps[i];
+      const refProp = refProps[i];
+      this.setHostParamValue(hostParams, fkProp, refProp.getPropertyValue(foreignObject));
+    }
     return hostParams;
   }
 
+
+  protected setHostParam(hostParams: any, prop: MetaProperty, model: T): void {
+    hostParams[prop.getHostParameterName()] = prop.getPropertyValue(model);
+  }
+
+  protected setHostParamValue(hostParams: any, prop: MetaProperty, value: any): void {
+    hostParams[prop.getHostParameterName()] = value;
+  }
+
   protected readResultRow(model: T, row: any): T {
-    this.table.fields.forEach((field) => this.setProperty(model, field, row));
+    this.metaModel.properties.forEach((prop) => {
+      prop.setPropertyValue(model, row[prop.field.name]);
+    });
     return model;
   }
 
-  protected setHostParam(hostParams: any, field: Field, model: T): void {
-    let value = Reflect.get(model, field.propertyKey);
-    // tslint:disable-next-line: triple-equals
-    if (value == undefined) {
-      hostParams[field.getHostParameterName()] = value;
-      return;
-      }
-    if (field.isJson) {
-      hostParams[field.getHostParameterName()] = JSON.stringify(value);
-    } else {
-      switch (field.propertyKnownType) {
-        case PropertyType.BOOLEAN:
-          value = !value ? 0 : 1;
-          break;
-        case PropertyType.DATE:
-          if (field.dbtype.toUpperCase().indexOf('INT') !== -1) {
-            value = Math.floor((value as Date).getTime() / 1000);
-          } else {
-            value = (value as Date).toISOString();
-            }
-          break;
-      }
-      hostParams[field.getHostParameterName()] = value;
-    }
-  }
-
-  protected setProperty(model: T, field: Field, row: any): void {
-    let value = row[field.name];
-    // tslint:disable-next-line: triple-equals
-    if (value == undefined) {
-      Reflect.set(model, field.propertyKey, undefined);
-      return;
-      }
-    if (field.isJson) {
-      value = JSON.parse(value);
-    } else {
-      switch (field.propertyKnownType) {
-        case PropertyType.BOOLEAN:
-          if (typeof value === 'string') {
-            if (value === '0' || value === 'false') {
-              value = false;
-            } else if (value === '1' || value === 'true') {
-              value = true;
-            } else {
-              value = undefined;
-            }
-          } else {
-            value = !value ? false : true;
-            }
-          break;
-        case PropertyType.DATE:
-          switch (typeof value) {
-            case 'string':
-              value = new Date(Date.parse(value));
-              break;
-            case 'number':
-              if (Number.isInteger(value)) {
-                // unix time
-                value = new Date((value as number) * 1000);
-              } else {
-                // Julian day numbers ?
-                // TODO: currently not supported
-                value = NaN;
-                }
-              break;
-            /* istanbul ignore next */
-            default:
-              // NOTE: should not happen
-              value = NaN;
-              break;
-              }
-          break;
-        case PropertyType.NUMBER:
-          if (typeof value !== 'number') {
-            value = Number(value);
-            }
-          break;
-        case PropertyType.STRING:
-          if (typeof value !== 'string') {
-            value = String(value);
-            }
-          break;
-      }
-    }
-    // console.log(`setting ${field.propertyKey} to ${value}`);
-    Reflect.set(model, field.propertyKey, value);
-  }
 
   /**
    * create a table in the database
@@ -432,8 +470,8 @@ export class BaseDAO<T extends Object> {
   /**
    * add a column/field to a database table
    *
-   * @param {string} colName
-   * @returns {Promise<void>}
+   * @param colName - The column/field to add
+   * @returns A promise
    */
   public async alterTableAddColumn(colName: string): Promise<void> {
     return this.sqldb.exec(this.table.getAlterTableAddColumnStatement(colName));
@@ -442,9 +480,9 @@ export class BaseDAO<T extends Object> {
   /**
    * create index in the database
    *
-   * @param {string} idxName - The name of the index
-   * @param {boolean} [unique] - create unique index
-   * @returns {Promise<void>}
+   * @param idxName - The name of the index
+   * @param [unique] - create unique index
+   * @returns A promise
    */
   public async createIndex(idxName: string, unique?: boolean): Promise<void> {
     return this.sqldb.exec(this.table.getCreateIndexStatement(idxName, unique));
@@ -453,8 +491,8 @@ export class BaseDAO<T extends Object> {
   /**
    * drop an index from the database
    *
-   * @param {string} idxName - The name of the index
-   * @returns {Promise<void>}
+   * @param idxName - The name of the index
+   * @returns A promise
    */
   public async dropIndex(idxName: string): Promise<void> {
     return this.sqldb.exec(this.table.getDropIndexStatement(idxName));

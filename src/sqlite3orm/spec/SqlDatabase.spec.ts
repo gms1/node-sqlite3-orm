@@ -1,5 +1,5 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-import {SqlDatabase, SQL_MEMORY_DB_PRIVATE} from '../index';
+import {SqlDatabase, SQL_MEMORY_DB_PRIVATE} from '..';
 
 // ---------------------------------------------
 

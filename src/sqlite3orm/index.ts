@@ -10,14 +10,20 @@ export {
 
 export {SqlStatement, SqlRunResult} from './SqlStatement';
 
-export {Field} from './Field';
+export {SqlConnectionPool} from './SqlConnectionPool';
 
-export {Table} from './Table';
+export {table, field, id, fk, index, TableOpts, FieldOpts, METADATA_MODEL_KEY, getModelMetadata} from './decorators';
 
 export {BaseDAO} from './BaseDAO';
 
 export {Schema, schema} from './Schema';
 
-export {table, field, id, fk, index, TableOpts, FieldOpts, METADATA_TABLE_KEY} from './decorators';
+export {Table} from './Table';
 
-export {SqlConnectionPool} from './SqlConnectionPool';
+export {Field} from './Field';
+
+export {MetaModel, TABLEALIAS} from './MetaModel';
+
+export {MetaProperty} from './MetaProperty';
+
+export * from './utils';

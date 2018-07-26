@@ -1,9 +1,11 @@
+// import * as core from './core';
+
 import {Statement} from 'sqlite3';
 
 export interface SqlRunResult {
   lastID: number;
   changes: number;
-  }
+}
 
 /**
  * A thin wrapper for the 'Statement' class from 'node-sqlite3' using Promises instead of callbacks
@@ -19,7 +21,7 @@ export class SqlStatement {
   /**
    * Creates an instance of SqlStatement.
    *
-   * @param {Statement} stmt
+   * @param stmt
    */
   public constructor(stmt: Statement) {
     this.stmt = stmt;
@@ -29,8 +31,7 @@ export class SqlStatement {
    * Bind the given parameters to the prepared statement
    * TODO: usage is unclear
    *
-   * @param {...any[]} params
-   * @returns {this}
+   * @param params
    */
   public bind(...params: any[]): this {
     this.stmt.bind(params);
@@ -72,8 +73,8 @@ export class SqlStatement {
   /**
    * Runs a prepared statement with the specified parameters
    *
-   * @param {*} [params] - The parameters referenced in the statement; you can provide multiple parameters as array
-   * @returns {Promise<SqlRunResult>}
+   * @param [params] - The parameters referenced in the statement; you can provide multiple parameters as array
+   * @returns A promise
    */
   public async run(params?: any): Promise<SqlRunResult> {
     return new Promise<SqlRunResult>((resolve, reject) => {
@@ -93,8 +94,8 @@ export class SqlStatement {
   /**
    * Runs a prepared statement with the specified parameters, fetching only the first row
    *
-   * @param {*} [params] - The parameters referenced in the statement; you can provide multiple parameters as array
-   * @returns {Promise<any>}
+   * @param [params] - The parameters referenced in the statement; you can provide multiple parameters as array
+   * @returns A promise
    */
   public async get(params?: any): Promise<any> {
     return new Promise<any>((resolve, reject) => {
@@ -111,8 +112,8 @@ export class SqlStatement {
   /**
    * Runs a prepared statement with the specified parameters, fetching all rows
    *
-   * @param {*} [params] - The parameters referenced in the statement; you can provide multiple parameters as array
-   * @returns {Promise<any[]>}
+   * @param [params] - The parameters referenced in the statement; you can provide multiple parameters as array
+   * @returns A promise
    */
   public async all(params?: any): Promise<any[]> {
     return new Promise<any[]>((resolve, reject) => {
@@ -131,9 +132,9 @@ export class SqlStatement {
    * Runs a prepared statement with the specified parameters, fetching all rows
    * using a callback for each row
    *
-   * @param {*} [params]
-   * @param {(err: Error, row: any) => void} [callback]
-   * @returns {Promise<number>}
+   * @param [params]
+   * @param [callback]
+   * @returns A promise
    */
   public async each(params?: any, callback?: (err: Error, row: any) => void): Promise<number> {
     return new Promise<number>((resolve, reject) => {

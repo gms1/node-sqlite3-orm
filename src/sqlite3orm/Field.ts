@@ -1,5 +1,8 @@
-import {FieldReference} from './FieldReference';
-import {PropertyType} from './PropertyType';
+// import * as core from './core';
+
+import {quoteSimpleIdentifier} from './utils';
+import {FKFieldDefinition} from './FKFieldDefinition';
+import {IDXFieldDefinition} from './IDXFieldDefinition';
 
 /**
  * Class holding a field definition
@@ -10,161 +13,116 @@ import {PropertyType} from './PropertyType';
 export class Field {
   /**
    * The name of the column
-   *
-   * @type {string}
    */
   public name!: string;
-  /**
-   * The property key mapped to this field
-   *
-   * @type {(string|symbol)}
-   */
-  propertyKey: string|symbol;
-  /**
-   * The property type mapped to this field
-   *
-   * @type {string}
-   */
-  private _propertyType?: string;
 
-  get propertyType(): string|undefined {
-    return this._propertyType;
-  }
-
-  set propertyType(propertyType: string|undefined) {
-    this._propertyType = propertyType;
-    // tslint:disable: triple-equals
-    if (this._propertyType == 'function Boolean() { [native code] }') {
-      this._propertyKnownType = PropertyType.BOOLEAN;
-    } else if (this._propertyType == 'function String() { [native code] }') {
-      this._propertyKnownType = PropertyType.STRING;
-    } else if (this._propertyType == 'function Number() { [native code] }') {
-      this._propertyKnownType = PropertyType.NUMBER;
-    } else if (this._propertyType == 'function Date() { [native code] }') {
-      this._propertyKnownType = PropertyType.DATE;
-    } else {
-      this._propertyKnownType = PropertyType.UNKNOWN;
-    }
-    // tslint:enable: triple-equals
+  /**
+   * The quoted field name
+   */
+  get quotedName(): string {
+    return quoteSimpleIdentifier(this.name);
   }
 
   /**
    * The type of the table column
-   *
-   * @type {string}
    */
-  dbtype: string;
-  /**
-   * Flag if this field is part of the primary key
-   *
-   * @type {boolean}
-   */
-  isIdentity: boolean;
-  /**
-   * Map of all the foreign key constraints this field participates
-   *
-   * @type {Map<string, FieldReference>}
-   */
-  foreignKeys: Map<string, FieldReference>;
+  private _dbtype?: string;
 
-  /**
-   * Set of all the indexes this field participates
-   *
-   * @type {Set<string}
-   */
-  indexKeys: Set<string>;
-
-  /**
-   * The property type enum mapped to this field
-   *
-   * @type {PropertyType}
-   */
-  private _propertyKnownType: PropertyType;
-
-  get propertyKnownType(): PropertyType {
-    return this._propertyKnownType;
+  get dbtype(): string {
+    // tslint:disable-next-line triple-equals
+    return this._dbtype == undefined ? 'TEXT' : this._dbtype;
+  }
+  set dbtype(dbType: string) {
+    this._dbtype = dbType;
+  }
+  get isDbTypeDefined(): boolean {
+    // tslint:disable-next-line triple-equals
+    return this._dbtype == undefined ? false : true;
   }
 
   /**
    * If this property should be serialized/deserialized to the database as Json data
-   *
-   * @type {boolean}
    */
-  isJson: boolean;
+  private _isJson?: boolean;
+
+  get isJson(): boolean {
+    // tslint:disable-next-line triple-equals
+    if (this._isJson == undefined) {
+      return false;
+    }
+    return this._isJson;
+  }
+  set isJson(isJson: boolean) {
+    this._isJson = isJson;
+  }
+  get isIsJsonDefined(): boolean {
+    // tslint:disable-next-line triple-equals
+    return this._isJson == undefined ? false : true;
+  }
+
+
+  /**
+   * Flag if this field is part of the primary key
+   */
+  isIdentity: boolean;
+  /**
+   * Map of all the foreign key constraint names this field participates
+   */
+  foreignKeys: Map<string, FKFieldDefinition>;
+
+  /**
+   * Map of all the indexes this field participates
+   */
+  indexKeys: Map<string, IDXFieldDefinition>;
+
 
   /**
    * Creates an instance of Field.
    *
    */
-  public constructor(key: string|symbol) {
-    this.propertyKey = key;
-    this._propertyType = undefined;
-    this._propertyKnownType = PropertyType.UNKNOWN;
+  public constructor(name?: string) {
+    if (name) {
+      this.name = name;
+    }
     this.isIdentity = false;
-    this.dbtype = 'TEXT';
-    this.foreignKeys = new Map<string, FieldReference>();
-    this.indexKeys = new Set<string>();
-    this.isJson = false;
+    this.foreignKeys = new Map<string, FKFieldDefinition>();
+    this.indexKeys = new Map<string, IDXFieldDefinition>();
   }
 
-  /**
-   * Get the name for the corresponding host parameter
-   *
-   * @returns {string}
-   */
-  public getHostParameterName(): string {
-    return ':' + this.name;
-  }
 
   /**
    * Test if this field is part of the given foreign key constraint
    *
-   * @param {string} constraintName
-   * @returns {boolean}
+   * @param constraintName
    */
-  public hasForeignKeyField(constraintName: string): boolean {
+  public isFKField(constraintName: string): boolean {
     return this.foreignKeys.has(constraintName);
-  }
-
-  /**
-   * Get the field reference for the given foreign key constraint
-   *
-   * @param {string} constraintName
-   * @returns {FieldReference}
-   */
-  public getForeignKeyField(constraintName: string): FieldReference {
-    return this.foreignKeys.get(constraintName) as FieldReference;
   }
 
   /**
    * Set this field to participate in a foreign key constraint
    *
-   * @param {string} constraintName - The constraint name
-   * @param {FieldReference} foreignTableField - The referenced table and column
+   * @param constraintName - The constraint name
    */
-  public setForeignKeyField(
-      constraintName: string, foreignTableField: FieldReference): void {
-    this.foreignKeys.set(constraintName, foreignTableField);
+  public setFKField(foreignKeyField: FKFieldDefinition): void {
+    this.foreignKeys.set(foreignKeyField.name, foreignKeyField);
   }
 
   /**
    * Test if this field is part of the given index
    *
-   * @param {string} constraintName
-   * @returns {boolean}
+   * @param indexName
    */
   public isIndexField(indexName: string): boolean {
     return this.indexKeys.has(indexName);
   }
 
   /**
-   * Test if this field is part of the given index
+   * Set this field as part of the given index
    *
-   * @param {string} indexName
-   * @returns {void}
+   * @param indexField
    */
-  public setIndexField(indexName: string): void {
-    this.indexKeys.add(indexName);
+  public setIndexField(indexField: IDXFieldDefinition): void {
+    this.indexKeys.set(indexField.name, indexField);
   }
-
 }

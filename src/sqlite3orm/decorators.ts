@@ -1,12 +1,10 @@
 // tslint:disable-next-line: no-import-side-effect
 import 'reflect-metadata';
+// import * as core from './core';
 
-import {Field} from './Field';
-import {FieldReference} from './FieldReference';
-import {schema} from './Schema';
-import {Table} from './Table';
+import {MetaModel} from './MetaModel';
 
-export const METADATA_TABLE_KEY = 'schema:table';
+export const METADATA_MODEL_KEY = 'sqlite3orm:model';
 
 /**
  * Options for the '@table' class decorator
@@ -14,25 +12,28 @@ export const METADATA_TABLE_KEY = 'schema:table';
  * @export
  * @interface TableOpts
  */
+
 export interface TableOpts {
   /**
    * The name of the table
-   * @type {string}
+   * @type
    */
   name?: string;
+
   /**
    * Flag to indicate if table should be created using the 'WITHOUT ROWID'
    * clause
-   * @type {boolean}
+   * @type
    */
   withoutRowId?: boolean;
   /**
    * Flag to indicate if AUTOINCREMENT should be added to single-column INTEGER
    * primary keys
-   * @type {boolean}
+   * @type
    */
   autoIncrement?: boolean;
-  }
+}
+
 
 /**
  * Options for the property decorators '@field' and '@id'
@@ -40,241 +41,186 @@ export interface TableOpts {
  * @export
  * @interface FieldOpts
  */
+
 export interface FieldOpts {
   /**
    * The name of the table field
-   * @type {string}
+   * @type
    */
   name?: string;
   /**
    * The column definition
-   * @type {string}
+   * @type
    */
   dbtype?: string;
   /**
    * Flag to indicate if field should be persisted to json string
-   * @type {boolean}
+   * @type
    */
   isJson?: boolean;
-  }
+}
+
 
 /**
- * Get the table metadata
+ * Get the model metadata
  *
- * @param {Function} target - The constructor of the class
- * @returns {Table}
+ * @param target - The constructor of the class
+ * @returns The meta model
  */
-function getTableMetadata(target: Function): Table {
-  if (!Reflect.hasOwnMetadata(METADATA_TABLE_KEY, target.prototype)) {
-    Reflect.defineMetadata(METADATA_TABLE_KEY, new Table(target.name), target.prototype);
-    }
-  return Reflect.getMetadata(METADATA_TABLE_KEY, target.prototype);
+export function getModelMetadata(target: Function): MetaModel {
+  if (!Reflect.hasOwnMetadata(METADATA_MODEL_KEY, target.prototype)) {
+    Reflect.defineMetadata(METADATA_MODEL_KEY, new MetaModel(target.name), target.prototype);
   }
+  return Reflect.getMetadata(METADATA_MODEL_KEY, target.prototype);
+}
 
-/**
- * Get the field metadata
- *
- * @param {Table} table - The table of this field
- * @param {(string | symbol)} key - The property key
- * @returns {Field}
- */
-function getFieldMetadata(metaTable: Table, key: string|symbol): Field {
-  let metaField: Field;
-  if (metaTable.hasPropertyField(key)) {
-    metaField = metaTable.getPropertyField(key);
-  } else {
-    metaField = new Field(key);
-    metaTable.addPropertyField(metaField);
-    }
-  return metaField;
-  }
 
 /**
  * Helper function for decorating a class and map it to a database table
  *
- * @param {Function} target - The constructor of the class
- * @param {TableOpts} [opts]
- * @returns {Table}
+ * @param target - The constructor of the class
+ * @param [opts] - The options for this table
  */
 function decorateTableClass(target: Function, opts: TableOpts): void {
-  const newTableName = opts.name || target.name;
-  const metaTable = getTableMetadata(target);
-  if (!!metaTable.name && newTableName !== metaTable.name) {
-    throw new Error(
-        `failed to map class '${target
-            .name}' to table name '${newTableName}': This class is already mapped to the table '${metaTable.name}'`);
-  }
-  metaTable.name = newTableName;
-  if (!!opts.withoutRowId) {
-    metaTable.withoutRowId = true;
-    }
-  if (!!opts.autoIncrement) {
-    metaTable.autoIncrement = true;
-  }
-  schema().addTable(metaTable);
-  }
+  const metaModel = getModelMetadata(target);
+  metaModel.init(opts);
+}
 
 /**
  * Helper function for decorating a property and map it to a table field
  *
- * @param {Object} target - The decorated class
- * @param {(string|symbol)} key - The decorated property
- * @param {FieldOpts} [opts]
- * @param {boolean} [isIdentity=false] - Indicator if this field belongs to the
+ * @param target - The decorated class
+ * @param key - The decorated property
+ * @param [opts] - The options for this field
+ * @param [isIdentity=false] - Indicator if this field belongs to the
  * primary key
- * @returns {Field}
+ * @returns The field class instance
  */
 function decorateFieldProperty(
-    target: Object|Function, key: string|symbol, opts: FieldOpts, isIdentity: boolean = false): Field {
+    target: Object|Function, key: string|symbol, opts: FieldOpts, isIdentity: boolean): void {
   if (typeof target === 'function') {
     // not decorating static property
     throw new Error(`decorating static property '${key.toString()}' using field-decorator is not supported`);
-    }
-
-  const metaTable: Table = getTableMetadata(target.constructor);
-  const metaField: Field = getFieldMetadata(metaTable, key);
-
-  metaField.propertyType = Reflect.getMetadata('design:type', target, key);
-  metaField.name = opts.name || key.toString();
-
-  if (!!opts.dbtype) {
-    metaField.dbtype = opts.dbtype;
-    }
-  if (!!opts.isJson) {
-    metaField.isJson = opts.isJson;
-    }
-  if (!!isIdentity) {
-    metaField.isIdentity = isIdentity;
-    }
-  // console.log(`name='${key.toString()}' type='${field.propertyType}'
-  // dbtype='${field.dbtype}'` );
-  return metaField;
   }
+
+  const metaModel = getModelMetadata(target.constructor);
+  const metaProp = metaModel.getPropertyAlways(key);
+  metaProp.setPropertyType(Reflect.getMetadata('design:type', target, key));
+  metaProp.setFieldProperties(opts.name || key.toString(), isIdentity, opts);
+}
+
 
 /**
  * Helper function for decorating a property and map it to a foreign key field
  *
- * @param {Object} target - The decorated class
- * @param {(string|symbol)} key - The decorated property
- * @param {string} constraintName - The name for the foreign key constraint
- * @param {string} foreignTableName - The referenced table name
- * @param {string} foreignTableField - The referenced table field
- * @returns {Field}
+ * @param target - The decorated class
+ * @param key - The decorated property
+ * @param constraintName - The name for the foreign key constraint
+ * @param foreignTableName - The referenced table name
+ * @param foreignTableField - The referenced table field
+ * @returns - The field class instance
  */
 function decorateForeignKeyProperty(
     target: Object|Function, key: string|symbol, constraintName: string, foreignTableName: string,
-    foreignTableField: string): Field {
+    foreignTableField: string): void {
   if (typeof target === 'function') {
     // not decorating static property
     throw new Error(`decorating static property '${key.toString()}' using fk-decorator is not supported`);
-    }
-
-  const metaTable: Table = getTableMetadata(target.constructor);
-  const metaField: Field = getFieldMetadata(metaTable, key);
-  if (metaField.hasForeignKeyField(constraintName)) {
-    throw new Error(`decorating property '${target.constructor.name
-                    }.${key.toString()}': duplicate foreign key constraint '${constraintName}'`);
   }
 
-  metaField.setForeignKeyField(constraintName, new FieldReference(foreignTableName, foreignTableField));
-  return metaField;
-  }
+  const metaModel = getModelMetadata(target.constructor);
+  const metaProp = metaModel.getPropertyAlways(key);
+  metaProp.addForeignKeyProperties(constraintName, foreignTableName, foreignTableField);
+}
 
 /**
  * Helper function for decorating a property and map it to an index field
  *
- * @param {Object} target - The decorated class
- * @param {(string|symbol)} key - The decorated property
- * @param {string} indexName - The name for the index
- * @returns {Field}
+ * @param target - The decorated class
+ * @param key - The decorated property
+ * @param indexName - The name for the index
+ * @returns The field class instance
  */
-function decorateIndexProperty(target: Object|Function, key: string|symbol, indexName: string): Field {
+function decorateIndexProperty(
+    target: Object|Function, key: string|symbol, indexName: string, isUnique?: boolean): void {
   if (typeof target === 'function') {
     // not decorating static property
     throw new Error(`decorating static property '${key.toString()}' using index-decorator is not supported`);
-    }
-
-  const metaTable: Table = getTableMetadata(target.constructor);
-  const metaField: Field = getFieldMetadata(metaTable, key);
-  if (metaField.isIndexField(indexName)) {
-    throw new Error(
-        `decorating property '${target.constructor.name}.${key.toString()}': duplicate index key '${indexName}'`);
   }
 
-  metaField.setIndexField(indexName);
-  return metaField;
-  }
+  const metaModel = getModelMetadata(target.constructor);
+  const metaProp = metaModel.getPropertyAlways(key);
+  metaProp.addIndex(indexName, isUnique);
+}
+
+/*****************************************************************************************/
+/* decorators:
 
 /**
  * The class decorator for mapping a database table to a class
  *
  * @export
- * @param {TableOpts} [opts]
- * @returns {(target: Function) => void}
+ * @param [opts]
+ * @returns The decorator function
  */
 export function table(opts: TableOpts = {}): (target: Function) => void {
   return ((target: Function) => decorateTableClass(target, opts));
-  }
+}
 
 /**
- * The field decorator for mapping a class property to a table field
+ * The property decorator for mapping a table field to a class property
  *
  * @export
- * @param {string} [name] - The name of the field; defaults to the property name
- * @param {string} [dbtype] - The type of the field; defaults to 'TEXT'
- * @returns {((
- *     target: Object, key: string|symbol) => void)}
+ * @param [name] - The name of the field; defaults to the property name
+ * @param [dbtype] - The type of the field; defaults to 'TEXT'
+ * @returns The decorator function
  */
 export function field(opts: FieldOpts = {}): (target: Object, key: string|symbol) => void {
   return ((target: Object, key: string | symbol) => {
     decorateFieldProperty(target, key, opts, false);
   });
-  }
+}
 
 /**
- * The id decorator for mapping a class property to a field of the primary key
- * of the table
+ * The id decorator for mapping a field of the primary key to a class property
  *
  * @export
- * @param {string} [name] - The name of the field; defaults to the property name
- * @param {string} [dbtype] - The type of the field; defaults to 'TEXT'
- * @returns {((
- *     target: Object, key: string|symbol) => void)}
+ * @param [name] - The name of the field; defaults to the property name
+ * @param [dbtype] - The type of the field; defaults to 'TEXT'
+ * @returns The decorator function
  */
 export function id(opts: FieldOpts = {}): (target: Object, key: string|symbol) => void {
   return ((target: Object, key: string | symbol) => {
     decorateFieldProperty(target, key, opts, true);
   });
-  }
+}
 
 /**
  * The fk decorator for mapping a class property to be part of a foreign key
  * constraint
  *
  * @export
- * @param {string} constraintName - The constraint name
- * @param {string} foreignTableName - The referenced table name
- * @param {string} foreignTableField - The referenced table field
- * @returns {((target: Object, key: string|symbol) =>
- *     void)}
+ * @param constraintName - The constraint name
+ * @param foreignTableName - The referenced table name
+ * @param foreignTableField - The referenced table field
+ * @returns The decorator function
  */
 export function fk(constraintName: string, foreignTableName: string, foreignTableField: string): (
     target: Object, key: string|symbol) => void {
   return ((target: Object, key: string | symbol) => {
     decorateForeignKeyProperty(target, key, constraintName, foreignTableName, foreignTableField);
   });
-  }
+}
 
 /**
  * The index decorator for mapping a class property to be part of an index
  *
  * @export
- * @param {string} indexName - The index name
- * @returns {((target: Object, key: string|symbol) =>
- *     void)}
+ * @param indexName - The index name
+ * @returns The decorator function
  */
-export function index(indexName: string): (target: Object, key: string|symbol) => void {
+export function index(indexName: string, isUnique: boolean = false): (target: Object, key: string|symbol) => void {
   return ((target: Object, key: string | symbol) => {
-    decorateIndexProperty(target, key, indexName);
+    decorateIndexProperty(target, key, indexName, isUnique);
   });
 }
