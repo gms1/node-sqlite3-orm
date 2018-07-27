@@ -1,5 +1,12 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-import {SqlConnectionPool, SqlDatabase, SQL_OPEN_DEFAULT, SQL_OPEN_READWRITE, SQL_MEMORY_DB_SHARED} from '..';
+import {
+  SqlConnectionPool,
+  SqlDatabase,
+  SQL_OPEN_DEFAULT,
+  SQL_OPEN_READWRITE,
+  SQL_MEMORY_DB_SHARED,
+  SqlDatabaseSettings
+} from '..';
 
 describe('test SqlConnectionPool', () => {
   // ---------------------------------------------
@@ -147,4 +154,62 @@ describe('test SqlConnectionPool', () => {
 
   });
 
+});
+
+
+
+describe('test SqlConnectionPool Settings', () => {
+  // ---------------------------------------------
+  it('should be able to open a database using custom settings', async (done) => {
+    try {
+      const settings: SqlDatabaseSettings = {
+        journalMode: 'WAL',
+        busyTimeout: 300,
+        synchronous: ['main.FULL'],
+        caseSensitiveLike: 'TRUE',
+        foreignKeys: 'TRUE',
+        ignoreCheckConstraints: 'TRUE',
+        queryOnly: 'TRUE',
+        readUncommitted: 'TRUE',
+        recursiveTriggers: 'TRUE',
+        secureDelete: ['FAST', 'temp.TRUE'],
+        executionMode: 'PARALLELIZE'
+      };
+      let pool = new SqlConnectionPool();
+      await pool.open(SQL_MEMORY_DB_SHARED, SQL_OPEN_DEFAULT, 2, 3, settings);
+      expect(pool.isOpen()).toBeTruthy();
+      let sqldb1 = await pool.get(100);
+      expect(sqldb1).toBeDefined();
+      expect(sqldb1.isOpen()).toBeTruthy();
+      let sqldb2 = await pool.get();
+      expect(sqldb2).toBeDefined();
+      expect(sqldb2.isOpen()).toBeTruthy();
+
+      const userVersion1 = await sqldb1.getUserVersion();
+      const userVersion2 = await sqldb2.getUserVersion();
+      expect(userVersion1).toBeDefined();
+      expect(userVersion2).toBeDefined();
+
+      await sqldb1.close();
+      await sqldb2.close();
+
+      expect(sqldb1.isOpen()).toBeFalsy();
+      expect(sqldb2.isOpen()).toBeFalsy();
+
+      expect(pool.isOpen()).toBeTruthy();
+      sqldb1 = await pool.get(100);
+      expect(sqldb1).toBeDefined();
+      expect(sqldb1.isOpen()).toBeTruthy();
+
+      const userVersion3 = await sqldb1.getUserVersion();
+      expect(userVersion3).toBeDefined();
+      await sqldb1.open(SQL_MEMORY_DB_SHARED, SQL_OPEN_DEFAULT, settings);
+      const userVersion4 = await sqldb1.getUserVersion();
+      expect(userVersion4).toBeDefined();
+
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
 });

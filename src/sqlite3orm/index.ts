@@ -8,6 +8,8 @@ export {
   SQL_MEMORY_DB_PRIVATE
 } from './SqlDatabase';
 
+export {SqlDatabaseSettings} from './SqlDatabaseSettings';
+
 export {SqlStatement, SqlRunResult} from './SqlStatement';
 
 export {SqlConnectionPool} from './SqlConnectionPool';

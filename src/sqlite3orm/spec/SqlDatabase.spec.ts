@@ -1,5 +1,5 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-import {SqlDatabase, SQL_MEMORY_DB_PRIVATE} from '..';
+import {SqlDatabase, SQL_MEMORY_DB_PRIVATE, SQL_OPEN_READWRITE, SqlDatabaseSettings, SQL_OPEN_DEFAULT} from '..';
 
 // ---------------------------------------------
 
@@ -16,6 +16,16 @@ describe('test SqlDatabase', () => {
     } catch (err) {
       fail(err);
     }
+    done();
+  });
+
+  afterEach(async (done) => {
+    try {
+      await sqldb.close();
+    } catch (err) {
+      fail(err);
+    }
+    (sqldb as any) = undefined;
     done();
   });
 
@@ -255,5 +265,107 @@ describe('test SqlDatabase', () => {
   */
 
 
+
+});
+
+
+describe('test SqlDatabase Settings', () => {
+  // ---------------------------------------------
+  it('should be able to open a database using custom settings', async (done) => {
+    try {
+      const settings: SqlDatabaseSettings = {
+        journalMode: 'WAL',
+        busyTimeout: 300,
+        synchronous: ['main.FULL'],
+        caseSensitiveLike: 'TRUE',
+        foreignKeys: 'TRUE',
+        ignoreCheckConstraints: 'TRUE',
+        queryOnly: 'TRUE',
+        readUncommitted: 'TRUE',
+        recursiveTriggers: 'TRUE',
+        secureDelete: ['FAST', 'temp.TRUE'],
+        executionMode: 'PARALLELIZE'
+      };
+      const sqldb = new SqlDatabase();
+      await sqldb.open(SQL_MEMORY_DB_PRIVATE, SQL_OPEN_DEFAULT, settings);
+      const userVersion = await sqldb.getUserVersion();
+      expect(userVersion).toBeDefined();
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+
+  it('should fail to open wrong db file', async (done) => {
+    try {
+      const sqldb = new SqlDatabase();
+      await sqldb.open('::/.', SQL_OPEN_READWRITE);
+      fail(`should not succeed`);
+    } catch (err) {
+    }
+    done();
+  });
+
+
+  it('should fail to open using wrong setting (schema having dot)', async (done) => {
+    try {
+      const settings: SqlDatabaseSettings = {synchronous: ['NOTEXIST.YYY.FULL']};
+      const sqldb = new SqlDatabase();
+      await sqldb.open(SQL_MEMORY_DB_PRIVATE, SQL_OPEN_DEFAULT, settings);
+      fail(`should not succeed`);
+    } catch (err) {
+    }
+    done();
+  });
+
+  it('should fail to open using wrong setting (empty)', async (done) => {
+    try {
+      const settings: SqlDatabaseSettings = {synchronous: ['']};
+      const sqldb = new SqlDatabase();
+      await sqldb.open(SQL_MEMORY_DB_PRIVATE, SQL_OPEN_DEFAULT, settings);
+      fail(`should not succeed`);
+    } catch (err) {
+    }
+    done();
+  });
+
+  it('should fail to open using wrong setting (executionMode)', async (done) => {
+    try {
+      const settings: SqlDatabaseSettings = {
+        journalMode: 'WAL',
+        busyTimeout: 300,
+        synchronous: ['main.FULL'],
+        caseSensitiveLike: 'TRUE',
+        foreignKeys: 'TRUE',
+        ignoreCheckConstraints: 'TRUE',
+        queryOnly: 'TRUE',
+        readUncommitted: 'TRUE',
+        recursiveTriggers: 'TRUE',
+        secureDelete: ['FAST', 'temp.TRUE'],
+        executionMode: 'NOTEXIST'
+      };
+      const sqldb = new SqlDatabase();
+      await sqldb.open(SQL_MEMORY_DB_PRIVATE, SQL_OPEN_DEFAULT, settings);
+      fail(`should not succeed`);
+    } catch (err) {
+    }
+    done();
+  });
+
+  it('should succeed to open serialized', async (done) => {
+    try {
+      const settings: SqlDatabaseSettings = {
+
+        executionMode: 'SERIALIZE'
+      };
+      const sqldb = new SqlDatabase();
+      await sqldb.open(SQL_MEMORY_DB_PRIVATE, SQL_OPEN_DEFAULT, settings);
+      const userVersion = await sqldb.getUserVersion();
+      expect(userVersion).toBeDefined();
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
 
 });
