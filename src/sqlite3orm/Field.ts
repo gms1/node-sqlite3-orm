@@ -23,21 +23,27 @@ export class Field {
     return quoteSimpleIdentifier(this.name);
   }
 
+  private _dbDefaultType?: string;
+  get dbDefaultType(): string {
+    return this._dbDefaultType ? this._dbDefaultType : 'TEXT';
+  }
+  set dbDefaultType(dbType: string) {
+    this._dbDefaultType = dbType;
+  }
+
   /**
    * The type of the table column
    */
   private _dbtype?: string;
 
   get dbtype(): string {
-    // tslint:disable-next-line triple-equals
-    return this._dbtype == undefined ? 'TEXT' : this._dbtype;
+    return this._dbtype ? this._dbtype : this.dbDefaultType;
   }
   set dbtype(dbType: string) {
     this._dbtype = dbType;
   }
   get isDbTypeDefined(): boolean {
-    // tslint:disable-next-line triple-equals
-    return this._dbtype == undefined ? false : true;
+    return this._dbtype ? true : false;
   }
 
   /**

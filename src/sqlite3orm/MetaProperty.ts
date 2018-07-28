@@ -50,7 +50,7 @@ export class MetaProperty {
     }
   }
 
-  setFieldProperties(name: string, isIdentity: boolean, opts?: FieldOpts): void {
+  addField(name: string, isIdentity: boolean, opts?: FieldOpts): void {
     opts = opts || {};
     if (this._tmpField) {
       if (this._tmpField.name) {
@@ -72,7 +72,7 @@ export class MetaProperty {
     }
   }
 
-  addForeignKeyProperties(constraintName: string, foreignTableName: string, foreignTableField: string): void {
+  addForeignKey(constraintName: string, foreignTableName: string, foreignTableField: string): void {
     if (!this._tmpField) {
       this._tmpField = new Field();
     }
@@ -86,7 +86,7 @@ export class MetaProperty {
     this._tmpField.setFKField(fkFieldDef);
   }
 
-  addIndex(indexName: string, isUnique?: boolean): void {
+  addIndexKey(indexName: string, isUnique?: boolean): void {
     if (!this._tmpField) {
       this._tmpField = new Field();
     }
@@ -102,53 +102,99 @@ export class MetaProperty {
       throw new Error(
           `meta model property '${this.className}.${this.key.toString()}' already mapped to '${this._field.name}'`);
     }
+
     if (!this._tmpField) {
       throw new Error(`meta model property '${this.className}.${this.key.toString()}' not mapped to any field'`);
     }
-    const metaTable = model.table;
-    let addField = false;
 
-    const fieldName = this._tmpField.name;
-    this._field = metaTable.hasTableField(fieldName);
-    if (!this._field) {
+    const oldField = model.table.hasTableField(this._tmpField.name);
+    this._field = this.initField(model);
+    this.initIndexKeys();
+    this.initForeignKeys();
+
+    if (oldField !== this._field) {
+      // add this field to the table:
+      model.table.addTableField(this._field);
+    }
+
+    // add mapping from column name to this property
+    model.mapColNameToProp.set(this._field.name, this);
+
+    // cleanup
+    this._tmpField = undefined;
+  }
+
+
+  protected initField(model: MetaModel): Field {
+    /* istanbul ignore if */
+    if (!this._tmpField) {
+      throw new Error(`meta model property '${this.className}.${this.key.toString()}' not mapped to any field'`);
+    }
+
+    let metaField = model.table.hasTableField(this._tmpField.name);
+    if (!metaField) {
       // new field
-      addField = true;
-      this._field = new Field(fieldName);
-      this._field.isIdentity = this._tmpField.isIdentity;
+      metaField = new Field(this._tmpField.name);
+      metaField.isIdentity = this._tmpField.isIdentity;
       if (this._tmpField.isDbTypeDefined) {
-        this._field.dbtype = this._tmpField.dbtype;
+        metaField.dbtype = this._tmpField.dbtype;
+      } else {
+        this.setDbDefaultType(metaField);
       }
       if (this._tmpField.isIsJsonDefined) {
-        this._field.isJson = this._tmpField.isJson;
+        metaField.isJson = this._tmpField.isJson;
       }
 
     } else {
       // merge field
-      if (this._field.isIdentity !== this._tmpField.isIdentity) {
+      if (metaField.isIdentity !== this._tmpField.isIdentity) {
         throw new Error(`in class '${
                                      this.className
                                    }': detected conflicting identity settings for property '${this.key.toString()}'`);
       }
       if (this._tmpField.isDbTypeDefined) {
-        if (this._field.isDbTypeDefined && this._field.dbtype !== this._tmpField.dbtype) {
+        if (metaField.isDbTypeDefined && metaField.dbtype !== this._tmpField.dbtype) {
           throw new Error(`in class '${
                                        this.className
                                      }': detected conflicting dbtype settings for property '${this.key.toString()}'`);
+        } else {
+          this.setDbDefaultType(metaField);
         }
-        this._field.dbtype = this._tmpField.dbtype;
+        metaField.dbtype = this._tmpField.dbtype;
       }
       // tslint:disable-next-line triple-equals
       if (this._tmpField.isIsJsonDefined) {
-        if (this._field.isIsJsonDefined && this._field.isJson !== this._tmpField.isJson) {
+        if (metaField.isIsJsonDefined && metaField.isJson !== this._tmpField.isJson) {
           throw new Error(
               `in class '${this.className}': detected conflicting json settings for property '${this.key.toString()}'`);
         }
-        this._field.isJson = this._tmpField.isJson;
+        metaField.isJson = this._tmpField.isJson;
       }
     }
-    const metaField = this._field;
+    return metaField;
+  }
 
-    if (this._tmpField.indexKeys) {
+  protected setDbDefaultType(metaField: Field): void {
+    switch (this.propertyType) {
+      case PropertyType.BOOLEAN:
+      case PropertyType.DATE:
+        metaField.dbDefaultType = 'INTEGER';
+        break;
+      case PropertyType.NUMBER:
+        if (metaField.isIdentity) {
+          metaField.dbDefaultType = 'INTEGER';
+        } else {
+          metaField.dbDefaultType = 'REAL';
+        }
+        break;
+    }
+    // otherwise 'TEXT' will be used as default
+  }
+
+
+  protected initIndexKeys(): void {
+    const metaField = this._field as Field;
+    if (this._tmpField && this._tmpField.indexKeys) {
       this._tmpField.indexKeys.forEach((idxField, idxName) => {
         if (!metaField.isIndexField(idxName)) {
           metaField.setIndexField(idxField);
@@ -162,7 +208,12 @@ export class MetaProperty {
         }
       });
     }
-    if (this._tmpField.foreignKeys) {
+  }
+
+
+  protected initForeignKeys(): void {
+    const metaField = this._field as Field;
+    if (this._tmpField && this._tmpField.foreignKeys) {
       this._tmpField.foreignKeys.forEach((fkFieldDef, constraintName) => {
         if (!metaField.isFKField(constraintName)) {
           metaField.setFKField(fkFieldDef);
@@ -176,18 +227,9 @@ export class MetaProperty {
         }
       });
     }
-
-    if (addField) {
-      // add this field to the table:
-      metaTable.addTableField(this._field);
-    }
-
-    // add mapping from column name to this property
-    model.mapColNameToProp.set(this._field.name, this);
-
-    // cleanup
-    this._tmpField = undefined;
   }
+
+
 
   getPropertyValue(model: any): any {
     const field = this.field;

@@ -106,7 +106,7 @@ function decorateFieldProperty(
   const metaModel = getModelMetadata(target.constructor);
   const metaProp = metaModel.getPropertyAlways(key);
   metaProp.setPropertyType(Reflect.getMetadata('design:type', target, key));
-  metaProp.setFieldProperties(opts.name || key.toString(), isIdentity, opts);
+  metaProp.addField(opts.name || key.toString(), isIdentity, opts);
 }
 
 
@@ -130,7 +130,7 @@ function decorateForeignKeyProperty(
 
   const metaModel = getModelMetadata(target.constructor);
   const metaProp = metaModel.getPropertyAlways(key);
-  metaProp.addForeignKeyProperties(constraintName, foreignTableName, foreignTableField);
+  metaProp.addForeignKey(constraintName, foreignTableName, foreignTableField);
 }
 
 /**
@@ -150,7 +150,7 @@ function decorateIndexProperty(
 
   const metaModel = getModelMetadata(target.constructor);
   const metaProp = metaModel.getPropertyAlways(key);
-  metaProp.addIndex(indexName, isUnique);
+  metaProp.addIndexKey(indexName, isUnique);
 }
 
 /*****************************************************************************************/
