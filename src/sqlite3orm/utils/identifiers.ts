@@ -1,8 +1,12 @@
 import {SQL_DEFAULT_SCHEMA} from '../SqlDatabase';
 
+export function backtickQuoteSimpleIdentifier(name: string): string {
+  return '`' + name.replace(/\`/g, '``') + '`';
+}
+
 
 export function quoteSimpleIdentifier(name: string): string {
-  return '"' + name.replace(/["]/g, '""') + '"';
+  return '"' + name.replace(/\"/g, '""') + '"';
 }
 
 export function quoteIdentifier(name: string): string {

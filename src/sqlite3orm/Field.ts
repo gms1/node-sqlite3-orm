@@ -1,6 +1,6 @@
 // import * as core from './core';
 
-import {quoteSimpleIdentifier} from './utils';
+import {backtickQuoteSimpleIdentifier} from './utils';
 import {FKFieldDefinition} from './FKFieldDefinition';
 import {IDXFieldDefinition} from './IDXFieldDefinition';
 
@@ -20,7 +20,7 @@ export class Field {
    * The quoted field name
    */
   get quotedName(): string {
-    return quoteSimpleIdentifier(this.name);
+    return backtickQuoteSimpleIdentifier(this.name);
   }
 
   private _dbDefaultType?: string;
