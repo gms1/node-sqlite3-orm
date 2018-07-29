@@ -5,6 +5,7 @@ import {Field} from './Field';
 import {FKDefinition} from './FKDefinition';
 import {IDXDefinition} from './IDXDefinition';
 import {quoteIdentifier, quoteAndUnqualiyIdentifier, quoteSimpleIdentifier, qualifiyIdentifier} from './utils';
+import {MetaModel} from './MetaModel';
 
 /**
  * Class holding a table definition (name of the table and fields in the table)
@@ -81,6 +82,10 @@ export class Table {
   // map index name to index key definition
   private mapNameToIDXDef: Map<string, IDXDefinition>;
 
+
+  public models: Set<MetaModel>;
+
+
   /**
    * Creates an instance of Table.
    *
@@ -92,6 +97,7 @@ export class Table {
     this.mapNameToFKDef = new Map<string, FKDefinition>();
     this.mapNameToIDXDef = new Map<string, IDXDefinition>();
     this.fields = [];
+    this.models = new Set<MetaModel>();
   }
 
 

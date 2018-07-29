@@ -101,6 +101,20 @@ export class MetaModel {
     this.properties.forEach((prop) => {
       prop.init(this);
     });
+
+    this._table.models.add(this);
+  }
+
+  destroy(): void {
+    if (this._table) {
+      this._table.models.delete(this);
+      if (!this.table.models.size) {
+        schema().deleteTable(this._table);
+      }
+      this._table = undefined;
+      (this.properties as any) = new Map<string|symbol, MetaProperty>();
+      (this.mapColNameToProp as any) = new Map<string, MetaProperty>();
+    }
   }
 
 

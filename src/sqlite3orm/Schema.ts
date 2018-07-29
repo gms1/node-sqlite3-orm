@@ -75,6 +75,14 @@ export class Schema {
     return table;
   }
 
+
+  public deleteTable(table: Table): void {
+    const name = qualifiyIdentifier(table.name);
+    if (this.mapNameToTable.has(name)) {
+      this.mapNameToTable.delete(name);
+    }
+  }
+
   /**
    * create a table in the database
    *
