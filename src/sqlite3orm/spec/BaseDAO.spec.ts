@@ -1,10 +1,13 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
 import {SqlDatabase, BaseDAO, SQL_MEMORY_DB_PRIVATE, field, fk, id, table} from '..';
+import {index} from '../decorators';
 
 
 const USERS_TABLE = 'BD:USERS TABLE';
 const CONTACTS_TABLE = 'main.BD:CONTACTS TABLE';
 const TEST_SET_PROP_TABLE = 'BD:TEST_SET_PROP_TABLE';
+const TEST_INDEX_TABLE1 = 'main.BD:INDEX_TABLE';
+const TEST_INDEX_TABLE2 = 'temp.BD:INDEX_TABLE';
 const TEST_DB_DEFAULTS = 'BD:TEST_DB_DEFAULTS_TABLE';
 
 @table({name: USERS_TABLE})
@@ -388,7 +391,7 @@ describe('test BaseDAO', () => {
 
 
   // ---------------------------------------------
-  it('expect setProperty to work', async (done) => {
+  it('expect setProperty to work if conversion is required', async (done) => {
     let testDao: BaseDAO<TestSetProperty> = new BaseDAO(TestSetProperty, sqldb);
     let testRow: TestSetProperty = new TestSetProperty();
     try {
@@ -418,6 +421,58 @@ describe('test BaseDAO', () => {
     }
     done();
 
+  });
+
+  @table({name: TEST_INDEX_TABLE1, autoIncrement: true})
+  class TestIndexTable1 {
+    @id({name: 'id', dbtype: 'INTEGER NOT NULL'})
+    id: number;
+
+    @field({name: 'info', dbtype: 'TEXT'}) @index('index_table_idx')
+    info?: string;
+
+    @field({name: 'otherId', dbtype: 'INTEGER'})
+    otherId?: number;
+
+    constructor() {
+      this.id = 0;
+    }
+  }
+
+  @table({name: TEST_INDEX_TABLE2, autoIncrement: true})
+  class TestIndexTable2 {
+    @id({name: 'id', dbtype: 'INTEGER NOT NULL'})
+    id: number;
+
+    @field({name: 'info', dbtype: 'TEXT'}) @index('index_table_idx')
+    info?: string;
+
+    @field({name: 'otherId', dbtype: 'INTEGER'})
+    otherId?: number;
+
+    constructor() {
+      this.id = 0;
+    }
+  }
+
+
+  // ---------------------------------------------
+  it('expect create tables/indexes to work for tables/indexes having same name but different schema ', async (done) => {
+    const table1DAO: BaseDAO<TestIndexTable1> = new BaseDAO(TestIndexTable1, sqldb);
+    const table2DAO: BaseDAO<TestIndexTable2> = new BaseDAO(TestIndexTable2, sqldb);
+    try {
+      await table1DAO.createTable();
+      await table2DAO.createTable();
+
+      await table1DAO.createIndex('index_table_idx');
+      await table2DAO.createIndex('index_table_idx');
+
+      await table1DAO.dropTable();
+      await table2DAO.dropTable();
+    } catch (err) {
+      fail(err);
+    }
+    done();
   });
 
 
