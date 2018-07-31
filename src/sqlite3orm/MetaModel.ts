@@ -1,16 +1,9 @@
 // import * as core from './core';
-
-// tslint:disable no-use-before-declare triple-equals
-// tslint:disable-next-line no-require-imports
-import * as _dbg from 'debug';
-
 import {MetaProperty} from './MetaProperty';
 import {TableOpts} from './decorators';
 import {Table} from './Table';
 import {schema} from './Schema';
 
-
-export const debugModel = _dbg('sqlite3orm:model');
 
 export const TABLEALIAS = 'T';
 export const TABLEALIASPREFIX = TABLEALIAS.length ? TABLEALIAS + '.' : '';
@@ -84,6 +77,7 @@ export class MetaModel {
     } else {
       // tslint:disable-next-line triple-equals
       if (opts.withoutRowId != undefined) {
+        // tslint:disable-next-line triple-equals
         if (this._table.isWithoutRowIdDefined && opts.withoutRowId != this._table.withoutRowId) {
           throw new Error(`in class '${this.name}': detected conflicting withoutRowId settings`);
         }
@@ -91,6 +85,7 @@ export class MetaModel {
       }
       // tslint:disable-next-line triple-equals
       if (opts.autoIncrement != undefined) {
+        // tslint:disable-next-line triple-equals
         if (this._table.isAutoIncrementDefined && opts.autoIncrement != this._table.autoIncrement) {
           throw new Error(`in class '${this.name}': detected conflicting autoIncrement settings`);
         }
@@ -266,6 +261,7 @@ export class MetaModel {
    *
    */
   private generateStatementsText(): SqlStatementText {
+    // tslint:disable-next-line no-use-before-declare
     const stmts = new SqlStatementText();
 
     if (!this.properties.size) {

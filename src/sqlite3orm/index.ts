@@ -28,4 +28,8 @@ export {MetaModel, TABLEALIAS} from './MetaModel';
 
 export {MetaProperty} from './MetaProperty';
 
+export {DbTableInfo, DbColumnInfo, DbIndexInfo, DbForeignKeyInfo} from './DbTableInfo';
+
+export {DbCatalogDAO} from './DbCatalogDAO';
+
 export * from './utils';

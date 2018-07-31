@@ -4,7 +4,13 @@
 import {Field} from './Field';
 import {FKDefinition} from './FKDefinition';
 import {IDXDefinition} from './IDXDefinition';
-import {quoteIdentifier, quoteAndUnqualiyIdentifier, quoteSimpleIdentifier, qualifiyIdentifier} from './utils';
+import {
+  quoteIdentifier,
+  quoteAndUnqualiyIdentifier,
+  quoteSimpleIdentifier,
+  qualifiyIdentifier,
+  splitIdentifiers
+} from './utils';
 import {MetaModel} from './MetaModel';
 
 /**
@@ -16,6 +22,10 @@ import {MetaModel} from './MetaModel';
 export class Table {
   get quotedName(): string {
     return quoteIdentifier(this.name);
+  }
+
+  get schemaName(): string|undefined {
+    return splitIdentifiers(this.name).identSchema;
   }
 
   /**
@@ -260,6 +270,7 @@ export class Table {
 
     const quotedIdxName = quoteIdentifier(idxName);
     const quotedTableName = quoteAndUnqualiyIdentifier(this.name);
+
     const idxCols = idxDef.fields.map((field) => field.quotedName);
     // tslint:disable-next-line: restrict-plus-operands
     return 'CREATE ' + (unique ? 'UNIQUE ' : ' ') + `INDEX IF NOT EXISTS ${quotedIdxName} ON ${quotedTableName} ` +
@@ -335,9 +346,21 @@ export class Table {
       stmt += fk.fields.map((field) => field.quotedName).join(', ');
       stmt += ')\n';
 
-      const refTableName = quoteIdentifier(fk.foreignTableName);
+      // TODO if fk.foreignTableName has qualifier it must match the qualifier of this.name
+      const {identName, identSchema} = splitIdentifiers(fk.foreignTableName);
 
-      stmt += `    REFERENCES ${refTableName} (`;
+      const tableSchema = this.schemaName;
+      if (identSchema) {
+        if ((identSchema === 'main' && tableSchema && tableSchema !== identSchema) ||
+            (identSchema !== 'main' && (!tableSchema || tableSchema !== identSchema))) {
+          throw new Error(
+              `table '${this.name}': foreign key '${fkName}' references table in wrong schema: '${
+                                                                                                  fk.foreignTableName
+                                                                                                }'`);
+        }
+      }
+
+      stmt += `    REFERENCES ${quoteSimpleIdentifier(identName)} (`;
       // tslint:disable-next-line: restrict-plus-operands
       stmt += fk.foreignColumNames.map((colName) => quoteSimpleIdentifier(colName)).join(', ') +
           ') ON DELETE CASCADE';  // TODO: hard-coded 'ON DELETE CASCADE'
