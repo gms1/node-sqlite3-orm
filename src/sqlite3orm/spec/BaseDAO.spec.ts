@@ -535,4 +535,75 @@ describe('test BaseDAO', () => {
 
   });
 
+  // ---------------------------------------------
+  it('expect update/delete-all to work', async (done) => {
+    const fullDao: BaseDAO<TestDbDefaultsFull> = new BaseDAO(TestDbDefaultsFull, sqldb);
+    const minDao: BaseDAO<TestDbDefaultsMin> = new BaseDAO(TestDbDefaultsMin, sqldb);
+    const writeRow: TestDbDefaultsMin = new TestDbDefaultsMin();
+    try {
+      await fullDao.createTable();
+
+      const writtenRow = await minDao.insert(writeRow);
+      let readRow = await fullDao.selectById({id: writtenRow.id});
+      expect(readRow.myBool).toBeTruthy();
+      expect(readRow.myInt).toBe(42);
+
+      const updateMyBool = fullDao.metaModel.getUpdateAllStatement(['myBool']);
+      await sqldb.run(updateMyBool, {':myBool': false});
+
+      readRow = await fullDao.selectById({id: writtenRow.id});
+      expect(readRow.myBool).toBeFalsy();
+      expect(readRow.myInt).toBe(42);
+
+      const updateMyBoolAndMyInt = fullDao.metaModel.getUpdateAllStatement(['myBool', 'myInt', 'myBool']);
+      await sqldb.run(updateMyBoolAndMyInt, {':myBool': true, ':myInt': 99});
+
+      readRow = await fullDao.selectById({id: writtenRow.id});
+      expect(readRow.myBool).toBeTruthy();
+      expect(readRow.myInt).toBe(99);
+
+      const writtenRow2 = await minDao.insert(readRow);
+
+      readRow = await fullDao.selectById({id: writtenRow2.id});
+      expect(readRow.myBool).toBeTruthy();
+      expect(readRow.myInt).toBe(42);
+
+      const deleteAll = fullDao.metaModel.getDeleteAllStatement();
+      await sqldb.run(deleteAll + ' where my_integer=:myInt', {':myInt': 99});
+
+      readRow = await fullDao.selectById({id: writtenRow2.id});
+      expect(readRow.myBool).toBeTruthy();
+      expect(readRow.myInt).toBe(42);
+
+      try {
+        readRow = await fullDao.selectById({id: writtenRow.id});
+        fail(`record should not exist`);
+      } catch (e) {
+      }
+
+    } catch (err) {
+      fail(err);
+    }
+    try {
+      await fullDao.dropTable();
+    } catch (err) {
+      fail(err);
+    }
+    done();
+
+  });
+
+
+  // ---------------------------------------------
+  it('expect get update-all-statement for not existing property to fail', async (done) => {
+    const fullDao: BaseDAO<TestDbDefaultsFull> = new BaseDAO(TestDbDefaultsFull, sqldb);
+    try {
+      const updateMyBool = fullDao.metaModel.getUpdateAllStatement(['myNotExistingProp']);
+      fail(`should have failed`);
+    } catch (err) {
+    }
+    done();
+  });
+
+
 });

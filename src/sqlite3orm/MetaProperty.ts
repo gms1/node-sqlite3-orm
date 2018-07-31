@@ -98,11 +98,13 @@ export class MetaProperty {
   }
 
   init(model: MetaModel): void {
+    /* istanbul ignore if */
     if (this._field) {
       throw new Error(
           `meta model property '${this.className}.${this.key.toString()}' already mapped to '${this._field.name}'`);
     }
 
+    /* istanbul ignore if */
     if (!this._tmpField) {
       throw new Error(`meta model property '${this.className}.${this.key.toString()}' not mapped to any field'`);
     }
@@ -182,7 +184,7 @@ export class MetaProperty {
         break;
       case PropertyType.NUMBER:
         if (metaField.isIdentity) {
-          metaField.dbDefaultType = 'INTEGER';
+          metaField.dbDefaultType = 'INTEGER NOT NULL';
         } else {
           metaField.dbDefaultType = 'REAL';
         }
@@ -194,7 +196,8 @@ export class MetaProperty {
 
   protected initIndexKeys(): void {
     const metaField = this._field as Field;
-    if (this._tmpField && this._tmpField.indexKeys) {
+    /* istanbul ignore else */
+    if (this._tmpField) {
       this._tmpField.indexKeys.forEach((idxField, idxName) => {
         if (!metaField.isIndexField(idxName)) {
           metaField.setIndexField(idxField);
@@ -213,7 +216,8 @@ export class MetaProperty {
 
   protected initForeignKeys(): void {
     const metaField = this._field as Field;
-    if (this._tmpField && this._tmpField.foreignKeys) {
+    /* istanbul ignore else */
+    if (this._tmpField) {
       this._tmpField.foreignKeys.forEach((fkFieldDef, constraintName) => {
         if (!metaField.isFKField(constraintName)) {
           metaField.setFKField(fkFieldDef);

@@ -15,10 +15,10 @@ import {MetaProperty} from './MetaProperty';
  * @template T - The class mapped to the base table
  */
 export class BaseDAO<T extends Object> {
-  private readonly type: {new(): T};
-  private readonly metaModel: MetaModel;
-  private readonly table: Table;
-  private sqldb: SqlDatabase;
+  readonly type: {new(): T};
+  readonly metaModel: MetaModel;
+  readonly table: Table;
+  readonly sqldb: SqlDatabase;
 
   /**
    * Creates an instance of BaseDAO.
@@ -59,6 +59,7 @@ export class BaseDAO<T extends Object> {
           }
           res[this.table.autoIncrementField.name] = res.lastID;
           const autoProp = this.metaModel.mapColNameToProp.get(this.table.autoIncrementField.name);
+          /* istanbul ignore else */
           if (autoProp) {
             autoProp.setPropertyValue(model, res.lastID);
           }
@@ -158,7 +159,7 @@ export class BaseDAO<T extends Object> {
         const row =
             await this.sqldb.get(this.metaModel.getSelectByIdStatement(), this.bindPrimaryKeyInputParams(model));
         model = this.readResultRow(model, row);
-      } catch (e) {
+      } catch (e /* istanbul ignore next */) {
         reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
         return;
       }
@@ -325,6 +326,7 @@ export class BaseDAO<T extends Object> {
         // get child properties
         const fkProps = childDAO.metaModel.getForeignKeyProps(constraintName);
         const cols = childDAO.metaModel.getForeignKeyRefCols(constraintName);
+        /* istanbul ignore if */
         if (!fkProps || !cols) {
           throw new Error(`in '${childDAO.metaModel.name}': constraint '${constraintName}' is not defined`);
         }
@@ -352,7 +354,7 @@ export class BaseDAO<T extends Object> {
         const row = await this.sqldb.get(stmt, hostParams);
         output = this.readResultRow(new this.type(), row);
 
-      } catch (e) {
+      } catch (e /* istanbul ignore next */) {
         reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
         return;
       }

@@ -17,8 +17,9 @@ import {
   MetaModel
 } from '..';
 import {unqualifyIdentifier} from '../utils';
-import {FKFieldDefinition} from '../FKFieldDefinition';
 import {MetaProperty} from '../MetaProperty';
+import {DbCatalogDAO} from '../DbCatalogDAO';
+import {DbTableInfo} from '../DbTableInfo';
 // sqlite3 catalog table
 
 
@@ -43,32 +44,6 @@ const TABLE_TESTIDX_NAME = 'S:TESTIDX';
 const TABLE_TESTIDX_IDX_NAME_U = 'S:TEST_IDU';
 const TABLE_TESTIDX_IDX_NAME_N = 'S:TEST_IDN';
 
-
-@table({name: 'sqlite_master'})
-class CatalogTable {
-  @id({name: 'type', dbtype: 'TEXT'})
-  objType?: string;
-
-  @id({name: 'name', dbtype: 'TEXT'})
-  objName?: string;
-
-  @field({name: 'tbl_name', dbtype: 'TEXT'})
-  tblName?: string;
-
-  @field({name: 'rootpage', dbtype: 'INTEGER'})
-  rootPage?: number;
-
-  @field({name: 'sql', dbtype: 'TEXT'})
-  sql?: string;
-
-  public constructor() {
-    this.objType = undefined;
-    this.objName = undefined;
-    this.tblName = undefined;
-    this.rootPage = undefined;
-    this.sql = undefined;
-  }
-}
 
 
 @table({name: TABLE_PARENT_TABLE_NAME})
@@ -220,8 +195,7 @@ describe('test schema', () => {
 
   // ---------------------------------------------
   it('expect create (unique) index to work', async (done) => {
-    let catalogDAO = new BaseDAO<CatalogTable>(CatalogTable, sqldb);
-    let catalogItem = new CatalogTable();
+    let catalogDAO = new DbCatalogDAO(sqldb);
     try {
       await schema().createTable(sqldb, TABLE_TESTIDX_NAME);
       await schema().createIndex(sqldb, TABLE_TESTIDX_NAME, TABLE_TESTIDX_IDX_NAME_U);
@@ -230,20 +204,21 @@ describe('test schema', () => {
       fail(`creating table '${TABLE_TESTIDX_NAME}' and indexes failed: ${e.message}`);
     }
 
-    catalogItem.objType = 'index';
-    catalogItem.objName = unqualifyIdentifier(TABLE_TESTIDX_IDX_NAME_U);
-    catalogItem = await catalogDAO.select(catalogItem);
-    expect(catalogItem.tblName === unqualifyIdentifier(TABLE_TESTIDX_NAME));
-    expect(catalogItem.sql).toBeDefined();
-    expect(catalogItem.sql!.indexOf('CREATE UNIQUE'))
-        .not.toBe(-1, `for '${TABLE_TESTIDX_IDX_NAME_U}: ${catalogItem.sql}`);
+    try {
+      const tableInfo = await catalogDAO.readTableInfo(TABLE_TESTIDX_NAME);
+      expect(tableInfo).toBeDefined('table not created');
+      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_U])
+          .toBeDefined(`index '${TABLE_TESTIDX_IDX_NAME_U}' not created`);
+      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_U].unique)
+          .toBeTruthy(`index '${TABLE_TESTIDX_IDX_NAME_U}' is not unique`);
+      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_N])
+          .toBeDefined(`index '${TABLE_TESTIDX_IDX_NAME_N}' not created`);
+      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_N].unique)
+          .toBeFalsy(`index '${TABLE_TESTIDX_IDX_NAME_U}' is unique`);
 
-    catalogItem.objType = 'index';
-    catalogItem.objName = unqualifyIdentifier(TABLE_TESTIDX_IDX_NAME_N);
-    catalogItem = await catalogDAO.select(catalogItem);
-    expect(catalogItem.tblName === unqualifyIdentifier(TABLE_TESTIDX_NAME));
-    expect(catalogItem.sql).toBeDefined();
-    expect(catalogItem.sql!.indexOf('CREATE UNIQUE')).toBe(-1, `for '${TABLE_TESTIDX_IDX_NAME_N}`);
+    } catch (e) {
+      fail(`reading catalog table info for '${TABLE_TESTIDX_NAME}' failed: ${e.message}`);
+    }
 
     try {
       await schema().dropIndex(sqldb, TABLE_TESTIDX_NAME, TABLE_TESTIDX_IDX_NAME_U);
@@ -259,19 +234,22 @@ describe('test schema', () => {
     } catch (e) {
       fail(`creating indexes on '${TABLE_TESTIDX_NAME}' failed: ${e.message}`);
     }
-    catalogItem.objType = 'index';
-    catalogItem.objName = unqualifyIdentifier(TABLE_TESTIDX_IDX_NAME_U);
-    catalogItem = await catalogDAO.select(catalogItem);
-    expect(catalogItem.tblName === unqualifyIdentifier(TABLE_TESTIDX_NAME));
-    expect(catalogItem.sql).toBeDefined();
-    expect(catalogItem.sql!.indexOf('CREATE UNIQUE')).toBe(-1, `for '${TABLE_TESTIDX_IDX_NAME_U}: ${catalogItem.sql}`);
 
-    catalogItem.objType = 'index';
-    catalogItem.objName = unqualifyIdentifier(TABLE_TESTIDX_IDX_NAME_N);
-    catalogItem = await catalogDAO.select(catalogItem);
-    expect(catalogItem.tblName === unqualifyIdentifier(TABLE_TESTIDX_NAME));
-    expect(catalogItem.sql).toBeDefined();
-    expect(catalogItem.sql!.indexOf('CREATE UNIQUE')).not.toBe(-1, `for '${TABLE_TESTIDX_IDX_NAME_N}`);
+    try {
+      const tableInfo = await catalogDAO.readTableInfo(TABLE_TESTIDX_NAME);
+      expect(tableInfo).toBeDefined('table not created');
+      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_U])
+          .toBeDefined(`index '${TABLE_TESTIDX_IDX_NAME_U}' not created`);
+      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_U].unique)
+          .toBeFalsy(`index '${TABLE_TESTIDX_IDX_NAME_U}' is unique`);
+      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_N])
+          .toBeDefined(`index '${TABLE_TESTIDX_IDX_NAME_N}' not created`);
+      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_N].unique)
+          .toBeTruthy(`index '${TABLE_TESTIDX_IDX_NAME_U}' is not unique`);
+
+    } catch (e) {
+      fail(`reading second catalog table info for '${TABLE_TESTIDX_NAME}' failed: ${e.message}`);
+    }
 
     done();
   });
@@ -279,33 +257,15 @@ describe('test schema', () => {
   // ---------------------------------------------
   it('expect create/drop/alter-table to work (using Schema)', async (done) => {
     try {
-      let catalogDAO = new BaseDAO<CatalogTable>(CatalogTable, sqldb);
-      let catalogItem = new CatalogTable();
+      let catalogDAO = new DbCatalogDAO(sqldb);
+      let tableInfo;
 
       // the database objects should not exist in the database catalog:
-      catalogItem.objType = 'table';
-      catalogItem.objName = unqualifyIdentifier(TABLE_PARENT_TABLE_NAME);
-      try {
-        await catalogDAO.select(catalogItem);
-      } catch (e) {
-        expect(e).toBeDefined();
-      }
+      tableInfo = await catalogDAO.readTableInfo(TABLE_PARENT_TABLE_NAME);
+      expect(tableInfo).toBeUndefined(`table '${TABLE_PARENT_TABLE_NAME}' found`);
 
-      catalogItem.objType = 'table';
-      catalogItem.objName = unqualifyIdentifier(TABLE_CHILD_TABLE_NAMEQ);
-      try {
-        await catalogDAO.select(catalogItem);
-      } catch (e) {
-        expect(e).toBeDefined();
-      }
-
-      catalogItem.objType = 'index';
-      catalogItem.objName = unqualifyIdentifier(TABLE_CHILD_IDX_NAMEQ);
-      try {
-        await catalogDAO.select(catalogItem);
-      } catch (e) {
-        expect(e).toBeDefined();
-      }
+      tableInfo = await catalogDAO.readTableInfo(TABLE_CHILD_TABLE_NAMEQ);
+      expect(tableInfo).toBeUndefined(`table '${TABLE_CHILD_TABLE_NAMEQ}' found`);
 
       // create tables
 
@@ -314,18 +274,12 @@ describe('test schema', () => {
       await schema().createIndex(sqldb, TABLE_CHILD_TABLE_NAMEQ, TABLE_CHILD_IDX_NAMEQ);
 
       // now the database objects should exist in the database catalog:
-      catalogItem.objType = 'table';
-      catalogItem.objName = unqualifyIdentifier(TABLE_PARENT_TABLE_NAME);
-      catalogItem = await catalogDAO.select(catalogItem);
+      tableInfo = await catalogDAO.readTableInfo(TABLE_PARENT_TABLE_NAME);
+      expect(tableInfo).toBeDefined(`table '${TABLE_PARENT_TABLE_NAME}' not found`);
 
-      catalogItem.objType = 'table';
-      catalogItem.objName = unqualifyIdentifier(TABLE_CHILD_TABLE_NAMEQ);
-      catalogItem = await catalogDAO.select(catalogItem);
-
-      catalogItem.objType = 'index';
-      catalogItem.objName = unqualifyIdentifier(TABLE_CHILD_IDX_NAMEQ);
-      catalogItem = await catalogDAO.select(catalogItem);
-      expect(catalogItem.tblName === unqualifyIdentifier(TABLE_CHILD_TABLE_NAMEQ));
+      tableInfo = await catalogDAO.readTableInfo(TABLE_CHILD_TABLE_NAMEQ);
+      expect(tableInfo).toBeDefined(`table '${TABLE_CHILD_TABLE_NAMEQ}' not found`);
+      expect(tableInfo!.indexes[TABLE_CHILD_IDX_NAME]).toBeDefined(`index '${TABLE_CHILD_IDX_NAME}' not found`);
 
       // alter table add a new column
 
@@ -342,37 +296,21 @@ describe('test schema', () => {
       await schema().alterTableAddColumn(sqldb, TABLE_PARENT_TABLE_NAME, newField.name);
 
       await schema().dropIndex(sqldb, TABLE_CHILD_TABLE_NAMEQ, TABLE_CHILD_IDX_NAMEQ);
-      catalogItem.objType = 'index';
-      catalogItem.objName = unqualifyIdentifier(TABLE_CHILD_IDX_NAMEQ);
-      try {
-        await catalogDAO.select(catalogItem);
-        fail(`index should not exist`);
-      } catch (e) {
-        expect(e).toBeDefined();
-      }
+
+      tableInfo = await catalogDAO.readTableInfo(TABLE_CHILD_TABLE_NAMEQ);
+      expect(tableInfo).toBeDefined(`table '${TABLE_CHILD_TABLE_NAMEQ}' not found`);
+      expect(tableInfo!.indexes[TABLE_CHILD_IDX_NAME]).toBeUndefined(`index '${TABLE_CHILD_IDX_NAME}' found`);
 
       await schema().dropTable(sqldb, TABLE_CHILD_TABLE_NAMEQ);
       await schema().dropTable(sqldb, TABLE_PARENT_TABLE_NAME);
 
+
       // now database objects should not exist in the database catalog:
+      tableInfo = await catalogDAO.readTableInfo(TABLE_PARENT_TABLE_NAME);
+      expect(tableInfo).toBeUndefined(`table '${TABLE_PARENT_TABLE_NAME}' found`);
 
-      catalogItem.objType = 'table';
-      catalogItem.objName = unqualifyIdentifier(TABLE_PARENT_TABLE_NAME);
-      try {
-        await catalogDAO.select(catalogItem);
-        fail(`table ${TABLE_CHILD_TABLE_NAMEQ} should not exist`);
-      } catch (e) {
-        expect(e).toBeDefined();
-      }
-
-      catalogItem.objType = 'table';
-      catalogItem.objName = unqualifyIdentifier(TABLE_CHILD_TABLE_NAMEQ);
-      try {
-        await catalogDAO.select(catalogItem);
-        fail(`table ${TABLE_CHILD_TABLE_NAMEQ} should not exist`);
-      } catch (e) {
-        expect(e).toBeDefined();
-      }
+      tableInfo = await catalogDAO.readTableInfo(TABLE_CHILD_TABLE_NAMEQ);
+      expect(tableInfo).toBeUndefined(`table '${TABLE_CHILD_TABLE_NAMEQ}' found`);
 
     } catch (err) {
       fail(err);
@@ -383,33 +321,15 @@ describe('test schema', () => {
   // ---------------------------------------------
   it('expect create/drop/alter-table to work (using BaseDAO)', async (done) => {
     try {
-      let catalogDAO = new BaseDAO<CatalogTable>(CatalogTable, sqldb);
-      let catalogItem = new CatalogTable();
+      let catalogDAO = new DbCatalogDAO(sqldb);
+      let tableInfo;
 
       // the database objects should not exist in the database catalog:
-      catalogItem.objType = 'table';
-      catalogItem.objName = unqualifyIdentifier(TABLE_PARENT_TABLE_NAME);
-      try {
-        await catalogDAO.select(catalogItem);
-      } catch (e) {
-        expect(e).toBeDefined();
-      }
+      tableInfo = await catalogDAO.readTableInfo(TABLE_PARENT_TABLE_NAME);
+      expect(tableInfo).toBeUndefined(`table '${TABLE_PARENT_TABLE_NAME}' found`);
 
-      catalogItem.objType = 'table';
-      catalogItem.objName = unqualifyIdentifier(TABLE_CHILD_TABLE_NAMEQ);
-      try {
-        await catalogDAO.select(catalogItem);
-      } catch (e) {
-        expect(e).toBeDefined();
-      }
-
-      catalogItem.objType = 'index';
-      catalogItem.objName = unqualifyIdentifier(TABLE_CHILD_IDX_NAMEQ);
-      try {
-        await catalogDAO.select(catalogItem);
-      } catch (e) {
-        expect(e).toBeDefined();
-      }
+      tableInfo = await catalogDAO.readTableInfo(TABLE_CHILD_TABLE_NAMEQ);
+      expect(tableInfo).toBeUndefined(`table '${TABLE_CHILD_TABLE_NAMEQ}' found`);
 
       // create tables
 
@@ -421,25 +341,18 @@ describe('test schema', () => {
       await childDAO.createIndex(TABLE_CHILD_IDX_NAMEQ);
 
       // now the database objects should exist in the database catalog:
-      catalogItem.objType = 'table';
-      catalogItem.objName = unqualifyIdentifier(TABLE_PARENT_TABLE_NAME);
-      catalogItem = await catalogDAO.select(catalogItem);
+      tableInfo = await catalogDAO.readTableInfo(TABLE_PARENT_TABLE_NAME);
+      expect(tableInfo).toBeDefined(`table '${TABLE_PARENT_TABLE_NAME}' not found`);
 
-      catalogItem.objType = 'table';
-      catalogItem.objName = unqualifyIdentifier(TABLE_CHILD_TABLE_NAMEQ);
-      catalogItem = await catalogDAO.select(catalogItem);
-
-      catalogItem.objType = 'index';
-      catalogItem.objName = unqualifyIdentifier(TABLE_CHILD_IDX_NAMEQ);
-      catalogItem = await catalogDAO.select(catalogItem);
-      expect(catalogItem.tblName === unqualifyIdentifier(TABLE_CHILD_TABLE_NAMEQ));
+      tableInfo = await catalogDAO.readTableInfo(TABLE_CHILD_TABLE_NAMEQ);
+      expect(tableInfo).toBeDefined(`table '${TABLE_CHILD_TABLE_NAMEQ}' not found`);
+      expect(tableInfo!.indexes[TABLE_CHILD_IDX_NAME]).toBeDefined(`index '${TABLE_CHILD_IDX_NAME}' not found`);
 
       // alter table add a new column
 
       let parentTable = schema().getTable(TABLE_PARENT_TABLE_NAME);
       expect(parentTable).toBeDefined();
 
-      let newProperty = 'dyndef2';
       let newField = new Field('TESTADDCOL2');
       newField.dbtype = 'INTEGER';
       parentTable.addTableField(newField);
@@ -450,36 +363,20 @@ describe('test schema', () => {
       await parentDAO.alterTableAddColumn(newField.name);
 
       await childDAO.dropIndex(TABLE_CHILD_IDX_NAMEQ);
-      catalogItem.objType = 'index';
-      catalogItem.objName = unqualifyIdentifier(TABLE_CHILD_IDX_NAMEQ);
-      try {
-        await catalogDAO.select(catalogItem);
-        fail('index should not exist');
-      } catch (e) {
-        expect(e).toBeDefined();
-      }
+
+      tableInfo = await catalogDAO.readTableInfo(TABLE_CHILD_TABLE_NAMEQ);
+      expect(tableInfo).toBeDefined(`table '${TABLE_CHILD_TABLE_NAMEQ}' not found`);
+      expect(tableInfo!.indexes[TABLE_CHILD_IDX_NAME]).toBeUndefined(`index '${TABLE_CHILD_IDX_NAME}' found`);
 
       await childDAO.dropTable();
       await parentDAO.dropTable();
 
       // now database objects should not exist in the database catalog:
-      catalogItem.objType = 'table';
-      catalogItem.objName = unqualifyIdentifier(TABLE_PARENT_TABLE_NAME);
-      try {
-        await catalogDAO.select(catalogItem);
-        fail(`table ${TABLE_PARENT_TABLE_NAME} should not exist`);
-      } catch (e) {
-        expect(e).toBeDefined();
-      }
+      tableInfo = await catalogDAO.readTableInfo(TABLE_PARENT_TABLE_NAME);
+      expect(tableInfo).toBeUndefined(`table '${TABLE_PARENT_TABLE_NAME}' found`);
 
-      catalogItem.objType = 'table';
-      catalogItem.objName = unqualifyIdentifier(TABLE_CHILD_TABLE_NAMEQ);
-      try {
-        await catalogDAO.select(catalogItem);
-        fail(`table ${TABLE_CHILD_TABLE_NAMEQ} should not exist`);
-      } catch (e) {
-        expect(e).toBeDefined();
-      }
+      tableInfo = await catalogDAO.readTableInfo(TABLE_CHILD_TABLE_NAMEQ);
+      expect(tableInfo).toBeUndefined(`table '${TABLE_CHILD_TABLE_NAMEQ}' found`);
 
     } catch (err) {
       fail(err);

@@ -350,14 +350,12 @@ export class Table {
       const {identName, identSchema} = splitIdentifiers(fk.foreignTableName);
 
       const tableSchema = this.schemaName;
-      if (identSchema) {
-        if ((identSchema === 'main' && tableSchema && tableSchema !== identSchema) ||
-            (identSchema !== 'main' && (!tableSchema || tableSchema !== identSchema))) {
-          throw new Error(
-              `table '${this.name}': foreign key '${fkName}' references table in wrong schema: '${
-                                                                                                  fk.foreignTableName
-                                                                                                }'`);
-        }
+      /* istanbul ignore if */
+      if (identSchema &&
+          ((identSchema === 'main' && tableSchema && tableSchema !== identSchema) ||
+           (identSchema !== 'main' && (!tableSchema || tableSchema !== identSchema)))) {
+        throw new Error(
+            `table '${this.name}': foreign key '${fkName}' references table in wrong schema: '${fk.foreignTableName}'`);
       }
 
       stmt += `    REFERENCES ${quoteSimpleIdentifier(identName)} (`;
