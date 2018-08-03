@@ -1,7 +1,6 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class  no-non-null-assertion
 // tslint:disable no-null-keyword
-import {SqlDatabase, BaseDAO, SQL_MEMORY_DB_PRIVATE, field, fk, id, table, DbCatalogDAO} from '..';
-import {index} from '../decorators';
+import {SqlDatabase, BaseDAO, SQL_MEMORY_DB_PRIVATE, field, fk, id, table, DbCatalogDAO, index} from '..';
 
 const PREFIX = 'DC';
 
@@ -188,7 +187,7 @@ describe('test DbTableInfo.discover', () => {
 
       expect(Object.keys(childInfo!.foreignKeys).length).toBe(2, 'childinfo: fk');
 
-      const fkName1 = DbCatalogDAO.genericForeignKeyName(['PID2', 'PID1'], PARENT_TABLE, ['ID2', 'ID1']);
+      const fkName1 = DbCatalogDAO.genericForeignKeyId(['PID2', 'PID1'], PARENT_TABLE, ['ID2', 'ID1']);
       expect(childInfo!.foreignKeys[fkName1]).toBeDefined(`childinfo: fk ${fkName1}`);
       expect(childInfo!.foreignKeys[fkName1].refTable).toBe(PARENT_TABLE, `childinfo: fk ${fkName1}`);
 
@@ -200,7 +199,7 @@ describe('test DbTableInfo.discover', () => {
       expect(childInfo!.foreignKeys[fkName1].refColumns[0]).toBe('ID2', `childinfo: fk ${fkName1} refColumns`);
       expect(childInfo!.foreignKeys[fkName1].refColumns[1]).toBe('ID1', `childinfo: fk ${fkName1} refColumns`);
 
-      const fkName2 = DbCatalogDAO.genericForeignKeyName(['PID3', 'PID4'], PARENT_TABLE, ['ID1', 'ID2']);
+      const fkName2 = DbCatalogDAO.genericForeignKeyId(['PID3', 'PID4'], PARENT_TABLE, ['ID1', 'ID2']);
       expect(childInfo!.foreignKeys[fkName2]).toBeDefined(`childinfo: fk ${fkName2}`);
       expect(childInfo!.foreignKeys[fkName2].refTable).toBe(PARENT_TABLE, `childinfo: fk ${fkName2}`);
 

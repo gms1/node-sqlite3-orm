@@ -104,7 +104,7 @@ export class MetaModel {
     if (this._table) {
       this._table.models.delete(this);
       if (!this.table.models.size) {
-        schema().deleteTable(this._table);
+        schema().deleteTable(this._table.name);
       }
       this._table = undefined;
       (this.properties as any) = new Map<string|symbol, MetaProperty>();

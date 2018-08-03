@@ -88,7 +88,7 @@ export class DbCatalogDAO {
           // old fk
           if (lastFk) {
             const fkInfo: DbForeignKeyInfo = {refTable: lastFk.table, columns: fromCols, refColumns: toCols};
-            info.foreignKeys[DbCatalogDAO.genericForeignKeyName(fromCols, lastFk.table, toCols)] = fkInfo;
+            info.foreignKeys[DbCatalogDAO.genericForeignKeyId(fromCols, lastFk.table, toCols)] = fkInfo;
           }
           // new fk
           lastId = fk.id;
@@ -101,7 +101,7 @@ export class DbCatalogDAO {
       });
       if (lastFk) {
         const fkInfo: DbForeignKeyInfo = {refTable: lastFk.table, columns: fromCols, refColumns: toCols};
-        info.foreignKeys[DbCatalogDAO.genericForeignKeyName(fromCols, lastFk.table, toCols)] = fkInfo;
+        info.foreignKeys[DbCatalogDAO.genericForeignKeyId(fromCols, lastFk.table, toCols)] = fkInfo;
       }
       return info;
     } catch (err) {
@@ -123,7 +123,7 @@ export class DbCatalogDAO {
     return this.sqldb.all(`PRAGMA ${this.schemaPragma(pragmaName, identifierName, identifierSchema)}`);
   }
 
-  static genericForeignKeyName(fromCols: string[], toTable: string, toCols: string[]): string {
+  static genericForeignKeyId(fromCols: string[], toTable: string, toCols: string[]): string {
     let res = '(';
     res += fromCols.join(',');
     res += `) => ${toTable}(`;

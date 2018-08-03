@@ -207,6 +207,33 @@ One possibility to achieve this could be to use a connection pool and to perform
 
 ```
 
+## Autoupgrade
+
+automatically create or upgrade tables and indexes in the database based on the table definitions
+
+```TypeScript
+const autoUpgrader = new AutoUpgrader(sqldb);
+
+// run autoupgrade for all registered tables:
+autoUpgrader.upgradeAllTables();
+
+// test if table definitions are up-to-date
+autoUpgrader.isActual([userDAO.table, contactDAO.table]);
+
+// run autoupgrade for specific table(s):
+autoUpgrader.upgradeTables([userDAO.table]);
+```
+
+> NOTE: *autoupgrade* should be carefully tested before running it on a production database! A backup should be self-evident!
+<!-- -->
+> NOTE: renaming of columns can not be detected! *autoupgrade* would normally add a new column with the new name and the data in the old column would be lost, but there is an option 'keepOldColumns' for preventing old columns from beeing dropped. Recycling the old column name for other purpose is asking for trouble
+<!-- -->
+> NOTE: changing autoIncrement cannot be detected! You can use the optional parameter *force* to force a recreation
+<!-- -->
+> NOTE: if you have changed the column type, the table definition will be updated accordingly, but the content of the column will be still the same. You need an additional action if you want to convert the content of the column
+<!-- -->
+> NOTE: please always add a DEFAULT-clause for newly added columns which are not nullable
+
 ## Install
 
 ``` bash

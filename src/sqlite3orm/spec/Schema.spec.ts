@@ -14,14 +14,13 @@ import {
   table,
   qualifiyIdentifier,
   getModelMetadata,
-  MetaModel
+  MetaModel,
+  Table,
+  unqualifyIdentifier,
+  MetaProperty,
+  DbCatalogDAO,
+  DbTableInfo
 } from '..';
-import {unqualifyIdentifier} from '../utils';
-import {MetaProperty} from '../MetaProperty';
-import {DbCatalogDAO} from '../DbCatalogDAO';
-import {DbTableInfo} from '../DbTableInfo';
-// sqlite3 catalog table
-
 
 
 const TABLE_PARENT_TABLE_NAME = 'S:PARENTTABLE';

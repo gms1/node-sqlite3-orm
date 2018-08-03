@@ -1,6 +1,5 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-import {table, id, index, fk, field, schema, getModelMetadata, METADATA_MODEL_KEY} from '..';
-import {MetaModel} from '../MetaModel';
+import {table, id, index, fk, field, schema, getModelMetadata, METADATA_MODEL_KEY, MetaModel} from '..';
 
 // ---------------------------------------------
 

@@ -62,7 +62,6 @@ export class Schema {
   /**
    * add a table definition
    *
-   * @param name - The name of the table
    * @param table - The table definition
    * @returns The table definition
    */
@@ -76,11 +75,22 @@ export class Schema {
   }
 
 
-  public deleteTable(table: Table): void {
-    const name = qualifiyIdentifier(table.name);
-    if (this.mapNameToTable.has(name)) {
-      this.mapNameToTable.delete(name);
-    }
+  /**
+   * delete a table definition
+   *
+   * @param table - The table definition
+   */
+  public deleteTable(name: string): void {
+    this.mapNameToTable.delete(qualifiyIdentifier(name));
+  }
+
+  /**
+   * get array of table definitions
+   *
+   * @returns The table definitions
+   */
+  public getAllTables(): Table[] {
+    return Array.from(this.mapNameToTable.values());
   }
 
   /**

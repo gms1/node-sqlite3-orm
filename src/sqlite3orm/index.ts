@@ -32,4 +32,6 @@ export {DbTableInfo, DbColumnInfo, DbIndexInfo, DbForeignKeyInfo} from './DbTabl
 
 export {DbCatalogDAO} from './DbCatalogDAO';
 
+export {AutoUpgrader, UpgradeMode, UpgradeInfo} from './AutoUpgrader';
+
 export * from './utils';

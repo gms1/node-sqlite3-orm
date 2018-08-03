@@ -1,6 +1,5 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-import {SqlDatabase, BaseDAO, SQL_MEMORY_DB_PRIVATE, field, fk, id, table} from '..';
-import {index} from '../decorators';
+import {SqlDatabase, BaseDAO, SQL_MEMORY_DB_PRIVATE, field, fk, id, table, index} from '..';
 
 
 const USERS_TABLE = 'BD:USERS TABLE';

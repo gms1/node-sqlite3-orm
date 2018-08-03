@@ -68,7 +68,7 @@ export class Table {
   /**
    * The fields defined for this table
    */
-  fields: Field[] = [];
+  readonly fields: Field[] = [];
 
   /**
    * The field mapped to the primary key; only set if the
@@ -81,19 +81,19 @@ export class Table {
   }
 
   // map column name to a field definition
-  private mapNameToField: Map<string, Field>;
+  readonly mapNameToField: Map<string, Field>;
 
   // map column name to a identity field definition
-  private mapNameToIdentityField: Map<string, Field>;
+  readonly mapNameToIdentityField: Map<string, Field>;
 
   // map constraint name to foreign key definition
-  public readonly mapNameToFKDef: Map<string, FKDefinition>;
+  readonly mapNameToFKDef: Map<string, FKDefinition>;
 
   // map index name to index key definition
-  private mapNameToIDXDef: Map<string, IDXDefinition>;
+  readonly mapNameToIDXDef: Map<string, IDXDefinition>;
 
 
-  public models: Set<MetaModel>;
+  readonly models: Set<MetaModel>;
 
 
   /**
@@ -199,22 +199,28 @@ export class Table {
   }
 
   public hasIDXDefinition(name: string): IDXDefinition|undefined {
+    // NOTE: creating a index in schema1 on a table in schema2 is not supported by Sqlite3
+    //  so using qualifiedIndentifier is currently not required
     return this.mapNameToIDXDef.get(qualifiyIdentifier(name));
   }
 
   public getIDXDefinition(name: string): IDXDefinition {
+    // NOTE: creating a index in schema1 on a table in schema2 is not supported by Sqlite3
+    //  so using qualifiedIndentifier is currently not required
     const idxDef = this.mapNameToIDXDef.get(qualifiyIdentifier(name));
     if (!idxDef) {
-      throw new Error(`table '${this.name}': foreign key constraint ${name} not registered yet`);
+      throw new Error(`table '${this.name}': index ${name} not registered yet`);
     }
     return idxDef;
   }
 
   public addIDXDefinition(idxDef: IDXDefinition): void {
+    // NOTE: creating a index in schema1 on a table in schema2 is not supported by Sqlite3
+    //  so using qualifiedIndentifier is currently not required
     const name = qualifiyIdentifier(idxDef.name);
     /* istanbul ignore if */
     if (this.mapNameToIDXDef.has(name)) {
-      throw new Error(`table '${this.name}': foreign key constraint ${idxDef.name} already registered`);
+      throw new Error(`table '${this.name}': index ${idxDef.name} already registered`);
     }
     this.mapNameToIDXDef.set(name, idxDef);
   }
@@ -295,7 +301,7 @@ export class Table {
    * Generate SQL Statements
    *
    */
-  private createCreateTableStatement(): string {
+  public createCreateTableStatement(addFields?: Field[]): string {
     const colNamesPK: string[] = [];
     const colDefs: string[] = [];
 
@@ -321,6 +327,12 @@ export class Table {
       }
       colDefs.push(colDef);
     });
+    if (addFields) {
+      addFields.forEach((field) => {
+        const quotedFieldName = field.quotedName;
+        colDefs.push(`${quotedFieldName} ${field.dbtype}`);
+      });
+    }
     // --------------------------------------------------------------
     // generate CREATE TABLE statement
     let stmt = `CREATE TABLE IF NOT EXISTS ${quotedTableName} (\n  `;
@@ -346,7 +358,7 @@ export class Table {
       stmt += fk.fields.map((field) => field.quotedName).join(', ');
       stmt += ')\n';
 
-      // TODO if fk.foreignTableName has qualifier it must match the qualifier of this.name
+      // if fk.foreignTableName has qualifier it must match the qualifier of this.name
       const {identName, identSchema} = splitIdentifiers(fk.foreignTableName);
 
       const tableSchema = this.schemaName;
