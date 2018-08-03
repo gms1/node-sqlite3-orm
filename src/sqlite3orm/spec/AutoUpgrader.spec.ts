@@ -4,7 +4,6 @@ import {
   AutoUpgrader,
   BaseDAO,
   DbCatalogDAO,
-  DbTableInfo,
   field,
   id,
   schema,
@@ -25,13 +24,13 @@ function debug(formatter: any, ...args: any[]): void {
 
 // public methods for easier testing
 class SpecAutoUpgrader extends AutoUpgrader {
-  createTable(tab: Table): Promise<void> {
+  async createTable(tab: Table): Promise<void> {
     return super.createTable(tab);
   }
-  alterTable(tab: Table, upgradeInfo: UpgradeInfo): Promise<void> {
+  async alterTable(tab: Table, upgradeInfo: UpgradeInfo): Promise<void> {
     return super.alterTable(tab, upgradeInfo);
   }
-  recreateTable(tab: Table, upgradeInfo: UpgradeInfo): Promise<void> {
+  async recreateTable(tab: Table, upgradeInfo: UpgradeInfo): Promise<void> {
     return super.recreateTable(tab, upgradeInfo);
   }
 }

@@ -2,7 +2,6 @@
 import {backtickQuoteSimpleIdentifier} from './utils';
 import {FKFieldDefinition} from './FKFieldDefinition';
 import {IDXFieldDefinition} from './IDXFieldDefinition';
-import {DbColumnTypeInfo} from './DbTableInfo';
 
 /**
  * Class holding a field definition
