@@ -9,7 +9,7 @@ export class DbCatalogDAO {
     this.sqldb = sqldb;
   }
 
-  async readSchemas(): Promise<string[]> {
+  readSchemas(): Promise<string[]> {
     const schemas: string[] = [];
     return this.sqldb.all(`PRAGMA database_list`).then((res) => {
       res.forEach((db) => schemas.push(db.name));
@@ -17,7 +17,7 @@ export class DbCatalogDAO {
     });
   }
 
-  async readTables(schemaName: string): Promise<string[]> {
+  readTables(schemaName: string): Promise<string[]> {
     const tables: string[] = [];
     const quotedSchemaName = quoteSimpleIdentifier(schemaName);
     return this.sqldb.all(`select * from ${quotedSchemaName}.sqlite_master where type='table'`).then((res) => {
@@ -118,8 +118,7 @@ export class DbCatalogDAO {
     }
   }
 
-  protected async callSchemaPragma(pragmaName: string, identifierName: string, identifierSchema?: string):
-      Promise<any[]> {
+  protected callSchemaPragma(pragmaName: string, identifierName: string, identifierSchema?: string): Promise<any[]> {
     return this.sqldb.all(`PRAGMA ${this.schemaPragma(pragmaName, identifierName, identifierSchema)}`);
   }
 

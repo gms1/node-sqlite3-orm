@@ -30,8 +30,8 @@ export interface UpgradeInfo {
 export class AutoUpgrader {
   static defaults?: UpgradeOptions;
 
-  private sqldb: SqlDatabase;
-  private catalogDao: DbCatalogDAO;
+  private readonly sqldb: SqlDatabase;
+  private readonly catalogDao: DbCatalogDAO;
 
   constructor(sqldb: SqlDatabase) {
     this.sqldb = sqldb;
@@ -42,7 +42,7 @@ export class AutoUpgrader {
    * upgrade all registered tables
    */
   /* istanbul ignore next */
-  async upgradeAllTables(opts?: UpgradeOptions): Promise<void> {
+  upgradeAllTables(opts?: UpgradeOptions): Promise<void> {
     return this.upgradeTables(schema().getAllTables(), opts);
   }
 
@@ -96,7 +96,7 @@ export class AutoUpgrader {
   }
 
 
-  async isActual(table: Table, opts?: UpgradeOptions): Promise<boolean> {
+  isActual(table: Table, opts?: UpgradeOptions): Promise<boolean> {
     debug(`isActual(${table.name}):`);
     return this.getUpgradeInfo(table, opts).then((info) => info.upgradeMode === UpgradeMode.ACTUAL);
   }
@@ -248,7 +248,7 @@ export class AutoUpgrader {
   /*
    * create table and indexes
    */
-  protected async createTable(table: Table): Promise<void> {
+  protected createTable(table: Table): Promise<void> {
     const promises: Promise<void>[] = [];
 
     debug(`  => create table`);
@@ -268,7 +268,7 @@ export class AutoUpgrader {
   /*
    * alter table and add missing table colums and indexes
    */
-  protected async alterTable(table: Table, upgradeInfo: UpgradeInfo): Promise<void> {
+  protected alterTable(table: Table, upgradeInfo: UpgradeInfo): Promise<void> {
     const tableInfo = upgradeInfo.tableInfo as DbTableInfo;
     const promises: Promise<void>[] = [];
 
@@ -319,7 +319,7 @@ export class AutoUpgrader {
   /*
    * recreate table
    */
-  protected async recreateTable(table: Table, upgradeInfo: UpgradeInfo): Promise<void> {
+  protected recreateTable(table: Table, upgradeInfo: UpgradeInfo): Promise<void> {
     const tableInfo = upgradeInfo.tableInfo as DbTableInfo;
     const addFields: Field[] = [];
     const promises: Promise<void>[] = [];
@@ -376,7 +376,7 @@ FROM  ${tmpTableName}`;
     // drop old table
     transPromises.push(this.sqldb.exec(`DROP TABLE ${tmpTableName}`));
 
-    promises.push(this.sqldb.transactionalize(async () => Promise.all(transPromises).then(() => {})));
+    promises.push(this.sqldb.transactionalize(() => Promise.all(transPromises).then(() => {})));
 
     // create all indexes
     table.mapNameToIDXDef.forEach((idx) => {
@@ -391,14 +391,14 @@ FROM  ${tmpTableName}`;
   /*
    * get current foreign key enforcement status
    */
-  async foreignKeyEnabled(): Promise<boolean> {
+  foreignKeyEnabled(): Promise<boolean> {
     return this.sqldb.get('PRAGMA foreign_keys').then((row: any) => !!row.foreign_keys);
   }
 
   /*
    * set current foreign key enforcement status
    */
-  async foreignKeyEnable(enable: boolean): Promise<void> {
+  foreignKeyEnable(enable: boolean): Promise<void> {
     const val = enable ? 'TRUE' : 'FALSE';
     return this.sqldb.exec(`PRAGMA foreign_keys = ${val}`);
   }

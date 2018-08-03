@@ -18,7 +18,7 @@ export class Schema {
    */
   public static schema: Schema;
 
-  private mapNameToTable!: Map<string, Table>;
+  private readonly mapNameToTable!: Map<string, Table>;
 
   /**
    * Creates an instance of Schema.
@@ -100,7 +100,7 @@ export class Schema {
    * @param name - The name of the table
    * @returns A promise
    */
-  public async createTable(sqldb: SqlDatabase, name: string): Promise<void> {
+  public createTable(sqldb: SqlDatabase, name: string): Promise<void> {
     const table = this.getTable(name);
     return sqldb.exec(table.getCreateTableStatement());
   }
@@ -112,7 +112,7 @@ export class Schema {
    * @param name - The name of the table
    * @returns A promise
    */
-  public async dropTable(sqldb: SqlDatabase, name: string): Promise<void> {
+  public dropTable(sqldb: SqlDatabase, name: string): Promise<void> {
     const table = this.getTable(name);
     return sqldb.exec(table.getDropTableStatement());
   }
@@ -125,7 +125,7 @@ export class Schema {
    * @param colName - The name of the column
    * @returns A promise
    */
-  public async alterTableAddColumn(sqldb: SqlDatabase, tableName: string, colName: string): Promise<void> {
+  public alterTableAddColumn(sqldb: SqlDatabase, tableName: string, colName: string): Promise<void> {
     const table = this.getTable(tableName);
     return sqldb.exec(table.getAlterTableAddColumnStatement(colName));
   }
@@ -139,7 +139,7 @@ export class Schema {
    * @param [unique] - create unique index
    * @returns A promise
    */
-  public async createIndex(sqldb: SqlDatabase, tableName: string, idxName: string, unique?: boolean): Promise<void> {
+  public createIndex(sqldb: SqlDatabase, tableName: string, idxName: string, unique?: boolean): Promise<void> {
     const table = this.getTable(tableName);
     return sqldb.exec(table.getCreateIndexStatement(idxName, unique));
   }
@@ -152,7 +152,7 @@ export class Schema {
    * @param idxName - The name of the index
    * @returns A promise
    */
-  public async dropIndex(sqldb: SqlDatabase, tableName: string, idxName: string): Promise<void> {
+  public dropIndex(sqldb: SqlDatabase, tableName: string, idxName: string): Promise<void> {
     const table = this.getTable(tableName);
     return sqldb.exec(table.getDropIndexStatement(idxName));
   }

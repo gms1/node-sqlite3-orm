@@ -16,7 +16,7 @@ export interface SqlRunResult {
  * @class SqlStatement
  */
 export class SqlStatement {
-  private stmt: Statement;
+  private readonly stmt: Statement;
 
   /**
    * Creates an instance of SqlStatement.
@@ -44,7 +44,7 @@ export class SqlStatement {
    *
    * @returns {Promise<void>}
    */
-  public async reset(): Promise<void> {
+  public reset(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.stmt.reset(() => {
         resolve();
@@ -57,7 +57,7 @@ export class SqlStatement {
    *
    * @returns {Promise<void>}
    */
-  public async finalize(): Promise<void> {
+  public finalize(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.stmt.finalize((err) => {
         if (err) {
@@ -76,7 +76,7 @@ export class SqlStatement {
    * @param [params] - The parameters referenced in the statement; you can provide multiple parameters as array
    * @returns A promise
    */
-  public async run(params?: any): Promise<SqlRunResult> {
+  public run(params?: any): Promise<SqlRunResult> {
     return new Promise<SqlRunResult>((resolve, reject) => {
       // tslint:disable-next-line: only-arrow-functions
       this.stmt.run(params, function(err: Error): void {
@@ -97,7 +97,7 @@ export class SqlStatement {
    * @param [params] - The parameters referenced in the statement; you can provide multiple parameters as array
    * @returns A promise
    */
-  public async get(params?: any): Promise<any> {
+  public get(params?: any): Promise<any> {
     return new Promise<any>((resolve, reject) => {
       this.stmt.get(params, (err, row) => {
         if (err) {
@@ -115,7 +115,7 @@ export class SqlStatement {
    * @param [params] - The parameters referenced in the statement; you can provide multiple parameters as array
    * @returns A promise
    */
-  public async all(params?: any): Promise<any[]> {
+  public all(params?: any): Promise<any[]> {
     return new Promise<any[]>((resolve, reject) => {
       this.stmt.all(params, (err, rows) => {
         /* istanbul ignore if */
@@ -136,7 +136,7 @@ export class SqlStatement {
    * @param [callback]
    * @returns A promise
    */
-  public async each(params?: any, callback?: (err: Error, row: any) => void): Promise<number> {
+  public each(params?: any, callback?: (err: Error, row: any) => void): Promise<number> {
     return new Promise<number>((resolve, reject) => {
       this.stmt.each(params, callback, (err: Error, count: number) => {
         /* istanbul ignore if */

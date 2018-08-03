@@ -78,7 +78,7 @@ export class SqlDatabase {
       await this.pool.release(this);
     }
     return new Promise<void>((resolve, reject) => {
-             const db = new Database(databaseFile, mode || SQL_OPEN_DEFAULT, async (err) => {
+             const db = new Database(databaseFile, mode || SQL_OPEN_DEFAULT, (err) => {
                if (err) {
                  debug(`opening connection to ${databaseFile} failed: ${err.message}`);
                  reject(err);
@@ -88,7 +88,7 @@ export class SqlDatabase {
                }
              });
            })
-        .then(async(): Promise<void> => {
+        .then((): Promise<void> => {
           if (settings) {
             return this.applySettings(settings);
           }
@@ -101,7 +101,7 @@ export class SqlDatabase {
    *
    * @returns {Promise<void>}
    */
-  public async close(): Promise<void> {
+  public close(): Promise<void> {
     if (this.pool) {
       return this.pool.release(this);
     }
@@ -142,7 +142,7 @@ export class SqlDatabase {
    * provide multiple parameters as array
    * @returns A promise
    */
-  public async run(sql: string, params?: any): Promise<SqlRunResult> {
+  public run(sql: string, params?: any): Promise<SqlRunResult> {
     return new Promise<SqlRunResult>((resolve, reject) => {
       // trace('run stmt=' + sql);
       // trace('>input: ' + JSON.stringify(params));
@@ -176,7 +176,7 @@ ${sql}\nparams: `, params);
    * provide multiple parameters as array
    * @returns A promise
    */
-  public async get(sql: string, params?: any): Promise<any> {
+  public get(sql: string, params?: any): Promise<any> {
     return new Promise<any>((resolve, reject) => {
       // trace('get stmt=' + sql);
       // trace('>input: ' + JSON.stringify(params));
@@ -206,7 +206,7 @@ ${sql}`);
    * provide multiple parameters as array
    * @returns A promise
    */
-  public async all(sql: string, params?: any): Promise<any[]> {
+  public all(sql: string, params?: any): Promise<any[]> {
     return new Promise<any[]>((resolve, reject) => {
       // trace('all stmt=' + sql);
       // trace('>input: ' + JSON.stringify(params));
@@ -238,7 +238,7 @@ ${sql}`);
    * @param [callback] - The callback function
    * @returns A promise
    */
-  public async each(sql: string, params?: any, callback?: (err: Error, row: any) => void): Promise<number> {
+  public each(sql: string, params?: any, callback?: (err: Error, row: any) => void): Promise<number> {
     return new Promise<number>((resolve, reject) => {
       /* istanbul ignore if */
       if (!this.db) {
@@ -263,7 +263,7 @@ ${sql}`);
    * @param sql - The SQL statement
    * @returns A promise
    */
-  public async exec(sql: string): Promise<void> {
+  public exec(sql: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       // trace('exec stmt=' + sql);
       /* istanbul ignore if */
@@ -291,7 +291,7 @@ ${sql}`);
    * provide multiple parameters as array
    * @returns A promise
    */
-  public async prepare(sql: string, params?: any): Promise<SqlStatement> {
+  public prepare(sql: string, params?: any): Promise<SqlStatement> {
     return new Promise<SqlStatement>((resolve, reject) => {
       /* istanbul ignore if */
       if (!this.db) {
@@ -346,11 +346,11 @@ ${sql}`);
    *
    * @param [callback]
    */
-  public async transactionalize<T>(callback: () => Promise<T>): Promise<T> {
+  public transactionalize<T>(callback: () => Promise<T>): Promise<T> {
     return this.run('BEGIN IMMEDIATE TRANSACTION')
         .then(callback)
-        .then(async (res) => this.run('COMMIT TRANSACTION').then(async () => Promise.resolve(res)))
-        .catch(async (err) => this.run('ROLLBACK TRANSACTION').then(async () => Promise.reject(err)));
+        .then((res) => this.run('COMMIT TRANSACTION').then(() => Promise.resolve(res)))
+        .catch((err) => this.run('ROLLBACK TRANSACTION').then(() => Promise.reject(err)));
   }
 
   // tslint:disable unified-signatures
@@ -427,11 +427,11 @@ ${sql}`);
    * @param newver
    * @returns A promise
    */
-  public async setUserVersion(newver: number): Promise<void> {
+  public setUserVersion(newver: number): Promise<void> {
     return this.exec(`PRAGMA user_version = ${newver}`);
   }
 
-  protected async applySettings(settings: SqlDatabaseSettings): Promise<void> {
+  protected applySettings(settings: SqlDatabaseSettings): Promise<void> {
     /* istanbul ignore if */
     if (!this.db) {
       return Promise.reject(new Error('database connection not open'));
@@ -541,7 +541,7 @@ ${sql}`);
   /*
   @internal
   */
-  public async openByPool(pool: SqlConnectionPool, databaseFile: string, mode?: number, settings?: SqlDatabaseSettings):
+  public openByPool(pool: SqlConnectionPool, databaseFile: string, mode?: number, settings?: SqlDatabaseSettings):
       Promise<void> {
     return new Promise<void>((resolve, reject) => {
              const db = new Database(databaseFile, mode || SQL_OPEN_DEFAULT, (err) => {
@@ -554,7 +554,7 @@ ${sql}`);
                }
              });
            })
-        .then(async(): Promise<void> => {
+        .then((): Promise<void> => {
           if (settings) {
             return this.applySettings(settings);
           }
@@ -565,7 +565,7 @@ ${sql}`);
   /*
   @internal
   */
-  public async closeByPool(): Promise<void> {
+  public closeByPool(): Promise<void> {
     this.pool = undefined;
     return new Promise<void>((resolve, reject) => {
       if (!this.db) {

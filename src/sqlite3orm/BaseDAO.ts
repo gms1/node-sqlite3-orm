@@ -42,7 +42,7 @@ export class BaseDAO<T extends Object> {
    * @param model - A model class instance
    * @returns A promise of the inserted model class instance
    */
-  public async insert(model: T): Promise<T> {
+  public insert(model: T): Promise<T> {
     return new Promise<T>(async (resolve, reject) => {
       try {
         if (!this.table.autoIncrementField) {
@@ -78,7 +78,7 @@ export class BaseDAO<T extends Object> {
    * @param model - A model class instance
    * @returns A promise of the updated model class instance
    */
-  public async update(model: T): Promise<T> {
+  public update(model: T): Promise<T> {
     return new Promise<T>(async (resolve, reject) => {
       try {
         const res = await this.sqldb.run(this.metaModel.getUpdateByIdStatement(), this.bindAllInputParams(model));
@@ -100,7 +100,7 @@ export class BaseDAO<T extends Object> {
    * @param model - A model class instance
    * @returns A promise
    */
-  public async delete(model: T): Promise<void> {
+  public delete(model: T): Promise<void> {
     return new Promise<void>(async (resolve, reject) => {
       try {
         const res =
@@ -126,7 +126,7 @@ export class BaseDAO<T extends Object> {
    * @param input - A partial model class instance
    * @returns A promise
    */
-  public async deleteById(input: Partial<T>): Promise<void> {
+  public deleteById(input: Partial<T>): Promise<void> {
     return new Promise<void>(async (resolve, reject) => {
       try {
         const res =
@@ -153,7 +153,7 @@ export class BaseDAO<T extends Object> {
    * @param model - A model class instance
    * @returns A promise of model class instance
    */
-  public async select(model: T): Promise<T> {
+  public select(model: T): Promise<T> {
     return new Promise<T>(async (resolve, reject) => {
       try {
         const row =
@@ -174,7 +174,7 @@ export class BaseDAO<T extends Object> {
    * @param input - A partial model class instance
    * @returns A promise of model class instance
    */
-  public async selectById(input: Partial<T>): Promise<T> {
+  public selectById(input: Partial<T>): Promise<T> {
     return new Promise<T>(async (resolve, reject) => {
       let output: T;
       try {
@@ -198,7 +198,7 @@ export class BaseDAO<T extends Object> {
    * @param [params] - An optional object with additional host parameter
    * @returns A promise of array of class instances
    */
-  public async selectAll(sql?: string, params?: Object): Promise<T[]> {
+  public selectAll(sql?: string, params?: Object): Promise<T[]> {
     return new Promise<T[]>(async (resolve, reject) => {
       try {
         let stmt = this.metaModel.getSelectAllStatement();
@@ -229,7 +229,7 @@ export class BaseDAO<T extends Object> {
    * @param [params] - An optional object with additional host parameter
    * @returns A promise
    */
-  public async selectEach(callback: (err: Error, model: T) => void, sql?: string, params?: Object): Promise<number> {
+  public selectEach(callback: (err: Error, model: T) => void, sql?: string, params?: Object): Promise<number> {
     return new Promise<number>(async (resolve, reject) => {
       try {
         let stmt = this.metaModel.getSelectAllStatement();
@@ -260,7 +260,7 @@ export class BaseDAO<T extends Object> {
    * @param [params] - An optional object with additional host parameter
    * @returns A promise of array of model class instances
    */
-  public async selectAllOf<P extends Object>(
+  public selectAllOf<P extends Object>(
       constraintName: string, parentType: {new(): P}, parentObj: P, sql?: string, params?: Object): Promise<T[]> {
     return new Promise<T[]>(async (resolve, reject) => {
       try {
@@ -302,7 +302,7 @@ export class BaseDAO<T extends Object> {
    * @param [params] - An optional object with additional host parameter
    * @returns A promise of array of model class instances
    */
-  public async selectAllChildsOf<C extends Object>(
+  public selectAllChildsOf<C extends Object>(
       constraintName: string, childType: {new(): C}, parentObj: T, sql?: string, params?: Object): Promise<C[]> {
     const childDAO = new BaseDAO<C>(childType, this.sqldb);
     return childDAO.selectAllOf(constraintName, this.type, parentObj, sql, params);
@@ -317,7 +317,7 @@ export class BaseDAO<T extends Object> {
    * @param childObj - An instance of the class mapped to the child table
    * @returns A promise of model class instance
    */
-  public async selectByChild<C extends Object>(constraintName: string, childType: {new(): C}, childObj: C): Promise<T> {
+  public selectByChild<C extends Object>(constraintName: string, childType: {new(): C}, childObj: C): Promise<T> {
     return new Promise<T>(async (resolve, reject) => {
       // create child DAO
       const childDAO = new BaseDAO<C>(childType, this.sqldb);
@@ -371,8 +371,7 @@ export class BaseDAO<T extends Object> {
    * @param childObj - An instance of the class mapped to the child table
    * @returns A promise of model class instance
    */
-  public async selectParentOf<P extends Object>(constraintName: string, parentType: {new(): P}, childObj: T):
-      Promise<P> {
+  public selectParentOf<P extends Object>(constraintName: string, parentType: {new(): P}, childObj: T): Promise<P> {
     const parentDAO = new BaseDAO<P>(parentType, this.sqldb);
     return parentDAO.selectByChild(constraintName, this.type, childObj);
   }
@@ -456,7 +455,7 @@ export class BaseDAO<T extends Object> {
    *
    * @returns {Promise<void>}
    */
-  public async createTable(): Promise<void> {
+  public createTable(): Promise<void> {
     return this.sqldb.exec(this.table.getCreateTableStatement());
   }
 
@@ -465,7 +464,7 @@ export class BaseDAO<T extends Object> {
    *
    * @returns {Promise<void>}
    */
-  public async dropTable(): Promise<void> {
+  public dropTable(): Promise<void> {
     return this.sqldb.exec(this.table.getDropTableStatement());
   }
 
@@ -475,7 +474,7 @@ export class BaseDAO<T extends Object> {
    * @param colName - The column/field to add
    * @returns A promise
    */
-  public async alterTableAddColumn(colName: string): Promise<void> {
+  public alterTableAddColumn(colName: string): Promise<void> {
     return this.sqldb.exec(this.table.getAlterTableAddColumnStatement(colName));
   }
 
@@ -486,7 +485,7 @@ export class BaseDAO<T extends Object> {
    * @param [unique] - create unique index
    * @returns A promise
    */
-  public async createIndex(idxName: string, unique?: boolean): Promise<void> {
+  public createIndex(idxName: string, unique?: boolean): Promise<void> {
     return this.sqldb.exec(this.table.getCreateIndexStatement(idxName, unique));
   }
 
@@ -496,7 +495,7 @@ export class BaseDAO<T extends Object> {
    * @param idxName - The name of the index
    * @returns A promise
    */
-  public async dropIndex(idxName: string): Promise<void> {
+  public dropIndex(idxName: string): Promise<void> {
     return this.sqldb.exec(this.table.getDropIndexStatement(idxName));
   }
 }

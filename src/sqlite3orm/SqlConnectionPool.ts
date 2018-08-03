@@ -27,9 +27,9 @@ export class SqlConnectionPool {
 
   private curr: number;
 
-  private inPool: SqlDatabase[];
+  private readonly inPool: SqlDatabase[];
 
-  private inUse: Set<SqlDatabase>;
+  private readonly inUse: Set<SqlDatabase>;
 
   private settings?: SqlDatabaseSettings;
 
@@ -59,7 +59,7 @@ export class SqlConnectionPool {
    * @param [max=0] maximum connections which can be opened by this connection pool
    * @returns A promise
    */
-  async open(
+  open(
       databaseFile: string, mode: number = SQL_OPEN_DEFAULT, min: number = 1, max: number = 0,
       settings?: SqlDatabaseSettings): Promise<void> {
     const opening = new Promise<void>(async (resolve, reject) => {
@@ -113,7 +113,7 @@ export class SqlConnectionPool {
    *
    * @returns A promise
    */
-  async close(): Promise<void> {
+  close(): Promise<void> {
     return new Promise<void>(async (resolve, reject) => {
       try {
         this.databaseFile = undefined;
@@ -149,7 +149,7 @@ export class SqlConnectionPool {
    * @param [timeout=0] The timeout to wait for a connection ( 0 is infinite )
    * @returns A promise of the db connection
    */
-  async get(timeout: number = 0): Promise<SqlDatabase> {
+  get(timeout: number = 0): Promise<SqlDatabase> {
     return new Promise<SqlDatabase>(async (resolve, reject) => {
       try {
         let sqldb: SqlDatabase|undefined;
@@ -209,7 +209,7 @@ export class SqlConnectionPool {
 }
 
 // TODO: move this function or find a better one:
-async function wait(cond: () => boolean, timeout: number = 0, intervall: number = 100): Promise<void> {
+function wait(cond: () => boolean, timeout: number = 0, intervall: number = 100): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     let counter = 0;
     const timer = setInterval(() => {
