@@ -151,7 +151,7 @@ export class Table {
       this.mapNameToIdentityField.set(field.name, field);
 
       if (this.autoIncrement && !this.withoutRowId && this.mapNameToIdentityField.size === 1 &&
-          field.dbtype.toUpperCase().indexOf('INTEGER') !== -1) {
+          field.dbTypeInfo.typeAffinity === 'INTEGER') {
         this._autoIncrementField = field;
       } else {
         this._autoIncrementField = undefined;

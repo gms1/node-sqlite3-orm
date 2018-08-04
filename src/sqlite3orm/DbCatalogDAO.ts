@@ -40,8 +40,13 @@ export class DbCatalogDAO {
 
 
       tableInfo.sort((colA, colB) => colA.pk - colB.pk).forEach((col) => {
-        const colInfo:
-            DbColumnInfo = {name: col.name, type: col.type, notNull: !!col.notnull, defaultValue: col.dflt_value};
+        const colInfo: DbColumnInfo = {
+          name: col.name,
+          type: col.type,
+          typeAffinity: DbCatalogDAO.getTypeAffinity(col.type),
+          notNull: !!col.notnull,
+          defaultValue: col.dflt_value
+        };
         info.columns[col.name] = colInfo;
         if (col.pk) {
           info.primaryKey.push(col.name);
@@ -129,5 +134,24 @@ export class DbCatalogDAO {
     res += toCols.join(',');
     res += ')';
     return res;
+  }
+
+  static getTypeAffinity(typeDef: string): string {
+    const type = typeDef.toUpperCase();
+    if (type.indexOf('INT') !== -1) {
+      return 'INTEGER';
+    }
+    const textMatches = /(CHAR|CLOB|TEXT)/.exec(type);
+    if (textMatches) {
+      return 'TEXT';
+    }
+    if (type.indexOf('BLOB') !== -1) {
+      return 'BLOB';
+    }
+    const realMatches = /(REAL|FLOA|DOUB)/.exec(type);
+    if (realMatches) {
+      return 'REAL';
+    }
+    return 'NUMERIC';
   }
 }

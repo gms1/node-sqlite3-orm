@@ -5,8 +5,8 @@ import {Table} from './Table';
 import {Field} from './Field';
 import {schema} from './Schema';
 import {DbCatalogDAO} from './DbCatalogDAO';
-import {DbTableInfo, DbColumnTypeInfo} from './DbTableInfo';
-import {quoteIdentifier, qualifiyIdentifier} from './utils';
+import {DbTableInfo} from './DbTableInfo';
+import {quoteIdentifier, qualifiyIdentifier, sequentialize, PromiseFactories} from './utils';
 const debug = _dbg('sqlite3orm:autoupgrade');
 
 export interface UpgradeOptions {
@@ -66,12 +66,12 @@ export class AutoUpgrader {
     // upgrade tables
     try {
       if (Array.isArray(tables)) {
-        const promises: Promise<void>[] = [];
+        const factories: PromiseFactories<void> = [];
         tables.forEach((table) => {
-          promises.push(this._upgradeTable(table, opts));
+          factories.push(() => this._upgradeTable(table, opts));
         });
 
-        await Promise.all(promises);
+        await sequentialize(factories);
 
       } else {
         await this._upgradeTable(tables, opts);
@@ -160,8 +160,8 @@ export class AutoUpgrader {
           continue;
         }
       }
-      const newFldDef = AutoUpgrader.parseDbType(field.dbtype);
-      if (!newFldDef || (newFldDef.type !== tableInfo.columns[colName].type) ||
+      const newFldDef = Field.parseDbType(field.dbtype);
+      if (!newFldDef || (newFldDef.typeAffinity !== tableInfo.columns[colName].typeAffinity) ||
           (newFldDef.notNull !== tableInfo.columns[colName].notNull) ||
           // tslint:disable-next-line triple-equals
           (newFldDef.defaultValue != tableInfo.columns[colName].defaultValue)) {
@@ -249,19 +249,19 @@ export class AutoUpgrader {
    * create table and indexes
    */
   protected createTable(table: Table): Promise<void> {
-    const promises: Promise<void>[] = [];
+    const factories: PromiseFactories<void> = [];
 
     debug(`  => create table`);
 
     // create table
-    promises.push(this.sqldb.exec(table.getCreateTableStatement()));
+    factories.push(() => this.sqldb.exec(table.getCreateTableStatement()));
 
     // create all indexes
     table.mapNameToIDXDef.forEach((idx) => {
       debug(`  => create index '${idx.name}'`);
-      promises.push(this.sqldb.exec(table.getCreateIndexStatement(idx.name)));
+      factories.push(() => this.sqldb.exec(table.getCreateIndexStatement(idx.name)));
     });
-    return Promise.all(promises).then(() => {});
+    return sequentialize(factories).then(() => {});
   }
 
 
@@ -270,7 +270,7 @@ export class AutoUpgrader {
    */
   protected alterTable(table: Table, upgradeInfo: UpgradeInfo): Promise<void> {
     const tableInfo = upgradeInfo.tableInfo as DbTableInfo;
-    const promises: Promise<void>[] = [];
+    const factories: PromiseFactories<void> = [];
 
     debug(`  => alter table`);
 
@@ -278,7 +278,7 @@ export class AutoUpgrader {
     table.mapNameToField.forEach((field) => {
       if (!tableInfo.columns[field.name]) {
         debug(`  => alter table add column '${field.name}'`);
-        promises.push(this.sqldb.exec(table.getAlterTableAddColumnStatement(field.name)));
+        factories.push(() => this.sqldb.exec(table.getAlterTableAddColumnStatement(field.name)));
       }
     });
 
@@ -287,7 +287,7 @@ export class AutoUpgrader {
       const idx = table.mapNameToIDXDef.get(qualifiyIdentifier(name));
       if (!idx) {
         debug(`  => drop index '${name}'`);
-        promises.push(this.sqldb.exec(`DROP INDEX IF EXISTS ${quoteIdentifier(name)}`));
+        factories.push(() => this.sqldb.exec(`DROP INDEX IF EXISTS ${quoteIdentifier(name)}`));
         delete tableInfo.indexes[name];  // delete to enable re-creation
         return;
       }
@@ -297,7 +297,7 @@ export class AutoUpgrader {
         debug(`  => drop index '${name}' (changed)`);
         // debug(`     oldCols='${oldCols}'`);
         // debug(`     newCols='${newCols}'`);
-        promises.push(this.sqldb.exec(`DROP INDEX IF EXISTS ${quoteIdentifier(name)}`));
+        factories.push(() => this.sqldb.exec(`DROP INDEX IF EXISTS ${quoteIdentifier(name)}`));
         delete tableInfo.indexes[name];  // delete to enable re-creation
         return;
       }
@@ -307,11 +307,11 @@ export class AutoUpgrader {
     table.mapNameToIDXDef.forEach((idx) => {
       if (!tableInfo.indexes[idx.name]) {
         debug(`  => create index '${idx.name}'`);
-        promises.push(this.sqldb.exec(table.getCreateIndexStatement(idx.name)));
+        factories.push(() => this.sqldb.exec(table.getCreateIndexStatement(idx.name)));
       }
     });
 
-    return Promise.all(promises).then(() => {});
+    return sequentialize(factories).then(() => {});
   }
 
 
@@ -322,8 +322,7 @@ export class AutoUpgrader {
   protected recreateTable(table: Table, upgradeInfo: UpgradeInfo): Promise<void> {
     const tableInfo = upgradeInfo.tableInfo as DbTableInfo;
     const addFields: Field[] = [];
-    const promises: Promise<void>[] = [];
-    const transPromises: Promise<void>[] = [];
+    const factories: PromiseFactories<void> = [];
 
     debug(`  => recreate table`);
     const keepOldColumns = upgradeInfo.opts && upgradeInfo.opts.keepOldColumns ? true : false;
@@ -349,10 +348,10 @@ export class AutoUpgrader {
     const tmpTableName = quoteIdentifier(table.name + '_autoupgrade');
 
     // rename old table
-    transPromises.push(this.sqldb.exec(`ALTER TABLE ${table.quotedName} RENAME TO ${tmpTableName}`));
+    factories.push(() => this.sqldb.exec(`ALTER TABLE ${table.quotedName} RENAME TO ${tmpTableName}`));
 
     // create table
-    transPromises.push(this.sqldb.exec(table.createCreateTableStatement(addFields)));
+    factories.push(() => this.sqldb.exec(table.createCreateTableStatement(addFields)));
 
     // data transfer
     let colNames;
@@ -371,20 +370,19 @@ export class AutoUpgrader {
   ${colNames}
 FROM  ${tmpTableName}`;
 
-    transPromises.push(this.sqldb.exec(insertStmt));
+    factories.push(() => this.sqldb.exec(insertStmt));
 
     // drop old table
-    transPromises.push(this.sqldb.exec(`DROP TABLE ${tmpTableName}`));
+    factories.push(() => this.sqldb.exec(`DROP TABLE ${tmpTableName}`));
 
-    promises.push(this.sqldb.transactionalize(() => Promise.all(transPromises).then(() => {})));
 
     // create all indexes
     table.mapNameToIDXDef.forEach((idx) => {
       debug(`  => create index '${idx.name}'`);
-      promises.push(this.sqldb.exec(table.getCreateIndexStatement(idx.name)));
+      factories.push(() => this.sqldb.exec(table.getCreateIndexStatement(idx.name)));
     });
 
-    return Promise.all(promises).then(() => {});
+    return this.sqldb.transactionalize(() => sequentialize(factories).then(() => {}));
   }
 
 
@@ -403,40 +401,6 @@ FROM  ${tmpTableName}`;
     return this.sqldb.exec(`PRAGMA foreign_keys = ${val}`);
   }
 
-
-  static parseDbType(dbtype: string): DbColumnTypeInfo|undefined {
-    const typeNameMatches = /^\s*(\w+(\s*\(\s*\d+\s*(,\s*\d+\s*)?\))?)(.*)$/.exec(dbtype);
-
-    /* istanbul ignore if */
-    if (!typeNameMatches) {
-      return undefined;
-    }
-    const typeName = typeNameMatches[1];
-    const rest = typeNameMatches[4];
-    const notNull = /\bNOT\s+NULL\b/i.exec(rest) ? true : false;
-
-    let defaultValue;
-    const defaultNumberMatches = /\bDEFAULT\s+([+-]?\d+(\.\d*)?)/i.exec(rest);
-    if (defaultNumberMatches) {
-      defaultValue = defaultNumberMatches[1];
-    }
-    const defaultLiteralMatches = /\bDEFAULT\s+(('[^']*')+)/i.exec(rest);
-    if (defaultLiteralMatches) {
-      defaultValue = defaultLiteralMatches[1];
-      defaultValue.replace(/\'\'/g, '\'');
-    }
-    const defaultExprMatches = /\bDEFAULT\s*\(([^\)]*)\)/i.exec(rest);
-    if (defaultExprMatches) {
-      defaultValue = defaultExprMatches[1];
-    }
-
-    // debug(`dbtype='${dbtype}'`);
-    // debug(`type='${typeName}'`);
-    // debug(`rest='${rest}'`);
-    // debug(`notNull='${notNull}'`);
-    // debug(`default='${defaultValue}'`);
-    return {type: typeName, notNull, defaultValue};
-  }
 
 
   static debug(formatter: any, ...args: any[]): void {

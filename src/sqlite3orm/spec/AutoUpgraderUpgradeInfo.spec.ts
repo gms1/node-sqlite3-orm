@@ -42,22 +42,22 @@ describe('test autoupgrade - upgrade info', () => {
   const tableInfo: DbTableInfo = {
     name: TEST_TABLE,
     columns: {
-      ID: {name: 'ID', type: 'INTEGER', notNull: true, defaultValue: null},
+      ID: {name: 'ID', typeAffinity: 'INTEGER', type: 'INT', notNull: true, defaultValue: null},
 
-      PARENT1_ID1: {name: 'PARENT1_ID1', type: 'INTEGER', notNull: false, defaultValue: null},
-      PARENT1_ID2: {name: 'PARENT1_ID2', type: 'INTEGER', notNull: false, defaultValue: null},
+      PARENT1_ID1: {name: 'PARENT1_ID1', typeAffinity: 'INTEGER', type: 'INT', notNull: false, defaultValue: null},
+      PARENT1_ID2: {name: 'PARENT1_ID2', typeAffinity: 'INTEGER', type: 'INT', notNull: false, defaultValue: null},
 
-      PARENT2_ID1: {name: 'PARENT2_ID1', type: 'INTEGER', notNull: false, defaultValue: null},
-      PARENT2_ID2: {name: 'PARENT2_ID2', type: 'INTEGER', notNull: false, defaultValue: null},
+      PARENT2_ID1: {name: 'PARENT2_ID1', typeAffinity: 'INTEGER', type: 'INT', notNull: false, defaultValue: null},
+      PARENT2_ID2: {name: 'PARENT2_ID2', typeAffinity: 'INTEGER', type: 'INT', notNull: false, defaultValue: null},
 
-      PARENT3_ID1: {name: 'PARENT3_ID1', type: 'INTEGER', notNull: false, defaultValue: null},
-      PARENT3_ID2: {name: 'PARENT3_ID2', type: 'INTEGER', notNull: false, defaultValue: null},
+      PARENT3_ID1: {name: 'PARENT3_ID1', typeAffinity: 'INTEGER', type: 'INT', notNull: false, defaultValue: null},
+      PARENT3_ID2: {name: 'PARENT3_ID2', typeAffinity: 'INTEGER', type: 'INT', notNull: false, defaultValue: null},
 
-      FLD1: {name: 'FLD1', type: 'TEXT', notNull: false, defaultValue: null},
-      FLD2: {name: 'FLD2', type: 'TEXT', notNull: true, defaultValue: null},
-      FLD3: {name: 'FLD3', type: 'TEXT', notNull: true, defaultValue: '\'foo\''},
-      FLD4: {name: 'FLD4', type: 'REAL', notNull: true, defaultValue: '3.14'},
-      FLD5: {name: 'FLD5', type: 'TEXT', notNull: true, defaultValue: '\'foo\''}
+      FLD1: {name: 'FLD1', typeAffinity: 'TEXT', type: 'CHAR', notNull: false, defaultValue: null},
+      FLD2: {name: 'FLD2', typeAffinity: 'TEXT', type: 'CHAR', notNull: true, defaultValue: null},
+      FLD3: {name: 'FLD3', typeAffinity: 'TEXT', type: 'CHAR', notNull: true, defaultValue: '\'foo\''},
+      FLD4: {name: 'FLD4', typeAffinity: 'REAL', type: 'DOUBLE', notNull: true, defaultValue: '3.14'},
+      FLD5: {name: 'FLD5', typeAffinity: 'TEXT', type: 'CHAR', notNull: true, defaultValue: '\'foo\''}
     },
     primaryKey: ['ID'],
     indexes: {

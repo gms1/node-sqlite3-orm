@@ -250,7 +250,7 @@ export class MetaProperty {
           value = !value ? 0 : 1;
           break;
         case PropertyType.DATE:
-          if (field.dbtype.toUpperCase().indexOf('INT') !== -1) {
+          if (field.dbTypeInfo.typeAffinity === 'INTEGER') {
             value = Math.floor((value as Date).getTime() / 1000);
           } else {
             value = (value as Date).toISOString();

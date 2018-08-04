@@ -1,10 +1,13 @@
 export interface DbColumnTypeInfo {
-  type: string;
+  typeAffinity: string;
   notNull: boolean;
   defaultValue: any;
 }
 
-export interface DbColumnInfo extends DbColumnTypeInfo { name: string; }
+export interface DbColumnInfo extends DbColumnTypeInfo {
+  name: string;
+  type: string;
+}
 
 export interface DbIndexColumnInfo {
   name: string;

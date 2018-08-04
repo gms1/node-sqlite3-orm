@@ -51,17 +51,17 @@ export const SQL_OPEN_DEFAULT = SQL_OPEN_READWRITE | SQL_OPEN_CREATE;
  * @class SqlDatabase
  */
 export class SqlDatabase {
+  private static lastId: number = 0;
+
   private db?: Database;
+  private dbId?: number;
   private pool?: SqlConnectionPool;
 
   /**
    * Creates an instance of SqlDatabase.
    *
    */
-  constructor() {
-    this.db = undefined;
-    this.pool = undefined;
-  }
+  constructor() {}
 
   /**
    * Open a database connection
@@ -84,6 +84,8 @@ export class SqlDatabase {
                  reject(err);
                } else {
                  this.db = db;
+                 this.dbId = SqlDatabase.lastId++;
+                 debug(`${this.dbId}: opened`);
                  resolve();
                }
              });
@@ -110,7 +112,9 @@ export class SqlDatabase {
         resolve();
       } else {
         const db = this.db;
+        debug(`${this.dbId}: close`);
         this.db = undefined;
+        this.dbId = undefined;
         db.close((err) => {
           db.removeAllListeners();
           /* istanbul ignore if */
@@ -152,11 +156,13 @@ export class SqlDatabase {
         return;
       }
       // tslint:disable-next-line: only-arrow-functions
+      debug(`${this.dbId}: sql: ${sql}`);
+      const self = this;
       this.db.run(sql, params, function(err: Error): void {
         // do not use arrow function for this callback
         // the below 'this' should not reference our self
         if (err) {
-          debug(`failed sql: ${err.message}
+          debug(`${self.dbId}: failed sql: ${err.message}
 ${sql}\nparams: `, params);
           reject(err);
         } else {
@@ -185,9 +191,10 @@ ${sql}\nparams: `, params);
         reject(new Error('database connection not open'));
         return;
       }
+      debug(`${this.dbId}: sql: ${sql}`);
       this.db.get(sql, params, (err, row) => {
         if (err) {
-          debug(`failed sql: ${err.message}
+          debug(`${this.dbId}: failed sql: ${err.message}
 ${sql}`);
           reject(err);
         } else {
@@ -215,9 +222,10 @@ ${sql}`);
         reject(new Error('database connection not open'));
         return;
       }
+      debug(`${this.dbId}: sql: ${sql}`);
       this.db.all(sql, params, (err, rows) => {
         if (err) {
-          debug(`failed sql: ${err.message}
+          debug(`${this.dbId}: failed sql: ${err.message}
 ${sql}`);
           reject(err);
         } else {
@@ -245,9 +253,10 @@ ${sql}`);
         reject(new Error('database connection not open'));
         return;
       }
+      debug(`${this.dbId}: sql: ${sql}`);
       this.db.each(sql, params, callback, (err: Error, count: number) => {
         if (err) {
-          debug(`failed sql: ${err.message}
+          debug(`${this.dbId}: failed sql: ${err.message}
 ${sql}`);
           reject(err);
         } else {
@@ -271,9 +280,10 @@ ${sql}`);
         reject(new Error('database connection not open'));
         return;
       }
+      debug(`${this.dbId}: sql: ${sql}`);
       this.db.exec(sql, (err) => {
         if (err) {
-          debug(`failed sql: ${err.message}
+          debug(`${this.dbId}: failed sql: ${err.message}
 ${sql}`);
           reject(err);
         } else {
@@ -299,9 +309,10 @@ ${sql}`);
         return;
       }
       let dbstmt: Statement;
+      debug(`${this.dbId}: sql: ${sql}`);
       dbstmt = this.db.prepare(sql, params, (err) => {
         if (err) {
-          debug(`failed sql: ${err.message}
+          debug(`${this.dbId}: failed sql: ${err.message}
 ${sql}`);
           reject(err);
         } else {
@@ -550,6 +561,8 @@ ${sql}`);
                } else {
                  this.pool = pool;
                  this.db = db;
+                 this.dbId = SqlDatabase.lastId++;
+                 debug(`${this.dbId}: opened`);
                  resolve();
                }
              });
@@ -572,7 +585,9 @@ ${sql}`);
         resolve();
       } else {
         const db = this.db;
+        debug(`${this.dbId}: close`);
         this.db = undefined;
+        this.dbId = undefined;
         db.close((err) => {
           db.removeAllListeners();
           if (err) {
@@ -594,6 +609,7 @@ ${sql}`);
       sqldb.db.removeAllListeners();
       // move
       this.db = sqldb.db;
+      this.dbId = sqldb.dbId;
       this.pool = pool;
       // reapply default settings
       if (settings) {
@@ -604,6 +620,7 @@ ${sql}`);
       }
     }
     sqldb.db = undefined;
+    sqldb.dbId = undefined;
     sqldb.pool = undefined;
   }
 

@@ -2,6 +2,8 @@
 import {backtickQuoteSimpleIdentifier} from './utils';
 import {FKFieldDefinition} from './FKFieldDefinition';
 import {IDXFieldDefinition} from './IDXFieldDefinition';
+import {DbColumnTypeInfo} from './DbTableInfo';
+import {DbCatalogDAO} from './DbCatalogDAO';
 
 /**
  * Class holding a field definition
@@ -34,15 +36,22 @@ export class Field {
    * The type of the table column
    */
   private _dbtype?: string;
+  private _dbTypeInfo?: DbColumnTypeInfo;
 
   get dbtype(): string {
     return this._dbtype ? this._dbtype : this.dbDefaultType;
   }
   set dbtype(dbType: string) {
     this._dbtype = dbType;
+    this._dbTypeInfo = Field.parseDbType(this._dbtype);
   }
   get isDbTypeDefined(): boolean {
     return this._dbtype ? true : false;
+  }
+
+  get dbTypeInfo(): DbColumnTypeInfo {
+    return this._dbTypeInfo ||
+        {typeAffinity: DbCatalogDAO.getTypeAffinity(this.dbDefaultType), notNull: false, defaultValue: undefined};
   }
 
   /**
@@ -129,5 +138,41 @@ export class Field {
    */
   public setIndexField(indexField: IDXFieldDefinition): void {
     this.indexKeys.set(indexField.name, indexField);
+  }
+
+
+
+  static parseDbType(dbtype: string): DbColumnTypeInfo {
+    const typeDefMatches = /^\s*((\w+)(\s*\(\s*\d+\s*(,\s*\d+\s*)?\))?)(.*)$/.exec(dbtype);
+
+    /* istanbul ignore if */
+    if (!typeDefMatches) {
+      throw new Error(`failed to parse '${dbtype}'`);
+    }
+    const typeAffinity = DbCatalogDAO.getTypeAffinity(typeDefMatches[2]);
+    const rest = typeDefMatches[5];
+
+    const notNull = /\bNOT\s+NULL\b/i.exec(rest) ? true : false;
+
+    let defaultValue;
+    const defaultNumberMatches = /\bDEFAULT\s+([+-]?\d+(\.\d*)?)/i.exec(rest);
+    if (defaultNumberMatches) {
+      defaultValue = defaultNumberMatches[1];
+    }
+    const defaultLiteralMatches = /\bDEFAULT\s+(('[^']*')+)/i.exec(rest);
+    if (defaultLiteralMatches) {
+      defaultValue = defaultLiteralMatches[1];
+      defaultValue.replace(/\'\'/g, '\'');
+    }
+    const defaultExprMatches = /\bDEFAULT\s*\(([^\)]*)\)/i.exec(rest);
+    if (defaultExprMatches) {
+      defaultValue = defaultExprMatches[1];
+    }
+
+    // debug(`dbtype='${dbtype}'`);
+    // debug(`type='${typeName}'`);
+    // debug(`notNull='${notNull}'`);
+    // debug(`default='${defaultValue}'`);
+    return {typeAffinity, notNull, defaultValue};
   }
 }
