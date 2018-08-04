@@ -209,7 +209,7 @@ One possibility to achieve this could be to use a connection pool and to perform
 
 ## Autoupgrade
 
-automatically create or upgrade tables and indexes in the database based on the table definitions
+automatically create or upgrade tables and indexes in the database based on your table definitions
 
 ```TypeScript
 const autoUpgrader = new AutoUpgrader(sqldb);

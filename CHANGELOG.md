@@ -2,6 +2,7 @@
 
 | Release   | Notes                                                                                                                       |
 |-----------|-----------------------------------------------------------------------------------------------------------------------------|
+| 2.2.0     | autoupgrade for automatically creating or upgrade tables and indexes in the database                                        |
 | 2.1.0     | [2.1.0 changes](#2.1.0-changes)                                                                                             |
 | 2.0.0     | [2.0.0 changes](#2.0.0-changes)                                                                                             |
 | 1.0.1     | maintenance releases                                                                                                        |
