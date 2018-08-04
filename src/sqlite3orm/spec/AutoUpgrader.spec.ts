@@ -633,12 +633,12 @@ describe('test autoupgrade', () => {
       const model1Dao = new BaseDAO<Model1>(Model1, sqldb);
 
       let actual: boolean;
-      actual = await autoUpgrader.isActual(model1Dao.table);
+      actual = await autoUpgrader.isActual([model1Dao.table, parentModelDao.table]);
       expect(actual).toBeFalsy('1st time');
 
       await autoUpgrader.upgradeTables([model1Dao.table]);
 
-      actual = await autoUpgrader.isActual(model1Dao.table);
+      actual = await autoUpgrader.isActual([model1Dao.table, parentModelDao.table]);
       expect(actual).toBeTruthy('2nd time');
 
       const table1Info1 = await catalogDao.readTableInfo(TEST_TABLE);
