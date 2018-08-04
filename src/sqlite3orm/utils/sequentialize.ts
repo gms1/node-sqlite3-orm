@@ -1,5 +1,3 @@
-import {rejects} from 'assert';
-import {promises} from 'fs';
 
 export declare type PromiseFactory<T> = () => Promise<T>;
 export declare type PromiseFactories<T> = PromiseFactory<T>[];
