@@ -70,6 +70,7 @@ describe('test DbTableInfo.discover', () => {
       await childDao.createTable();
       await childDao.createIndex('PIDX1');
       await childDao.createIndex('PIDX2');
+
     } catch (err) {
       fail(err);
     }

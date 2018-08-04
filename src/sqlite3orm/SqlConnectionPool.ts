@@ -6,7 +6,7 @@ import * as _dbg from 'debug';
 import {SqlDatabase, SQL_OPEN_DEFAULT} from './SqlDatabase';
 import {SqlDatabaseSettings} from './SqlDatabaseSettings';
 
-const debug = _dbg('sqlite3orm:connectionpool');
+const debug = _dbg('sqlite3orm:pool');
 
 /**
  * A simple connection pool
@@ -74,6 +74,7 @@ export class SqlConnectionPool {
         this.min = min;
         this.max = max;
         this.settings = settings;
+        this.curr = 0;
         this.inPool.length = 0;
 
         const promises: Promise<void>[] = [];
@@ -82,17 +83,16 @@ export class SqlConnectionPool {
           this.min = 1;
         }
         let sqldb = new SqlDatabase();
-        this.inPool.push(sqldb);
         await sqldb.openByPool(this, this.databaseFile, this.mode, this.settings);
+        this.inPool.push(sqldb);
 
         for (let i = 1; i < this.min; i++) {
           sqldb = new SqlDatabase();
-          this.inPool.push(sqldb);
           promises.push(sqldb.openByPool(this, this.databaseFile, this.mode, this.settings));
+          this.inPool.push(sqldb);
         }
         await Promise.all(promises);
-        this.curr += this.min;
-        debug(`pool: ${this.curr} connections open (${this.inPool.length} in pool)`);
+        debug(`pool: opened: ${this.curr} connections open (${this.inPool.length} in pool)`);
         this.opening = undefined;
         resolve();
       } catch (err) {
@@ -116,6 +116,9 @@ export class SqlConnectionPool {
   close(): Promise<void> {
     return new Promise<void>(async (resolve, reject) => {
       try {
+        if (this.databaseFile) {
+          debug(`pool: closing: ${this.curr} connections open (${this.inPool.length} in pool)`);
+        }
         this.databaseFile = undefined;
         this.mode = SQL_OPEN_DEFAULT;
         const promises: Promise<void>[] = [];
@@ -163,6 +166,8 @@ export class SqlConnectionPool {
           if (this.max > 0) {
             this.inUse.add(sqldb);
           }
+          this.curr++;
+          debug(`pool: ${this.curr} connections open (${this.inPool.length} in pool)`);
           resolve(sqldb);
           return;
         }
@@ -203,6 +208,7 @@ export class SqlConnectionPool {
       const newsqldb = new SqlDatabase();
       await newsqldb.recycleByPool(this, sqldb, this.settings);
       this.inPool.push(newsqldb);
+      this.curr--;
       debug(`pool: ${this.curr} connections open (${this.inPool.length} in pool)`);
     }
   }

@@ -105,6 +105,9 @@ describe('test SqlConnectionPool', () => {
       let ver3 = await sqldb3.getUserVersion();
       expect(ver3).toBe(ver1, 'got wrong user version from connection 3');
 
+      await sqldb1.close();
+      await sqldb2.close();
+      await sqldb3.close();
       await pool.close();
       expect(pool.isOpen()).toBeFalsy();
 

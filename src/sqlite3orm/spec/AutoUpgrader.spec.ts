@@ -99,7 +99,7 @@ describe('test autoupgrade', () => {
 
       await autoUpgrader.upgradeTables([model1Dao.table]);
 
-      actual = await autoUpgrader.isActual(model1Dao.table);
+      actual = await autoUpgrader.isActual([model1Dao.table]);
       expect(actual).toBeTruthy('2nd time');
 
       const tableDef = schema().getTable(TEST_TABLE);

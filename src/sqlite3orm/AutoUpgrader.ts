@@ -96,9 +96,16 @@ export class AutoUpgrader {
   }
 
 
-  isActual(table: Table, opts?: UpgradeOptions): Promise<boolean> {
-    debug(`isActual(${table.name}):`);
-    return this.getUpgradeInfo(table, opts).then((info) => info.upgradeMode === UpgradeMode.ACTUAL);
+  isActual(tables: Table|Table[], opts?: UpgradeOptions): Promise<boolean> {
+    const promises: Promise<boolean>[] = [];
+    if (Array.isArray(tables)) {
+      tables.forEach((tab) => {
+        promises.push(this.getUpgradeInfo(tab, opts).then((info) => info.upgradeMode === UpgradeMode.ACTUAL));
+      });
+    } else {
+      promises.push(this.getUpgradeInfo(tables, opts).then((info) => info.upgradeMode === UpgradeMode.ACTUAL));
+    }
+    return Promise.all(promises).then((results) => results.reduce((prev, curr) => prev && curr));
   }
 
 
