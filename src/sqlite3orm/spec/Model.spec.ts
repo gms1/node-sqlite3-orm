@@ -1,9 +1,9 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-import {table, id, index, fk, field, schema, getModelMetadata} from '..';
+import {table, id, index, fk, field, schema, getModelMetadata, METADATA_MODEL_KEY, MetaModel} from '..';
 
 // ---------------------------------------------
 
-describe('test multiple models per table', () => {
+describe('test metaModels', () => {
 
   // ---------------------------------------------
   it('both models using all options', async (done) => {
@@ -118,6 +118,7 @@ describe('test multiple models per table', () => {
     }
     done();
   });
+
   // ---------------------------------------------
   it('conflicting withoutRowId-table option', async (done) => {
     try {
@@ -269,5 +270,90 @@ describe('test multiple models per table', () => {
     }
     done();
   });
+
+
+  // ---------------------------------------------
+  it('model destroy', async (done) => {
+    try {
+      @table({name: 'MPT11:T1'})
+      class Model1 {
+        @id({name: 'MPT11:ID'})
+        id!: number;
+
+        @field({name: 'MPT11:COL'})
+        col?: number;
+      }
+      @table({name: 'MPT11:T1'})
+      class Model2 {
+        @id({name: 'MPT11:ID'})
+        id!: number;
+
+        @field({name: 'MPT11:COL'})
+        col?: number;
+      }
+      expect(schema().hasTable('MPT11:T1')).toBeTruthy(`table not found`);
+      const metaModel1 = Reflect.getMetadata(METADATA_MODEL_KEY, Model1.prototype) as MetaModel;
+      const metaModel2 = Reflect.getMetadata(METADATA_MODEL_KEY, Model2.prototype) as MetaModel;
+      metaModel1.destroy();
+      metaModel2.destroy();
+      expect(schema().hasTable('MPT11:T1')).toBeFalsy(`table found`);
+      metaModel1.destroy();
+
+    } catch (err) {
+      fail(`should not throw: ${err.message}`);
+    }
+
+    done();
+  });
+
+
+  // ---------------------------------------------
+  it('model default types', async (done) => {
+    try {
+      @table({name: 'MPT12:T1'})
+      class Model {
+        @id({name: 'MPT12:ID'})
+        id!: number;
+
+        @field({name: 'MPT12:COLNUM'})
+        colNum?: number;
+
+        @field({name: 'MPT12:COLSTR'})
+        colString?: string;
+
+        @field({name: 'MPT12:COLBOOL'})
+        colBool?: boolean;
+
+        @field({name: 'MPT12:COLDATE'})
+        colDate?: boolean;
+      }
+      expect(schema().hasTable('MPT12:T1')).toBeTruthy(`table not found`);
+      const metaModel1 = Reflect.getMetadata(METADATA_MODEL_KEY, Model.prototype) as MetaModel;
+
+      expect(metaModel1.table.fields.length).toBe(5);
+
+      expect(metaModel1.table.fields[0].name).toBe('MPT12:ID');
+      expect(metaModel1.table.fields[0].dbtype).toBe('INTEGER NOT NULL');
+
+      expect(metaModel1.table.fields[1].name).toBe('MPT12:COLNUM');
+      expect(metaModel1.table.fields[1].dbtype).toBe('REAL');
+
+      expect(metaModel1.table.fields[2].name).toBe('MPT12:COLSTR');
+      expect(metaModel1.table.fields[2].dbtype).toBe('TEXT');
+
+      expect(metaModel1.table.fields[3].name).toBe('MPT12:COLBOOL');
+      expect(metaModel1.table.fields[3].dbtype).toBe('INTEGER');
+
+      expect(metaModel1.table.fields[4].name).toBe('MPT12:COLDATE');
+      expect(metaModel1.table.fields[4].dbtype).toBe('INTEGER');
+
+    } catch (err) {
+      fail(`should not throw: ${err.message}`);
+    }
+
+    done();
+  });
+
+
 
 });

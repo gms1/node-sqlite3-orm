@@ -8,6 +8,8 @@ export {
   SQL_MEMORY_DB_PRIVATE
 } from './SqlDatabase';
 
+export {SqlDatabaseSettings} from './SqlDatabaseSettings';
+
 export {SqlStatement, SqlRunResult} from './SqlStatement';
 
 export {SqlConnectionPool} from './SqlConnectionPool';
@@ -25,5 +27,11 @@ export {Field} from './Field';
 export {MetaModel, TABLEALIAS} from './MetaModel';
 
 export {MetaProperty} from './MetaProperty';
+
+export {DbTableInfo, DbColumnInfo, DbIndexInfo, DbForeignKeyInfo} from './DbTableInfo';
+
+export {DbCatalogDAO} from './DbCatalogDAO';
+
+export {AutoUpgrader, UpgradeMode, UpgradeInfo} from './AutoUpgrader';
 
 export * from './utils';

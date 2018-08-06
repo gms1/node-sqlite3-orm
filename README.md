@@ -1,6 +1,6 @@
 [![npm version](https://badge.fury.io/js/sqlite3orm.svg)](https://badge.fury.io/js/sqlite3orm)
 [![Build Status](https://api.travis-ci.org/gms1/node-sqlite3-orm.svg?branch=master)](https://travis-ci.org/gms1/node-sqlite3-orm)
-[![Coverage Status](https://coveralls.io/repos/github/gms1/node-sqlite3-orm/badge.svg?branch=master)](https://coveralls.io/github/gms1/node-sqlite3-orm?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/gms1/node-sqlite3-orm/badge.svg?branch=master&service=github)](https://coveralls.io/github/gms1/node-sqlite3-orm?branch=master)
 [![DeepScan Grade](https://deepscan.io/api/projects/699/branches/1107/badge/grade.svg)](https://deepscan.io/dashboard/#view=project&pid=699&bid=1107)
 [![Dependency Status](https://david-dm.org/gms1/node-sqlite3-orm.svg)](https://david-dm.org/gms1/node-sqlite3-orm)
 [![Known Vulnerabilities](https://snyk.io/test/github/gms1/node-sqlite3-orm/badge.svg)](https://snyk.io/test/github/gms1/node-sqlite3-orm)
@@ -206,6 +206,33 @@ One possibility to achieve this could be to use a connection pool and to perform
 })();
 
 ```
+
+## Autoupgrade
+
+automatically create or upgrade tables and indexes in the database based on your table definitions
+
+```TypeScript
+const autoUpgrader = new AutoUpgrader(sqldb);
+
+// run autoupgrade for all registered tables:
+autoUpgrader.upgradeAllTables();
+
+// test if table definitions are up-to-date
+autoUpgrader.isActual([userDAO.table, contactDAO.table]);
+
+// run autoupgrade for specific table(s):
+autoUpgrader.upgradeTables([userDAO.table]);
+```
+
+> NOTE: *autoupgrade* should be carefully tested before running it on a production database! A backup should be self-evident!
+<!-- -->
+> NOTE: renaming of columns can not be detected! *autoupgrade* would normally add a new column with the new name and the data in the old column would be lost, but there is an option 'keepOldColumns' for preventing old columns from beeing dropped. Recycling the old column name for other purpose is asking for trouble
+<!-- -->
+> NOTE: changing autoIncrement cannot be detected! You can use the optional parameter *force* to force a recreation
+<!-- -->
+> NOTE: if you have changed the column type, the table definition will be updated accordingly, but the content of the column will be still the same. You need an additional action if you want to convert the content of the column
+<!-- -->
+> NOTE: please always add a DEFAULT-clause for newly added columns which are not nullable
 
 ## Install
 

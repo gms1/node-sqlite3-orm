@@ -1,6 +1,5 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-import {SQL_MEMORY_DB_PRIVATE, table, id, field, index, fk, SqlDatabase, schema, qualifiyIdentifier} from '..';
-import {BaseDAO} from '../BaseDAO';
+import {SQL_MEMORY_DB_PRIVATE, table, id, field, index, fk, SqlDatabase, schema, qualifiyIdentifier, BaseDAO} from '..';
 
 const PREFIX = 'FK:';
 

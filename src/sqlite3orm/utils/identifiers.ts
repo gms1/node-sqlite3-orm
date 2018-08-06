@@ -1,12 +1,19 @@
 import {SQL_DEFAULT_SCHEMA} from '../SqlDatabase';
 
+export function backtickQuoteSimpleIdentifier(name: string): string {
+  return '`' + name.replace(/\`/g, '``') + '`';
+}
 
 export function quoteSimpleIdentifier(name: string): string {
-  return '"' + name.replace(/["]/g, '""') + '"';
+  return '"' + name.replace(/\"/g, '""') + '"';
+}
+
+export function quoteIdentifiers(name: string): string[] {
+  return name.split('.').map((value) => quoteSimpleIdentifier(value));
 }
 
 export function quoteIdentifier(name: string): string {
-  return name.split('.').map((value) => quoteSimpleIdentifier(value)).join('.');
+  return quoteIdentifiers(name).join('.');
 }
 
 export function unqualifyIdentifier(name: string): string {
@@ -30,3 +37,23 @@ export function quoteAndQualifyIdentifier(name: string): string {
   return quoteIdentifier(qualifiyIdentifier(name));
 }
 */
+
+export function splitIdentifiers(name: string): {identName: string, identSchema?: string} {
+  const identifiers = name.split('.');
+
+  if (identifiers.length === 2) {
+    return {identSchema: identifiers[0], identName: identifiers[1]};
+  } else {
+    return {identName: identifiers[0]};
+  }
+}
+
+export function quoteAndSplitIdentifiers(name: string): {identName: string, identSchema?: string} {
+  const {identName, identSchema} = splitIdentifiers(name);
+
+  if (identSchema) {
+    return {identName: quoteSimpleIdentifier(identName), identSchema: quoteSimpleIdentifier(identSchema)};
+  } else {
+    return {identName: quoteSimpleIdentifier(identName)};
+  }
+}

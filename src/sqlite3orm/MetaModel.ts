@@ -1,16 +1,9 @@
 // import * as core from './core';
-
-// tslint:disable no-use-before-declare triple-equals
-// tslint:disable-next-line no-require-imports
-import * as _dbg from 'debug';
-
 import {MetaProperty} from './MetaProperty';
 import {TableOpts} from './decorators';
 import {Table} from './Table';
 import {schema} from './Schema';
 
-
-export const debugModel = _dbg('sqlite3orm:model');
 
 export const TABLEALIAS = 'T';
 export const TABLEALIASPREFIX = TABLEALIAS.length ? TABLEALIAS + '.' : '';
@@ -84,6 +77,7 @@ export class MetaModel {
     } else {
       // tslint:disable-next-line triple-equals
       if (opts.withoutRowId != undefined) {
+        // tslint:disable-next-line triple-equals
         if (this._table.isWithoutRowIdDefined && opts.withoutRowId != this._table.withoutRowId) {
           throw new Error(`in class '${this.name}': detected conflicting withoutRowId settings`);
         }
@@ -91,6 +85,7 @@ export class MetaModel {
       }
       // tslint:disable-next-line triple-equals
       if (opts.autoIncrement != undefined) {
+        // tslint:disable-next-line triple-equals
         if (this._table.isAutoIncrementDefined && opts.autoIncrement != this._table.autoIncrement) {
           throw new Error(`in class '${this.name}': detected conflicting autoIncrement settings`);
         }
@@ -101,6 +96,20 @@ export class MetaModel {
     this.properties.forEach((prop) => {
       prop.init(this);
     });
+
+    this._table.models.add(this);
+  }
+
+  destroy(): void {
+    if (this._table) {
+      this._table.models.delete(this);
+      if (!this.table.models.size) {
+        schema().deleteTable(this._table.name);
+      }
+      this._table = undefined;
+      (this.properties as any) = new Map<string|symbol, MetaProperty>();
+      (this.mapColNameToProp as any) = new Map<string, MetaProperty>();
+    }
   }
 
 
@@ -141,7 +150,7 @@ export class MetaModel {
   }
 
   /**
-   * Get 'DELETE BY PRIMARY KEY'-statement
+   * Get 'DELETE ALL'-statement
    *
    * @returns The sql-statement
    */
@@ -214,7 +223,9 @@ export class MetaModel {
           addedMap.add(key);
         }
       });
+      /* istanbul ignore if */
       if (addIdentity) {
+        // for later use
         props.push(
             ...Array.from(this.properties.values()).filter((prop) => prop.field.isIdentity && !addedMap.has(prop.key)));
       }
@@ -228,7 +239,7 @@ export class MetaModel {
 
   public getPropertiesFromColumnNames(cols: string[], notFoundCols?: string[]): MetaProperty[]|undefined {
     const resProps: MetaProperty[] = [];
-    /* istanbul ignore else */
+    /* istanbul ignore if */
     if (!notFoundCols) {
       notFoundCols = [];
     }
@@ -241,6 +252,7 @@ export class MetaModel {
         (notFoundCols as string[]).push(colName);
       }
     });
+    /* istanbul ignore if */
     if (notFoundCols.length) {
       return undefined;
     }
@@ -252,8 +264,10 @@ export class MetaModel {
    *
    */
   private generateStatementsText(): SqlStatementText {
+    // tslint:disable-next-line no-use-before-declare
     const stmts = new SqlStatementText();
 
+    /* istanbul ignore if */
     if (!this.properties.size) {
       throw new Error(`class '${this.name}': does not have any mapped properties`);
     }
@@ -291,6 +305,8 @@ export class MetaModel {
 
     stmts.updateAll = (props: MetaProperty[]): string => {
       props = props.filter((prop) => !prop.field.isIdentity);
+
+      /* istanbul ignore if */
       if (!props.length) {
         throw new Error(`no columns to update'`);
       }
@@ -342,10 +358,12 @@ export class MetaModel {
       const props: MetaProperty[] = [];
       fkDef.fields.forEach((fkField) => {
         const prop = this.mapColNameToProp.get(fkField.name);
+        /* istanbul ignore else */
         if (prop) {
           props.push(prop);
         }
       });
+      /* istanbul ignore else */
       if (props.length === fkDef.fields.length) {
         const selectCondition =
             props.map((prop) => `${TABLEALIASPREFIX}${prop.field.quotedName}=${prop.getHostParameterName()}`)

@@ -2,6 +2,8 @@
 
 | Release   | Notes                                                                                                                       |
 |-----------|-----------------------------------------------------------------------------------------------------------------------------|
+| 2.2.0     | autoupgrade for automatically creating or upgrade tables and indexes in the database                                        |
+| 2.1.0     | [2.1.0 changes](#2.1.0-changes)                                                                                             |
 | 2.0.0     | [2.0.0 changes](#2.0.0-changes)                                                                                             |
 | 1.0.1     | maintenance releases                                                                                                        |
 | 1.0.0     | maintenance releases                                                                                                        |
@@ -15,6 +17,13 @@
 | 0.0.8     | SqlConnectionPool: allow connections to be garbage-collected if the connection pool is not limited by max-connections       |
 | 0.0.7     | SqlConnectionPool: a new connection pool                                                                                    |
 | 0.0.6     | BaseDAO: ensure type safety for mapped properties of primitive or Date type                                                 |
+
+## 2.1.0 changes
+
+### new features
+
+* DbCatalogDAO for reading schemas, tables, table-definitions, index-definitions and foreign key-definitions
+* SqlDatabaseSettings for applying pragma settings on opening a connection to a database
 
 ## 2.0.0 changes
 

@@ -7,6 +7,7 @@ import {Database, OPEN_CREATE, OPEN_READONLY, OPEN_READWRITE, Statement, verbose
 
 import {SqlStatement, SqlRunResult} from './SqlStatement';
 import {SqlConnectionPool} from './SqlConnectionPool';
+import {SqlDatabaseSettings} from './SqlDatabaseSettings';
 
 export const SQL_OPEN_READONLY = OPEN_READONLY;
 export const SQL_OPEN_READWRITE = OPEN_READWRITE;
@@ -50,17 +51,17 @@ export const SQL_OPEN_DEFAULT = SQL_OPEN_READWRITE | SQL_OPEN_CREATE;
  * @class SqlDatabase
  */
 export class SqlDatabase {
+  private static lastId: number = 0;
+
   private db?: Database;
+  private dbId?: number;
   private pool?: SqlConnectionPool;
 
   /**
    * Creates an instance of SqlDatabase.
    *
    */
-  constructor() {
-    this.db = undefined;
-    this.pool = undefined;
-  }
+  constructor() {}
 
   /**
    * Open a database connection
@@ -72,21 +73,29 @@ export class SqlDatabase {
    * SQL_OPEN_READONLY | SQL_OPEN_READWRITE
    * @returns A promise
    */
-  public async open(databaseFile: string, mode?: number): Promise<void> {
+  public async open(databaseFile: string, mode?: number, settings?: SqlDatabaseSettings): Promise<void> {
     if (this.pool) {
-      this.pool.release(this);
+      await this.pool.release(this);
     }
     return new Promise<void>((resolve, reject) => {
-      const db = new Database(databaseFile, mode || SQL_OPEN_DEFAULT, (err) => {
-        if (err) {
-          debug(`opening connection to ${databaseFile} failed: ${err.message}`);
-          reject(err);
-        } else {
-          this.db = db;
-          resolve();
-        }
-      });
-    });
+             const db = new Database(databaseFile, mode || SQL_OPEN_DEFAULT, (err) => {
+               if (err) {
+                 debug(`opening connection to ${databaseFile} failed: ${err.message}`);
+                 reject(err);
+               } else {
+                 this.db = db;
+                 this.dbId = SqlDatabase.lastId++;
+                 debug(`${this.dbId}: opened`);
+                 resolve();
+               }
+             });
+           })
+        .then((): Promise<void> => {
+          if (settings) {
+            return this.applySettings(settings);
+          }
+          return Promise.resolve();
+        });
   }
 
   /**
@@ -94,18 +103,21 @@ export class SqlDatabase {
    *
    * @returns {Promise<void>}
    */
-  public async close(): Promise<void> {
+  public close(): Promise<void> {
+    if (this.pool) {
+      return this.pool.release(this);
+    }
     return new Promise<void>((resolve, reject) => {
       if (!this.db) {
         resolve();
-      } else if (this.pool) {
-        this.pool.release(this);
-        resolve();
       } else {
         const db = this.db;
+        debug(`${this.dbId}: close`);
         this.db = undefined;
+        this.dbId = undefined;
         db.close((err) => {
           db.removeAllListeners();
+          /* istanbul ignore if */
           if (err) {
             debug(`closing connection failed: ${err.message}`);
             reject(err);
@@ -134,20 +146,23 @@ export class SqlDatabase {
    * provide multiple parameters as array
    * @returns A promise
    */
-  public async run(sql: string, params?: any): Promise<SqlRunResult> {
+  public run(sql: string, params?: any): Promise<SqlRunResult> {
     return new Promise<SqlRunResult>((resolve, reject) => {
       // trace('run stmt=' + sql);
       // trace('>input: ' + JSON.stringify(params));
+      /* istanbul ignore if */
       if (!this.db) {
         reject(new Error('database connection not open'));
         return;
       }
       // tslint:disable-next-line: only-arrow-functions
+      debug(`${this.dbId}: sql: ${sql}`);
+      const self = this;
       this.db.run(sql, params, function(err: Error): void {
         // do not use arrow function for this callback
         // the below 'this' should not reference our self
         if (err) {
-          debug(`failed sql: ${err.message}
+          debug(`${self.dbId}: failed sql: ${err.message}
 ${sql}\nparams: `, params);
           reject(err);
         } else {
@@ -167,17 +182,19 @@ ${sql}\nparams: `, params);
    * provide multiple parameters as array
    * @returns A promise
    */
-  public async get(sql: string, params?: any): Promise<any> {
+  public get(sql: string, params?: any): Promise<any> {
     return new Promise<any>((resolve, reject) => {
       // trace('get stmt=' + sql);
       // trace('>input: ' + JSON.stringify(params));
+      /* istanbul ignore if */
       if (!this.db) {
         reject(new Error('database connection not open'));
         return;
       }
+      debug(`${this.dbId}: sql: ${sql}`);
       this.db.get(sql, params, (err, row) => {
         if (err) {
-          debug(`failed sql: ${err.message}
+          debug(`${this.dbId}: failed sql: ${err.message}
 ${sql}`);
           reject(err);
         } else {
@@ -196,17 +213,19 @@ ${sql}`);
    * provide multiple parameters as array
    * @returns A promise
    */
-  public async all(sql: string, params?: any): Promise<any[]> {
+  public all(sql: string, params?: any): Promise<any[]> {
     return new Promise<any[]>((resolve, reject) => {
       // trace('all stmt=' + sql);
       // trace('>input: ' + JSON.stringify(params));
+      /* istanbul ignore if */
       if (!this.db) {
         reject(new Error('database connection not open'));
         return;
       }
+      debug(`${this.dbId}: sql: ${sql}`);
       this.db.all(sql, params, (err, rows) => {
         if (err) {
-          debug(`failed sql: ${err.message}
+          debug(`${this.dbId}: failed sql: ${err.message}
 ${sql}`);
           reject(err);
         } else {
@@ -227,15 +246,17 @@ ${sql}`);
    * @param [callback] - The callback function
    * @returns A promise
    */
-  public async each(sql: string, params?: any, callback?: (err: Error, row: any) => void): Promise<number> {
+  public each(sql: string, params?: any, callback?: (err: Error, row: any) => void): Promise<number> {
     return new Promise<number>((resolve, reject) => {
+      /* istanbul ignore if */
       if (!this.db) {
         reject(new Error('database connection not open'));
         return;
       }
+      debug(`${this.dbId}: sql: ${sql}`);
       this.db.each(sql, params, callback, (err: Error, count: number) => {
         if (err) {
-          debug(`failed sql: ${err.message}
+          debug(`${this.dbId}: failed sql: ${err.message}
 ${sql}`);
           reject(err);
         } else {
@@ -251,16 +272,18 @@ ${sql}`);
    * @param sql - The SQL statement
    * @returns A promise
    */
-  public async exec(sql: string): Promise<void> {
+  public exec(sql: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       // trace('exec stmt=' + sql);
+      /* istanbul ignore if */
       if (!this.db) {
         reject(new Error('database connection not open'));
         return;
       }
+      debug(`${this.dbId}: sql: ${sql}`);
       this.db.exec(sql, (err) => {
         if (err) {
-          debug(`failed sql: ${err.message}
+          debug(`${this.dbId}: failed sql: ${err.message}
 ${sql}`);
           reject(err);
         } else {
@@ -278,16 +301,18 @@ ${sql}`);
    * provide multiple parameters as array
    * @returns A promise
    */
-  public async prepare(sql: string, params?: any): Promise<SqlStatement> {
+  public prepare(sql: string, params?: any): Promise<SqlStatement> {
     return new Promise<SqlStatement>((resolve, reject) => {
+      /* istanbul ignore if */
       if (!this.db) {
         reject(new Error('database connection not open'));
         return;
       }
       let dbstmt: Statement;
+      debug(`${this.dbId}: sql: ${sql}`);
       dbstmt = this.db.prepare(sql, params, (err) => {
         if (err) {
-          debug(`failed sql: ${err.message}
+          debug(`${this.dbId}: failed sql: ${err.message}
 ${sql}`);
           reject(err);
         } else {
@@ -305,6 +330,7 @@ ${sql}`);
    * @param [callback]
    */
   public serialize(callback?: () => void): void {
+    /* istanbul ignore if */
     if (!this.db) {
       throw new Error('database connection not open');
     }
@@ -319,6 +345,7 @@ ${sql}`);
    * @param [callback]
    */
   public parallelize(callback?: () => void): void {
+    /* istanbul ignore if */
     if (!this.db) {
       throw new Error('database connection not open');
     }
@@ -330,11 +357,11 @@ ${sql}`);
    *
    * @param [callback]
    */
-  public async transactionalize<T>(callback: () => Promise<T>): Promise<T> {
+  public transactionalize<T>(callback: () => Promise<T>): Promise<T> {
     return this.run('BEGIN IMMEDIATE TRANSACTION')
         .then(callback)
-        .then(async (res) => this.run('COMMIT TRANSACTION').then(async () => Promise.resolve(res)))
-        .catch(async (err) => this.run('ROLLBACK TRANSACTION').then(async () => Promise.reject(err)));
+        .then((res) => this.run('COMMIT TRANSACTION').then(() => Promise.resolve(res)))
+        .catch((err) => this.run('ROLLBACK TRANSACTION').then(() => Promise.reject(err)));
   }
 
   // tslint:disable unified-signatures
@@ -380,6 +407,7 @@ ${sql}`);
    * @param listener
    */
   public on(event: string, listener: (...args: any[]) => void): this {
+    /* istanbul ignore if */
     if (!this.db) {
       throw new Error('database connection not open');
     }
@@ -410,8 +438,105 @@ ${sql}`);
    * @param newver
    * @returns A promise
    */
-  public async setUserVersion(newver: number): Promise<void> {
+  public setUserVersion(newver: number): Promise<void> {
     return this.exec(`PRAGMA user_version = ${newver}`);
+  }
+
+  protected applySettings(settings: SqlDatabaseSettings): Promise<void> {
+    /* istanbul ignore if */
+    if (!this.db) {
+      return Promise.reject(new Error('database connection not open'));
+    }
+    const promises: Promise<void>[] = [];
+    try {
+      /* istanbul ignore else */
+      if (settings.journalMode) {
+        this._addPragmaSettings(promises, 'journal_mode', settings.journalMode);
+      }
+      /* istanbul ignore else */
+      if (settings.busyTimeout) {
+        this._addPragmaSetting(promises, 'busy_timeout', settings.busyTimeout);
+      }
+      /* istanbul ignore else */
+      if (settings.synchronous) {
+        this._addPragmaSettings(promises, 'synchronous', settings.synchronous);
+      }
+      /* istanbul ignore else */
+      if (settings.caseSensitiveLike) {
+        this._addPragmaSetting(promises, 'case_sensitive_like', settings.caseSensitiveLike);
+      }
+      /* istanbul ignore else */
+      if (settings.foreignKeys) {
+        this._addPragmaSetting(promises, 'foreign_keys', settings.foreignKeys);
+      }
+      /* istanbul ignore else */
+      if (settings.ignoreCheckConstraints) {
+        this._addPragmaSetting(promises, 'ignore_check_constraints', settings.ignoreCheckConstraints);
+      }
+      /* istanbul ignore else */
+      if (settings.queryOnly) {
+        this._addPragmaSetting(promises, 'query_only', settings.queryOnly);
+      }
+      /* istanbul ignore else */
+      if (settings.readUncommitted) {
+        this._addPragmaSetting(promises, 'read_uncommitted', settings.readUncommitted);
+      }
+      /* istanbul ignore else */
+      if (settings.recursiveTriggers) {
+        this._addPragmaSetting(promises, 'recursive_triggers', settings.recursiveTriggers);
+      }
+      /* istanbul ignore else */
+      if (settings.secureDelete) {
+        this._addPragmaSettings(promises, 'secure_delete', settings.secureDelete);
+      }
+      if (settings.executionMode) {
+        switch (settings.executionMode.toUpperCase()) {
+          case 'SERIALIZE':
+            this.serialize();
+            break;
+          case 'PARALLELIZE':
+            this.parallelize();
+            break;
+          default:
+            throw new Error(`failed to read executionMode setting: ${settings.executionMode.toString()}`);
+        }
+      } else {
+        this.parallelize();
+      }
+    } catch (err) {
+      return Promise.reject(err);
+    }
+    if (promises.length) {
+      return Promise.all(promises).then(() => {});
+    }
+    return Promise.resolve();
+  }
+
+  protected _addPragmaSettings(promises: Promise<void>[], pragma: string, setting: string|string[]): void {
+    if (Array.isArray(setting)) {
+      setting.forEach((val) => {
+        this._addPragmaSetting(promises, pragma, val);
+      });
+    } else {
+      this._addPragmaSetting(promises, pragma, setting);
+    }
+  }
+
+  protected _addPragmaSetting(promises: Promise<void>[], pragma: string, setting: string|number): void {
+    if (typeof setting === 'number') {
+      promises.push(this.exec(`PRAGMA ${pragma} = ${setting}`));
+      return;
+    }
+    const splitted = setting.split('.');
+    switch (splitted.length) {
+      case 1:
+        promises.push(this.exec(`PRAGMA ${pragma} = ${setting.toUpperCase()}`));
+        return;
+      case 2:
+        promises.push(this.exec(`PRAGMA ${splitted[0]}.${pragma} = ${splitted[1].toUpperCase()}`));
+        return;
+    }
+    throw new Error(`failed to read ${pragma} setting: ${setting.toString()}`);
   }
 
   /**
@@ -427,31 +552,42 @@ ${sql}`);
   /*
   @internal
   */
-  public async openByPool(pool: SqlConnectionPool, databaseFile: string, mode?: number): Promise<void> {
+  public openByPool(pool: SqlConnectionPool, databaseFile: string, mode?: number, settings?: SqlDatabaseSettings):
+      Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      const db = new Database(databaseFile, mode || SQL_OPEN_DEFAULT, (err) => {
-        if (err) {
-          reject(err);
-        } else {
-          this.pool = pool;
-          this.db = db;
-          resolve();
-        }
-      });
-    });
+             const db = new Database(databaseFile, mode || SQL_OPEN_DEFAULT, (err) => {
+               if (err) {
+                 reject(err);
+               } else {
+                 this.pool = pool;
+                 this.db = db;
+                 this.dbId = SqlDatabase.lastId++;
+                 debug(`${this.dbId}: opened`);
+                 resolve();
+               }
+             });
+           })
+        .then((): Promise<void> => {
+          if (settings) {
+            return this.applySettings(settings);
+          }
+          return Promise.resolve();
+        });
   }
 
   /*
   @internal
   */
-  public async closeByPool(): Promise<void> {
+  public closeByPool(): Promise<void> {
     this.pool = undefined;
     return new Promise<void>((resolve, reject) => {
       if (!this.db) {
         resolve();
       } else {
         const db = this.db;
+        debug(`${this.dbId}: close`);
         this.db = undefined;
+        this.dbId = undefined;
         db.close((err) => {
           db.removeAllListeners();
           if (err) {
@@ -467,13 +603,24 @@ ${sql}`);
   /*
   @internal
   */
-  public recycleByPool(pool: SqlConnectionPool, sqldb: SqlDatabase): void {
+  public async recycleByPool(pool: SqlConnectionPool, sqldb: SqlDatabase, settings?: SqlDatabaseSettings):
+      Promise<void> {
     if (sqldb.db) {
       sqldb.db.removeAllListeners();
+      // move
       this.db = sqldb.db;
+      this.dbId = sqldb.dbId;
       this.pool = pool;
+      // reapply default settings
+      if (settings) {
+        try {
+          await this.applySettings(settings);
+        } catch (err) {
+        }
+      }
     }
     sqldb.db = undefined;
+    sqldb.dbId = undefined;
     sqldb.pool = undefined;
   }
 

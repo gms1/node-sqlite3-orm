@@ -1,10 +1,12 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-import {SqlDatabase, BaseDAO, SQL_MEMORY_DB_PRIVATE, field, fk, id, table} from '..';
+import {SqlDatabase, BaseDAO, SQL_MEMORY_DB_PRIVATE, field, fk, id, table, index} from '..';
 
 
 const USERS_TABLE = 'BD:USERS TABLE';
 const CONTACTS_TABLE = 'main.BD:CONTACTS TABLE';
 const TEST_SET_PROP_TABLE = 'BD:TEST_SET_PROP_TABLE';
+const TEST_INDEX_TABLE1 = 'main.BD:INDEX_TABLE';
+const TEST_INDEX_TABLE2 = 'temp.BD:INDEX_TABLE';
 const TEST_DB_DEFAULTS = 'BD:TEST_DB_DEFAULTS_TABLE';
 
 @table({name: USERS_TABLE})
@@ -388,7 +390,7 @@ describe('test BaseDAO', () => {
 
 
   // ---------------------------------------------
-  it('expect setProperty to work', async (done) => {
+  it('expect setProperty to work if conversion is required', async (done) => {
     let testDao: BaseDAO<TestSetProperty> = new BaseDAO(TestSetProperty, sqldb);
     let testRow: TestSetProperty = new TestSetProperty();
     try {
@@ -418,6 +420,58 @@ describe('test BaseDAO', () => {
     }
     done();
 
+  });
+
+  @table({name: TEST_INDEX_TABLE1, autoIncrement: true})
+  class TestIndexTable1 {
+    @id({name: 'id', dbtype: 'INTEGER NOT NULL'})
+    id: number;
+
+    @field({name: 'info', dbtype: 'TEXT'}) @index('index_table_idx')
+    info?: string;
+
+    @field({name: 'otherId', dbtype: 'INTEGER'})
+    otherId?: number;
+
+    constructor() {
+      this.id = 0;
+    }
+  }
+
+  @table({name: TEST_INDEX_TABLE2, autoIncrement: true})
+  class TestIndexTable2 {
+    @id({name: 'id', dbtype: 'INTEGER NOT NULL'})
+    id: number;
+
+    @field({name: 'info', dbtype: 'TEXT'}) @index('index_table_idx')
+    info?: string;
+
+    @field({name: 'otherId', dbtype: 'INTEGER'})
+    otherId?: number;
+
+    constructor() {
+      this.id = 0;
+    }
+  }
+
+
+  // ---------------------------------------------
+  it('expect create tables/indexes to work for tables/indexes having same name but different schema ', async (done) => {
+    const table1DAO: BaseDAO<TestIndexTable1> = new BaseDAO(TestIndexTable1, sqldb);
+    const table2DAO: BaseDAO<TestIndexTable2> = new BaseDAO(TestIndexTable2, sqldb);
+    try {
+      await table1DAO.createTable();
+      await table2DAO.createTable();
+
+      await table1DAO.createIndex('index_table_idx');
+      await table2DAO.createIndex('index_table_idx');
+
+      await table1DAO.dropTable();
+      await table2DAO.dropTable();
+    } catch (err) {
+      fail(err);
+    }
+    done();
   });
 
 
@@ -479,5 +533,76 @@ describe('test BaseDAO', () => {
     done();
 
   });
+
+  // ---------------------------------------------
+  it('expect update/delete-all to work', async (done) => {
+    const fullDao: BaseDAO<TestDbDefaultsFull> = new BaseDAO(TestDbDefaultsFull, sqldb);
+    const minDao: BaseDAO<TestDbDefaultsMin> = new BaseDAO(TestDbDefaultsMin, sqldb);
+    const writeRow: TestDbDefaultsMin = new TestDbDefaultsMin();
+    try {
+      await fullDao.createTable();
+
+      const writtenRow = await minDao.insert(writeRow);
+      let readRow = await fullDao.selectById({id: writtenRow.id});
+      expect(readRow.myBool).toBeTruthy();
+      expect(readRow.myInt).toBe(42);
+
+      const updateMyBool = fullDao.metaModel.getUpdateAllStatement(['myBool']);
+      await sqldb.run(updateMyBool, {':myBool': false});
+
+      readRow = await fullDao.selectById({id: writtenRow.id});
+      expect(readRow.myBool).toBeFalsy();
+      expect(readRow.myInt).toBe(42);
+
+      const updateMyBoolAndMyInt = fullDao.metaModel.getUpdateAllStatement(['myBool', 'myInt', 'myBool']);
+      await sqldb.run(updateMyBoolAndMyInt, {':myBool': true, ':myInt': 99});
+
+      readRow = await fullDao.selectById({id: writtenRow.id});
+      expect(readRow.myBool).toBeTruthy();
+      expect(readRow.myInt).toBe(99);
+
+      const writtenRow2 = await minDao.insert(readRow);
+
+      readRow = await fullDao.selectById({id: writtenRow2.id});
+      expect(readRow.myBool).toBeTruthy();
+      expect(readRow.myInt).toBe(42);
+
+      const deleteAll = fullDao.metaModel.getDeleteAllStatement();
+      await sqldb.run(deleteAll + ' where my_integer=:myInt', {':myInt': 99});
+
+      readRow = await fullDao.selectById({id: writtenRow2.id});
+      expect(readRow.myBool).toBeTruthy();
+      expect(readRow.myInt).toBe(42);
+
+      try {
+        readRow = await fullDao.selectById({id: writtenRow.id});
+        fail(`record should not exist`);
+      } catch (e) {
+      }
+
+    } catch (err) {
+      fail(err);
+    }
+    try {
+      await fullDao.dropTable();
+    } catch (err) {
+      fail(err);
+    }
+    done();
+
+  });
+
+
+  // ---------------------------------------------
+  it('expect get update-all-statement for not existing property to fail', async (done) => {
+    const fullDao: BaseDAO<TestDbDefaultsFull> = new BaseDAO(TestDbDefaultsFull, sqldb);
+    try {
+      const updateMyBool = fullDao.metaModel.getUpdateAllStatement(['myNotExistingProp']);
+      fail(`should have failed`);
+    } catch (err) {
+    }
+    done();
+  });
+
 
 });

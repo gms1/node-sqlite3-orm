@@ -1,8 +1,9 @@
-// import * as core from './core';
 
-import {quoteSimpleIdentifier} from './utils';
+import {backtickQuoteSimpleIdentifier} from './utils';
 import {FKFieldDefinition} from './FKFieldDefinition';
 import {IDXFieldDefinition} from './IDXFieldDefinition';
+import {DbColumnTypeInfo} from './DbTableInfo';
+import {DbCatalogDAO} from './DbCatalogDAO';
 
 /**
  * Class holding a field definition
@@ -20,24 +21,37 @@ export class Field {
    * The quoted field name
    */
   get quotedName(): string {
-    return quoteSimpleIdentifier(this.name);
+    return backtickQuoteSimpleIdentifier(this.name);
+  }
+
+  private _dbDefaultType?: string;
+  get dbDefaultType(): string {
+    return this._dbDefaultType ? this._dbDefaultType : 'TEXT';
+  }
+  set dbDefaultType(dbType: string) {
+    this._dbDefaultType = dbType;
   }
 
   /**
    * The type of the table column
    */
   private _dbtype?: string;
+  private _dbTypeInfo?: DbColumnTypeInfo;
 
   get dbtype(): string {
-    // tslint:disable-next-line triple-equals
-    return this._dbtype == undefined ? 'TEXT' : this._dbtype;
+    return this._dbtype ? this._dbtype : this.dbDefaultType;
   }
   set dbtype(dbType: string) {
     this._dbtype = dbType;
+    this._dbTypeInfo = Field.parseDbType(this._dbtype);
   }
   get isDbTypeDefined(): boolean {
-    // tslint:disable-next-line triple-equals
-    return this._dbtype == undefined ? false : true;
+    return this._dbtype ? true : false;
+  }
+
+  get dbTypeInfo(): DbColumnTypeInfo {
+    return this._dbTypeInfo ||
+        {typeAffinity: DbCatalogDAO.getTypeAffinity(this.dbDefaultType), notNull: false, defaultValue: undefined};
   }
 
   /**
@@ -124,5 +138,41 @@ export class Field {
    */
   public setIndexField(indexField: IDXFieldDefinition): void {
     this.indexKeys.set(indexField.name, indexField);
+  }
+
+
+
+  static parseDbType(dbtype: string): DbColumnTypeInfo {
+    const typeDefMatches = /^\s*((\w+)(\s*\(\s*\d+\s*(,\s*\d+\s*)?\))?)(.*)$/.exec(dbtype);
+
+    /* istanbul ignore if */
+    if (!typeDefMatches) {
+      throw new Error(`failed to parse '${dbtype}'`);
+    }
+    const typeAffinity = DbCatalogDAO.getTypeAffinity(typeDefMatches[2]);
+    const rest = typeDefMatches[5];
+
+    const notNull = /\bNOT\s+NULL\b/i.exec(rest) ? true : false;
+
+    let defaultValue;
+    const defaultNumberMatches = /\bDEFAULT\s+([+-]?\d+(\.\d*)?)/i.exec(rest);
+    if (defaultNumberMatches) {
+      defaultValue = defaultNumberMatches[1];
+    }
+    const defaultLiteralMatches = /\bDEFAULT\s+(('[^']*')+)/i.exec(rest);
+    if (defaultLiteralMatches) {
+      defaultValue = defaultLiteralMatches[1];
+      defaultValue.replace(/\'\'/g, '\'');
+    }
+    const defaultExprMatches = /\bDEFAULT\s*\(([^\)]*)\)/i.exec(rest);
+    if (defaultExprMatches) {
+      defaultValue = defaultExprMatches[1];
+    }
+
+    // debug(`dbtype='${dbtype}'`);
+    // debug(`type='${typeName}'`);
+    // debug(`notNull='${notNull}'`);
+    // debug(`default='${defaultValue}'`);
+    return {typeAffinity, notNull, defaultValue};
   }
 }
