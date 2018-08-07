@@ -637,7 +637,7 @@ describe('test BaseDAO', () => {
     try {
       await fullDao.createTable();
 
-      const insertedPartial = await fullDao.partialInsert({});
+      const insertedPartial = await fullDao.insertPartial({});
       let readRow = await fullDao.selectById({id: insertedPartial.id});
       expect(readRow.myBool).toBeTruthy();
       expect(readRow.myInt).toBe(42);
@@ -663,7 +663,7 @@ describe('test BaseDAO', () => {
     try {
       await fullDao.createTable();
 
-      const insertedPartial = await fullDao.partialInsert({id: 1});
+      const insertedPartial = await fullDao.insertPartial({id: 1});
       let readRow = await fullDao.selectById({id: insertedPartial.id});
       expect(readRow.myBool).toBeTruthy();
       expect(readRow.myInt).toBe(42);
@@ -689,7 +689,7 @@ describe('test BaseDAO', () => {
     try {
       await fullDao.createTable();
 
-      await fullDao.partialInsert({notExist: true} as any as Partial<TestDbDefaultsFull>);
+      await fullDao.insertPartial({notExist: true} as any as Partial<TestDbDefaultsFull>);
       fail('should have thrown');
     } catch (err) {
     }
@@ -710,13 +710,13 @@ describe('test BaseDAO', () => {
     try {
       await fullDao.createTable();
 
-      insertedPartial = await fullDao.partialInsert({});
+      insertedPartial = await fullDao.insertPartial({});
     } catch (err) {
       fail(err);
       return;
     }
     try {
-      await fullDao.partialUpdate({});
+      await fullDao.updatePartial({});
       fail('should have thrown');
     } catch (err) {
     }
@@ -736,13 +736,13 @@ describe('test BaseDAO', () => {
     try {
       await fullDao.createTable();
 
-      insertedPartial = await fullDao.partialInsert({});
+      insertedPartial = await fullDao.insertPartial({});
     } catch (err) {
       fail(err);
       return;
     }
     try {
-      await fullDao.partialUpdate({id: insertedPartial.id});
+      await fullDao.updatePartial({id: insertedPartial.id});
       fail('should have thrown');
     } catch (err) {
     }
@@ -762,8 +762,8 @@ describe('test BaseDAO', () => {
     try {
       await fullDao.createTable();
 
-      insertedPartial = await fullDao.partialInsert({});
-      await fullDao.partialUpdate({id: insertedPartial.id, myBool: false, myString: 'foo'});
+      insertedPartial = await fullDao.insertPartial({});
+      await fullDao.updatePartial({id: insertedPartial.id, myBool: false, myString: 'foo'});
       let readRow = await fullDao.selectById({id: insertedPartial.id});
       expect(readRow.myBool).toBe(false, 'wrong myBool');
       expect(readRow.myInt).toBe(42, 'wrong myInt');
@@ -788,12 +788,12 @@ describe('test BaseDAO', () => {
     try {
       await fullDao.createTable();
 
-      insertedPartial = await fullDao.partialInsert({});
+      insertedPartial = await fullDao.insertPartial({});
       const readRow = await fullDao.selectById({id: insertedPartial.id});
       readRow.myBool = false;
       readRow.myInt = readRow.myInt || 0;
       readRow.myInt += insertedPartial.id as number;
-      await fullDao.partialUpdate(readRow);
+      await fullDao.updatePartial(readRow);
       const readRow2 = await fullDao.selectById({id: insertedPartial.id});
       expect(readRow2.myBool).toBe(false);
       expect(readRow2.myInt).toBe(42 + (insertedPartial.id as number));
@@ -816,9 +816,9 @@ describe('test BaseDAO', () => {
     try {
       await fullDao.createTable();
 
-      insertedPartial = await fullDao.partialInsert({});
+      insertedPartial = await fullDao.insertPartial({});
       insertedPartial.myInt = 59;
-      await fullDao.updateAll({myInt: insertedPartial.myInt});
+      await fullDao.updatePartialAll({myInt: insertedPartial.myInt});
       let readRow = await fullDao.selectById({id: insertedPartial.id});
       expect(readRow.myBool).toBe(true);
       expect(readRow.myInt).toBe(59);
@@ -828,7 +828,7 @@ describe('test BaseDAO', () => {
       try {
         // TODO: use exist instead of update
         insertedPartial.myBool = false;
-        await fullDao.partialUpdate({id: insertedPartial.id, myBool: insertedPartial.myBool});
+        await fullDao.updatePartial({id: insertedPartial.id, myBool: insertedPartial.myBool});
         fail(`update should have failed`);
       } catch (err) {
       }
@@ -851,9 +851,9 @@ describe('test BaseDAO', () => {
     try {
       await fullDao.createTable();
 
-      insertedPartial = await fullDao.partialInsert({});
+      insertedPartial = await fullDao.insertPartial({});
       insertedPartial.myInt = 59;
-      await fullDao.updateAll({id: insertedPartial.id, myInt: insertedPartial.myInt}, 'where ID=:id');
+      await fullDao.updatePartialAll({id: insertedPartial.id, myInt: insertedPartial.myInt}, 'where ID=:id');
       let readRow = await fullDao.selectById({id: insertedPartial.id});
       expect(readRow.myBool).toBe(true);
       expect(readRow.myInt).toBe(59);
@@ -863,7 +863,7 @@ describe('test BaseDAO', () => {
       try {
         // TODO: use exist instead of update
         insertedPartial.myBool = false;
-        await fullDao.partialUpdate({id: insertedPartial.id, myBool: insertedPartial.myBool});
+        await fullDao.updatePartial({id: insertedPartial.id, myBool: insertedPartial.myBool});
         fail(`update should have failed`);
       } catch (err) {
       }
@@ -886,13 +886,14 @@ describe('test BaseDAO', () => {
     try {
       await fullDao.createTable();
 
-      insertedPartial = await fullDao.partialInsert({});
+      insertedPartial = await fullDao.insertPartial({});
       insertedPartial.myInt = 59;
     } catch (err) {
       fail(err);
     }
     try {
-      await fullDao.updateAll({id: insertedPartial.id as number + 1, myInt: insertedPartial.myInt}, 'where ID=:id');
+      await fullDao.updatePartialAll(
+          {id: insertedPartial.id as number + 1, myInt: insertedPartial.myInt}, 'where ID=:id');
       fail('updateAll should have failed');
     } catch (err) {
     }

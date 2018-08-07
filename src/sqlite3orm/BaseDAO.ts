@@ -73,6 +73,48 @@ export class BaseDAO<T extends Object> {
   }
 
   /**
+   * insert partially - insert only columns mapped to the property keys from the partial input model
+   *
+   * for this to work:
+   * all columns mapped to included properties must be nullable or their properties must provide a value
+   * all columns mapped to excluded properties must be nullable or must have a database default value
+   *
+   * @param input - A model class instance
+   * @returns A promise of the inserted model class instance
+   */
+  public async insertPartial(input: Partial<T>): Promise<Partial<T>> {
+    return new Promise<Partial<T>>(async (resolve, reject) => {
+      try {
+        const subset = Object.keys(input);
+        if (!this.table.autoIncrementField) {
+          await this.sqldb.run(this.metaModel.getInsertIntoStatement(subset), this.bindAllInputParams(input, subset));
+        } else {
+          const res: any = await this.sqldb.run(
+              this.metaModel.getInsertIntoStatement(subset), this.bindNonPrimaryKeyInputParams(input));
+          /* istanbul ignore if */
+          // tslint:disable-next-line: triple-equals
+          if (res.lastID == undefined) {
+            // NOTE: should not happen
+            reject(new Error('AUTOINCREMENT failed, \'lastID\' is undefined or null'));
+            return;
+          }
+          res[this.table.autoIncrementField.name] = res.lastID;
+          const autoProp = this.metaModel.mapColNameToProp.get(this.table.autoIncrementField.name);
+          /* istanbul ignore else */
+          if (autoProp) {
+            autoProp.setPropertyValue(input, res.lastID);
+          }
+        }
+      } catch (e) {
+        reject(new Error(`insert into '${this.table.name}' failed: ${e.message}`));
+        return;
+      }
+      resolve(input);
+    });
+  }
+
+
+  /**
    * update
    *
    * @param model - A model class instance
@@ -91,6 +133,70 @@ export class BaseDAO<T extends Object> {
         return;
       }
       resolve(model);
+    });
+  }
+
+  /**
+   * update partially - update only columns mapped to the property keys from the partial input model
+   *
+   * for this to work:
+   * all columns mapped to included properties must be nullable or their properties must provide a value
+   * all other columns are not affected by this update
+   *
+   * @param input - A model class instance
+   * @returns A promise of the updated model class instance
+   */
+  public async updatePartial(input: Partial<T>): Promise<Partial<T>> {
+    return new Promise<Partial<T>>(async (resolve, reject) => {
+      try {
+        const subset = Object.keys(input);
+        const res = await this.sqldb.run(
+            this.metaModel.getUpdateByIdStatement(subset), this.bindAllInputParams(input, subset, true));
+        if (!res.changes) {
+          reject(new Error(`update '${this.table.name}' failed: nothing changed`));
+          return;
+        }
+      } catch (e) {
+        reject(new Error(`update '${this.table.name}' failed: ${e.message}`));
+        return;
+      }
+      resolve(input);
+    });
+  }
+
+  /**
+   * update all - please provide a proper sql-condition otherwise all records will be updated!
+   * this updates only columns mapped to the property keys from the partial input model
+   *
+   * for this to work:
+   * all columns mapped to included properties must be nullable or their properties must provide a value
+   * all other columns are not affected by this update
+   *
+   * @param input - A model class instance
+   * @param [sql] - An optional sql-text which will be added to the update-statement (e.g 'WHERE <your condition>' )
+   * @param [params] - An optional object with additional host parameter
+   * @returns A promise of the updated model class instance
+   */
+  public async updatePartialAll(input: Partial<T>, sql?: string, params?: Object): Promise<number> {
+    return new Promise<number>(async (resolve, reject) => {
+      try {
+        const subset = Object.keys(input);
+        let stmt = this.metaModel.getUpdateAllStatement(subset);
+        if (sql) {
+          stmt += ' ';
+          stmt += sql;
+        }
+        const hostParams = Object.assign({}, params, this.bindAllInputParams(input, subset));
+        const res = await this.sqldb.run(stmt, hostParams);
+        if (!res.changes) {
+          reject(new Error(`update '${this.table.name}' failed: nothing changed`));
+          return;
+        }
+        resolve(res.changes);
+      } catch (e /* istanbul ignore next */) {
+        reject(new Error(`update '${this.table.name}' failed: ${e.message}`));
+        return;
+      }
     });
   }
 
@@ -146,6 +252,33 @@ export class BaseDAO<T extends Object> {
     });
   }
 
+  /**
+   * delete all - please provide a proper sql-condition otherwise all records will be deleted!
+   *
+   * @param input - A partial model class instance
+   * @returns A promise
+   */
+  public async deleteAll(sql?: string, params?: Object): Promise<number> {
+    return new Promise<number>(async (resolve, reject) => {
+      try {
+        let stmt = this.metaModel.getDeleteAllStatement();
+        if (sql) {
+          stmt += ' ';
+          stmt += sql;
+        }
+        const hostParams = Object.assign({}, params);
+        const res = await this.sqldb.run(stmt, hostParams);
+        if (!res.changes) {
+          reject(new Error(`delete from '${this.table.name}' failed: nothing changed`));
+          return;
+        }
+        resolve(res.changes);
+      } catch (e /* istanbul ignore next */) {
+        reject(new Error(`delete from '${this.table.name}' failed: ${e.message}`));
+        return;
+      }
+    });
+  }
 
   /**
    * select using primary key
@@ -187,125 +320,6 @@ export class BaseDAO<T extends Object> {
       }
       resolve(output);
     });
-  }
-
-  /**
-   * perform:
-   * select T.<col1>,.. FROM <table> T
-   *
-   * @param [sql] - An optional sql-text which will be added to the select-statement
-   *                (e.g 'WHERE <your condition>', 'ORDER BY <columns>')
-   * @param [params] - An optional object with additional host parameter
-   * @returns A promise of array of class instances
-   */
-  public selectAll(sql?: string, params?: Object): Promise<T[]> {
-    return new Promise<T[]>(async (resolve, reject) => {
-      try {
-        let stmt = this.metaModel.getSelectAllStatement();
-        if (sql) {
-          stmt += ' ';
-          stmt += sql;
-        }
-        const rows: any[] = await this.sqldb.all(stmt, params);
-        const results: T[] = [];
-        rows.forEach((row) => {
-          results.push(this.readResultRow(new this.type(), row));
-        });
-        resolve(results);
-      } catch (e) {
-        reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
-        return;
-      }
-    });
-  }
-
-  /**
-   * perform:
-   * select T.<col1>,.. FROM <table> T
-   *
-   * @param callback - The callback called for each row
-   * @param [sql] - An optional sql-text which will be added to the select-statement
-   *                (e.g ')
-   * @param [params] - An optional object with additional host parameter
-   * @returns A promise
-   */
-  public selectEach(callback: (err: Error, model: T) => void, sql?: string, params?: Object): Promise<number> {
-    return new Promise<number>(async (resolve, reject) => {
-      try {
-        let stmt = this.metaModel.getSelectAllStatement();
-        if (sql) {
-          stmt += ' ';
-          stmt += sql;
-        }
-        const res = await this.sqldb.each(stmt, params, (err, row) => {
-          // TODO: err?
-          callback(err, this.readResultRow(new this.type(), row));
-        });
-        resolve(res);
-      } catch (e) {
-        reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
-        return;
-      }
-    });
-  }
-
-  /**
-   * select all childs using a foreign key constraint and a given parent instance
-   *
-   * @template P - The class mapped to the parent table
-   * @param constraintName - The foreign key constraint
-   * @param parentType - The class mapped to the parent table
-   * @param parentObj - An instance of the class mapped to the parent table
-   * @param [sql] - An optional sql-text which will be added to the where-clause of the select-statement
-   * @param [params] - An optional object with additional host parameter
-   * @returns A promise of array of model class instances
-   */
-  public selectAllOf<P extends Object>(
-      constraintName: string, parentType: {new(): P}, parentObj: P, sql?: string, params?: Object): Promise<T[]> {
-    return new Promise<T[]>(async (resolve, reject) => {
-      try {
-        const fkSelCondition = this.metaModel.getForeignKeySelects(constraintName);
-        if (!fkSelCondition) {
-          throw new Error(`constraint '${constraintName}' is not defined`);
-        }
-        let stmt = this.metaModel.getSelectAllStatement();
-        stmt += '\nWHERE\n  ';
-        stmt += fkSelCondition;
-        if (sql) {
-          stmt += ' ';
-          stmt += sql;
-        }
-        const parentDAO = new BaseDAO<P>(parentType, this.sqldb);
-        const childParams = this.bindForeignParams(parentDAO, constraintName, parentObj, params);
-
-        const rows: any[] = await this.sqldb.all(stmt, childParams);
-        const results: T[] = [];
-        rows.forEach((row) => {
-          results.push(this.readResultRow(new this.type(), row));
-        });
-        resolve(results);
-      } catch (e) {
-        reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
-        return;
-      }
-    });
-  }
-
-  /**
-   * select all childs using a foreign key constraint and a given parent instance
-   *
-   * @template C - The class mapped to the child table
-   * @param constraintName - The foreign key constraint (defined in the child table)
-   * @param childType - The class mapped to the childtable
-   * @param parentObj - An instance of the class mapped to the parent table
-   * @param [sql] - An optional sql-text which will be added to the where-clause of the select-statement
-   * @param [params] - An optional object with additional host parameter
-   * @returns A promise of array of model class instances
-   */
-  public selectAllChildsOf<C extends Object>(
-      constraintName: string, childType: {new(): C}, parentObj: T, sql?: string, params?: Object): Promise<C[]> {
-    const childDAO = new BaseDAO<C>(childType, this.sqldb);
-    return childDAO.selectAllOf(constraintName, this.type, parentObj, sql, params);
   }
 
   /**
@@ -376,141 +390,129 @@ export class BaseDAO<T extends Object> {
     return parentDAO.selectByChild(constraintName, this.type, childObj);
   }
 
-
   /**
-   * insert partially - insert only columns mapped to the property keys from the partial input model
+   * perform:
+   * select T.<col1>,.. FROM <table> T
    *
-   * for this to work:
-   * all columns mapped to included properties must be nullable or their properties must provide a value
-   * all columns mapped to excluded properties must be nullable or must have a database default value
-   *
-   * @param input - A model class instance
-   * @returns A promise of the inserted model class instance
-   */
-  public async partialInsert(input: Partial<T>): Promise<Partial<T>> {
-    return new Promise<Partial<T>>(async (resolve, reject) => {
-      try {
-        const subset = Object.keys(input);
-        if (!this.table.autoIncrementField) {
-          await this.sqldb.run(this.metaModel.getInsertIntoStatement(subset), this.bindAllInputParams(input, subset));
-        } else {
-          const res: any = await this.sqldb.run(
-              this.metaModel.getInsertIntoStatement(subset), this.bindNonPrimaryKeyInputParams(input));
-          /* istanbul ignore if */
-          // tslint:disable-next-line: triple-equals
-          if (res.lastID == undefined) {
-            // NOTE: should not happen
-            reject(new Error('AUTOINCREMENT failed, \'lastID\' is undefined or null'));
-            return;
-          }
-          res[this.table.autoIncrementField.name] = res.lastID;
-          const autoProp = this.metaModel.mapColNameToProp.get(this.table.autoIncrementField.name);
-          /* istanbul ignore else */
-          if (autoProp) {
-            autoProp.setPropertyValue(input, res.lastID);
-          }
-        }
-      } catch (e) {
-        reject(new Error(`insert into '${this.table.name}' failed: ${e.message}`));
-        return;
-      }
-      resolve(input);
-    });
-  }
-
-
-  /**
-   * update partially - update only columns mapped to the property keys from the partial input model
-   *
-   * for this to work:
-   * all columns mapped to included properties must be nullable or their properties must provide a value
-   * all other columns are not affected by this update
-   *
-   * @param input - A model class instance
-   * @returns A promise of the updated model class instance
-   */
-  public async partialUpdate(input: Partial<T>): Promise<Partial<T>> {
-    return new Promise<Partial<T>>(async (resolve, reject) => {
-      try {
-        const subset = Object.keys(input);
-        const res = await this.sqldb.run(
-            this.metaModel.getUpdateByIdStatement(subset), this.bindAllInputParams(input, subset, true));
-        if (!res.changes) {
-          reject(new Error(`update '${this.table.name}' failed: nothing changed`));
-          return;
-        }
-      } catch (e) {
-        reject(new Error(`update '${this.table.name}' failed: ${e.message}`));
-        return;
-      }
-      resolve(input);
-    });
-  }
-
-
-  /**
-   * update all - please provide a proper sql-condition otherwise all records will be updated!
-   * updates only columns mapped to the property keys from the partial input model
-   *
-   * for this to work:
-   * all columns mapped to included properties must be nullable or their properties must provide a value
-   * all other columns are not affected by this update
-   *
-   * @param input - A model class instance
-   * @param [sql] - An optional sql-text which will be added to the update-statement (e.g 'WHERE <your condition>' )
+   * @param [sql] - An optional sql-text which will be added to the select-statement
+   *                (e.g 'WHERE <your condition>', 'ORDER BY <columns>')
    * @param [params] - An optional object with additional host parameter
-   * @returns A promise of the updated model class instance
+   * @returns A promise of array of class instances
    */
-  public async updateAll(input: Partial<T>, sql?: string, params?: Object): Promise<number> {
-    return new Promise<number>(async (resolve, reject) => {
+  public selectAll(sql?: string, params?: Object): Promise<T[]> {
+    return new Promise<T[]>(async (resolve, reject) => {
       try {
-        const subset = Object.keys(input);
-        let stmt = this.metaModel.getUpdateAllStatement(subset);
+        let stmt = this.metaModel.getSelectAllStatement();
         if (sql) {
           stmt += ' ';
           stmt += sql;
         }
-        const hostParams = Object.assign({}, params, this.bindAllInputParams(input, subset));
-        const res = await this.sqldb.run(stmt, hostParams);
-        if (!res.changes) {
-          reject(new Error(`update '${this.table.name}' failed: nothing changed`));
-          return;
+        const rows: any[] = await this.sqldb.all(stmt, params);
+        const results: T[] = [];
+        rows.forEach((row) => {
+          results.push(this.readResultRow(new this.type(), row));
+        });
+        resolve(results);
+      } catch (e) {
+        reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
+        return;
+      }
+    });
+  }
+
+
+  /**
+   * select all childs using a foreign key constraint and a given parent instance
+   *
+   * @template P - The class mapped to the parent table
+   * @param constraintName - The foreign key constraint
+   * @param parentType - The class mapped to the parent table
+   * @param parentObj - An instance of the class mapped to the parent table
+   * @param [sql] - An optional sql-text which will be added to the where-clause of the select-statement
+   * @param [params] - An optional object with additional host parameter
+   * @returns A promise of array of model class instances
+   */
+  public selectAllOf<P extends Object>(
+      constraintName: string, parentType: {new(): P}, parentObj: P, sql?: string, params?: Object): Promise<T[]> {
+    return new Promise<T[]>(async (resolve, reject) => {
+      try {
+        const fkSelCondition = this.metaModel.getForeignKeySelects(constraintName);
+        if (!fkSelCondition) {
+          throw new Error(`constraint '${constraintName}' is not defined`);
         }
-        resolve(res.changes);
-      } catch (e /* istanbul ignore next */) {
-        reject(new Error(`update '${this.table.name}' failed: ${e.message}`));
+        let stmt = this.metaModel.getSelectAllStatement();
+        stmt += '\nWHERE\n  ';
+        stmt += fkSelCondition;
+        if (sql) {
+          stmt += ' ';
+          stmt += sql;
+        }
+        const parentDAO = new BaseDAO<P>(parentType, this.sqldb);
+        const childParams = this.bindForeignParams(parentDAO, constraintName, parentObj, params);
+
+        const rows: any[] = await this.sqldb.all(stmt, childParams);
+        const results: T[] = [];
+        rows.forEach((row) => {
+          results.push(this.readResultRow(new this.type(), row));
+        });
+        resolve(results);
+      } catch (e) {
+        reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
         return;
       }
     });
   }
 
   /**
-   * delete all - please provide a proper sql-condition otherwise all records will be deleted!
+   * select all childs using a foreign key constraint and a given parent instance
    *
-   * @param input - A partial model class instance
+   * @template C - The class mapped to the child table
+   * @param constraintName - The foreign key constraint (defined in the child table)
+   * @param childType - The class mapped to the childtable
+   * @param parentObj - An instance of the class mapped to the parent table
+   * @param [sql] - An optional sql-text which will be added to the where-clause of the select-statement
+   * @param [params] - An optional object with additional host parameter
+   * @returns A promise of array of model class instances
+   */
+  public selectAllChildsOf<C extends Object>(
+      constraintName: string, childType: {new(): C}, parentObj: T, sql?: string, params?: Object): Promise<C[]> {
+    const childDAO = new BaseDAO<C>(childType, this.sqldb);
+    return childDAO.selectAllOf(constraintName, this.type, parentObj, sql, params);
+  }
+
+
+
+  /**
+   * perform:
+   * select T.<col1>,.. FROM <table> T
+   *
+   * @param callback - The callback called for each row
+   * @param [sql] - An optional sql-text which will be added to the select-statement
+   *                (e.g ')
+   * @param [params] - An optional object with additional host parameter
    * @returns A promise
    */
-  public async deleteAll(sql?: string, params?: Object): Promise<number> {
+  public selectEach(callback: (err: Error, model: T) => void, sql?: string, params?: Object): Promise<number> {
     return new Promise<number>(async (resolve, reject) => {
       try {
-        let stmt = this.metaModel.getDeleteAllStatement();
+        let stmt = this.metaModel.getSelectAllStatement();
         if (sql) {
           stmt += ' ';
           stmt += sql;
         }
-        const hostParams = Object.assign({}, params);
-        const res = await this.sqldb.run(stmt, hostParams);
-        if (!res.changes) {
-          reject(new Error(`delete from '${this.table.name}' failed: nothing changed`));
-          return;
-        }
-        resolve(res.changes);
-      } catch (e /* istanbul ignore next */) {
-        reject(new Error(`delete from '${this.table.name}' failed: ${e.message}`));
+        const res = await this.sqldb.each(stmt, params, (err, row) => {
+          // TODO: err?
+          callback(err, this.readResultRow(new this.type(), row));
+        });
+        resolve(res);
+      } catch (e) {
+        reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
         return;
       }
     });
   }
+
+
 
   protected bindAllInputParams(model: Partial<T>, subset?: (string|symbol)[], addIdentity?: boolean): Object {
     const hostParams: Object = {};
