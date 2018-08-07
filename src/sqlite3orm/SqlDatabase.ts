@@ -13,7 +13,7 @@ export const SQL_OPEN_READONLY = OPEN_READONLY;
 export const SQL_OPEN_READWRITE = OPEN_READWRITE;
 export const SQL_OPEN_CREATE = OPEN_CREATE;
 
-export const SQL_MEMORY_DB_SHARED = 'file::memory:?cache=shared';
+export const SQL_MEMORY_DB_SHARED = 'file:sqlite3orm?mode=memory&cache=shared';
 export const SQL_MEMORY_DB_PRIVATE = ':memory:';
 export const SQL_DEFAULT_SCHEMA = 'main';
 
