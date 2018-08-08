@@ -1,14 +1,14 @@
-#  Getting Started
+# Getting Started
 
 ## Install Global Dependencies
 
 The sample output provided here is from an installation on Windows 10 x64.
 
 ```bash
-$ npm -g install gulp-cli
+npm -g install gulp-cli
 ```
 
-### Sample output
+### Sample output 1
 
 ```bash
 C:\Program Files\nodejs\gulp -> C:\Program Files\nodejs\node_modules\gulp-cli\bin\gulp.js
@@ -19,14 +19,14 @@ added 139 packages in 20.699s
 ## Clone the Repo and Install Dependencies
 
 ```bash
-$ git clone git@github.com:gms1/node-sqlite3-orm.git
+git clone git@github.com:gms1/node-sqlite3-orm.git
 
-$ cd node-sqlite3-orm
+cd node-sqlite3-orm
 
-$ npm install
+npm install
 ```
 
-### Sample output
+### Sample output 2
 
 ```bash
 > sqlite3@3.1.13 install C:\ae\node-sqlite3-orm\node_modules\sqlite3
@@ -39,10 +39,10 @@ added 512 packages in 44.156s
 ## Build and Run All Tests
 
 ```bash
-$ gulp test
+gulp test
 ```
 
-### Sample output
+### Sample output 3
 
 ```bash
 [21:17:38] mode: development
@@ -107,10 +107,10 @@ Executed 22 of 22 specs SUCCESS in 0.181 sec.
 ## Build
 
 ```bash
-$ gulp build
+gulp build
 ```
 
-### Sample output
+### Sample output 4
 
 ```bash
 [21:40:35] mode: development
@@ -132,10 +132,10 @@ $ gulp build
 ## Run a Single Test
 
 ```bash
-$ ./node_modules/.bin/jasmine dist/spec/BaseDAO.spec.js
+./node_modules/.bin/jasmine dist/spec/BaseDAO.spec.js
 ```
 
-### Sample output
+### Sample output 5
 
 ```bash
 Started
@@ -149,10 +149,10 @@ Finished in 0.02 seconds
 ## Generate Documentation
 
 ```bash
-$ npm run typedoc
+npm run typedoc
 ```
 
-### Sample output
+### Sample output 6
 
 ```bash
 > sqlite3orm@0.0.18 typedoc C:\ae\node-sqlite3-orm
