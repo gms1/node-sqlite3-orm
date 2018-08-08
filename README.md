@@ -265,10 +265,11 @@ tsconfig.json:
 
 [CHANGELOG](./CHANGELOG.md)
 
-## TODOs
-
-[TODO](./TODO.md)
-
 ## License
 
 **node-sqlite3-orm** is licensed under the MIT License: [LICENSE](./LICENSE)
+
+## Wiki
+
+further documentation can be found in our [Wiki](https://github.com/gms1/node-sqlite3-orm/wiki/)
+
