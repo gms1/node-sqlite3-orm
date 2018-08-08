@@ -1,4 +1,4 @@
-// tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
+// tslint:disable prefer-const max-classes-per-file no-unnecessary-class
 import {SqlDatabase, BaseDAO, SQL_MEMORY_DB_PRIVATE, field, fk, id, table, index} from '..';
 
 
@@ -17,6 +17,8 @@ class User {
 
   @field({name: 'user_loginname', dbtype: 'TEXT NOT NULL'})
   userLoginName: string;
+
+  notMapped?: string;
 
   constructor() {
     this.userId = 0;
@@ -39,6 +41,8 @@ class Contact {
 
   @fk(Contact.userConstraint, USERS_TABLE, 'user_id') @field({name: 'user_id', dbtype: 'INTEGER NOT NULL'})
   userId: number;
+
+  notMapped?: string;
 
   constructor() {
     this.contactId = 0;
@@ -383,6 +387,8 @@ describe('test BaseDAO', () => {
     @field({name: 'my_date_real', dbtype: 'REAL'})
     myDate2Number?: Date;
 
+    notMapped?: string;
+
     constructor() {
       this.id = 0;
     }
@@ -434,6 +440,8 @@ describe('test BaseDAO', () => {
     @field({name: 'otherId', dbtype: 'INTEGER'})
     otherId?: number;
 
+    notMapped?: string;
+
     constructor() {
       this.id = 0;
     }
@@ -449,6 +457,8 @@ describe('test BaseDAO', () => {
 
     @field({name: 'otherId', dbtype: 'INTEGER'})
     otherId?: number;
+
+    notMapped?: string;
 
     constructor() {
       this.id = 0;
@@ -493,6 +503,8 @@ describe('test BaseDAO', () => {
     @field({name: 'my_real', dbtype: 'REAL DEFAULT 3.1415692'})
     myReal?: number;
 
+    notMapped?: string;
+
     constructor() {
       this.id = 0;
     }
@@ -502,6 +514,8 @@ describe('test BaseDAO', () => {
   class TestDbDefaultsMin {
     @id({name: 'id', dbtype: 'INTEGER NOT NULL'})
     id: number;
+
+    notMapped?: string;
 
     constructor() {
       this.id = 0;
@@ -525,6 +539,8 @@ describe('test BaseDAO', () => {
 
     @field({name: 'my_real', dbtype: 'REAL DEFAULT 3.1415692'})
     myReal?: number;
+
+    notMapped?: string;
 
     constructor() {
       this.id = 0;
@@ -633,12 +649,11 @@ describe('test BaseDAO', () => {
   // ---------------------------------------------
   it('expect default-clause to work: using partial insert and empty partial model (autoincrement)', async (done) => {
     const fullDao: BaseDAO<TestDbDefaultsFull> = new BaseDAO(TestDbDefaultsFull, sqldb);
-    const writeRow: TestDbDefaultsFull = new TestDbDefaultsFull();
     try {
       await fullDao.createTable();
 
-      const insertedPartial = await fullDao.insertPartial({});
-      let readRow = await fullDao.selectById({id: insertedPartial.id});
+      const insertedPartial = await fullDao.insertPartial({notMapped: 'foo'});
+      let readRow = await fullDao.selectById({id: insertedPartial.id, notMapped: 'foo'});
       expect(readRow.myBool).toBeTruthy();
       expect(readRow.myInt).toBe(42);
       expect(readRow.myString).toBe('sqlite3orm');
@@ -659,7 +674,6 @@ describe('test BaseDAO', () => {
   // ---------------------------------------------
   it('expect default-clause to work: using partial insert and empty partial model (no autoincrement)', async (done) => {
     const fullDao: BaseDAO<TestDbDefaultsFull2> = new BaseDAO(TestDbDefaultsFull2, sqldb);
-    const writeRow: TestDbDefaultsFull2 = new TestDbDefaultsFull2();
     try {
       await fullDao.createTable();
 
@@ -683,29 +697,8 @@ describe('test BaseDAO', () => {
   });
 
   // ---------------------------------------------
-  it('expect partial insert to fail for invalid property in partial model', async (done) => {
-    const fullDao: BaseDAO<TestDbDefaultsFull> = new BaseDAO(TestDbDefaultsFull, sqldb);
-    const writeRow: TestDbDefaultsFull = new TestDbDefaultsFull();
-    try {
-      await fullDao.createTable();
-
-      await fullDao.insertPartial({notExist: true} as any as Partial<TestDbDefaultsFull>);
-      fail('should have thrown');
-    } catch (err) {
-    }
-    try {
-      await fullDao.dropTable();
-    } catch (err) {
-      fail(err);
-    }
-    done();
-
-  });
-
-  // ---------------------------------------------
   it('expect partial update to fail for empty partial model', async (done) => {
     const fullDao: BaseDAO<TestDbDefaultsFull> = new BaseDAO(TestDbDefaultsFull, sqldb);
-    const writeRow: TestDbDefaultsFull = new TestDbDefaultsFull();
     let insertedPartial: Partial<TestDbDefaultsFull>;
     try {
       await fullDao.createTable();
@@ -716,7 +709,7 @@ describe('test BaseDAO', () => {
       return;
     }
     try {
-      await fullDao.updatePartial({});
+      await fullDao.updatePartial({notMapped: 'foo'});
       fail('should have thrown');
     } catch (err) {
     }
@@ -731,7 +724,6 @@ describe('test BaseDAO', () => {
 
   it('expect partial update to fail for only identity properties in partial model', async (done) => {
     const fullDao: BaseDAO<TestDbDefaultsFull> = new BaseDAO(TestDbDefaultsFull, sqldb);
-    const writeRow: TestDbDefaultsFull = new TestDbDefaultsFull();
     let insertedPartial: Partial<TestDbDefaultsFull>;
     try {
       await fullDao.createTable();
@@ -757,7 +749,6 @@ describe('test BaseDAO', () => {
 
   it('expect partial update to succeed for partial model', async (done) => {
     const fullDao: BaseDAO<TestDbDefaultsFull> = new BaseDAO(TestDbDefaultsFull, sqldb);
-    const writeRow: TestDbDefaultsFull = new TestDbDefaultsFull();
     let insertedPartial: Partial<TestDbDefaultsFull>;
     try {
       await fullDao.createTable();
@@ -783,7 +774,6 @@ describe('test BaseDAO', () => {
 
   it('expect partial update to succeed for full model', async (done) => {
     const fullDao: BaseDAO<TestDbDefaultsFull> = new BaseDAO(TestDbDefaultsFull, sqldb);
-    const writeRow: TestDbDefaultsFull = new TestDbDefaultsFull();
     let insertedPartial: Partial<TestDbDefaultsFull>;
     try {
       await fullDao.createTable();
@@ -793,6 +783,7 @@ describe('test BaseDAO', () => {
       readRow.myBool = false;
       readRow.myInt = readRow.myInt || 0;
       readRow.myInt += insertedPartial.id as number;
+      readRow.notMapped = 'foo';
       await fullDao.updatePartial(readRow);
       const readRow2 = await fullDao.selectById({id: insertedPartial.id});
       expect(readRow2.myBool).toBe(false);
@@ -811,14 +802,13 @@ describe('test BaseDAO', () => {
 
   it('expect update/delete all (without condition) to succeed for partial model', async (done) => {
     const fullDao: BaseDAO<TestDbDefaultsFull> = new BaseDAO(TestDbDefaultsFull, sqldb);
-    const writeRow: TestDbDefaultsFull = new TestDbDefaultsFull();
     let insertedPartial: Partial<TestDbDefaultsFull>;
     try {
       await fullDao.createTable();
 
       insertedPartial = await fullDao.insertPartial({});
       insertedPartial.myInt = 59;
-      await fullDao.updatePartialAll({myInt: insertedPartial.myInt});
+      await fullDao.updatePartialAll({myInt: insertedPartial.myInt, notMapped: 'foo'});
       let readRow = await fullDao.selectById({id: insertedPartial.id});
       expect(readRow.myBool).toBe(true);
       expect(readRow.myInt).toBe(59);
@@ -846,7 +836,6 @@ describe('test BaseDAO', () => {
 
   it('expect update/delete all (with condition) to succeed for partial model', async (done) => {
     const fullDao: BaseDAO<TestDbDefaultsFull> = new BaseDAO(TestDbDefaultsFull, sqldb);
-    const writeRow: TestDbDefaultsFull = new TestDbDefaultsFull();
     let insertedPartial: Partial<TestDbDefaultsFull>;
     try {
       await fullDao.createTable();
@@ -881,7 +870,6 @@ describe('test BaseDAO', () => {
 
   it('expect update/delete all to fail if nothing changed', async (done) => {
     const fullDao: BaseDAO<TestDbDefaultsFull> = new BaseDAO(TestDbDefaultsFull, sqldb);
-    const writeRow: TestDbDefaultsFull = new TestDbDefaultsFull();
     let insertedPartial: Partial<TestDbDefaultsFull> = new TestDbDefaultsFull();
     try {
       await fullDao.createTable();

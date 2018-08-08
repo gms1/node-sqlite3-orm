@@ -216,7 +216,7 @@ export class MetaModel {
       keys.forEach((key) => {
         const prop = this.properties.get(key);
         if (!prop) {
-          throw new Error(`property '${key.toString()}' not defined for model '${this.name}'`);
+          return;
         }
         if (!addedMap.has(key)) {
           props.push(prop);
