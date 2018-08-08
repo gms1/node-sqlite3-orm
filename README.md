@@ -30,6 +30,9 @@ class User {
 
   @field({name: 'user_json', dbtype: 'TEXT', isJson: true})
   userJsonData: any;
+
+  @field({name: 'user_deleted'})
+  deleted?: boolean;
 }
 
 @table({name: 'CONTACTS', autoIncrement: true})
@@ -126,6 +129,9 @@ In order to read from or write to the database, you can use the `BaseDAO<Model>'
 
   // read a user:
   let userDonald = await userDAO.select(user);
+
+  // update a user partially:
+  await userDAO.updatePartial({userId: userDonald.userId, deleted: true});
 
   // read all contacts (child) for a given user (parent):
   let contactsDonald1 = await contactDAO.selectAllOf('fk_user_contacts', User, userDonald);

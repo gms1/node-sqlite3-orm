@@ -217,4 +217,17 @@ describe('test DbTableInfo.discover', () => {
     }
     done();
   });
+
+  // ---------------------------------------------
+  it('expect type affinity for \'BLOB\' to be \'BLOB\'', () => {
+
+    expect(DbCatalogDAO.getTypeAffinity('BLOB')).toBe('BLOB');
+  });
+
+  // ---------------------------------------------
+  it('expect type affinity for \'FOO\' to be \'NUMERIC\' (default)', () => {
+
+    expect(DbCatalogDAO.getTypeAffinity('FOO')).toBe('NUMERIC');
+  });
+
 });

@@ -56,7 +56,7 @@ describe('test SqlConnectionPool', () => {
   });
 
 
-  it('expect pool to be able to open a database', async (done) => {
+  it('expect pool to be able to open a (file-)database', async (done) => {
     try {
       let pool = new SqlConnectionPool();
       await pool.open('testsqlite3.db', SQL_OPEN_DEFAULT, 1, 2);
@@ -122,7 +122,7 @@ describe('test SqlConnectionPool', () => {
   it('expect pool to be closed after failed attempt to open a database', async (done) => {
     try {
       let pool = new SqlConnectionPool();
-      await pool.open('testsqlite4.db', SQL_OPEN_READWRITE);
+      await pool.open('::/.', SQL_OPEN_READWRITE);
       expect(pool.isOpen()).toBeFalsy();
 
       // getting first connection

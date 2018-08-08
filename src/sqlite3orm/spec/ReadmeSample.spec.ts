@@ -14,6 +14,9 @@ class User {
   @field({name: 'user_json', dbtype: 'TEXT', isJson: true})
   userJsonData: any;
 
+  @field({name: 'user_deleted'})
+  deleted?: boolean;
+
   constructor() {
     this.userId = 0;
     this.userLoginName = 'noname';
@@ -100,6 +103,14 @@ async function runSample(): Promise<void> {
         // read a user:
         let userDonald = await userDAO.select(user);
 
+        expect(userDonald.deleted).toBeFalsy('deleted is true');
+
+        // update a user partially:
+        await userDAO.updatePartial({userId: userDonald.userId, deleted: true});
+
+        userDonald = await userDAO.select(user);
+        expect(userDonald.deleted).toBeTruthy('deleted is false');
+
         // read all contacts (child) for a given user (parent):
         let contactsDonald1 = await contactDAO.selectAllOf('fk_user_contacts', User, userDonald);
         // or
@@ -135,7 +146,6 @@ async function runSample(): Promise<void> {
         expect(userDonald2.userLoginName).toBe(user.userLoginName, 'wrong userDonald2.userLoginName');
         expect(userDonald2.userJsonData.lastScores.length)
             .toBe(user.userJsonData.lastScores.length, 'wrong userDonald2.userJsonData.lastScores.length');
-
 
 
         expect(contactsDonald1.length).toBe(1, 'wrong contactsDonald1.length');
