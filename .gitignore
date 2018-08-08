@@ -26,4 +26,4 @@ npm-debug.log*
 *:memory*
 file:sqlite3orm*
 test*.db
-
+file
