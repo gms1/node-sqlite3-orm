@@ -104,9 +104,9 @@ function decorateFieldProperty(
   }
 
   const metaModel = getModelMetadata(target.constructor);
-  const metaProp = metaModel.getPropertyAlways(key);
+  const metaProp = metaModel.getOrAddProperty(key);
   metaProp.setPropertyType(Reflect.getMetadata('design:type', target, key));
-  metaProp.addField(opts.name || key.toString(), isIdentity, opts);
+  metaModel.setPropertyField(key, isIdentity, opts);
 }
 
 
@@ -129,8 +129,7 @@ function decorateForeignKeyProperty(
   }
 
   const metaModel = getModelMetadata(target.constructor);
-  const metaProp = metaModel.getPropertyAlways(key);
-  metaProp.addForeignKey(constraintName, foreignTableName, foreignTableField);
+  metaModel.setPropertyForeignKey(key, constraintName, foreignTableName, foreignTableField);
 }
 
 /**
@@ -139,6 +138,7 @@ function decorateForeignKeyProperty(
  * @param target - The decorated class
  * @param key - The decorated property
  * @param indexName - The name for the index
+ * @param [isUnique] - is a unique index
  * @returns The field class instance
  */
 function decorateIndexProperty(
@@ -149,8 +149,7 @@ function decorateIndexProperty(
   }
 
   const metaModel = getModelMetadata(target.constructor);
-  const metaProp = metaModel.getPropertyAlways(key);
-  metaProp.addIndexKey(indexName, isUnique);
+  metaModel.setPropertyIndexKey(key, indexName, isUnique);
 }
 
 /*****************************************************************************************/
@@ -219,7 +218,7 @@ export function fk(constraintName: string, foreignTableName: string, foreignTabl
  * @param indexName - The index name
  * @returns The decorator function
  */
-export function index(indexName: string, isUnique: boolean = false): (target: Object, key: string|symbol) => void {
+export function index(indexName: string, isUnique?: boolean): (target: Object, key: string|symbol) => void {
   return ((target: Object, key: string | symbol) => {
     decorateIndexProperty(target, key, indexName, isUnique);
   });

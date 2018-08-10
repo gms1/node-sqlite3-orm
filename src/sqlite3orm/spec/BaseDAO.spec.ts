@@ -1,6 +1,5 @@
-// tslint:disable prefer-const max-classes-per-file no-unnecessary-class
+// tslint:disable prefer-const max-classes-per-file no-unnecessary-class no-unused-variable
 import {SqlDatabase, BaseDAO, SQL_MEMORY_DB_PRIVATE, field, fk, id, table, index} from '..';
-
 
 const USERS_TABLE = 'BD:USERS TABLE';
 const CONTACTS_TABLE = 'main.BD:CONTACTS TABLE';
@@ -129,16 +128,19 @@ describe('test BaseDAO', () => {
       user.userLoginName = 'login3';
       await userDao.insert(user);
 
+      contact.contactId = 0;
       contact.userId = 1;
       contact.emailAddress = 'user1@test1.net';
       contact = await contactDao.insert(contact);
       expect(contact.contactId).toBe(1, 'autoIncrement id not updated');
 
+      contact.contactId = 0;
       contact.userId = 1;
       contact.emailAddress = 'user1@test2.net';
       contact = await contactDao.insert(contact);
       expect(contact.contactId).toBe(2, 'autoIncrement id not updated');
 
+      contact.contactId = 0;
       contact.userId = 2;
       contact.emailAddress = 'user2@test.net';
       contact = await contactDao.insert(contact);

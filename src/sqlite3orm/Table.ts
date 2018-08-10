@@ -1,4 +1,4 @@
-// import * as core from './core';
+import * as core from './core';
 
 // tslint:disable no-use-before-declare
 import {Field} from './Field';
@@ -12,6 +12,8 @@ import {
   splitIdentifiers
 } from './utils';
 import {MetaModel} from './MetaModel';
+import {FieldOpts} from './decorators';
+import {PropertyType} from './PropertyType';
 
 /**
  * Class holding a table definition (name of the table and fields in the table)
@@ -137,19 +139,43 @@ export class Table {
   /**
    * Add a table field to this table
    *
-   * @param colName - The name of the column
+   * @param name - The name of the column
+   * @param isIdentity
+   * @param [opts]
+   * @param [propertyType]
    * @returns The field definition
    */
-  public addTableField(field: Field): Field {
-    /* istanbul ignore if */
-    if (this.mapNameToField.has(field.name)) {
-      throw new Error(`table '${this.name}': field '${field.name}' on table  already defined`);
-    }
-    this.fields.push(field);
-    this.mapNameToField.set(field.name, field);
-    if (field.isIdentity) {
-      this.mapNameToIdentityField.set(field.name, field);
+  public getOrAddTableField(name: string, isIdentity: boolean, opts?: FieldOpts, propertyType?: PropertyType): Field {
+    let field = this.mapNameToField.get(name);
+    if (!field) {
+      // create field
+      field = new Field(name, isIdentity, opts, propertyType);
+      this.fields.push(field);
+      this.mapNameToField.set(field.name, field);
 
+      if (field.isIdentity) {
+        this.mapNameToIdentityField.set(field.name, field);
+      }
+    } else {
+      // merge field
+      if (field.isIdentity !== isIdentity) {
+        throw new Error(`conflicting identity setting: new: ${isIdentity}, old: ${field.isIdentity}`);
+      }
+      if (opts && opts.dbtype) {
+        if (field.isDbTypeDefined && field.dbtype !== opts.dbtype) {
+          throw new Error(`conflicting dbtype setting: new: '${opts.dbtype}', old: '${field.dbtype}'`);
+        }
+        field.dbtype = opts.dbtype;
+      }
+      // tslint:disable-next-line triple-equals
+      if (opts && opts.isJson != undefined) {
+        if (field.isIsJsonDefined && field.isJson !== opts.isJson) {
+          throw new Error(`conflicting json setting: new: ${opts.isJson}, old: ${field.isJson}`);
+        }
+        field.isJson = opts.isJson;
+      }
+    }
+    if (field.isIdentity) {
       if (this.autoIncrement && !this.withoutRowId && this.mapNameToIdentityField.size === 1 &&
           field.dbTypeInfo.typeAffinity === 'INTEGER') {
         this._autoIncrementField = field;
@@ -157,23 +183,6 @@ export class Table {
         this._autoIncrementField = undefined;
       }
     }
-    field.indexKeys.forEach((idxFieldDef, idxName) => {
-      let idxDef = this.hasIDXDefinition(idxName);
-      if (!idxDef) {
-        idxDef = new IDXDefinition(idxName, idxFieldDef.isUnique);
-        this.addIDXDefinition(idxDef);
-      }
-      idxDef.fields.push(field);
-    });
-    field.foreignKeys.forEach((fkFieldDef, constraintName) => {
-      let fkDef = this.hasFKDefinition(constraintName);
-      if (!fkDef) {
-        fkDef = new FKDefinition(constraintName, fkFieldDef.foreignTableName);
-        this.addFKDefinition(fkDef);
-      }
-      fkDef.fields.push(field);
-      fkDef.foreignColumNames.push(fkFieldDef.foreignColumName);
-    });
     return field;
   }
 
@@ -190,12 +199,20 @@ export class Table {
     return constraint;
   }
 
-  public addFKDefinition(fkDef: FKDefinition): void {
-    /* istanbul ignore if */
-    if (this.mapNameToFKDef.has(fkDef.name)) {
-      throw new Error(`table '${this.name}': foreign key constraint ${fkDef.name} already registered`);
+  public addFKDefinition(fkDef: FKDefinition): FKDefinition {
+    const oldFkDef = this.mapNameToFKDef.get(fkDef.name);
+    if (!oldFkDef) {
+      this.mapNameToFKDef.set(fkDef.name, fkDef);
+    } else {
+      // check conflicts
+      if (oldFkDef.id !== fkDef.id) {
+        core.debugORM(`table '${this.name}': conflicting foreign key definition for '${fkDef.name}'`);
+        core.debugORM(`   old: ${oldFkDef.id}`);
+        core.debugORM(`   new: ${fkDef.id}`);
+        throw new Error(`table '${this.name}': conflicting foreign key definition for '${fkDef.name}'`);
+      }
     }
-    this.mapNameToFKDef.set(fkDef.name, fkDef);
+    return fkDef;
   }
 
   public hasIDXDefinition(name: string): IDXDefinition|undefined {
@@ -214,15 +231,23 @@ export class Table {
     return idxDef;
   }
 
-  public addIDXDefinition(idxDef: IDXDefinition): void {
+  public addIDXDefinition(idxDef: IDXDefinition): IDXDefinition {
     // NOTE: creating a index in schema1 on a table in schema2 is not supported by Sqlite3
     //  so using qualifiedIndentifier is currently not required
-    const name = qualifiyIdentifier(idxDef.name);
-    /* istanbul ignore if */
-    if (this.mapNameToIDXDef.has(name)) {
-      throw new Error(`table '${this.name}': index ${idxDef.name} already registered`);
+    const qname = qualifiyIdentifier(idxDef.name);
+    const oldIdxDef = this.mapNameToIDXDef.get(qname);
+    if (!oldIdxDef) {
+      this.mapNameToIDXDef.set(qname, idxDef);
+    } else {
+      // check conflicts
+      if (oldIdxDef.id !== idxDef.id) {
+        core.debugORM(`table '${this.name}': conflicting index definition for '${idxDef.name}'`);
+        core.debugORM(`   old: ${oldIdxDef.id}`);
+        core.debugORM(`   new: ${idxDef.id}`);
+        throw new Error(`table '${this.name}': conflicting index definition '${idxDef.name}'`);
+      }
     }
-    this.mapNameToIDXDef.set(name, idxDef);
+    return idxDef;
   }
 
 
@@ -274,12 +299,10 @@ export class Table {
       unique = idxDef.isUnique ? true : false;
     }
 
-    const quotedIdxName = quoteIdentifier(idxName);
-    const quotedTableName = quoteAndUnqualiyIdentifier(this.name);
-
-    const idxCols = idxDef.fields.map((field) => field.quotedName);
+    const idxCols = idxDef.fields.map((field) => quoteSimpleIdentifier(field.name));
     // tslint:disable-next-line: restrict-plus-operands
-    return 'CREATE ' + (unique ? 'UNIQUE ' : ' ') + `INDEX IF NOT EXISTS ${quotedIdxName} ON ${quotedTableName} ` +
+    return 'CREATE ' + (unique ? 'UNIQUE ' : ' ') +
+        `INDEX IF NOT EXISTS ${quoteIdentifier(idxName)} ON ${quoteAndUnqualiyIdentifier(this.name)} ` +
         `(` + idxCols.join(', ') + ')';
   }
 
@@ -293,8 +316,7 @@ export class Table {
     if (!idxDef) {
       throw new Error(`table '${this.name}': index '${idxName}' is not defined on table '${this.name}'`);
     }
-    const quotedIdxName = quoteIdentifier(idxName);
-    return `DROP INDEX IF EXISTS ${quotedIdxName}`;
+    return `DROP INDEX IF EXISTS ${quoteIdentifier(idxName)}`;
   }
 
   /**
@@ -350,19 +372,19 @@ export class Table {
     // add foreign key constraint definition:
     this.mapNameToFKDef.forEach((fk, fkName) => {
       /* istanbul ignore if */
-      if (!fk.fields.length || !fk.foreignColumNames.length || fk.fields.length !== fk.foreignColumNames.length) {
+      if (!fk.fields.length || !fk.fields.length || fk.fields.length !== fk.fields.length) {
         throw new Error(`table '${this.name}': foreign key constraint '${fkName}' definition is incomplete`);
       }
       stmt += `,\n  CONSTRAINT ${quoteSimpleIdentifier(fk.name)}\n`;
       stmt += `    FOREIGN KEY (`;
-      stmt += fk.fields.map((field) => field.quotedName).join(', ');
+      stmt += fk.fields.map((field) => quoteSimpleIdentifier(field.name)).join(', ');
       stmt += ')\n';
 
       // if fk.foreignTableName has qualifier it must match the qualifier of this.name
       const {identName, identSchema} = splitIdentifiers(fk.foreignTableName);
 
       const tableSchema = this.schemaName;
-      /* istanbul ignore if */
+      /* istanbul ignore next */
       if (identSchema &&
           ((identSchema === 'main' && tableSchema && tableSchema !== identSchema) ||
            (identSchema !== 'main' && (!tableSchema || tableSchema !== identSchema)))) {
@@ -372,7 +394,7 @@ export class Table {
 
       stmt += `    REFERENCES ${quoteSimpleIdentifier(identName)} (`;
       // tslint:disable-next-line: restrict-plus-operands
-      stmt += fk.foreignColumNames.map((colName) => quoteSimpleIdentifier(colName)).join(', ') +
+      stmt += fk.fields.map((field) => quoteSimpleIdentifier(field.foreignColumnName)).join(', ') +
           ') ON DELETE CASCADE';  // TODO: hard-coded 'ON DELETE CASCADE'
       stmt += '\n';
 

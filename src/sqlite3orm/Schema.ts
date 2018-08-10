@@ -1,6 +1,7 @@
 // import * as core from './core';
 
 import {Table} from './Table';
+import {TableOpts} from './decorators';
 import {SqlDatabase} from './SqlDatabase';
 import {qualifiyIdentifier} from './utils';
 
@@ -65,12 +66,41 @@ export class Schema {
    * @param table - The table definition
    * @returns The table definition
    */
-  public addTable(table: Table): Table {
-    const name = qualifiyIdentifier(table.name);
-    if (this.mapNameToTable.has(name)) {
-      throw new Error(`table '${table.name}' already registered`);
+  public getOrAddTable(name: string, opts: TableOpts): Table {
+    const qname = qualifiyIdentifier(name);
+    let table = this.mapNameToTable.get(qname);
+
+    if (!table) {
+      table = new Table(name);
+      this.mapNameToTable.set(qname, table);
+
+      // tslint:disable-next-line triple-equals
+      if (opts.withoutRowId != undefined) {
+        table.withoutRowId = opts.withoutRowId;
+      }
+      // tslint:disable-next-line triple-equals
+      if (opts.autoIncrement != undefined) {
+        table.autoIncrement = opts.autoIncrement;
+      }
+    } else {
+      // tslint:disable-next-line triple-equals
+      if (opts.withoutRowId != undefined) {
+        // tslint:disable-next-line triple-equals
+        if (table.isWithoutRowIdDefined && opts.withoutRowId != table.withoutRowId) {
+          throw new Error(`conflicting withoutRowId settings: new: ${opts.withoutRowId}, old ${table.withoutRowId}`);
+        }
+        table.withoutRowId = opts.withoutRowId;
+      }
+      // tslint:disable-next-line triple-equals
+      if (opts.autoIncrement != undefined) {
+        // tslint:disable-next-line triple-equals
+        if (table.isAutoIncrementDefined && opts.autoIncrement != table.autoIncrement) {
+          throw new Error(`conflicting autoIncrement settings: new: ${opts.autoIncrement}, old ${table.autoIncrement}`);
+        }
+        table.autoIncrement = opts.autoIncrement;
+      }
     }
-    this.mapNameToTable.set(name, table);
+
     return table;
   }
 

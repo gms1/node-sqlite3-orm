@@ -1,6 +1,7 @@
 import {DbTableInfo, DbColumnInfo, DbIndexInfo, DbForeignKeyInfo, DbIndexColumnInfo} from './DbTableInfo';
 import {SqlDatabase} from './SqlDatabase';
 import {quoteAndSplitIdentifiers, quoteSimpleIdentifier} from './utils';
+import {FKDefinition} from './FKDefinition';
 
 export class DbCatalogDAO {
   sqldb: SqlDatabase;
@@ -93,7 +94,7 @@ export class DbCatalogDAO {
           // old fk
           if (lastFk) {
             const fkInfo: DbForeignKeyInfo = {refTable: lastFk.table, columns: fromCols, refColumns: toCols};
-            info.foreignKeys[DbCatalogDAO.genericForeignKeyId(fromCols, lastFk.table, toCols)] = fkInfo;
+            info.foreignKeys[FKDefinition.genericForeignKeyId(fromCols, lastFk.table, toCols)] = fkInfo;
           }
           // new fk
           lastId = fk.id;
@@ -106,7 +107,7 @@ export class DbCatalogDAO {
       });
       if (lastFk) {
         const fkInfo: DbForeignKeyInfo = {refTable: lastFk.table, columns: fromCols, refColumns: toCols};
-        info.foreignKeys[DbCatalogDAO.genericForeignKeyId(fromCols, lastFk.table, toCols)] = fkInfo;
+        info.foreignKeys[FKDefinition.genericForeignKeyId(fromCols, lastFk.table, toCols)] = fkInfo;
       }
       return info;
     } catch (err) {
@@ -127,14 +128,7 @@ export class DbCatalogDAO {
     return this.sqldb.all(`PRAGMA ${this.schemaPragma(pragmaName, identifierName, identifierSchema)}`);
   }
 
-  static genericForeignKeyId(fromCols: string[], toTable: string, toCols: string[]): string {
-    let res = '(';
-    res += fromCols.join(',');
-    res += `) => ${toTable}(`;
-    res += toCols.join(',');
-    res += ')';
-    return res;
-  }
+
 
   static getTypeAffinity(typeDef: string): string {
     const type = typeDef.toUpperCase();

@@ -34,4 +34,8 @@ export {DbCatalogDAO} from './DbCatalogDAO';
 
 export {AutoUpgrader, UpgradeMode, UpgradeInfo} from './AutoUpgrader';
 
+export {IDXDefinition} from './IDXDefinition';
+
+export {FKDefinition} from './FKDefinition';
+
 export * from './utils';

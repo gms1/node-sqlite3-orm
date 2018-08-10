@@ -6,6 +6,7 @@ import {Field} from './Field';
 import {schema} from './Schema';
 import {DbCatalogDAO} from './DbCatalogDAO';
 import {DbTableInfo} from './DbTableInfo';
+import {FKDefinition} from './FKDefinition';
 import {quoteIdentifier, qualifiyIdentifier, sequentialize, PromiseFactories} from './utils';
 const debug = _dbg('sqlite3orm:autoupgrade');
 
@@ -139,8 +140,8 @@ export class AutoUpgrader {
       return {tableInfo, opts, upgradeMode: UpgradeMode.RECREATE};
     }
     for (const fk of table.mapNameToFKDef.values()) {
-      const genName =
-          DbCatalogDAO.genericForeignKeyId(fk.fields.map((f) => f.name), fk.foreignTableName, fk.foreignColumNames);
+      const genName = FKDefinition.genericForeignKeyId(
+          fk.fields.map((f) => f.name), fk.foreignTableName, fk.fields.map((field) => field.foreignColumnName));
       if (!tableInfo.foreignKeys[genName]) {
         debug(`  foreign key definition for '${fk.name}' changed`);
         return {tableInfo, opts, upgradeMode: UpgradeMode.RECREATE};
@@ -340,7 +341,7 @@ export class AutoUpgrader {
         if (field) {
           continue;
         }
-        const addField = new Field(colName);
+        const addField = new Field(colName, false);
 
         // NOTE: these columns should always be nullable
         addField.dbtype = tableInfo.columns[colName].type;

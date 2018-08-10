@@ -1,9 +1,9 @@
 
 import {backtickQuoteSimpleIdentifier} from './utils';
-import {FKFieldDefinition} from './FKFieldDefinition';
-import {IDXFieldDefinition} from './IDXFieldDefinition';
 import {DbColumnTypeInfo} from './DbTableInfo';
 import {DbCatalogDAO} from './DbCatalogDAO';
+import {PropertyType} from './PropertyType';
+import {FieldOpts} from './decorators';
 
 /**
  * Class holding a field definition
@@ -79,67 +79,44 @@ export class Field {
    * Flag if this field is part of the primary key
    */
   isIdentity: boolean;
-  /**
-   * Map of all the foreign key constraint names this field participates
-   */
-  foreignKeys: Map<string, FKFieldDefinition>;
-
-  /**
-   * Map of all the indexes this field participates
-   */
-  indexKeys: Map<string, IDXFieldDefinition>;
-
 
   /**
    * Creates an instance of Field.
    *
    */
-  public constructor(name?: string) {
-    if (name) {
-      this.name = name;
+  public constructor(name: string, isIdentity?: boolean, opts?: FieldOpts, propertyType?: PropertyType) {
+    this.name = name;
+    this.isIdentity = !!isIdentity;
+
+    if (propertyType) {
+      this.setDbDefaultType(propertyType);
     }
-    this.isIdentity = false;
-    this.foreignKeys = new Map<string, FKFieldDefinition>();
-    this.indexKeys = new Map<string, IDXFieldDefinition>();
+    if (opts) {
+      if (opts.dbtype) {
+        this.dbtype = opts.dbtype;
+      }
+      if (opts.isJson) {
+        this.isJson = opts.isJson;
+      }
+    }
   }
 
-
-  /**
-   * Test if this field is part of the given foreign key constraint
-   *
-   * @param constraintName
-   */
-  public isFKField(constraintName: string): boolean {
-    return this.foreignKeys.has(constraintName);
+  setDbDefaultType(propertyType: PropertyType): void {
+    switch (propertyType) {
+      case PropertyType.BOOLEAN:
+      case PropertyType.DATE:
+        this.dbDefaultType = 'INTEGER';
+        break;
+      case PropertyType.NUMBER:
+        if (this.isIdentity) {
+          this.dbDefaultType = 'INTEGER NOT NULL';
+        } else {
+          this.dbDefaultType = 'REAL';
+        }
+        break;
+    }
+    // otherwise 'TEXT' will be used as default
   }
-
-  /**
-   * Set this field to participate in a foreign key constraint
-   *
-   * @param constraintName - The constraint name
-   */
-  public setFKField(foreignKeyField: FKFieldDefinition): void {
-    this.foreignKeys.set(foreignKeyField.name, foreignKeyField);
-  }
-
-  /**
-   * Test if this field is part of the given index
-   *
-   * @param indexName
-   */
-  public isIndexField(indexName: string): boolean {
-    return this.indexKeys.has(indexName);
-  }
-
-  /**
-   * Set this field as part of the given index
-   *
-   * @param indexField
-   */
-  public setIndexField(indexField: IDXFieldDefinition): void {
-    this.indexKeys.set(indexField.name, indexField);
-  }
-
 
 
   static parseDbType(dbtype: string): DbColumnTypeInfo {

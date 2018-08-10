@@ -100,8 +100,10 @@ class TestIdx {
 
   @field({name: 'COL2', dbtype: 'TEXT'}) @index(TABLE_TESTIDX_IDX_NAME_N) public col2?: string;
 }
-
-
+@table()
+class TestEmptyTableOpts {
+  @id({name: 'ID', dbtype: 'INTEGER NOT NULL'}) public id!: number;
+}
 
 // ---------------------------------------------
 
@@ -135,7 +137,7 @@ describe('test schema', () => {
       expect(parentNameField).toBeDefined();
       expect(parentNameField.name).toBe(TABLE_PARENT_FIELD_NAME_NAME);
       expect(parentNameField.quotedName).toBeDefined();
-      expect(parentNameField.isIdentity).toBeFalsy();
+      expect(parentNameField.isIdentity).toBeFalsy('isIdentity is true');
 
 
       const parentMetaModel: MetaModel = getModelMetadata(ParentTable);
@@ -168,21 +170,24 @@ describe('test schema', () => {
       expect(childNameField).toBeDefined();
       expect(childNameField.name).toBe(TABLE_CHILD_FIELD_NAME_NAME);
       expect(childNameField.quotedName).toBeDefined();
-      expect(childNameField.isIdentity).toBeFalsy();
-      let childFKField = childTable.getTableField(TABLE_CHILD_FIELD_FK_NAME);
-      expect(childFKField).toBeDefined();
-      expect(childFKField.name).toBe(TABLE_CHILD_FIELD_FK_NAME);
-      expect(childFKField.quotedName).toBeDefined();
-      expect(childFKField.isIdentity).toBeFalsy();
-      let childFKFieldDef = childFKField.foreignKeys.get(TABLE_CHILD_FK_CONSTRAINT_NAME);
-      expect(childFKFieldDef!.foreignTableName).toBe(TABLE_PARENT_TABLE_NAME);
-      expect(childFKFieldDef!.foreignColumName).toBe(TABLE_PARENT_FIELD_ID_NAME);
-      const childFKDef = childTable.getFKDefinition(TABLE_CHILD_FK_CONSTRAINT_NAME);
-      expect(() => childTable.getFKDefinition('not existing fk constraint')).toThrow();
-      expect(childFKDef.foreignTableName).toBe(TABLE_PARENT_TABLE_NAME);
+      expect(childNameField.isIdentity).toBeFalsy('isIdentity is true');
 
-      expect(childFKField.isIndexField(TABLE_CHILD_IDX_NAMEQ)).toBeTruthy();
-      const childIDXDef = childTable.getIDXDefinition(TABLE_CHILD_IDX_NAMEQ);
+      expect(childTable.hasFKDefinition('foo')).toBeFalsy('fk is defined');
+
+      expect(childTable.hasFKDefinition(TABLE_CHILD_FK_CONSTRAINT_NAME)).toBeTruthy();
+      const childParentFkDef = childTable.getFKDefinition(TABLE_CHILD_FK_CONSTRAINT_NAME);
+      expect(childParentFkDef.foreignTableName).toBe(TABLE_PARENT_TABLE_NAME);
+      expect(childParentFkDef.fields.length).toBe(1);
+      expect(childParentFkDef.fields.length).toBe(1);
+      expect(childParentFkDef.fields[0].name).toBe(TABLE_CHILD_FIELD_FK_NAME);
+      expect(childParentFkDef.fields[0].foreignColumnName).toBe(TABLE_PARENT_FIELD_ID_NAME);
+
+      const childIdxDef = childTable.getIDXDefinition(TABLE_CHILD_IDX_NAMEQ);
+      expect(childIdxDef.fields.length).toBe(1);
+      expect(childIdxDef.fields[0].name).toBe(TABLE_CHILD_FIELD_FK_NAME);
+      expect(childIdxDef.isUnique).toBeUndefined('isUnique is defined');
+
+      expect(() => childTable.getFKDefinition('not existing fk constraint')).toThrow();
       expect(() => childTable.getIDXDefinition('not existing index')).toThrow();
 
 
@@ -285,10 +290,8 @@ describe('test schema', () => {
       let parentTable = schema().getTable(TABLE_PARENT_TABLE_NAME);
       expect(parentTable).toBeDefined();
 
-      let newProperty = Symbol('dyndef1');
-      let newField = new Field('TESTADDCOL1');
-      newField.dbtype = 'INTEGER';
-      parentTable.addTableField(newField);
+      const newField = parentTable.getOrAddTableField('TESTADDCOL1', false, {dbtype: 'INTEGER'});
+      expect(newField.name).toBe('TESTADDCOL1');
       expect(parentTable.hasTableField(newField.name)).toBeTruthy();
 
       // TODO: validate if new column exist afterwards
@@ -352,10 +355,8 @@ describe('test schema', () => {
       let parentTable = schema().getTable(TABLE_PARENT_TABLE_NAME);
       expect(parentTable).toBeDefined();
 
-      let newField = new Field('TESTADDCOL2');
-      newField.dbtype = 'INTEGER';
-      parentTable.addTableField(newField);
-
+      const newField = parentTable.getOrAddTableField('TESTADDCOL2', false, {dbtype: 'INTEGER'});
+      expect(newField.name).toBe('TESTADDCOL2');
       expect(parentTable.hasTableField(newField.name)).toBeTruthy();
 
       // TODO: validate if new column exist afterwards
@@ -392,18 +393,6 @@ describe('test schema', () => {
     }
     done();
   });
-
-  // ---------------------------------------------
-  it('addTable for registered table should throw', async (done) => {
-    try {
-      let parentTable = schema().getTable(TABLE_PARENT_TABLE_NAME);
-      schema().addTable(parentTable);
-      fail('should have thrown');
-    } catch (err) {
-    }
-    done();
-  });
-
 
   // ---------------------------------------------
   it('get not defined field should throw', async (done) => {

@@ -1,12 +1,37 @@
-// import * as core from './core';
+import * as core from './core';
 import {MetaProperty} from './MetaProperty';
-import {TableOpts} from './decorators';
+import {TableOpts, FieldOpts} from './decorators';
 import {Table} from './Table';
 import {schema} from './Schema';
-
+import {FKDefinition} from './FKDefinition';
+import {IDXDefinition} from './IDXDefinition';
 
 export const TABLEALIAS = 'T';
+/* istanbul ignore next */
 export const TABLEALIASPREFIX = TABLEALIAS.length ? TABLEALIAS + '.' : '';
+
+interface PropertyFieldOptions {
+  name: string;
+  isIdentity: boolean;
+  opts: FieldOpts;
+}
+
+interface PropertyForeignKeyOptions {
+  constraintName: string;
+  foreignTableName: string;
+  foreignTableField: string;
+}
+
+interface PropertyIndexOptions {
+  name: string;
+  isUnique?: boolean;
+}
+
+interface PropertyOptions {
+  field?: Map<string|symbol, PropertyFieldOptions>;
+  fk?: Map<string|symbol, Map<string, PropertyForeignKeyOptions>>;
+  index?: Map<string|symbol, Map<string, PropertyIndexOptions>>;
+}
 
 
 export class MetaModel {
@@ -23,6 +48,8 @@ export class MetaModel {
     throw new Error(`meta model '${this.name}' not fully initialized yet`);
   }
 
+  private opts: PropertyOptions;
+
   private _statementsText?: SqlStatementText;
   public get statementsText(): SqlStatementText {
     if (!this._statementsText) {
@@ -34,6 +61,7 @@ export class MetaModel {
   constructor(public readonly name: string) {
     this.properties = new Map<string|symbol, MetaProperty>();
     this.mapColNameToProp = new Map<string, MetaProperty>();
+    this.opts = {};
   }
 
   hasProperty(key: string|symbol): MetaProperty|undefined {
@@ -48,7 +76,7 @@ export class MetaModel {
     throw new Error(`property '${key.toString()}' not defined for meta model '${this.name}'`);
   }
 
-  getPropertyAlways(key: string|symbol): MetaProperty {
+  getOrAddProperty(key: string|symbol): MetaProperty {
     let prop = this.properties.get(key);
     if (!prop) {
       prop = new MetaProperty(this.name, key);
@@ -57,48 +85,157 @@ export class MetaModel {
     return prop;
   }
 
-  init(opts: TableOpts): void {
+  setPropertyField(key: string|symbol, isIdentity: boolean, opts: FieldOpts): void {
+    this.getOrAddProperty(key);
+    if (!this.opts.field) {
+      this.opts.field = new Map<string|symbol, PropertyFieldOptions>();
+    }
+    let fieldOpts = this.opts.field.get(key);
+    if (fieldOpts) {
+      throw new Error(`property '${this.name}.${key.toString()}' already mapped to '${fieldOpts.name}'`);
+    }
+    fieldOpts = {name: opts.name || key.toString(), isIdentity, opts};
+    this.opts.field.set(key, fieldOpts);
+  }
+
+  setPropertyForeignKey(
+      key: string|symbol, constraintName: string, foreignTableName: string, foreignTableField: string): void {
+    this.getOrAddProperty(key);
+    if (!this.opts.fk) {
+      this.opts.fk = new Map<string|symbol, Map<string, PropertyForeignKeyOptions>>();
+    }
+    let propertyFkOpts = this.opts.fk.get(key);
+    if (!propertyFkOpts) {
+      propertyFkOpts = new Map<string, PropertyForeignKeyOptions>();
+      this.opts.fk.set(key, propertyFkOpts);
+    }
+    if (propertyFkOpts.has(constraintName)) {
+      throw new Error(`property '${this.name}.${key.toString()}' already mapped to foreign key '${constraintName}'`);
+    }
+    propertyFkOpts.set(constraintName, {constraintName, foreignTableName, foreignTableField});
+  }
+
+  setPropertyIndexKey(key: string|symbol, indexName: string, isUnique?: boolean): void {
+    this.getOrAddProperty(key);
+    if (!this.opts.index) {
+      this.opts.index = new Map<string|symbol, Map<string, PropertyIndexOptions>>();
+    }
+    let propertyIdxOpts = this.opts.index.get(key);
+    if (!propertyIdxOpts) {
+      propertyIdxOpts = new Map<string, PropertyIndexOptions>();
+      this.opts.index.set(key, propertyIdxOpts);
+    }
+    if (propertyIdxOpts.has(indexName)) {
+      throw new Error(`property '${this.name}.${key.toString()}' already mapped to foreign key '${indexName}'`);
+    }
+    propertyIdxOpts.set(indexName, {name: indexName, isUnique});
+  }
+
+
+
+  init(tableOpts: TableOpts): void {
     if (this._table) {
       throw new Error(`meta model '${this.name}' already mapped to '${this._table.name}'`);
     }
-    const tableName = opts.name || this.name;
-    this._table = schema().hasTable(tableName);
-    if (!this._table) {
-      this._table = new Table(tableName);
-      schema().addTable(this.table);
-      // tslint:disable-next-line triple-equals
-      if (opts.withoutRowId != undefined) {
-        this._table.withoutRowId = opts.withoutRowId;
-      }
-      // tslint:disable-next-line triple-equals
-      if (opts.autoIncrement != undefined) {
-        this._table.autoIncrement = opts.autoIncrement;
-      }
-    } else {
-      // tslint:disable-next-line triple-equals
-      if (opts.withoutRowId != undefined) {
-        // tslint:disable-next-line triple-equals
-        if (this._table.isWithoutRowIdDefined && opts.withoutRowId != this._table.withoutRowId) {
-          throw new Error(`in class '${this.name}': detected conflicting withoutRowId settings`);
-        }
-        this._table.withoutRowId = opts.withoutRowId;
-      }
-      // tslint:disable-next-line triple-equals
-      if (opts.autoIncrement != undefined) {
-        // tslint:disable-next-line triple-equals
-        if (this._table.isAutoIncrementDefined && opts.autoIncrement != this._table.autoIncrement) {
-          throw new Error(`in class '${this.name}': detected conflicting autoIncrement settings`);
-        }
-        this._table.autoIncrement = opts.autoIncrement;
-      }
+    const tableName = tableOpts.name || this.name;
+    try {
+      this._table = schema().getOrAddTable(tableName, tableOpts);
+    } catch (err) {
+      throw new Error(`meta model '${this.name}': failed to add field: ${err.message}`);
     }
 
-    this.properties.forEach((prop) => {
-      prop.init(this);
+    const idxDefs = new Map<string, IDXDefinition>();
+    const fkDefs = new Map<string, FKDefinition>();
+
+    // tslint:disable no-non-null-assertion
+    /* istanbul ignore if */
+    if (!this.opts.field) {
+      this.opts.field = new Map<string|symbol, PropertyFieldOptions>();
+    }
+
+    // after all the decoraters have run and a table has been created
+    // we are able to fully initialize all properties:
+    this.properties.forEach((prop, key) => {
+      let fieldOpts = this.opts.field!.get(key);
+      /* istanbul ignore if */
+      if (!fieldOpts) {
+        fieldOpts = {name: key.toString(), isIdentity: false, opts: {}};
+        this.opts.field!.set(key, fieldOpts);
+      }
+      prop.init(this, fieldOpts.name, fieldOpts.isIdentity, fieldOpts.opts);
+
+      const allPropIdxOpts = this.opts.index && this.opts.index.get(key);
+      if (allPropIdxOpts) {
+        allPropIdxOpts.forEach((propIdxOpts, idxName) => {
+          let idxDef = idxDefs.get(idxName);
+          if (!idxDef) {
+            idxDef = new IDXDefinition(idxName, propIdxOpts.isUnique);
+            idxDefs.set(idxName, idxDef);
+          } else {
+            // test for conflicting isUniqe setting
+            // tslint:disable triple-equals
+            if (propIdxOpts.isUnique != undefined) {
+              if (idxDef.isUnique != undefined && propIdxOpts.isUnique !== idxDef.isUnique) {
+                core.debugORM(
+                    `property '${
+                                 this.name
+                               }.${
+                                   prop.key.toString()
+                                 }': table: '${
+                                               this.table.name
+                                             }': conflicting index uniqueness setting: ${
+                                                                                         propIdxOpts.isUnique
+                                                                                       } !== ${idxDef.isUnique}`);
+
+                throw new Error(`property '${this.name}.${prop.key.toString()}': conflicting index uniqueness setting`);
+              }
+              idxDef.isUnique = propIdxOpts.isUnique;
+            }
+            // tslint:enable triple-equals
+          }
+          idxDef.fields.push({name: prop.field.name});
+        });
+      }
+
+      const allPropFkOpts = this.opts.fk && this.opts.fk.get(key);
+      if (allPropFkOpts) {
+        allPropFkOpts.forEach((propFkOpts, constraintName) => {
+          let fkDef = fkDefs.get(constraintName);
+          if (!fkDef) {
+            fkDef = new FKDefinition(constraintName, propFkOpts.foreignTableName);
+            fkDefs.set(constraintName, fkDef);
+          } else {
+            // test for conflicting foreign table setting
+            if (propFkOpts.foreignTableName !== fkDef.foreignTableName) {
+              throw new Error(
+                  `property '${this.name}.${
+                                            prop.key.toString()
+                                          }': conflicting foreign table setting: new: '${
+                                                                                         propFkOpts.foreignTableName
+                                                                                       }', old '${
+                                                                                                  fkDef.foreignTableName
+                                                                                                }'`);
+            }
+          }
+          fkDef.fields.push({name: prop.field.name, foreignColumnName: propFkOpts.foreignTableField});
+        });
+      }
+    });
+    // tslint:enable no-non-null-assertion
+
+    idxDefs.forEach((idxDef) => {
+      this.table.addIDXDefinition(idxDef);
     });
 
-    this._table.models.add(this);
+    fkDefs.forEach((fkDef) => {
+      this.table.addFKDefinition(fkDef);
+    });
+
+    this.table.models.add(this);
+    this.opts = {};
   }
+
+
 
   destroy(): void {
     if (this._table) {
@@ -111,6 +248,7 @@ export class MetaModel {
       (this.mapColNameToProp as any) = new Map<string, MetaProperty>();
     }
   }
+
 
 
   /**
@@ -370,7 +508,7 @@ export class MetaModel {
                 .join(' AND ');
         stmts.foreignKeySelects.set(constraintName, selectCondition);
         stmts.foreignKeyProps.set(constraintName, props);
-        stmts.foreignKeyRefCols.set(constraintName, fkDef.foreignColumNames);
+        stmts.foreignKeyRefCols.set(constraintName, fkDef.fields.map((field) => field.foreignColumnName));
       }
 
     });

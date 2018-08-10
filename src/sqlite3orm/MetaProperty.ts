@@ -4,8 +4,6 @@
 import {FieldOpts} from './decorators';
 import {PropertyType} from './PropertyType';
 import {Field} from './Field';
-import {FKFieldDefinition} from './FKFieldDefinition';
-import {IDXFieldDefinition} from './IDXFieldDefinition';
 import {MetaModel} from './MetaModel';
 
 
@@ -29,8 +27,6 @@ export class MetaProperty {
     throw new Error(`meta model property '${this.className}.${this.key.toString()}' not fully initialized yet`);
   }
 
-  private _tmpField?: Field;
-
   constructor(public readonly className: string, public readonly key: string|symbol) {
     this._propertyType = PropertyType.UNKNOWN;
   }
@@ -47,189 +43,6 @@ export class MetaProperty {
       this._propertyType = PropertyType.DATE;
     } else {
       this._propertyType = PropertyType.UNKNOWN;
-    }
-  }
-
-  addField(name: string, isIdentity: boolean, opts?: FieldOpts): void {
-    opts = opts || {};
-    if (this._tmpField) {
-      if (this._tmpField.name) {
-        throw new Error(`in class '${this.className}': property '${
-                                                                   this.key.toString()
-                                                                 }' is already mapped to '${this._tmpField.name}`);
-      }
-      this._tmpField.name = name;
-    } else {
-      this._tmpField = new Field(name);
-    }
-    this._tmpField.isIdentity = isIdentity;
-    if (opts.dbtype) {
-      this._tmpField.dbtype = opts.dbtype;
-    }
-    // tslint:disable-next-line triple-equals
-    if (opts.isJson != undefined) {
-      this._tmpField.isJson = opts.isJson;
-    }
-  }
-
-  addForeignKey(constraintName: string, foreignTableName: string, foreignTableField: string): void {
-    if (!this._tmpField) {
-      this._tmpField = new Field();
-    }
-    if (this._tmpField.foreignKeys.has(constraintName)) {
-      throw new Error(
-          `in class '${this.className}': foreign key '${
-                                                        constraintName
-                                                      }' is already defined on property '${this.key.toString()}'`);
-    }
-    const fkFieldDef = new FKFieldDefinition(constraintName, foreignTableName, foreignTableField);
-    this._tmpField.setFKField(fkFieldDef);
-  }
-
-  addIndexKey(indexName: string, isUnique?: boolean): void {
-    if (!this._tmpField) {
-      this._tmpField = new Field();
-    }
-    if (this._tmpField.isIndexField(indexName)) {
-      throw new Error(
-          `in class '${this.className}': index '${indexName}' is already defined on property '${this.key.toString()}'`);
-    }
-    this._tmpField.setIndexField(new IDXFieldDefinition(indexName, isUnique));
-  }
-
-  init(model: MetaModel): void {
-    /* istanbul ignore if */
-    if (this._field) {
-      throw new Error(
-          `meta model property '${this.className}.${this.key.toString()}' already mapped to '${this._field.name}'`);
-    }
-
-    /* istanbul ignore if */
-    if (!this._tmpField) {
-      throw new Error(`meta model property '${this.className}.${this.key.toString()}' not mapped to any field'`);
-    }
-
-    const oldField = model.table.hasTableField(this._tmpField.name);
-    this._field = this.initField(model);
-    this.initIndexKeys();
-    this.initForeignKeys();
-
-    if (oldField !== this._field) {
-      // add this field to the table:
-      model.table.addTableField(this._field);
-    }
-
-    // add mapping from column name to this property
-    model.mapColNameToProp.set(this._field.name, this);
-
-    // cleanup
-    this._tmpField = undefined;
-  }
-
-
-  protected initField(model: MetaModel): Field {
-    /* istanbul ignore if */
-    if (!this._tmpField) {
-      throw new Error(`meta model property '${this.className}.${this.key.toString()}' not mapped to any field'`);
-    }
-
-    let metaField = model.table.hasTableField(this._tmpField.name);
-    if (!metaField) {
-      // new field
-      metaField = new Field(this._tmpField.name);
-      metaField.isIdentity = this._tmpField.isIdentity;
-      if (this._tmpField.isDbTypeDefined) {
-        metaField.dbtype = this._tmpField.dbtype;
-      } else {
-        this.setDbDefaultType(metaField);
-      }
-      if (this._tmpField.isIsJsonDefined) {
-        metaField.isJson = this._tmpField.isJson;
-      }
-
-    } else {
-      // merge field
-      if (metaField.isIdentity !== this._tmpField.isIdentity) {
-        throw new Error(`in class '${
-                                     this.className
-                                   }': detected conflicting identity settings for property '${this.key.toString()}'`);
-      }
-      if (this._tmpField.isDbTypeDefined) {
-        if (metaField.isDbTypeDefined && metaField.dbtype !== this._tmpField.dbtype) {
-          throw new Error(`in class '${
-                                       this.className
-                                     }': detected conflicting dbtype settings for property '${this.key.toString()}'`);
-        } else {
-          this.setDbDefaultType(metaField);
-        }
-        metaField.dbtype = this._tmpField.dbtype;
-      }
-      // tslint:disable-next-line triple-equals
-      if (this._tmpField.isIsJsonDefined) {
-        if (metaField.isIsJsonDefined && metaField.isJson !== this._tmpField.isJson) {
-          throw new Error(
-              `in class '${this.className}': detected conflicting json settings for property '${this.key.toString()}'`);
-        }
-        metaField.isJson = this._tmpField.isJson;
-      }
-    }
-    return metaField;
-  }
-
-  protected setDbDefaultType(metaField: Field): void {
-    switch (this.propertyType) {
-      case PropertyType.BOOLEAN:
-      case PropertyType.DATE:
-        metaField.dbDefaultType = 'INTEGER';
-        break;
-      case PropertyType.NUMBER:
-        if (metaField.isIdentity) {
-          metaField.dbDefaultType = 'INTEGER NOT NULL';
-        } else {
-          metaField.dbDefaultType = 'REAL';
-        }
-        break;
-    }
-    // otherwise 'TEXT' will be used as default
-  }
-
-
-  protected initIndexKeys(): void {
-    const metaField = this._field as Field;
-    /* istanbul ignore else */
-    if (this._tmpField) {
-      this._tmpField.indexKeys.forEach((idxField, idxName) => {
-        if (!metaField.isIndexField(idxName)) {
-          metaField.setIndexField(idxField);
-        } else {
-          const oldIDXDef = metaField.indexKeys.get(idxName) as IDXFieldDefinition;
-          // tslint:disable-next-line triple-equals
-          if (idxField.isUnique != undefined && oldIDXDef.isUnique != undefined &&
-              idxField.isUnique !== oldIDXDef.isUnique) {
-            throw new Error(`in class '${this.className}': detected conflicting index settings for ${idxName}`);
-          }
-        }
-      });
-    }
-  }
-
-
-  protected initForeignKeys(): void {
-    const metaField = this._field as Field;
-    /* istanbul ignore else */
-    if (this._tmpField) {
-      this._tmpField.foreignKeys.forEach((fkFieldDef, constraintName) => {
-        if (!metaField.isFKField(constraintName)) {
-          metaField.setFKField(fkFieldDef);
-        } else {
-          const oldFKDef = metaField.foreignKeys.get(constraintName) as FKFieldDefinition;
-          if (oldFKDef.foreignTableName !== fkFieldDef.foreignTableName ||
-              oldFKDef.foreignColumName !== fkFieldDef.foreignColumName) {
-            throw new Error(
-                `in class '${this.className}': detected conflicting foreign key settings for ${constraintName}`);
-          }
-        }
-      });
     }
   }
 
@@ -329,5 +142,18 @@ export class MetaProperty {
    */
   public getHostParameterName(): string {
     return ':' + this.key.toString();
+  }
+
+
+
+  init(model: MetaModel, name: string, isIdentity: boolean, opts: FieldOpts): void {
+    try {
+      this._field = model.table.getOrAddTableField(name, isIdentity, opts, this.propertyType);
+    } catch (err) {
+      throw new Error(`property '${this.className}.${this.key.toString()}': failed to add field: ${err.message}`);
+    }
+
+    // add mapping from column name to this property
+    model.mapColNameToProp.set(this._field.name, this);
   }
 }

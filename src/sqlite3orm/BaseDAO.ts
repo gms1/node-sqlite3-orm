@@ -105,7 +105,7 @@ export class BaseDAO<T extends Object> {
             autoProp.setPropertyValue(input, res.lastID);
           }
         }
-      } catch (e) {
+      } catch (e /* istanbul ignore next */) {
         reject(new Error(`insert into '${this.table.name}' failed: ${e.message}`));
         return;
       }

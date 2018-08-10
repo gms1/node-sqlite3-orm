@@ -69,9 +69,7 @@ describe('test metaModels', () => {
         @id({name: 'MPT3:ID', dbtype: 'INTEGER NOT NULL', isJson: false})
         id!: number;
 
-        @index('MPT3:IDX1', false)
-        @fk('MPT3:FK1', 'MPT3:T1', 'MPT3:ID')
-        @field({name: 'MPT3:COL', dbtype: 'INTEGER', isJson: false})
+        @index('MPT3:IDX1', false) @fk('MPT3:FK1', 'MPT3:T1', 'MPT3:ID') @field({dbtype: 'INTEGER', isJson: false})
         col?: number;
       }
       @table({name: 'MPT3:T1'})
@@ -220,7 +218,7 @@ describe('test metaModels', () => {
   });
 
   // ---------------------------------------------
-  it('conflicting index options', async (done) => {
+  it('conflicting index options (single model)', async (done) => {
     try {
       @table({name: 'MPT9:T1'})
       class Model1 {
@@ -229,13 +227,54 @@ describe('test metaModels', () => {
 
         @index('MPT9:IDX1', false) @field({name: 'MPT9:COL'})
         col?: number;
+
+        @index('MPT9:IDX1', true)
+        col2?: number;
       }
-      @table({name: 'MPT9:T1'})
-      class Model2 {
-        @id({name: 'MPT9:ID'})
+    } catch (err) {
+      expect((err.message as string).indexOf('index')).not.toBe(-1);
+    }
+    done();
+  });
+
+  // ---------------------------------------------
+  it('non-conflicting index options (single model)', async (done) => {
+    try {
+      @table({name: 'MPT9A:T1'})
+      class Model1 {
+        @id({name: 'MPT9A:ID'})
         id!: number;
 
-        @index('MPT9:IDX1', true) @field({name: 'MPT9:COL'})
+        @index('MPT9A:IDX1') @field({name: 'MPT9A:COL'})
+        col?: number;
+
+        @index('MPT9A:IDX1', true)
+        col2?: number;
+      }
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+
+
+  // ---------------------------------------------
+  it('conflicting index options (multi model)', async (done) => {
+    try {
+      @table({name: 'MPT9B:T1'})
+      class Model1 {
+        @id({name: 'MPT9B:ID'})
+        id!: number;
+
+        @index('MPT9B:IDX1', false) @field({name: 'MPT9B:COL'})
+        col?: number;
+      }
+      @table({name: 'MPT9B:T1'})
+      class Model2 {
+        @id({name: 'MPT9B:ID'})
+        id!: number;
+
+        @index('MPT9B:IDX1', true) @field({name: 'MPT9B:COL'})
         col?: number;
       }
       fail('should have thrown');
@@ -245,8 +284,54 @@ describe('test metaModels', () => {
     done();
   });
 
+
+  it('non conflicting index options (multi model)', async (done) => {
+    try {
+      @table({name: 'MPT9C:T1'})
+      class Model1 {
+        @id({name: 'MPT9C:ID'})
+        id!: number;
+
+        @index('MPT9C:IDX1', false) @field({name: 'MPT9C:COL'})
+        col?: number;
+      }
+      @table({name: 'MPT9C:T1'})
+      class Model2 {
+        @id({name: 'MPT9C:ID'})
+        id!: number;
+
+        @index('MPT9C:IDX1', false) @field({name: 'MPT9C:COL'})
+        col?: number;
+      }
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+
   // ---------------------------------------------
-  it('conflicting foreign key options', async (done) => {
+  it('conflicting foreign key options (single model)', async (done) => {
+    try {
+      @table({name: 'MPT10:T1'})
+      class Model1 {
+        @id({name: 'MPT10:ID'})
+        id!: number;
+
+        @fk('MPT10:FK1', 'MPT10:T2', 'MPT10:ID') @field({name: 'MPT10:COL'})
+        col?: number;
+
+        @fk('MPT10:FK1', 'MPT10:T1', 'MPT10:ID')
+        col2?: number;
+      }
+    } catch (err) {
+      expect((err.message as string).indexOf('foreign')).not.toBe(-1);
+    }
+    done();
+  });
+
+
+  // ---------------------------------------------
+  it('conflicting foreign key options (multi model)', async (done) => {
     try {
       @table({name: 'MPT10:T1'})
       class Model1 {
