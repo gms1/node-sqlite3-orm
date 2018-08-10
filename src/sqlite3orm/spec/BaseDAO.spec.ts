@@ -818,7 +818,6 @@ describe('test BaseDAO', () => {
       expect(readRow.myReal).toBe(3.1415692);
       await fullDao.deleteAll();
       try {
-        // TODO: use exist instead of update
         insertedPartial.myBool = false;
         await fullDao.updatePartial({id: insertedPartial.id, myBool: insertedPartial.myBool});
         fail(`update should have failed`);
@@ -852,7 +851,6 @@ describe('test BaseDAO', () => {
       expect(readRow.myReal).toBe(3.1415692);
       await fullDao.deleteAll('where ID=:id', {':id': insertedPartial.id});
       try {
-        // TODO: use exist instead of update
         insertedPartial.myBool = false;
         await fullDao.updatePartial({id: insertedPartial.id, myBool: insertedPartial.myBool});
         fail(`update should have failed`);

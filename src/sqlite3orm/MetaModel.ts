@@ -1,4 +1,4 @@
-import * as core from './core';
+// import * as core from './core';
 import {MetaProperty} from './MetaProperty';
 import {TableOpts, FieldOpts} from './decorators';
 import {Table} from './Table';
@@ -25,6 +25,7 @@ interface PropertyForeignKeyOptions {
 interface PropertyIndexOptions {
   name: string;
   isUnique?: boolean;
+  desc?: boolean;
 }
 
 interface PropertyOptions {
@@ -115,7 +116,7 @@ export class MetaModel {
     propertyFkOpts.set(constraintName, {constraintName, foreignTableName, foreignTableField});
   }
 
-  setPropertyIndexKey(key: string|symbol, indexName: string, isUnique?: boolean): void {
+  setPropertyIndexKey(key: string|symbol, indexName: string, isUnique?: boolean, desc?: boolean): void {
     this.getOrAddProperty(key);
     if (!this.opts.index) {
       this.opts.index = new Map<string|symbol, Map<string, PropertyIndexOptions>>();
@@ -126,9 +127,9 @@ export class MetaModel {
       this.opts.index.set(key, propertyIdxOpts);
     }
     if (propertyIdxOpts.has(indexName)) {
-      throw new Error(`property '${this.name}.${key.toString()}' already mapped to foreign key '${indexName}'`);
+      throw new Error(`property '${this.name}.${key.toString()}' already mapped to index '${indexName}'`);
     }
-    propertyIdxOpts.set(indexName, {name: indexName, isUnique});
+    propertyIdxOpts.set(indexName, {name: indexName, isUnique, desc});
   }
 
 
@@ -176,24 +177,13 @@ export class MetaModel {
             // tslint:disable triple-equals
             if (propIdxOpts.isUnique != undefined) {
               if (idxDef.isUnique != undefined && propIdxOpts.isUnique !== idxDef.isUnique) {
-                core.debugORM(
-                    `property '${
-                                 this.name
-                               }.${
-                                   prop.key.toString()
-                                 }': table: '${
-                                               this.table.name
-                                             }': conflicting index uniqueness setting: ${
-                                                                                         propIdxOpts.isUnique
-                                                                                       } !== ${idxDef.isUnique}`);
-
                 throw new Error(`property '${this.name}.${prop.key.toString()}': conflicting index uniqueness setting`);
               }
               idxDef.isUnique = propIdxOpts.isUnique;
             }
             // tslint:enable triple-equals
           }
-          idxDef.fields.push({name: prop.field.name});
+          idxDef.fields.push({name: prop.field.name, desc: propIdxOpts.desc});
         });
       }
 

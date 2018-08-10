@@ -1,7 +1,10 @@
 // import * as core from './core';
 
 // tslint:disable interface-name
-export interface IDXFieldDefinition { name: string; }
+export interface IDXFieldDefinition {
+  name: string;
+  desc?: boolean;
+}
 
 export class IDXDefinition {
   readonly name: string;
@@ -9,7 +12,8 @@ export class IDXDefinition {
   readonly fields: IDXFieldDefinition[];
 
   get id(): string {
-    return IDXDefinition.genericIndexId(this.name, this.fields.map((field) => field.name), this.isUnique);
+    return IDXDefinition.genericIndexId(
+        this.name, this.fields.map((field) => field.desc ? `${field.name} DESC` : field.name), this.isUnique);
   }
 
   constructor(name: string, isUnique?: boolean) {
@@ -20,7 +24,7 @@ export class IDXDefinition {
 
   static genericIndexId(name: string, fields: string[], isUnique?: boolean): string {
     let res = name;
-    res += !!isUnique ? ' unique (' : '(';
+    res += !!isUnique ? ' UNIQUE (' : '(';
     res += fields.join(',');
     res += ')';
     return res;

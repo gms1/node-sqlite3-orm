@@ -139,17 +139,18 @@ function decorateForeignKeyProperty(
  * @param key - The decorated property
  * @param indexName - The name for the index
  * @param [isUnique] - is a unique index
+ * @param [desc] - descending order for this column
  * @returns The field class instance
  */
 function decorateIndexProperty(
-    target: Object|Function, key: string|symbol, indexName: string, isUnique?: boolean): void {
+    target: Object|Function, key: string|symbol, indexName: string, isUnique?: boolean, desc?: boolean): void {
   if (typeof target === 'function') {
     // not decorating static property
     throw new Error(`decorating static property '${key.toString()}' using index-decorator is not supported`);
   }
 
   const metaModel = getModelMetadata(target.constructor);
-  metaModel.setPropertyIndexKey(key, indexName, isUnique);
+  metaModel.setPropertyIndexKey(key, indexName, isUnique, desc);
 }
 
 /*****************************************************************************************/
@@ -216,10 +217,13 @@ export function fk(constraintName: string, foreignTableName: string, foreignTabl
  *
  * @export
  * @param indexName - The index name
+ * @param [isUnique] - index is unique
+ * @param [desc] - descending order for this column
  * @returns The decorator function
  */
-export function index(indexName: string, isUnique?: boolean): (target: Object, key: string|symbol) => void {
+export function index(indexName: string, isUnique?: boolean, desc?: boolean): (target: Object, key: string|symbol) =>
+    void {
   return ((target: Object, key: string | symbol) => {
-    decorateIndexProperty(target, key, indexName, isUnique);
+    decorateIndexProperty(target, key, indexName, isUnique, desc);
   });
 }

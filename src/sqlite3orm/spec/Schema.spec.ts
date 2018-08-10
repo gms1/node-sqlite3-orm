@@ -96,7 +96,7 @@ class TestTable {
 class TestIdx {
   @id({name: 'ID', dbtype: 'INTEGER NOT NULL'}) public id!: number;
 
-  @field({name: 'COL1', dbtype: 'TEXT'}) @index(TABLE_TESTIDX_IDX_NAME_U, true) public col1?: string;
+  @field({name: 'COL1', dbtype: 'TEXT'}) @index(TABLE_TESTIDX_IDX_NAME_U, true, true) public col1?: string;
 
   @field({name: 'COL2', dbtype: 'TEXT'}) @index(TABLE_TESTIDX_IDX_NAME_N) public col2?: string;
 }
@@ -109,12 +109,13 @@ class TestEmptyTableOpts {
 
 describe('test schema', () => {
   let sqldb: SqlDatabase;
-
+  let dbCatDao: DbCatalogDAO;
   // ---------------------------------------------
   beforeEach(async (done) => {
     try {
       sqldb = new SqlDatabase();
       await sqldb.open(SQL_MEMORY_DB_PRIVATE);
+      dbCatDao = new DbCatalogDAO(sqldb);
       done();
     } catch (e) {
       fail(e);
@@ -215,10 +216,15 @@ describe('test schema', () => {
           .toBeDefined(`index '${TABLE_TESTIDX_IDX_NAME_U}' not created`);
       expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_U].unique)
           .toBeTruthy(`index '${TABLE_TESTIDX_IDX_NAME_U}' is not unique`);
+      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_U].columns[0].desc)
+          .toBe(true, `index '${TABLE_TESTIDX_IDX_NAME_U}' is not descending`);
+
       expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_N])
           .toBeDefined(`index '${TABLE_TESTIDX_IDX_NAME_N}' not created`);
       expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_N].unique)
-          .toBeFalsy(`index '${TABLE_TESTIDX_IDX_NAME_U}' is unique`);
+          .toBeFalsy(`index '${TABLE_TESTIDX_IDX_NAME_N}' is unique`);
+      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_N].columns[0].desc)
+          .toBe(false, `index '${TABLE_TESTIDX_IDX_NAME_N}' is not descending`);
 
     } catch (e) {
       fail(`reading catalog table info for '${TABLE_TESTIDX_NAME}' failed: ${e.message}`);
@@ -242,17 +248,30 @@ describe('test schema', () => {
     try {
       const tableInfo = await catalogDAO.readTableInfo(TABLE_TESTIDX_NAME);
       expect(tableInfo).toBeDefined('table not created');
+
       expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_U])
           .toBeDefined(`index '${TABLE_TESTIDX_IDX_NAME_U}' not created`);
       expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_U].unique)
           .toBeFalsy(`index '${TABLE_TESTIDX_IDX_NAME_U}' is unique`);
+      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_U].columns[0].desc)
+          .toBe(true, `index '${TABLE_TESTIDX_IDX_NAME_U}' is not descending`);
+
+
       expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_N])
           .toBeDefined(`index '${TABLE_TESTIDX_IDX_NAME_N}' not created`);
       expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_N].unique)
-          .toBeTruthy(`index '${TABLE_TESTIDX_IDX_NAME_U}' is not unique`);
+          .toBeTruthy(`index '${TABLE_TESTIDX_IDX_NAME_N}' is not unique`);
+      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_N].columns[0].desc)
+          .toBe(false, `index '${TABLE_TESTIDX_IDX_NAME_N}' is not descending`);
 
     } catch (e) {
       fail(`reading second catalog table info for '${TABLE_TESTIDX_NAME}' failed: ${e.message}`);
+    }
+
+    try {
+      await schema().dropTable(sqldb, TABLE_TESTIDX_NAME);
+    } catch (e) {
+      fail(e);
     }
 
     done();
@@ -294,8 +313,9 @@ describe('test schema', () => {
       expect(newField.name).toBe('TESTADDCOL1');
       expect(parentTable.hasTableField(newField.name)).toBeTruthy();
 
-      // TODO: validate if new column exist afterwards
       await schema().alterTableAddColumn(sqldb, TABLE_PARENT_TABLE_NAME, newField.name);
+      let parentTableInfo = await dbCatDao.readTableInfo(TABLE_PARENT_TABLE_NAME);
+      expect(parentTableInfo!.columns[newField.name]).toBeDefined();
 
       await schema().dropIndex(sqldb, TABLE_CHILD_TABLE_NAMEQ, TABLE_CHILD_IDX_NAMEQ);
 
@@ -317,6 +337,7 @@ describe('test schema', () => {
     } catch (err) {
       fail(err);
     }
+
     done();
   });
 
@@ -359,8 +380,9 @@ describe('test schema', () => {
       expect(newField.name).toBe('TESTADDCOL2');
       expect(parentTable.hasTableField(newField.name)).toBeTruthy();
 
-      // TODO: validate if new column exist afterwards
       await parentDAO.alterTableAddColumn(newField.name);
+      let parentTableInfo = await dbCatDao.readTableInfo(TABLE_PARENT_TABLE_NAME);
+      expect(parentTableInfo!.columns[newField.name]).toBeDefined();
 
       await childDAO.dropIndex(TABLE_CHILD_IDX_NAMEQ);
 

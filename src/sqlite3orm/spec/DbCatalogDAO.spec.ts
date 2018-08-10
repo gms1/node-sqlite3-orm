@@ -36,7 +36,7 @@ class ChildTable {
   @field({name: 'PID3', dbtype: 'INTEGER'}) @fk('PARENT2', PARENT_TABLE, 'ID1') @index('PIDX2')
   pid3?: number;
 
-  @field({name: 'PID4', dbtype: 'INTEGER'}) @fk('PARENT2', PARENT_TABLE, 'ID2') @index('PIDX2')
+  @field({name: 'PID4', dbtype: 'INTEGER'}) @fk('PARENT2', PARENT_TABLE, 'ID2') @index('PIDX2', false, true)
   pid4?: number;
 
 
@@ -44,6 +44,17 @@ class ChildTable {
   constructor() {
     this.id = 0;
   }
+}
+
+@table({name: CHILD_TABLEQ})
+class ChildTableSubset {
+  @field({name: 'PID3', dbtype: 'INTEGER'}) @fk('PARENT2', PARENT_TABLE, 'ID1') @index('PIDX2')
+  pid3?: number;
+
+  @field({name: 'PID4', dbtype: 'INTEGER'}) @fk('PARENT2', PARENT_TABLE, 'ID2') @index('PIDX2', false, true)
+  pid4?: number;
+
+  constructor() {}
 }
 
 

@@ -299,7 +299,7 @@ export class Table {
       unique = idxDef.isUnique ? true : false;
     }
 
-    const idxCols = idxDef.fields.map((field) => quoteSimpleIdentifier(field.name));
+    const idxCols = idxDef.fields.map((field) => quoteSimpleIdentifier(field.name) + (field.desc ? ' DESC' : ''));
     // tslint:disable-next-line: restrict-plus-operands
     return 'CREATE ' + (unique ? 'UNIQUE ' : ' ') +
         `INDEX IF NOT EXISTS ${quoteIdentifier(idxName)} ON ${quoteAndUnqualiyIdentifier(this.name)} ` +
