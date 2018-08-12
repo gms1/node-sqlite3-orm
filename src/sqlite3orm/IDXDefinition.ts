@@ -24,9 +24,12 @@ export class IDXDefinition {
 
   static genericIndexId(name: string, fields: string[], isUnique?: boolean): string {
     let res = name;
-    res += !!isUnique ? ' UNIQUE (' : '(';
+    res += '(';
     res += fields.join(',');
     res += ')';
+    if (isUnique) {
+      res += ':UNIQUE';
+    }
     return res;
   }
 }

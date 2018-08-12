@@ -53,7 +53,7 @@
     "@types/debug": "0.0.30",
     "@types/fs-extra": "^5.0.4",
     "@types/jasmine": "^2.8.8",
-    "@types/node": "^10.5.2",
+    "@types/node": "^10.5.8",
     "@types/sqlite3": "^3.1.3",
     "coveralls": "^3.0.2",
     "fs-extra": "^7.0.0",
@@ -63,7 +63,7 @@
     "jasmine-ts": "^0.2.1",
     "nyc": "^12.0.2",
     "rimraf": "^2.6.2",
-    "ts-node": "^7.0.0",
+    "ts-node": "^7.0.1",
     "tslint": "^5.11.0",
     "typedoc": "^0.11.1",
     "typescript": "^2.9.2"
