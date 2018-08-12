@@ -2,6 +2,7 @@
 
 | Release   | Notes                                                                                                                       |
 |-----------|-----------------------------------------------------------------------------------------------------------------------------|
+| 2.3.1     | descending index columns                                                                                                    |
 | 2.3.0     | BaseDAO: added partial insert/update/update all, as well as delete all methods                                              |
 | 2.2.0     | autoupgrade for automatically creating or upgrade tables and indexes in the database                                        |
 | 2.1.0     | [2.1.0 changes](#2.1.0-changes)                                                                                             |
