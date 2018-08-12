@@ -32,17 +32,30 @@ export class MetaProperty {
   }
 
   // called from decorator
-  setPropertyType(propertyType: Function): void {
-    if (propertyType.name === 'Boolean') {
-      this._propertyType = PropertyType.BOOLEAN;
-    } else if (propertyType.name === 'String') {
-      this._propertyType = PropertyType.STRING;
-    } else if (propertyType.name === 'Number') {
-      this._propertyType = PropertyType.NUMBER;
-    } else if (propertyType.name === 'Date') {
-      this._propertyType = PropertyType.DATE;
+  setPropertyType(propertyType: Function|string): void {
+    let typeName: string;
+    /* istanbul ignore else */
+    if (typeof propertyType === 'function') {
+      typeName = propertyType.name.toLowerCase();
     } else {
-      this._propertyType = PropertyType.UNKNOWN;
+      typeName = propertyType.toLowerCase();
+    }
+    switch (typeName) {
+      case 'boolean':
+        this._propertyType = PropertyType.BOOLEAN;
+        break;
+      case 'string':
+        this._propertyType = PropertyType.STRING;
+        break;
+      case 'number':
+        this._propertyType = PropertyType.NUMBER;
+        break;
+      case 'date':
+        this._propertyType = PropertyType.DATE;
+        break;
+      default:
+        this._propertyType = PropertyType.UNKNOWN;
+        break;
     }
   }
 
