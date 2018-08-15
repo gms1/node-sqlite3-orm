@@ -271,7 +271,17 @@ export class BaseDAO<T extends Object> {
    * @returns A promise of model class instance
    */
   public select(model: T): Promise<T> {
-    return this.selectById(model);
+    return new Promise<T>(async (resolve, reject) => {
+      try {
+        const row =
+            await this.sqldb.get(this.metaModel.getSelectByIdStatement(), this.bindPrimaryKeyInputParams(model));
+        model = this.readResultRow(model, row);
+      } catch (e /* istanbul ignore next */) {
+        reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
+        return;
+      }
+      resolve(model);
+    });
   }
 
 

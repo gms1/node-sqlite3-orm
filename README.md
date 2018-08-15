@@ -164,20 +164,20 @@ In order to read from or write to the database, you can use the `BaseDAO<Model>'
 All primitive JavaScript data types ('String', 'Number', 'Boolean') and properties of type 'Date' are supported.
 Type safety is guaranteed, when reading properties of these types from the database (NULL values are treated as 'undefined').
 
-**Date** properties can be mapped to either the 'TEXT' or to the 'INTEGER' storage class and their their values will be stored as UTC. Using 'INTEGER' converts to Unix-Time, so fractions of seconds are lost.
+**Date** properties can be mapped to either the 'TEXT' or to the 'INTEGER' storage class and their values will be stored as UTC. Using 'INTEGER' converts to Unix-Time, so fractions of seconds are lost.
 
 These are the corresponding defaults for the 'current timestamp':
 
 default for 'TEXT':
 
 ```TypeScript
- dbtype: 'TEXT    DEFAULT(datetime(\'now\') || \'Z\')'})
+ dbtype: 'TEXT    DEFAULT(datetime(\'now\') || \'Z\')'
  ```
 
 default for 'INTEGER':
 
 ```TypeScript
- dbtype: 'INTEGER DEFAULT(strftime(\'%s\',\'now\'))'})
+ dbtype: 'INTEGER DEFAULT(strftime(\'%s\',\'now\'))'
  ```
 
 **Boolean** properties can either be mapped to 'TEXT' or to 'INTEGER'. On storing a boolean value **false** will be converted to '0' and **true** will be converted to '1', on reading '0' or 'false' will be converted to **false** and '1' or 'true' will be converted to **true**. All other values will result in **undefined**
