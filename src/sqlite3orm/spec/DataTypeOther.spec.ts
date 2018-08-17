@@ -3,7 +3,7 @@ import {SqlDatabase, BaseDAO, SQL_MEMORY_DB_PRIVATE, schema, field, id, table, V
 
 const DATATYPE_OTHER_TABLE = 'DJ:DATATYPE_NUMBER';
 
-// tslint:disable triple-equals no-null-keyword
+// tslint:disable triple-equals no-null-keyword no-unbound-method
 
 const testTransformer: ValueTransformer = {
   toDB: (input) => (input == undefined) ? null : input.toFixed(2),
