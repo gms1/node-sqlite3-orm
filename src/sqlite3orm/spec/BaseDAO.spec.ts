@@ -1,4 +1,5 @@
 // tslint:disable prefer-const max-classes-per-file no-unnecessary-class no-unused-variable
+// tslint:disable no-non-null-assertion
 import {SqlDatabase, BaseDAO, SQL_MEMORY_DB_PRIVATE, field, fk, id, table, index} from '..';
 
 const USERS_TABLE = 'BD:USERS TABLE';
@@ -423,7 +424,7 @@ describe('test BaseDAO', () => {
       expect(testRow.myBool2Text).toBeUndefined();
       expect(testRow.myNumber2Text).toBe(42);
       expect(testRow.myString2Number).toBe('24');
-      expect(testRow.myDate2Number).toBeNaN();
+      expect(testRow.myDate2Number!.getTime()).toBeNaN();
     } catch (err) {
       fail(err);
     }

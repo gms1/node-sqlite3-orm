@@ -5,14 +5,14 @@ import {FieldOpts} from './decorators';
 import {PropertyType} from './PropertyType';
 import {Field} from './Field';
 import {MetaModel} from './MetaModel';
-
+import {ValueTransformer} from './ValueTransformer';
+import * as transformers from './DefaultValueTransformers';
 
 export class MetaProperty {
   /**
    * The property type enum mapped to this field
    */
   private _propertyType: PropertyType;
-
   get propertyType(): PropertyType {
     return this._propertyType;
   }
@@ -25,6 +25,11 @@ export class MetaProperty {
     }
     /* istanbul ignore next */
     throw new Error(`meta model property '${this.className}.${this.key.toString()}' not fully initialized yet`);
+  }
+
+  private _transform!: ValueTransformer;
+  public get transform(): ValueTransformer {
+    return this._transform;
   }
 
   constructor(public readonly className: string, public readonly key: string|symbol) {
@@ -61,91 +66,12 @@ export class MetaProperty {
 
 
 
-  getPropertyValue(model: any): any {
-    const field = this.field;
-    let value = Reflect.get(model, this.key);
-    // tslint:disable-next-line: triple-equals
-    if (value == undefined) {
-      return value;
-    }
-    if (field.isJson) {
-      value = JSON.stringify(value);
-    } else {
-      switch (this.propertyType) {
-        case PropertyType.BOOLEAN:
-          value = !value ? 0 : 1;
-          break;
-        case PropertyType.DATE:
-          if (field.dbTypeInfo.typeAffinity === 'INTEGER') {
-            value = Math.floor((value as Date).getTime() / 1000);
-          } else {
-            value = (value as Date).toISOString();
-          }
-          break;
-      }
-    }
-    return value;
+  getDBValue(model: any): any {
+    return this._transform.toDB(Reflect.get(model, this.key));
   }
 
-  setPropertyValue(model: any, value: any): void {
-    const field = this.field;
-    // tslint:disable-next-line: triple-equals
-    if (value == undefined) {
-      Reflect.set(model, this.key, undefined);
-      return;
-    }
-    if (field.isJson) {
-      value = JSON.parse(value);
-    } else {
-      switch (this.propertyType) {
-        case PropertyType.BOOLEAN:
-          if (typeof value === 'string') {
-            if (value === '0' || value === 'false') {
-              value = false;
-            } else if (value === '1' || value === 'true') {
-              value = true;
-            } else {
-              value = undefined;
-            }
-          } else {
-            value = !value ? false : true;
-          }
-          break;
-        case PropertyType.DATE:
-          switch (typeof value) {
-            case 'string':
-              value = new Date(Date.parse(value));
-              break;
-            case 'number':
-              if (Number.isInteger(value)) {
-                // unix time
-                value = new Date((value as number) * 1000);
-              } else {
-                // Julian day numbers ?
-                // TODO: convert real-number to Date is currently not supported
-                value = NaN;
-              }
-              break;
-            /* istanbul ignore next */
-            default:
-              // NOTE: should not happen
-              value = NaN;
-              break;
-          }
-          break;
-        case PropertyType.NUMBER:
-          if (typeof value !== 'number') {
-            value = Number(value);
-          }
-          break;
-        case PropertyType.STRING:
-          if (typeof value !== 'string') {
-            value = String(value);
-          }
-          break;
-      }
-    }
-    Reflect.set(model, this.key, value);
+  setDBValue(model: any, value: any): void {
+    Reflect.set(model, this.key, this._transform.fromDB(value));
   }
 
   /**
@@ -157,8 +83,6 @@ export class MetaProperty {
     return ':' + this.key.toString();
   }
 
-
-
   init(model: MetaModel, name: string, isIdentity: boolean, opts: FieldOpts): void {
     try {
       this._field = model.table.getOrAddTableField(name, isIdentity, opts, this.propertyType);
@@ -168,5 +92,51 @@ export class MetaProperty {
 
     // add mapping from column name to this property
     model.mapColNameToProp.set(this._field.name, this);
+
+    // init transform
+    const typeAffinity = this.field.dbTypeInfo.typeAffinity;
+
+    if (opts.transform) {
+      this._transform = opts.transform;
+    } else {
+      if (this.field.isJson) {
+        this._transform = new transformers.JsonTransformer();
+      } else {
+        switch (this.propertyType) {
+          /* BOOLEAN */
+          case PropertyType.BOOLEAN:
+            if (typeAffinity === 'TEXT') {
+              this._transform = new transformers.BooleanTextTransformer();
+            } else {
+              this._transform = new transformers.BooleanNumberTransformer();
+            }
+            break;
+          case PropertyType.DATE:
+            if (typeAffinity === 'TEXT') {
+              this._transform = new transformers.DateTextTransformer();
+            } else {
+              this._transform = new transformers.DateIntegerTransformer();
+            }
+            break;
+          case PropertyType.NUMBER:
+            if (typeAffinity === 'TEXT') {
+              this._transform = new transformers.NumberTextTransformer();
+            } else {
+              this._transform = new transformers.NumberDefaultTransformer();
+            }
+            break;
+          case PropertyType.STRING:
+            if (typeAffinity === 'TEXT') {
+              this._transform = new transformers.StringDefaultTransformer();
+            } else {
+              this._transform = new transformers.StringNumberTransformer();
+            }
+            break;
+          default:
+            this._transform = new transformers.UnknownDefaultTransformer();
+            break;
+        }
+      }
+    }
   }
 }

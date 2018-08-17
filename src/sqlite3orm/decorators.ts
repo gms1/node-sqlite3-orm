@@ -3,6 +3,7 @@ import 'reflect-metadata';
 // import * as core from './core';
 
 import {MetaModel} from './MetaModel';
+import {ValueTransformer} from './ValueTransformer';
 
 export const METADATA_MODEL_KEY = 'sqlite3orm:model';
 
@@ -15,21 +16,18 @@ export const METADATA_MODEL_KEY = 'sqlite3orm:model';
 
 export interface TableOpts {
   /**
-   * The name of the table
-   * @type
+   * [name] - The name of the table
    */
   name?: string;
 
   /**
-   * Flag to indicate if table should be created using the 'WITHOUT ROWID'
+   * [withoutRowId] - Flag to indicate if table should be created using the 'WITHOUT ROWID'
    * clause
-   * @type
    */
   withoutRowId?: boolean;
   /**
-   * Flag to indicate if AUTOINCREMENT should be added to single-column INTEGER
+   * [autoIncrement] - Flag to indicate if AUTOINCREMENT should be added to single-column INTEGER
    * primary keys
-   * @type
    */
   autoIncrement?: boolean;
 }
@@ -44,20 +42,21 @@ export interface TableOpts {
 
 export interface FieldOpts {
   /**
-   * The name of the table field
-   * @type
+   * [name] - The name of the table field
    */
   name?: string;
   /**
-   * The column definition
-   * @type
+   * [dbtype] - The column definition
    */
   dbtype?: string;
   /**
-   * Flag to indicate if field should be persisted to json string
-   * @type
+   * [isJson] - Flag to indicate if field should be persisted to json string
    */
   isJson?: boolean;
+  /**
+   * [transform] - serialize/deserialize functions
+   */
+  transform?: ValueTransformer;
 }
 
 

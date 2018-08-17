@@ -9,13 +9,13 @@ interface JsonData {
 }
 
 
-@table({name: DATATYPE_JSON_TABLE})
+@table({name: DATATYPE_JSON_TABLE, autoIncrement: true})
 class DataTypeJson {
   @id({name: 'id', dbtype: 'INTEGER NOT NULL'})
   id: number;
 
   @field({name: 'my_json_text', dbtype: 'TEXT', isJson: true})
-  myJasonData?: JsonData;
+  myJsonData?: JsonData;
 
   constructor() {
     this.id = 0;
@@ -27,7 +27,6 @@ class DataTypeJson {
 describe('test Json data', () => {
   let sqldb: SqlDatabase;
   let dao: BaseDAO<DataTypeJson>;
-  let model: DataTypeJson = new DataTypeJson();
   // ---------------------------------------------
   beforeEach(async (done) => {
     try {
@@ -35,7 +34,6 @@ describe('test Json data', () => {
       await sqldb.open(SQL_MEMORY_DB_PRIVATE);
       await schema().createTable(sqldb, DATATYPE_JSON_TABLE);
       dao = new BaseDAO<DataTypeJson>(DataTypeJson, sqldb);
-      model.id = 0;
     } catch (err) {
       fail(err);
     }
@@ -45,23 +43,40 @@ describe('test Json data', () => {
   it('expect reading/writing Json properties from/to the database to succeed', async (done) => {
     try {
       // write
-      ++model.id;
-      model.myJasonData = {notes: 'hello', scores: [3, 5, 1]};
+      const model: DataTypeJson = new DataTypeJson();
+      model.myJsonData = {notes: 'hello', scores: [3, 5, 1]};
       await dao.insert(model);
 
       // read
       let model2: DataTypeJson = await dao.select(model);
       expect(model2.id).toBe(model.id);
-      expect(model2.myJasonData).toBeDefined();
-      if (!model2.myJasonData) {
+      expect(model2.myJsonData).toBeDefined();
+      if (!model2.myJsonData) {
         throw new Error('this should not happen');
       }
-      expect(model2.myJasonData.notes).toBe(model.myJasonData.notes);
-      expect(model2.myJasonData.scores.length).toBe(model2.myJasonData.scores.length);
-      expect(model2.myJasonData.scores[0]).toBe(model2.myJasonData.scores[0]);
-      expect(model2.myJasonData.scores[1]).toBe(model2.myJasonData.scores[1]);
-      expect(model2.myJasonData.scores[2]).toBe(model2.myJasonData.scores[2]);
+      expect(model2.myJsonData.notes).toBe(model.myJsonData.notes);
+      expect(model2.myJsonData.scores.length).toBe(model2.myJsonData.scores.length);
+      expect(model2.myJsonData.scores[0]).toBe(model2.myJsonData.scores[0]);
+      expect(model2.myJsonData.scores[1]).toBe(model2.myJsonData.scores[1]);
+      expect(model2.myJsonData.scores[2]).toBe(model2.myJsonData.scores[2]);
 
+    } catch (err) {
+      fail(err);
+    }
+    done();
+
+  });
+
+  it('expect reading/writing Json properties from/to the database to succeed', async (done) => {
+    try {
+      // write
+      const model: DataTypeJson = new DataTypeJson();
+      await dao.insert(model);
+
+      // read
+      let model2: DataTypeJson = await dao.select(model);
+      expect(model2.id).toBe(model.id);
+      expect(model2.myJsonData).toBeUndefined('myJsonData is defined');
     } catch (err) {
       fail(err);
     }

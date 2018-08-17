@@ -61,7 +61,7 @@ export class BaseDAO<T extends Object> {
           const autoProp = this.metaModel.mapColNameToProp.get(this.table.autoIncrementField.name);
           /* istanbul ignore else */
           if (autoProp) {
-            autoProp.setPropertyValue(model, res.lastID);
+            autoProp.setDBValue(model, res.lastID);
           }
         }
       } catch (e) {
@@ -102,7 +102,7 @@ export class BaseDAO<T extends Object> {
           const autoProp = this.metaModel.mapColNameToProp.get(this.table.autoIncrementField.name);
           /* istanbul ignore else */
           if (autoProp) {
-            autoProp.setPropertyValue(input, res.lastID);
+            autoProp.setDBValue(input, res.lastID);
           }
         }
       } catch (e /* istanbul ignore next */) {
@@ -340,7 +340,7 @@ export class BaseDAO<T extends Object> {
         // bind parameters
         const hostParams: Object = {};
         for (let i = 0; i < fkProps.length; ++i) {
-          this.setHostParamValue(hostParams, props[i], fkProps[i].getPropertyValue(childObj));
+          this.setHostParamValue(hostParams, props[i], fkProps[i].getDBValue(childObj));
         }
 
         // generate statement
@@ -548,14 +548,14 @@ export class BaseDAO<T extends Object> {
     for (let i = 0; i < fkProps.length; ++i) {
       const fkProp = fkProps[i];
       const refProp = refProps[i];
-      this.setHostParamValue(hostParams, fkProp, refProp.getPropertyValue(foreignObject));
+      this.setHostParamValue(hostParams, fkProp, refProp.getDBValue(foreignObject));
     }
     return hostParams;
   }
 
 
   protected setHostParam(hostParams: any, prop: MetaProperty, model: Partial<T>): void {
-    hostParams[prop.getHostParameterName()] = prop.getPropertyValue(model);
+    hostParams[prop.getHostParameterName()] = prop.getDBValue(model);
   }
 
   protected setHostParamValue(hostParams: any, prop: MetaProperty, value: any): void {
@@ -564,7 +564,7 @@ export class BaseDAO<T extends Object> {
 
   protected readResultRow(model: T, row: any): T {
     this.metaModel.properties.forEach((prop) => {
-      prop.setPropertyValue(model, row[prop.field.name]);
+      prop.setDBValue(model, row[prop.field.name]);
     });
     return model;
   }

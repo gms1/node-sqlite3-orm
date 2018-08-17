@@ -8,10 +8,10 @@ class DataTypeDate {
   @id({name: 'id', dbtype: 'INTEGER NOT NULL'})
   id: number;
 
-  @field({name: 'my_date_text', dbtype: 'TEXT NOT NULL DEFAULT(datetime(\'now\') || \'Z\')'})
+  @field({name: 'my_date_text', dbtype: 'TEXT DEFAULT(datetime(\'now\') || \'Z\')'})
   myDate2Text?: Date;
 
-  @field({name: 'my_date_int', dbtype: 'INTEGER NOT NULL DEFAULT(strftime(\'%s\',\'now\'))'})
+  @field({name: 'my_date_int', dbtype: 'INTEGER DEFAULT(strftime(\'%s\',\'now\'))'})
   myDate2Int?: Date;
 
   constructor() {
@@ -130,6 +130,25 @@ describe('test Date type', () => {
 
       expect(+writeDate <= +(readModel.myDate2Int as Date)).toBeTruthy('int-date has wrong default value');
       expect(+readDate >= +(readModel.myDate2Int as Date)).toBeTruthy('int-date has wrong default value');
+
+    } catch (err) {
+      fail(err);
+    }
+    done();
+
+  });
+
+
+  it('expect writing undefined Date properties to the database to succeed', async (done) => {
+    try {
+      const model: DataTypeDate = new DataTypeDate();
+      model.id = ++lastModelId;
+      await dao.insert(model);
+
+      let model2: DataTypeDate = await dao.select(model);
+      expect(model2.id).toBe(model.id);
+      expect(model2.myDate2Text).toBeUndefined('date wrongly written to text');
+      expect(model2.myDate2Int).toBeUndefined('date wrongly written to integer');
 
     } catch (err) {
       fail(err);
