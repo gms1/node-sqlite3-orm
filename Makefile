@@ -12,8 +12,7 @@ coverage:
 test:
 	npm run clean
 	npm run build
-	npm run test:run
+	npm run coverage:run
+	npm run coverage:html
 	npm run lint
-	@echo nodejs=$(NODE_VERSION)
-	@if [ "$(NODE_VERSION)" -gt 6 ]; then npm run coverage:run; fi
 

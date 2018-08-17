@@ -164,7 +164,7 @@ In order to read from or write to the database, you can use the `BaseDAO<Model>'
 All primitive JavaScript data types ('String', 'Number', 'Boolean') and properties of type 'Date' are supported.
 Type safety is guaranteed, when reading properties of these types from the database (NULL values are treated as 'undefined').
 
-**Date** properties can be mapped to either the 'TEXT' or to the 'INTEGER' (default) storage class and their values will be stored as UTC. Using 'INTEGER' converts to Unix-Time, so fractions of seconds are lost. This can be changed by using the field option **dateInMilliSeconds** or by setting as default using ```schema().dateInMilliSeconds = true```.
+**Date** properties can be mapped to either the 'TEXT' or to the 'INTEGER' storage class (defaults to 'INTEGER') and their values will be stored as UTC. Using 'INTEGER' converts to Unix-Time, so fractions of seconds are lost. This can be changed by using the field option 'dateInMilliSeconds' or by setting as default using ```schema().dateInMilliSeconds = true```.
 
 These are the corresponding defaults for a 'current timestamp':
 
@@ -182,7 +182,9 @@ default for 'INTEGER' (in seconds):
 
 **Boolean** properties can either be mapped to 'TEXT' or to 'INTEGER' (default). On storing a boolean value **false** will be converted to '0' and **true** will be converted to '1', on reading '0' or 'false' will be converted to **false** and '1' or 'true' will be converted to **true**. All other values will result in **undefined**
 
-Other data types can be serialized to a database field of type TEXT in JSON format, by setting the option 'isJson' to true (see sample above).
+Other data types can be serialized to a database field of type TEXT in JSON format, by setting the option 'isJson' to **true** (see sample above).
+
+additional you have the possibility to apply your own serialze/deserialize functions by setting the 'transform' option.
 
 ## Connection pool
 
