@@ -15,8 +15,8 @@ describe('test metaModels', () => {
 
         @index('MPT1:IDX1', false)
         @fk('MPT1:FK1', 'MPT1:T1', 'MPT1:ID')
-        @field({name: 'MPT1:COL', dbtype: 'INTEGER', isJson: false})
-        col?: number;
+        @field({name: 'MPT1:COL', dbtype: 'INTEGER', isJson: false, dateInMilliSeconds: false})
+        col?: Date;
       }
       @table({name: 'MPT1:T1', withoutRowId: false, autoIncrement: true})
       class Model2 {
@@ -25,8 +25,8 @@ describe('test metaModels', () => {
 
         @index('MPT1:IDX1', false)
         @fk('MPT1:FK1', 'MPT1:T1', 'MPT1:ID')
-        @field({name: 'MPT1:COL', dbtype: 'INTEGER', isJson: false})
-        col?: number;
+        @field({name: 'MPT1:COL', dbtype: 'INTEGER', isJson: false, dateInMilliSeconds: false})
+        col?: Date;
       }
     } catch (err) {
       fail(err);
@@ -43,7 +43,7 @@ describe('test metaModels', () => {
         id!: number;
 
         @field({name: 'MPT2:COL'})
-        col?: number;
+        col?: Date;
       }
       @table({name: 'MPT2:T1', withoutRowId: false, autoIncrement: true})
       class Model2 {
@@ -52,8 +52,8 @@ describe('test metaModels', () => {
 
         @index('MPT2:IDX1', false)
         @fk('MPT2:FK1', 'MPT2:T1', 'MPT2:ID')
-        @field({name: 'MPT2:COL', dbtype: 'INTEGER', isJson: false})
-        col?: number;
+        @field({name: 'MPT2:COL', dbtype: 'INTEGER', isJson: false, dateInMilliSeconds: false})
+        col?: Date;
       }
     } catch (err) {
       fail(err);
@@ -69,8 +69,10 @@ describe('test metaModels', () => {
         @id({name: 'MPT3:ID', dbtype: 'INTEGER NOT NULL', isJson: false})
         id!: number;
 
-        @index('MPT3:IDX1', false) @fk('MPT3:FK1', 'MPT3:T1', 'MPT3:ID') @field({dbtype: 'INTEGER', isJson: false})
-        col?: number;
+        @index('MPT3:IDX1', false)
+        @fk('MPT3:FK1', 'MPT3:T1', 'MPT3:ID')
+        @field({dbtype: 'INTEGER', isJson: false, dateInMilliSeconds: false})
+        col?: Date;
       }
       @table({name: 'MPT3:T1'})
       class Model2 {
@@ -78,7 +80,7 @@ describe('test metaModels', () => {
         id!: number;
 
         @index('MPT3:IDX1')
-        col?: number;
+        col?: Date;
       }
     } catch (err) {
       fail(err);
@@ -96,7 +98,7 @@ describe('test metaModels', () => {
         id!: number;
 
         @field({name: 'MPT4A:COL'}) @index('MPT4A:IDX1')
-        col?: number;
+        col?: Date;
       }
       @table({name: 'MPT4A:T1'})
       class Model2 {
@@ -104,7 +106,7 @@ describe('test metaModels', () => {
         id!: number;
 
         @field({name: 'MPT4A:COL'}) @index('MPT4A:IDX1')
-        col?: number;
+        col?: Date;
       }
       let testTable = schema().getTable('MPT4A:T1');
       let sqlCreateTable = testTable.getCreateTableStatement();
@@ -216,6 +218,27 @@ describe('test metaModels', () => {
     }
     done();
   });
+
+  // ---------------------------------------------
+  it('conflicting dateInMilliSeconds-field option', async (done) => {
+    try {
+      @table({name: 'MPT8A:T1'})
+      class Model1 {
+        @field({name: 'MPT8A:COL', dateInMilliSeconds: true})
+        col!: Date;
+      }
+      @table({name: 'MPT8A:T1'})
+      class Model2 {
+        @field({name: 'MPT8A:COL', dateInMilliSeconds: false})
+        col!: Date;
+      }
+      fail('should have thrown');
+    } catch (err) {
+      expect((err.message as string).indexOf('dateInMilliSeconds')).not.toBe(-1);
+    }
+    done();
+  });
+
 
   // ---------------------------------------------
   it('conflicting index options (single model)', async (done) => {

@@ -4,6 +4,7 @@ import {DbColumnTypeInfo} from './DbTableInfo';
 import {DbCatalogDAO} from './DbCatalogDAO';
 import {PropertyType} from './PropertyType';
 import {FieldOpts} from './decorators';
+import {schema} from './Schema';
 
 /**
  * Class holding a field definition
@@ -61,10 +62,7 @@ export class Field {
 
   get isJson(): boolean {
     // tslint:disable-next-line triple-equals
-    if (this._isJson == undefined) {
-      return false;
-    }
-    return this._isJson;
+    return (this._isJson == undefined) ? false : this._isJson;
   }
   set isJson(isJson: boolean) {
     this._isJson = isJson;
@@ -74,6 +72,19 @@ export class Field {
     return this._isJson == undefined ? false : true;
   }
 
+
+  private _dateInMilliSeconds?: boolean;
+  get dateInMilliSeconds(): boolean {
+    // tslint:disable-next-line triple-equals
+    return (this._dateInMilliSeconds == undefined) ? schema().dateInMilliSeconds : this._dateInMilliSeconds;
+  }
+  set dateInMilliSeconds(val: boolean) {
+    this._dateInMilliSeconds = val;
+  }
+  get isDateInMilliSecondsDefined(): boolean {
+    // tslint:disable-next-line triple-equals
+    return this._dateInMilliSeconds == undefined ? false : true;
+  }
 
   /**
    * Flag if this field is part of the primary key
@@ -95,8 +106,13 @@ export class Field {
       if (opts.dbtype) {
         this.dbtype = opts.dbtype;
       }
-      if (opts.isJson) {
-        this.isJson = opts.isJson;
+      // tslint:disable-next-line triple-equals
+      if (opts.isJson != undefined) {
+        this._isJson = opts.isJson;
+      }
+      // tslint:disable-next-line triple-equals
+      if (opts.dateInMilliSeconds != undefined) {
+        this._dateInMilliSeconds = opts.dateInMilliSeconds;
       }
     }
   }

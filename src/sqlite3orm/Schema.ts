@@ -21,6 +21,16 @@ export class Schema {
 
   private readonly mapNameToTable!: Map<string, Table>;
 
+
+  private _dateInMilliSeconds?: boolean;
+  get dateInMilliSeconds(): boolean {
+    // tslint:disable-next-line triple-equals
+    return (this._dateInMilliSeconds == undefined) ? false : this._dateInMilliSeconds;
+  }
+  set dateInMilliSeconds(val: boolean) {
+    this._dateInMilliSeconds = val;
+  }
+
   /**
    * Creates an instance of Schema.
    *

@@ -145,6 +145,7 @@ export class Table {
    * @param [propertyType]
    * @returns The field definition
    */
+  // tslint:disable cyclomatic-complexity
   public getOrAddTableField(name: string, isIdentity: boolean, opts?: FieldOpts, propertyType?: PropertyType): Field {
     let field = this.mapNameToField.get(name);
     if (!field) {
@@ -174,6 +175,15 @@ export class Table {
         }
         field.isJson = opts.isJson;
       }
+      // tslint:disable-next-line triple-equals
+      if (opts && opts.dateInMilliSeconds != undefined) {
+        if (field.isDateInMilliSecondsDefined && field.dateInMilliSeconds !== opts.dateInMilliSeconds) {
+          throw new Error(`conflicting dateInMilliSeconds setting: new: ${
+                                                                          opts.dateInMilliSeconds
+                                                                        }, old: ${field.dateInMilliSeconds}`);
+        }
+        field.dateInMilliSeconds = opts.dateInMilliSeconds;
+      }
     }
     if (field.isIdentity) {
       if (this.autoIncrement && !this.withoutRowId && this.mapNameToIdentityField.size === 1 &&
@@ -185,6 +195,7 @@ export class Table {
     }
     return field;
   }
+  // tslint:enable cyclomatic-complexity
 
 
   public hasFKDefinition(name: string): FKDefinition|undefined {

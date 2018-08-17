@@ -1,6 +1,6 @@
 // tslint:disable prefer-const max-classes-per-file no-unnecessary-class no-unused-variable
 // tslint:disable no-non-null-assertion
-import {SqlDatabase, BaseDAO, SQL_MEMORY_DB_PRIVATE, field, fk, id, table, index} from '..';
+import {SqlDatabase, BaseDAO, SQL_MEMORY_DB_PRIVATE, field, fk, id, table, index, schema} from '..';
 
 const USERS_TABLE = 'BD:USERS TABLE';
 const CONTACTS_TABLE = 'main.BD:CONTACTS TABLE';
@@ -60,6 +60,11 @@ describe('test BaseDAO', () => {
   // ---------------------------------------------
   beforeEach(async (done) => {
     try {
+      expect(schema().dateInMilliSeconds).toBeFalsy();
+      schema().dateInMilliSeconds = true;
+      expect(schema().dateInMilliSeconds).toBeTruthy();
+      schema().dateInMilliSeconds = false;
+      expect(schema().dateInMilliSeconds).toBeFalsy();
       sqldb = new SqlDatabase();
       await sqldb.open(SQL_MEMORY_DB_PRIVATE);
 
@@ -387,8 +392,11 @@ describe('test BaseDAO', () => {
     @field({name: 'my_string_int', dbtype: 'INTEGER'})
     myString2Number?: string;
 
-    @field({name: 'my_date_real', dbtype: 'REAL'})
-    myDate2Number?: Date;
+    @field({name: 'my_date_sec_real', dbtype: 'REAL', dateInMilliSeconds: false})
+    myDate2Seconds?: Date;
+
+    @field({name: 'my_date_milli_real', dbtype: 'REAL', dateInMilliSeconds: true})
+    myDate2Milliseconds?: Date;
 
     notMapped?: string;
 
@@ -411,12 +419,14 @@ describe('test BaseDAO', () => {
           my_bool_text,
           my_number_text,
           my_string_int,
-          my_date_real
+          my_date_sec_real,
+          my_date_milli_real
         ) values (
           1,
           \"abc\",
           \"42\",
           24,
+          3.14,
           3.14
         )
       `);
@@ -424,7 +434,8 @@ describe('test BaseDAO', () => {
       expect(testRow.myBool2Text).toBeUndefined();
       expect(testRow.myNumber2Text).toBe(42);
       expect(testRow.myString2Number).toBe('24');
-      expect(testRow.myDate2Number!.getTime()).toBeNaN();
+      expect(testRow.myDate2Seconds!.getTime()).toBeNaN();
+      expect(testRow.myDate2Milliseconds!.getTime()).toBeNaN();
     } catch (err) {
       fail(err);
     }

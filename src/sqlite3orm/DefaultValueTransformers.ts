@@ -51,7 +51,7 @@ export class DateTextTransformer implements ValueTransformer {
   }
 }
 
-export class DateIntegerTransformer implements ValueTransformer {
+export class DateIntegerAsSecondsTransformer implements ValueTransformer {
   toDB(input: Date|undefined): number|null {
     return (input == undefined) ? null : Math.floor(input.getTime() / 1000);
   }
@@ -60,6 +60,19 @@ export class DateIntegerTransformer implements ValueTransformer {
     return (input == null) ? undefined : new Date(Number.isInteger(input) ? input * 1000 : NaN);
   }
 }
+
+
+export class DateIntegerAsMillisecondsTransformer implements ValueTransformer {
+  toDB(input: Date|undefined): number|null {
+    return (input == undefined) ? null : input.getTime();
+  }
+
+  fromDB(input: number|null): Date|undefined {
+    return (input == null) ? undefined : new Date(Number.isInteger(input) ? input : NaN);
+  }
+}
+
+
 
 export class NumberTextTransformer implements ValueTransformer {
   toDB(input: number|undefined): string|null {

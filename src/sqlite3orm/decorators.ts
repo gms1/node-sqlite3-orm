@@ -50,9 +50,15 @@ export interface FieldOpts {
    */
   dbtype?: string;
   /**
-   * [isJson] - Flag to indicate if field should be persisted to json string
+   * [isJson] - Flag to indicate if field should be persisted as json string
    */
   isJson?: boolean;
+
+  /*
+   * [dateInMilliSeconds] - If date is stored as integer use milliseconds instead of seconds
+   */
+  dateInMilliSeconds?: boolean;
+
   /**
    * [transform] - serialize/deserialize functions
    */

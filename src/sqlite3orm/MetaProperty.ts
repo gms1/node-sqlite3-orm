@@ -115,7 +115,11 @@ export class MetaProperty {
             if (typeAffinity === 'TEXT') {
               this._transform = new transformers.DateTextTransformer();
             } else {
-              this._transform = new transformers.DateIntegerTransformer();
+              if (this._field.dateInMilliSeconds) {
+                this._transform = new transformers.DateIntegerAsMillisecondsTransformer();
+              } else {
+                this._transform = new transformers.DateIntegerAsSecondsTransformer();
+              }
             }
             break;
           case PropertyType.NUMBER:

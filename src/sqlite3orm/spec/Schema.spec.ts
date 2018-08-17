@@ -113,6 +113,7 @@ describe('test schema', () => {
   // ---------------------------------------------
   beforeEach(async (done) => {
     try {
+      expect(schema().dateInMilliSeconds).toBeFalsy();
       sqldb = new SqlDatabase();
       await sqldb.open(SQL_MEMORY_DB_PRIVATE);
       dbCatDao = new DbCatalogDAO(sqldb);
