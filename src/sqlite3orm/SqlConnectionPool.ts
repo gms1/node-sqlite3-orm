@@ -113,30 +113,27 @@ export class SqlConnectionPool {
    *
    * @returns A promise
    */
-  close(): Promise<void> {
-    return new Promise<void>(async (resolve, reject) => {
-      try {
-        if (this.databaseFile) {
-          debug(`pool: closing: ${this.curr} connections open (${this.inPool.length} in pool)`);
-        }
-        this.databaseFile = undefined;
-        this.mode = SQL_OPEN_DEFAULT;
-        const promises: Promise<void>[] = [];
-        this.inPool.forEach((value) => {
-          promises.push(value.closeByPool());
-        });
-        this.inPool.length = 0;
-        this.inUse.forEach((value) => {
-          promises.push(value.closeByPool());
-        });
-        this.inUse.clear();
-        await Promise.all(promises);
-        resolve();
-      } catch (err) /* istanbul ignore next */ {
-        debug(`closing pool failed: ${err.message}`);
-        reject(err);
+  async close(): Promise<void> {
+    try {
+      if (this.databaseFile) {
+        debug(`pool: closing: ${this.curr} connections open (${this.inPool.length} in pool)`);
       }
-    });
+      this.databaseFile = undefined;
+      this.mode = SQL_OPEN_DEFAULT;
+      const promises: Promise<void>[] = [];
+      this.inPool.forEach((value) => {
+        promises.push(value.closeByPool());
+      });
+      this.inPool.length = 0;
+      this.inUse.forEach((value) => {
+        promises.push(value.closeByPool());
+      });
+      this.inUse.clear();
+      await Promise.all(promises);
+    } catch (err) /* istanbul ignore next */ {
+      debug(`closing pool failed: ${err.message}`);
+      return Promise.reject(err);
+    }
   }
 
   /**
@@ -152,41 +149,38 @@ export class SqlConnectionPool {
    * @param [timeout=0] The timeout to wait for a connection ( 0 is infinite )
    * @returns A promise of the db connection
    */
-  get(timeout: number = 0): Promise<SqlDatabase> {
-    return new Promise<SqlDatabase>(async (resolve, reject) => {
-      try {
-        let sqldb: SqlDatabase|undefined;
-        const cond = () => this.inPool.length > 0;
-        if (this.max > 0 && !cond() && this.inUse.size >= this.max) {
-          await wait(cond, timeout);
-        }
-        if (this.inPool.length > 0) {
-          // tslint:disable-next-line no-unnecessary-type-assertion
-          sqldb = this.inPool.shift() as SqlDatabase;
-          if (this.max > 0) {
-            this.inUse.add(sqldb);
-          }
-          this.curr++;
-          debug(`pool: ${this.curr} connections open (${this.inPool.length} in pool)`);
-          resolve(sqldb);
-          return;
-        }
-        if (!this.databaseFile) {
-          throw new Error(`connection pool not opened`);
-        }
-        sqldb = new SqlDatabase();
-        await sqldb.openByPool(this, this.databaseFile, this.mode, this.settings);
-        this.curr++;
-        debug(`pool: ${this.curr} connections open (${this.inPool.length} in pool)`);
+  async get(timeout: number = 0): Promise<SqlDatabase> {
+    try {
+      let sqldb: SqlDatabase|undefined;
+      const cond = () => this.inPool.length > 0;
+      if (this.max > 0 && !cond() && this.inUse.size >= this.max) {
+        await wait(cond, timeout);
+      }
+      if (this.inPool.length > 0) {
+        // tslint:disable-next-line no-unnecessary-type-assertion
+        sqldb = this.inPool.shift() as SqlDatabase;
         if (this.max > 0) {
           this.inUse.add(sqldb);
         }
-        resolve(sqldb);
-      } catch (err) {
-        debug(`getting connection from pool failed: ${err.message}`);
-        reject(err);
+        this.curr++;
+        debug(`pool: ${this.curr} connections open (${this.inPool.length} in pool)`);
+        return sqldb;
       }
-    });
+      if (!this.databaseFile) {
+        throw new Error(`connection pool not opened`);
+      }
+      sqldb = new SqlDatabase();
+      await sqldb.openByPool(this, this.databaseFile, this.mode, this.settings);
+      this.curr++;
+      debug(`pool: ${this.curr} connections open (${this.inPool.length} in pool)`);
+      if (this.max > 0) {
+        this.inUse.add(sqldb);
+      }
+      return sqldb;
+    } catch (err) {
+      debug(`getting connection from pool failed: ${err.message}`);
+      return Promise.reject(err);
+    }
   }
 
   /**

@@ -25,12 +25,17 @@ export class BaseDAO<T extends Object> {
    *
    * @param type - The class mapped to the base table
    * @param sqldb - The database connection
+   * @param [metaModel] - The meta model for this DAO
    */
-  public constructor(type: {new(): T}, sqldb: SqlDatabase) {
+  public constructor(type: {new(): T}, sqldb: SqlDatabase, metaModel?: MetaModel) {
     this.type = type;
-    this.metaModel = Reflect.getMetadata(METADATA_MODEL_KEY, type.prototype);
-    if (!this.metaModel) {
-      throw new Error(`no table-definition defined on prototype of ${this.type.name}'`);
+    if (metaModel) {
+      this.metaModel = metaModel;
+    } else {
+      this.metaModel = Reflect.getMetadata(METADATA_MODEL_KEY, type.prototype);
+      if (!this.metaModel) {
+        throw new Error(`no table-definition defined on prototype of ${this.type.name}'`);
+      }
     }
     this.table = this.metaModel.table;
     this.sqldb = sqldb;
@@ -42,34 +47,30 @@ export class BaseDAO<T extends Object> {
    * @param model - A model class instance
    * @returns A promise of the inserted model class instance
    */
-  public insert(model: T): Promise<T> {
-    return new Promise<T>(async (resolve, reject) => {
-      try {
-        if (!this.table.autoIncrementField) {
-          await this.sqldb.run(this.metaModel.getInsertIntoStatement(), this.bindAllInputParams(model));
-        } else {
-          const res: any =
-              await this.sqldb.run(this.metaModel.getInsertIntoStatement(), this.bindNonPrimaryKeyInputParams(model));
-          /* istanbul ignore if */
-          // tslint:disable-next-line: triple-equals
-          if (res.lastID == undefined) {
-            // NOTE: should not happen
-            reject(new Error('AUTOINCREMENT failed, \'lastID\' is undefined or null'));
-            return;
-          }
-          res[this.table.autoIncrementField.name] = res.lastID;
-          const autoProp = this.metaModel.mapColNameToProp.get(this.table.autoIncrementField.name);
-          /* istanbul ignore else */
-          if (autoProp) {
-            autoProp.setDBValue(model, res.lastID);
-          }
+  public async insert(model: T): Promise<T> {
+    try {
+      if (!this.table.autoIncrementField) {
+        await this.sqldb.run(this.metaModel.getInsertIntoStatement(), this.bindAllInputParams(model));
+      } else {
+        const res: any =
+            await this.sqldb.run(this.metaModel.getInsertIntoStatement(), this.bindNonPrimaryKeyInputParams(model));
+        /* istanbul ignore if */
+        // tslint:disable-next-line: triple-equals
+        if (res.lastID == undefined) {
+          // NOTE: should not happen
+          return Promise.reject(new Error('AUTOINCREMENT failed, \'lastID\' is undefined or null'));
         }
-      } catch (e) {
-        reject(new Error(`insert into '${this.table.name}' failed: ${e.message}`));
-        return;
+        res[this.table.autoIncrementField.name] = res.lastID;
+        const autoProp = this.metaModel.mapColNameToProp.get(this.table.autoIncrementField.name);
+        /* istanbul ignore else */
+        if (autoProp) {
+          autoProp.setDBValue(model, res.lastID);
+        }
       }
-      resolve(model);
-    });
+    } catch (e) {
+      return Promise.reject(new Error(`insert into '${this.table.name}' failed: ${e.message}`));
+    }
+    return model;
   }
 
   /**
@@ -83,34 +84,30 @@ export class BaseDAO<T extends Object> {
    * @returns A promise of the inserted model class instance
    */
   public async insertPartial(input: Partial<T>): Promise<Partial<T>> {
-    return new Promise<Partial<T>>(async (resolve, reject) => {
-      try {
-        const subset = Object.keys(input);
-        if (!this.table.autoIncrementField) {
-          await this.sqldb.run(this.metaModel.getInsertIntoStatement(subset), this.bindAllInputParams(input, subset));
-        } else {
-          const res: any = await this.sqldb.run(
-              this.metaModel.getInsertIntoStatement(subset), this.bindNonPrimaryKeyInputParams(input, subset));
-          /* istanbul ignore if */
-          // tslint:disable-next-line: triple-equals
-          if (res.lastID == undefined) {
-            // NOTE: should not happen
-            reject(new Error('AUTOINCREMENT failed, \'lastID\' is undefined or null'));
-            return;
-          }
-          res[this.table.autoIncrementField.name] = res.lastID;
-          const autoProp = this.metaModel.mapColNameToProp.get(this.table.autoIncrementField.name);
-          /* istanbul ignore else */
-          if (autoProp) {
-            autoProp.setDBValue(input, res.lastID);
-          }
+    try {
+      const subset = Object.keys(input);
+      if (!this.table.autoIncrementField) {
+        await this.sqldb.run(this.metaModel.getInsertIntoStatement(subset), this.bindAllInputParams(input, subset));
+      } else {
+        const res: any = await this.sqldb.run(
+            this.metaModel.getInsertIntoStatement(subset), this.bindNonPrimaryKeyInputParams(input, subset));
+        /* istanbul ignore if */
+        // tslint:disable-next-line: triple-equals
+        if (res.lastID == undefined) {
+          // NOTE: should not happen
+          return Promise.reject(new Error('AUTOINCREMENT failed, \'lastID\' is undefined or null'));
         }
-      } catch (e /* istanbul ignore next */) {
-        reject(new Error(`insert into '${this.table.name}' failed: ${e.message}`));
-        return;
+        res[this.table.autoIncrementField.name] = res.lastID;
+        const autoProp = this.metaModel.mapColNameToProp.get(this.table.autoIncrementField.name);
+        /* istanbul ignore else */
+        if (autoProp) {
+          autoProp.setDBValue(input, res.lastID);
+        }
       }
-      resolve(input);
-    });
+    } catch (e /* istanbul ignore next */) {
+      return Promise.reject(new Error(`insert into '${this.table.name}' failed: ${e.message}`));
+    }
+    return input;
   }
 
 
@@ -120,21 +117,19 @@ export class BaseDAO<T extends Object> {
    * @param model - A model class instance
    * @returns A promise of the updated model class instance
    */
-  public update(model: T): Promise<T> {
-    return new Promise<T>(async (resolve, reject) => {
-      try {
-        const res = await this.sqldb.run(this.metaModel.getUpdateByIdStatement(), this.bindAllInputParams(model));
-        if (!res.changes) {
-          reject(new Error(`update '${this.table.name}' failed: nothing changed`));
-          return;
-        }
-      } catch (e) {
-        reject(new Error(`update '${this.table.name}' failed: ${e.message}`));
-        return;
+
+  public async update(model: T): Promise<T> {
+    try {
+      const res = await this.sqldb.run(this.metaModel.getUpdateByIdStatement(), this.bindAllInputParams(model));
+      if (!res.changes) {
+        return Promise.reject(new Error(`update '${this.table.name}' failed: nothing changed`));
       }
-      resolve(model);
-    });
+    } catch (e) {
+      return Promise.reject(new Error(`update '${this.table.name}' failed: ${e.message}`));
+    }
+    return model;
   }
+
 
   /**
    * update partially - update only columns mapped to the property keys from the partial input model
@@ -147,21 +142,17 @@ export class BaseDAO<T extends Object> {
    * @returns A promise of the updated model class instance
    */
   public async updatePartial(input: Partial<T>): Promise<Partial<T>> {
-    return new Promise<Partial<T>>(async (resolve, reject) => {
-      try {
-        const subset = Object.keys(input);
-        const res = await this.sqldb.run(
-            this.metaModel.getUpdateByIdStatement(subset), this.bindAllInputParams(input, subset, true));
-        if (!res.changes) {
-          reject(new Error(`update '${this.table.name}' failed: nothing changed`));
-          return;
-        }
-      } catch (e) {
-        reject(new Error(`update '${this.table.name}' failed: ${e.message}`));
-        return;
+    try {
+      const subset = Object.keys(input);
+      const res = await this.sqldb.run(
+          this.metaModel.getUpdateByIdStatement(subset), this.bindAllInputParams(input, subset, true));
+      if (!res.changes) {
+        return Promise.reject(new Error(`update '${this.table.name}' failed: nothing changed`));
       }
-      resolve(input);
-    });
+    } catch (e) {
+      return Promise.reject(new Error(`update '${this.table.name}' failed: ${e.message}`));
+    }
+    return input;
   }
 
   /**
@@ -178,26 +169,22 @@ export class BaseDAO<T extends Object> {
    * @returns A promise of the updated model class instance
    */
   public async updatePartialAll(input: Partial<T>, sql?: string, params?: Object): Promise<number> {
-    return new Promise<number>(async (resolve, reject) => {
-      try {
-        const subset = Object.keys(input);
-        let stmt = this.metaModel.getUpdateAllStatement(subset);
-        if (sql) {
-          stmt += ' ';
-          stmt += sql;
-        }
-        const hostParams = Object.assign({}, params, this.bindAllInputParams(input, subset));
-        const res = await this.sqldb.run(stmt, hostParams);
-        if (!res.changes) {
-          reject(new Error(`update '${this.table.name}' failed: nothing changed`));
-          return;
-        }
-        resolve(res.changes);
-      } catch (e /* istanbul ignore next */) {
-        reject(new Error(`update '${this.table.name}' failed: ${e.message}`));
-        return;
+    try {
+      const subset = Object.keys(input);
+      let stmt = this.metaModel.getUpdateAllStatement(subset);
+      if (sql) {
+        stmt += ' ';
+        stmt += sql;
       }
-    });
+      const hostParams = Object.assign({}, params, this.bindAllInputParams(input, subset));
+      const res = await this.sqldb.run(stmt, hostParams);
+      if (!res.changes) {
+        return Promise.reject(new Error(`update '${this.table.name}' failed: nothing changed`));
+      }
+      return res.changes;
+    } catch (e /* istanbul ignore next */) {
+      return Promise.reject(new Error(`update '${this.table.name}' failed: ${e.message}`));
+    }
   }
 
   /**
@@ -216,24 +203,17 @@ export class BaseDAO<T extends Object> {
    * @param input - A partial model class instance
    * @returns A promise
    */
-  public deleteById(input: Partial<T>): Promise<void> {
-    return new Promise<void>(async (resolve, reject) => {
-      try {
-        const res =
-            await this.sqldb.run(this.metaModel.getDeleteByIdStatement(), this.bindPrimaryKeyInputParams(input));
-        if (!res.changes) {
-          reject(new Error(`delete from '${this.table.name}' failed: nothing changed`));
-          return;
-        }
-      } catch (e) {
-        // NOTE: should not happen
-        /* istanbul ignore next */
-        reject(new Error(`delete from '${this.table.name}' failed: ${e.message}`));
-        /* istanbul ignore next */
-        return;
+  public async deleteById(input: Partial<T>): Promise<void> {
+    try {
+      const res = await this.sqldb.run(this.metaModel.getDeleteByIdStatement(), this.bindPrimaryKeyInputParams(input));
+      if (!res.changes) {
+        return Promise.reject(new Error(`delete from '${this.table.name}' failed: nothing changed`));
       }
-      resolve();
-    });
+    } catch (e) {
+      // NOTE: should not happen
+      /* istanbul ignore next */
+      return Promise.reject(new Error(`delete from '${this.table.name}' failed: ${e.message}`));
+    }
   }
 
   /**
@@ -243,25 +223,21 @@ export class BaseDAO<T extends Object> {
    * @returns A promise
    */
   public async deleteAll(sql?: string, params?: Object): Promise<number> {
-    return new Promise<number>(async (resolve, reject) => {
-      try {
-        let stmt = this.metaModel.getDeleteAllStatement();
-        if (sql) {
-          stmt += ' ';
-          stmt += sql;
-        }
-        const hostParams = Object.assign({}, params);
-        const res = await this.sqldb.run(stmt, hostParams);
-        if (!res.changes) {
-          reject(new Error(`delete from '${this.table.name}' failed: nothing changed`));
-          return;
-        }
-        resolve(res.changes);
-      } catch (e /* istanbul ignore next */) {
-        reject(new Error(`delete from '${this.table.name}' failed: ${e.message}`));
-        return;
+    try {
+      let stmt = this.metaModel.getDeleteAllStatement();
+      if (sql) {
+        stmt += ' ';
+        stmt += sql;
       }
-    });
+      const hostParams = Object.assign({}, params);
+      const res = await this.sqldb.run(stmt, hostParams);
+      if (!res.changes) {
+        return Promise.reject(new Error(`delete from '${this.table.name}' failed: nothing changed`));
+      }
+      return Promise.resolve(res.changes);
+    } catch (e /* istanbul ignore next */) {
+      return Promise.reject(new Error(`delete from '${this.table.name}' failed: ${e.message}`));
+    }
   }
 
   /**
@@ -270,18 +246,14 @@ export class BaseDAO<T extends Object> {
    * @param model - A model class instance
    * @returns A promise of model class instance
    */
-  public select(model: T): Promise<T> {
-    return new Promise<T>(async (resolve, reject) => {
-      try {
-        const row =
-            await this.sqldb.get(this.metaModel.getSelectByIdStatement(), this.bindPrimaryKeyInputParams(model));
-        model = this.readResultRow(model, row);
-      } catch (e /* istanbul ignore next */) {
-        reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
-        return;
-      }
-      resolve(model);
-    });
+  public async select(model: T): Promise<T> {
+    try {
+      const row = await this.sqldb.get(this.metaModel.getSelectByIdStatement(), this.bindPrimaryKeyInputParams(model));
+      model = this.readResultRow(model, row);
+    } catch (e /* istanbul ignore next */) {
+      return Promise.reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
+    }
+    return model;
   }
 
 
@@ -291,19 +263,15 @@ export class BaseDAO<T extends Object> {
    * @param input - A partial model class instance
    * @returns A promise of model class instance
    */
-  public selectById(input: Partial<T>): Promise<T> {
-    return new Promise<T>(async (resolve, reject) => {
-      let output: T;
-      try {
-        const row =
-            await this.sqldb.get(this.metaModel.getSelectByIdStatement(), this.bindPrimaryKeyInputParams(input));
-        output = this.readResultRow(new this.type(), row);
-      } catch (e) {
-        reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
-        return;
-      }
-      resolve(output);
-    });
+  public async selectById(input: Partial<T>): Promise<T> {
+    let output: T;
+    try {
+      const row = await this.sqldb.get(this.metaModel.getSelectByIdStatement(), this.bindPrimaryKeyInputParams(input));
+      output = this.readResultRow(new this.type(), row);
+    } catch (e) {
+      return Promise.reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
+    }
+    return output;
   }
 
   /**
@@ -315,49 +283,46 @@ export class BaseDAO<T extends Object> {
    * @param childObj - An instance of the class mapped to the child table
    * @returns A promise of model class instance
    */
-  public selectByChild<C extends Object>(constraintName: string, childType: {new(): C}, childObj: C): Promise<T> {
-    return new Promise<T>(async (resolve, reject) => {
-      // create child DAO
-      const childDAO = new BaseDAO<C>(childType, this.sqldb);
-      let output: T;
-      try {
-        // get child properties
-        const fkProps = childDAO.metaModel.getForeignKeyProps(constraintName);
-        const cols = childDAO.metaModel.getForeignKeyRefCols(constraintName);
-        /* istanbul ignore if */
-        if (!fkProps || !cols) {
-          throw new Error(`in '${childDAO.metaModel.name}': constraint '${constraintName}' is not defined`);
-        }
-        const refNotFoundCols: string[] = [];
-
-        // get parent (our) properties
-        const props = this.metaModel.getPropertiesFromColumnNames(cols, refNotFoundCols);
-        /* istanbul ignore if */
-        if (!props || refNotFoundCols.length) {
-          const s = '"' + refNotFoundCols.join('", "') + '"';
-          throw new Error(`in '${this.metaModel.name}': no property mapped to these fields: ${s}`);
-        }
-        // bind parameters
-        const hostParams: Object = {};
-        for (let i = 0; i < fkProps.length; ++i) {
-          this.setHostParamValue(hostParams, props[i], fkProps[i].getDBValue(childObj));
-        }
-
-        // generate statement
-        let stmt = this.metaModel.getSelectAllStatement();
-        stmt += '\nWHERE\n  ';
-        stmt += props.map((prop) => `${TABLEALIASPREFIX}${prop.field.quotedName}=${prop.getHostParameterName()}`)
-                    .join(' AND ');
-
-        const row = await this.sqldb.get(stmt, hostParams);
-        output = this.readResultRow(new this.type(), row);
-
-      } catch (e /* istanbul ignore next */) {
-        reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
-        return;
+  public async selectByChild<C extends Object>(constraintName: string, childType: {new(): C}, childObj: C): Promise<T> {
+    // create child DAO
+    const childDAO = new BaseDAO<C>(childType, this.sqldb);
+    let output: T;
+    try {
+      // get child properties
+      const fkProps = childDAO.metaModel.getForeignKeyProps(constraintName);
+      const cols = childDAO.metaModel.getForeignKeyRefCols(constraintName);
+      /* istanbul ignore if */
+      if (!fkProps || !cols) {
+        throw new Error(`in '${childDAO.metaModel.name}': constraint '${constraintName}' is not defined`);
       }
-      resolve(output);
-    });
+      const refNotFoundCols: string[] = [];
+
+      // get parent (our) properties
+      const props = this.metaModel.getPropertiesFromColumnNames(cols, refNotFoundCols);
+      /* istanbul ignore if */
+      if (!props || refNotFoundCols.length) {
+        const s = '"' + refNotFoundCols.join('", "') + '"';
+        throw new Error(`in '${this.metaModel.name}': no property mapped to these fields: ${s}`);
+      }
+      // bind parameters
+      const hostParams: Object = {};
+      for (let i = 0; i < fkProps.length; ++i) {
+        this.setHostParamValue(hostParams, props[i], fkProps[i].getDBValue(childObj));
+      }
+
+      // generate statement
+      let stmt = this.metaModel.getSelectAllStatement();
+      stmt += '\nWHERE\n  ';
+      stmt += props.map((prop) => `${TABLEALIASPREFIX}${prop.field.quotedName}=${prop.getHostParameterName()}`)
+                  .join(' AND ');
+
+      const row = await this.sqldb.get(stmt, hostParams);
+      output = this.readResultRow(new this.type(), row);
+
+    } catch (e /* istanbul ignore next */) {
+      return Promise.reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
+    }
+    return output;
   }
 
   /**
@@ -383,25 +348,22 @@ export class BaseDAO<T extends Object> {
    * @param [params] - An optional object with additional host parameter
    * @returns A promise of array of class instances
    */
-  public selectAll(sql?: string, params?: Object): Promise<T[]> {
-    return new Promise<T[]>(async (resolve, reject) => {
-      try {
-        let stmt = this.metaModel.getSelectAllStatement();
-        if (sql) {
-          stmt += ' ';
-          stmt += sql;
-        }
-        const rows: any[] = await this.sqldb.all(stmt, params);
-        const results: T[] = [];
-        rows.forEach((row) => {
-          results.push(this.readResultRow(new this.type(), row));
-        });
-        resolve(results);
-      } catch (e) {
-        reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
-        return;
+  public async selectAll(sql?: string, params?: Object): Promise<T[]> {
+    try {
+      let stmt = this.metaModel.getSelectAllStatement();
+      if (sql) {
+        stmt += ' ';
+        stmt += sql;
       }
-    });
+      const rows: any[] = await this.sqldb.all(stmt, params);
+      const results: T[] = [];
+      rows.forEach((row) => {
+        results.push(this.readResultRow(new this.type(), row));
+      });
+      return results;
+    } catch (e) {
+      return Promise.reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
+    }
   }
 
 
@@ -416,35 +378,32 @@ export class BaseDAO<T extends Object> {
    * @param [params] - An optional object with additional host parameter
    * @returns A promise of array of model class instances
    */
-  public selectAllOf<P extends Object>(
+  public async selectAllOf<P extends Object>(
       constraintName: string, parentType: {new(): P}, parentObj: P, sql?: string, params?: Object): Promise<T[]> {
-    return new Promise<T[]>(async (resolve, reject) => {
-      try {
-        const fkSelCondition = this.metaModel.getForeignKeySelects(constraintName);
-        if (!fkSelCondition) {
-          throw new Error(`constraint '${constraintName}' is not defined`);
-        }
-        let stmt = this.metaModel.getSelectAllStatement();
-        stmt += '\nWHERE\n  ';
-        stmt += fkSelCondition;
-        if (sql) {
-          stmt += ' ';
-          stmt += sql;
-        }
-        const parentDAO = new BaseDAO<P>(parentType, this.sqldb);
-        const childParams = this.bindForeignParams(parentDAO, constraintName, parentObj, params);
-
-        const rows: any[] = await this.sqldb.all(stmt, childParams);
-        const results: T[] = [];
-        rows.forEach((row) => {
-          results.push(this.readResultRow(new this.type(), row));
-        });
-        resolve(results);
-      } catch (e) {
-        reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
-        return;
+    try {
+      const fkSelCondition = this.metaModel.getForeignKeySelects(constraintName);
+      if (!fkSelCondition) {
+        throw new Error(`constraint '${constraintName}' is not defined`);
       }
-    });
+      let stmt = this.metaModel.getSelectAllStatement();
+      stmt += '\nWHERE\n  ';
+      stmt += fkSelCondition;
+      if (sql) {
+        stmt += ' ';
+        stmt += sql;
+      }
+      const parentDAO = new BaseDAO<P>(parentType, this.sqldb);
+      const childParams = this.bindForeignParams(parentDAO, constraintName, parentObj, params);
+
+      const rows: any[] = await this.sqldb.all(stmt, childParams);
+      const results: T[] = [];
+      rows.forEach((row) => {
+        results.push(this.readResultRow(new this.type(), row));
+      });
+      return results;
+    } catch (e) {
+      return Promise.reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
+    }
   }
 
   /**
@@ -476,24 +435,21 @@ export class BaseDAO<T extends Object> {
    * @param [params] - An optional object with additional host parameter
    * @returns A promise
    */
-  public selectEach(callback: (err: Error, model: T) => void, sql?: string, params?: Object): Promise<number> {
-    return new Promise<number>(async (resolve, reject) => {
-      try {
-        let stmt = this.metaModel.getSelectAllStatement();
-        if (sql) {
-          stmt += ' ';
-          stmt += sql;
-        }
-        const res = await this.sqldb.each(stmt, params, (err, row) => {
-          // TODO: err?
-          callback(err, this.readResultRow(new this.type(), row));
-        });
-        resolve(res);
-      } catch (e) {
-        reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
-        return;
+  public async selectEach(callback: (err: Error, model: T) => void, sql?: string, params?: Object): Promise<number> {
+    try {
+      let stmt = this.metaModel.getSelectAllStatement();
+      if (sql) {
+        stmt += ' ';
+        stmt += sql;
       }
-    });
+      const res = await this.sqldb.each(stmt, params, (err, row) => {
+        // TODO: err?
+        callback(err, this.readResultRow(new this.type(), row));
+      });
+      return res;
+    } catch (e) {
+      return Promise.reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
+    }
   }
 
 

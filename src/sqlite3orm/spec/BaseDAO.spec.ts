@@ -1,6 +1,6 @@
 // tslint:disable prefer-const max-classes-per-file no-unnecessary-class no-unused-variable
 // tslint:disable no-non-null-assertion
-import {SqlDatabase, BaseDAO, SQL_MEMORY_DB_PRIVATE, field, fk, id, table, index, schema} from '..';
+import {SqlDatabase, BaseDAO, SQL_MEMORY_DB_PRIVATE, field, fk, id, table, index, schema, METADATA_MODEL_KEY} from '..';
 
 const USERS_TABLE = 'BD:USERS TABLE';
 const CONTACTS_TABLE = 'main.BD:CONTACTS TABLE';
@@ -197,8 +197,9 @@ describe('test BaseDAO', () => {
 
   // ---------------------------------------------
   it('expect inserting duplicate id to throw', async (done) => {
-    let user1: User = new User();
-    let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
+    const user1: User = new User();
+    const metaModel = Reflect.getMetadata(METADATA_MODEL_KEY, User.prototype);
+    const userDao: BaseDAO<User> = new BaseDAO(User, sqldb, metaModel);
     try {
       user1.userId = 1;
       user1.userLoginName = 'login1/1';

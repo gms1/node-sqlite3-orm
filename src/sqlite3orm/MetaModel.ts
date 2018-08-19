@@ -471,13 +471,13 @@ export class MetaModel {
     stmts.selectAll = 'SELECT\n  ';
     stmts.selectAll +=
         `${TABLEALIASPREFIX}` + properties.map((prop) => prop.field.quotedName).join(`, ${TABLEALIASPREFIX}`);
-    stmts.selectAll += `\nFROM ${this.table.quotedName} ${TABLEALIAS} `;
+    stmts.selectAll += `\nFROM ${this.table.quotedName} ${TABLEALIAS}\n`;
 
     // --------------------------------------------------------------
     // generate SELECT-one statement
     stmts.selectById = stmts.selectAll;
-    stmts.selectById += '\nWHERE\n  ';
-    stmts.selectById += `${TABLEALIASPREFIX}` + colSelPK.join(` AND ${TABLEALIASPREFIX}`);
+    stmts.selectById += 'WHERE\n';
+    stmts.selectById += `  ${TABLEALIASPREFIX}` + colSelPK.join(` AND ${TABLEALIASPREFIX}`);
 
     // --------------------------------------------------------------
     // generate SELECT-fk condition
