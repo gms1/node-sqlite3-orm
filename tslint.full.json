@@ -157,7 +157,6 @@
     "trailing-comma": [
       true,
       {
-        "multiline": "never",
         "singleline": "never"
       }
     ],
