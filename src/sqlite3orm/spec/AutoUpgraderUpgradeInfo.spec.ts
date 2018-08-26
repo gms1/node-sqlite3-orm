@@ -15,7 +15,7 @@ import {
   table,
   UpgradeInfo
 } from '..';
-import {index, fk} from '../decorators';
+import {index, fk} from '../metadata/decorators';
 import {UpgradeMode, UpgradeOptions} from '../AutoUpgrader';
 
 const TEST_TABLE = 'AU:TABLE';

@@ -13,7 +13,7 @@ import {
   table,
   UpgradeInfo
 } from '..';
-import {index, fk} from '../decorators';
+import {index, fk} from '../metadata/decorators';
 
 const TEST_TABLE = 'AU:TABLE';
 const TEST_PARENT_TABLE = 'AU:PARENT_TABLE';
@@ -452,7 +452,6 @@ describe('test autoupgrade', () => {
       expect(table1Info1!.indexes['IDX_CHANGE']).toBeDefined('index \'IDX_CHANGE\' does not exist');
       expect(table1Info1!.indexes['IDX_CHANGE'].columns[0].name)
           .toBe('CONTENT2', 'index \'IDX_CHANGE\' using wrong column');
-      // TODO: test IDX_CHANGE column
 
       schema().deleteTable(TEST_TABLE);
       // --------------------------------------------

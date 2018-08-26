@@ -4,4 +4,4 @@ ColumnLimit:     120
 JavaScriptQuotes: Single
 JavaScriptWrapImports: true
 AlignEscapedNewlinesLeft: true
-SortIncludes:    false
+SortIncludes:    true

@@ -1,45 +1,57 @@
-export {
-  SqlDatabase,
-  SQL_OPEN_READONLY,
-  SQL_OPEN_READWRITE,
-  SQL_OPEN_CREATE,
-  SQL_OPEN_DEFAULT,
-  SQL_MEMORY_DB_SHARED,
-  SQL_MEMORY_DB_PRIVATE
-} from './SqlDatabase';
-
-export {SqlDatabaseSettings} from './SqlDatabaseSettings';
-
-export {SqlStatement, SqlRunResult} from './SqlStatement';
-
-export {SqlConnectionPool} from './SqlConnectionPool';
-
-export {table, field, id, fk, index, TableOpts, FieldOpts, METADATA_MODEL_KEY, getModelMetadata} from './decorators';
+export {AutoUpgrader, UpgradeInfo, UpgradeMode} from './AutoUpgrader';
 
 export {BaseDAO} from './BaseDAO';
 
-export {Schema, schema} from './Schema';
+export {
+  SQL_MEMORY_DB_PRIVATE,
+  SQL_MEMORY_DB_SHARED,
+  SQL_OPEN_CREATE,
+  SQL_OPEN_DEFAULT,
+  SQL_OPEN_READONLY,
+  SQL_OPEN_READWRITE,
+  SqlConnectionPool,
+  SqlDatabase,
+  SqlDatabaseSettings,
+  SqlRunResult,
+  SqlStatement
+} from './core';
 
-export {Table} from './Table';
+export {DbCatalogDAO, DbColumnInfo, DbForeignKeyInfo, DbIndexInfo, DbTableInfo} from './dbcatalog';
 
-export {Field} from './Field';
+export {
+  field,
+  Field,
+  FieldOpts,
+  fk,
+  FKDefinition,
+  FKFieldDefinition,
+  getModelMetadata,
+  id,
+  IDXDefinition,
+  IDXFieldDefinition,
+  index,
+  METADATA_MODEL_KEY,
+  MetaModel,
+  MetaProperty,
+  PropertyType,
+  Schema,
+  schema,
+  table,
+  Table,
+  TableOpts,
+  ValueTransformer
+} from './metadata';
 
-export {MetaModel, TABLEALIAS} from './MetaModel';
-
-export {MetaProperty} from './MetaProperty';
-
-export {PropertyType} from './PropertyType';
-
-export {ValueTransformer} from './ValueTransformer';
-
-export {DbTableInfo, DbColumnInfo, DbIndexInfo, DbForeignKeyInfo} from './DbTableInfo';
-
-export {DbCatalogDAO} from './DbCatalogDAO';
-
-export {AutoUpgrader, UpgradeMode, UpgradeInfo} from './AutoUpgrader';
-
-export {IDXDefinition, IDXFieldDefinition} from './IDXDefinition';
-
-export {FKDefinition, FKFieldDefinition} from './FKDefinition';
+export {
+  Columns,
+  Condition,
+  Filter,
+  OrderColumns,
+  PropertyComparisons,
+  PropertyPredicates,
+  QueryModel,
+  TABLEALIAS,
+  Where
+} from './query';
 
 export * from './utils';

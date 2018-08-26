@@ -1,13 +1,11 @@
 // tslint:disable-next-line no-require-imports
 import * as _dbg from 'debug';
-import {SqlDatabase} from './SqlDatabase';
-import {Table} from './Table';
-import {Field} from './Field';
-import {schema} from './Schema';
-import {DbCatalogDAO} from './DbCatalogDAO';
-import {DbTableInfo} from './DbTableInfo';
-import {FKDefinition} from './FKDefinition';
-import {quoteIdentifier, qualifiyIdentifier, sequentialize, PromiseFactories} from './utils';
+
+import {SqlDatabase} from './core/SqlDatabase';
+import {DbCatalogDAO, DbTableInfo} from './dbcatalog';
+import {Field, FKDefinition, schema, Table} from './metadata';
+import {PromiseFactories, qualifiyIdentifier, quoteIdentifier, sequentialize} from './utils';
+
 const debug = _dbg('sqlite3orm:autoupgrade');
 
 export interface UpgradeOptions {

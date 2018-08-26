@@ -1,4 +1,4 @@
-import {SQL_DEFAULT_SCHEMA} from '../SqlDatabase';
+import {SQL_DEFAULT_SCHEMA} from '../core/SqlDatabase';
 
 export function backtickQuoteSimpleIdentifier(name: string): string {
   return '`' + name.replace(/\`/g, '``') + '`';

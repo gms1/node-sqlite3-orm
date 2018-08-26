@@ -2,6 +2,7 @@
 
 | Release   | Notes                                                                                                                       |
 |-----------|-----------------------------------------------------------------------------------------------------------------------------|
+| 2.4.0     | [2.4.0 changes](#2.4.0-changes)                                                                                             |
 | 2.3.2     | customizable serialize/deserialize; support for date in milliseconds unix epoch                                             |
 | 2.3.1     | descending index columns                                                                                                    |
 | 2.3.0     | BaseDAO: added partial insert/update/update all, as well as delete all methods                                              |
@@ -20,6 +21,17 @@
 | 0.0.8     | SqlConnectionPool: allow connections to be garbage-collected if the connection pool is not limited by max-connections       |
 | 0.0.7     | SqlConnectionPool: a new connection pool                                                                                    |
 | 0.0.6     | BaseDAO: ensure type safety for mapped properties of primitive or Date type                                                 |
+
+## 2.4.0 changes
+
+### new features
+
+* typesafe queries
+
+### breaking changes
+
+* MetaModel: get*Statement() methods have been moved to the new QueryModel
+* BaseDAO: protected members have been moved to the new QueryModel
 
 ## 2.1.0 changes
 

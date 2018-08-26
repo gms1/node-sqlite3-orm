@@ -1,6 +1,6 @@
 // tslint:disable prefer-const max-classes-per-file no-unnecessary-class no-unused-variable
 // tslint:disable no-non-null-assertion
-import {SqlDatabase, BaseDAO, SQL_MEMORY_DB_PRIVATE, field, fk, id, table, index, schema, METADATA_MODEL_KEY} from '..';
+import {BaseDAO, field, fk, id, index, METADATA_MODEL_KEY, schema, SQL_MEMORY_DB_PRIVATE, SqlDatabase, table} from '..';
 
 const USERS_TABLE = 'BD:USERS TABLE';
 const CONTACTS_TABLE = 'main.BD:CONTACTS TABLE';
@@ -198,8 +198,7 @@ describe('test BaseDAO', () => {
   // ---------------------------------------------
   it('expect inserting duplicate id to throw', async (done) => {
     const user1: User = new User();
-    const metaModel = Reflect.getMetadata(METADATA_MODEL_KEY, User.prototype);
-    const userDao: BaseDAO<User> = new BaseDAO(User, sqldb, metaModel);
+    const userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
     try {
       user1.userId = 1;
       user1.userLoginName = 'login1/1';
@@ -603,14 +602,14 @@ describe('test BaseDAO', () => {
       expect(readRow.myBool).toBeTruthy();
       expect(readRow.myInt).toBe(42);
 
-      const updateMyBool = fullDao.metaModel.getUpdateAllStatement(['myBool']);
+      const updateMyBool = fullDao.queryModel.getUpdateAllStatement(['myBool']);
       await sqldb.run(updateMyBool, {':myBool': false});
 
       readRow = await fullDao.selectById({id: writtenRow.id});
       expect(readRow.myBool).toBeFalsy();
       expect(readRow.myInt).toBe(42);
 
-      const updateMyBoolAndMyInt = fullDao.metaModel.getUpdateAllStatement(['myBool', 'myInt', 'myBool']);
+      const updateMyBoolAndMyInt = fullDao.queryModel.getUpdateAllStatement(['myBool', 'myInt', 'myBool']);
       await sqldb.run(updateMyBoolAndMyInt, {':myBool': true, ':myInt': 99});
 
       readRow = await fullDao.selectById({id: writtenRow.id});
@@ -623,7 +622,7 @@ describe('test BaseDAO', () => {
       expect(readRow.myBool).toBeTruthy();
       expect(readRow.myInt).toBe(42);
 
-      const deleteAll = fullDao.metaModel.getDeleteAllStatement();
+      const deleteAll = fullDao.queryModel.getDeleteAllStatement();
       await sqldb.run(deleteAll + ' where my_integer=:myInt', {':myInt': 99});
 
       readRow = await fullDao.selectById({id: writtenRow2.id});
@@ -650,15 +649,17 @@ describe('test BaseDAO', () => {
 
 
   // ---------------------------------------------
+  /* this is now checked at compile time
   it('expect get update-all-statement for not existing property to fail', async (done) => {
     const fullDao: BaseDAO<TestDbDefaultsFull> = new BaseDAO(TestDbDefaultsFull, sqldb);
     try {
-      const updateMyBool = fullDao.metaModel.getUpdateAllStatement(['myNotExistingProp']);
+      const updateMyBool = fullDao.queryModel.getUpdateAllStatement(['myNotExistingProp']);
       fail(`should have failed`);
     } catch (err) {
     }
     done();
   });
+  */
 
 
   // ---------------------------------------------
@@ -856,7 +857,7 @@ describe('test BaseDAO', () => {
 
       insertedPartial = await fullDao.insertPartial({});
       insertedPartial.myInt = 59;
-      await fullDao.updatePartialAll({id: insertedPartial.id, myInt: insertedPartial.myInt}, 'where ID=:id');
+      await fullDao.updatePartialAll({myInt: insertedPartial.myInt}, 'where ID=:id', {':id': insertedPartial.id});
       let readRow = await fullDao.selectById({id: insertedPartial.id});
       expect(readRow.myBool).toBe(true);
       expect(readRow.myInt).toBe(59);
@@ -894,14 +895,16 @@ describe('test BaseDAO', () => {
     }
     try {
       await fullDao.updatePartialAll(
-          {id: insertedPartial.id as number + 1, myInt: insertedPartial.myInt}, 'where ID=:id');
+          {myInt: insertedPartial.myInt}, 'where ID=:id', {':id': insertedPartial.id as number + 1});
       fail('updateAll should have failed');
     } catch (err) {
+      expect(err.message).toContain('nothing changed');
     }
     try {
       await fullDao.deleteAll('where ID=:id', {':id': insertedPartial.id as number + 1});
       fail('deleteAll should have failed');
     } catch (err) {
+      expect(err.message).toContain('nothing changed');
     }
     try {
       await fullDao.dropTable();
