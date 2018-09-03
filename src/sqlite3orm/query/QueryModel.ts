@@ -120,8 +120,8 @@ export class QueryModel<T> extends QueryModelBase<T> {
       return '';
     }
     let where: Where<T> = filter.where;
-    if (typeof filter.where === 'string') {
-      where = filter.where.trimLeft();
+    if (typeof where === 'string') {
+      where = where.trimLeft();
       if (!where.length) {
         return '';
       }
@@ -130,14 +130,14 @@ export class QueryModel<T> extends QueryModelBase<T> {
       }
       return where;
     }
-    const tableAlias = filter && filter.tableAlias ? filter.tableAlias : undefined;
+    const tableAlias = filter.tableAlias ? filter.tableAlias : undefined;
     const tablePrefix = tableAlias && tableAlias.length ? `${tableAlias}.` : '';
 
     let oper: QueryCondition<T>|QueryModelPredicates<T>;
-    if (isModelPredicates(filter.where)) {
-      oper = new QueryModelPredicates<T>(filter.where);
+    if (isModelPredicates(where)) {
+      oper = new QueryModelPredicates<T>(where);
     } else {
-      oper = new QueryCondition<T>(filter.where);
+      oper = new QueryCondition<T>(where);
     }
 
     const whereClause = await oper.toSql(this.metaModel, params, tablePrefix);
@@ -146,7 +146,6 @@ export class QueryModel<T> extends QueryModelBase<T> {
 
   protected async getSelectStatement(filter: Filter<T>, params: Object): Promise<string> {
     try {
-      filter = filter;
       let sql = this.getSelectAllStatement(this.getSelectColumns(filter), filter.tableAlias);
       const whereClause = await this.getWhereClause(filter, params);
       if (whereClause.length) {
@@ -207,7 +206,7 @@ export class QueryModel<T> extends QueryModelBase<T> {
     if (!columns.length) {
       return '';
     }
-    const tableAlias = filter && filter.tableAlias ? filter.tableAlias : undefined;
+    const tableAlias = filter.tableAlias ? filter.tableAlias : undefined;
     const tablePrefix = tableAlias && tableAlias.length ? `${tableAlias}.` : '';
     return `ORDER BY ${tablePrefix}` + columns.join(`, ${tablePrefix}`);
   }

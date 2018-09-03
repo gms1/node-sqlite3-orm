@@ -154,7 +154,6 @@ export class AutoUpgrader {
       if (!field) {
         if (!keepOldColumns || tableInfo.columns[colName].notNull) {
           if (keepOldColumns) {
-            oldColumnsCount += 1;
             debug(`  column to keep '${colName} as nullable'`);
           } else {
             debug(`  column dropped '${colName}'`);
