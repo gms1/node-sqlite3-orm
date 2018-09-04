@@ -10,6 +10,7 @@
 
 This module allows you to map your model, written in JavaScript or TypeScript, to a database schema using SQLite Version 3.
 **node-sqlite3-orm** is designed to work with new JavaScript *Decorators*, *Promises* and the *async/await* feature.
+It also supports typesafe database queries and refactoring, with a filter syntax designed to serialize safely without any SQL injection possibility
 
 > NOTE: Your contribution is highly welcome! Feel free to pick-up a TODO-item or add yours.
 
@@ -33,6 +34,7 @@ class User {
 
   @field({name: 'user_deleted'})
   deleted?: boolean;
+
 }
 
 @table({name: 'CONTACTS', autoIncrement: true})
@@ -53,7 +55,7 @@ class Contact {
 }
 ```
 
-With **node-sqlite3-orm** you have full control over the names for tables, fields and foreign key constraints in the mapped database schema.
+With **node-sqlite3-orm** you have full control over the names for tables, fields, indexes and foreign key constraints in the mapped database schema.
 
 > NOTE: Properties without a *node-sqlite3-orm* decorator will not be mapped to the database.
 <!-- -->
@@ -141,6 +143,10 @@ In order to read from or write to the database, you can use the `BaseDAO<Model>'
   // read all users:
   let allUsers = await userDAO.selectAll();
 
+  // read all users having login-name starting with 'd':
+  // (see section 'typesafe queries')
+  let selectedUsers = await userDAO.selectAll({userLoginName: {isLike: 'd%'});
+
   // read all users having a contact:
   let allUsersHavingContacts = await userDAO.selectAll(
       'WHERE EXISTS(SELECT 1 FROM CONTACTS C WHERE C.user_id = T.user_id)');
@@ -157,6 +163,101 @@ In order to read from or write to the database, you can use the `BaseDAO<Model>'
 
 })();
 
+```
+
+## Typesafe queries syntax
+
+### Filter
+
+```TypeScript
+interface Filter<ModelType> {
+  select?: Columns<ModelType>;     // the columns which should be returned by the select
+  where?: Where<ModelType>;        // the conditions for the WHERE-clause
+  order?: OrderColumns<ModelType>; // the columns to use for 'ORDER BY'-clause
+  limit?: number;                  // the limit for the 'LIMIT'-clause
+  offset?: number;                 // the offset for the 'LIMIT'-clause
+  tableAlias?: string;             // a table alias to use for the query
+}
+```
+
+#### select-object
+
+Only columns mapped to properties that evaluate to true participate in the result set. Therefore, this select-object is only
+useful for methods that return an array of partials and is otherwise ignored
+
+```TypeScript
+const filter = {
+  select: {userId: true, userLoginName: true}
+}
+```
+
+#### where-object
+
+The where-object consists of predicates and may be grouped by (nested conditions: 'and', 'or', 'not')
+
+A simple predicate is defined for a specific property of the model, the comparison operator and the value:
+
+```TypeScript
+{userLoginName: {eq: 'donald'}}   // transforms to: WHERE user_loginname = 'donald'
+```
+
+For the 'eq' operator shorthand form exist:
+
+```TypeScript
+{userLoginName: 'donald'}         // transforms to: WHERE user_loginname = 'donald'
+```
+
+All the given values are not inserted directly into the SQL, but passed via parameters:
+eg: 'WHERE user_loginname = :userLoginName'
+
+We can define multiple predicates on one property as well as on multiple properties:
+
+```TypeScript
+{
+  userLoginName: {gte: 'A', lt: 'B' },
+  userJsonData: {isNotNull: true}
+}   // transforms to: WHERE user_loginname >= 'A' AND user_loginname < 'B' AND user_json IS NOT NULL
+```
+
+All predicates are combined using logical 'AND' operator, so if we have the need for a logical 'OR' we would do something like that:
+
+```TypeScript
+{
+  or: [{deleted: true}, {deleted: {isNull: true}}]
+}   // transforms to: WHERE user_deleted = 1 OR user_deleted IS NULL
+```
+
+'and' and 'or' operators are expecing an array, the 'not' operator requires a single child-condition/predicates only
+
+```TypeScript
+{  
+  not: {
+    or: [{deleted: true}, {deleted: {isNull: true}}]
+  }
+}   // transforms to: WHERE NOT ( user_deleted = 1 OR user_deleted IS NULL )
+```
+
+Furthermore, it is also possible to define parts of the query as sql expression, or replace the complete where-object with a sql where-clause:
+
+```TypeScript
+{  
+  and: [{deleted: true}, {sql: `
+EXISTS (select 1 from CONTACTS C where C.user_id = T.user_id)  
+  `}]
+}   // transforms to: WHERE NOT ( user_deleted = 1 OR user_deleted IS NULL )
+```
+
+> NOTE: If you want to use user input as part of the sql expression, it is highly recommendet to user host variables instead. The value for the host variables can be defined using an additional and optional 'params' object
+
+#### additional filter properties and other things worth mentioning
+
+`limit` and `offset` speak for themselves.
+By defining the `tableAlias` property, the default alias 'T' for the main table (see above) can be overwritten
+
+For all 'update*' and 'delete*' methods, only the where-object part is needed, not the complete filter definition:
+
+```TypeScript
+userDAO.deleteAll({deleted: true});
 ```
 
 ## Supported data types
@@ -274,4 +375,3 @@ tsconfig.json:
 ## Wiki
 
 further documentation can be found in our [Wiki](https://github.com/gms1/node-sqlite3-orm/wiki/)
-

@@ -1,5 +1,5 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-import {BaseDAO, table, id, field, index, fk, SqlDatabase, schema} from '..';
+import {BaseDAO, field, fk, id, index, schema, SqlDatabase, table} from '..';
 
 // definition-part:
 
@@ -118,6 +118,12 @@ async function runSample(): Promise<void> {
 
         // read all users:
         let allUsers = await userDAO.selectAll();
+
+        // read all users having login-name starting with 'd':
+        // (see section 'typesafe queries')
+        let selectedUsers = await userDAO.selectAll({userLoginName: {isLike: 'd%'}});
+
+        expect(selectedUsers.length).toBe(1, 'wrong selectedUsers.length');
 
         // read all users having a contact:
         let allUsersHavingContacts =
