@@ -7,26 +7,23 @@ const CONTACTS_TABLE = 'main.QB:CONTACTS TABLE';
 
 @table({name: USERS_TABLE})
 class User {
-  @id({name: 'user_id', dbtype: 'INTEGER NOT NULL'})
-  userId: number;
+  @id({name: 'user_id', dbtype: 'INTEGER NOT NULL'}) userId: number;
 
-  @field({name: 'user_loginname', dbtype: 'TEXT NOT NULL'})
-  userLoginName: string;
+  @field({name: 'user_loginname', dbtype: 'TEXT NOT NULL'}) userLoginName: string;
 
-  @field({name: 'user_followers', dbtype: 'NUMBER NOT NULL'})
-  userFollowers: number;
+  @field({name: 'user_followers', dbtype: 'NUMBER NOT NULL'}) userFollowers: number;
 
-  @field({name: 'user_likes1', dbtype: 'NUMBER'})
-  userLikes1?: number;
+  @field({name: 'user_likes1', dbtype: 'NUMBER'}) userLikes1?: number;
 
-  @field({name: 'user_likes2', dbtype: 'NUMBER'})
-  userLikes2?: number;
+  @field({name: 'user_likes2', dbtype: 'NUMBER'}) userLikes2?: number;
 
-  @field({name: 'user_created', dbtype: 'INTEGER NOT NULL'})
-  userCreated: Date;
+  @field({name: 'user_flag1', dbtype: 'INTEGER'}) userFlag1?: boolean;
 
-  @field({name: 'user_updated', dbtype: 'TEXT NOT NULL'})
-  userUpdated: Date;
+  @field({name: 'user_flag2', dbtype: 'TEXT'}) userFlag2?: boolean;
+
+  @field({name: 'user_created', dbtype: 'INTEGER NOT NULL'}) userCreated: Date;
+
+  @field({name: 'user_updated', dbtype: 'TEXT NOT NULL'}) userUpdated: Date;
 
   notMapped?: string;
 
@@ -39,20 +36,21 @@ class User {
   }
 }
 
-@table({name: CONTACTS_TABLE, autoIncrement: true})
+/*
+@table({ name: CONTACTS_TABLE, autoIncrement: true })
 class Contact {
   static userConstraint: string = 'user';
 
-  @id({name: 'contact_id', dbtype: 'INTEGER NOT NULL'})
+  @id({ name: 'contact_id', dbtype: 'INTEGER NOT NULL' })
   contactId: number;
 
-  @field({name: 'contact_email', dbtype: 'TEXT'})
+  @field({ name: 'contact_email', dbtype: 'TEXT' })
   emailAddress: string;
 
-  @field({name: 'contact_mobile', dbtype: 'TEXT'})
+  @field({ name: 'contact_mobile', dbtype: 'TEXT' })
   mobile: string;
 
-  @fk(Contact.userConstraint, USERS_TABLE, 'user_id') @field({name: 'user_id', dbtype: 'INTEGER NOT NULL'})
+  @fk(Contact.userConstraint, USERS_TABLE, 'user_id') @field({ name: 'user_id', dbtype: 'INTEGER NOT NULL' })
   userId: number;
 
   notMapped?: string;
@@ -64,6 +62,7 @@ class Contact {
     this.userId = 0;
   }
 }
+*/
 
 
 describe('test QueryModel', () => {
@@ -74,9 +73,9 @@ describe('test QueryModel', () => {
     await sqldb.open(SQL_MEMORY_DB_PRIVATE);
 
     let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
-    let contactDao: BaseDAO<Contact> = new BaseDAO(Contact, sqldb);
+    // let contactDao: BaseDAO<Contact> = new BaseDAO(Contact, sqldb);
     await userDao.createTable();
-    await contactDao.createTable();
+    // await contactDao.createTable();
     const user = new User();
 
     user.userId = 1;
@@ -86,6 +85,8 @@ describe('test QueryModel', () => {
     user.userUpdated = new Date('2018-01-06');
     user.userLikes1 = 6;
     user.userLikes2 = undefined;
+    user.userFlag1 = true;
+    user.userFlag2 = false;
     await userDao.insert(user);
 
     user.userId = 2;
@@ -95,6 +96,8 @@ describe('test QueryModel', () => {
     user.userUpdated = new Date('2018-01-05');
     user.userLikes1 = 5;
     user.userLikes2 = undefined;
+    user.userFlag1 = false;
+    user.userFlag2 = true;
     await userDao.insert(user);
 
     user.userId = 3;
@@ -104,6 +107,8 @@ describe('test QueryModel', () => {
     user.userUpdated = new Date('2018-01-04');
     user.userLikes1 = 4;
     user.userLikes2 = undefined;
+    user.userFlag1 = undefined;
+    user.userFlag2 = undefined;
     await userDao.insert(user);
 
     user.userId = 4;
@@ -113,6 +118,8 @@ describe('test QueryModel', () => {
     user.userUpdated = new Date('2018-01-03');
     user.userLikes1 = undefined;
     user.userLikes2 = 9;
+    user.userFlag1 = undefined;
+    user.userFlag2 = undefined;
     await userDao.insert(user);
 
     user.userId = 5;
@@ -122,6 +129,8 @@ describe('test QueryModel', () => {
     user.userUpdated = new Date('2018-01-02');
     user.userLikes1 = 2;
     user.userLikes2 = undefined;
+    user.userFlag1 = undefined;
+    user.userFlag2 = undefined;
     await userDao.insert(user);
 
     user.userId = 6;
@@ -131,6 +140,8 @@ describe('test QueryModel', () => {
     user.userUpdated = new Date('2018-01-01');
     user.userLikes1 = 1;
     user.userLikes2 = undefined;
+    user.userFlag1 = undefined;
+    user.userFlag2 = undefined;
     await userDao.insert(user);
 
     done();
@@ -140,8 +151,8 @@ describe('test QueryModel', () => {
   afterAll(async (done) => {
     try {
       let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
-      let contactDao: BaseDAO<Contact> = new BaseDAO(Contact, sqldb);
-      await contactDao.dropTable();
+      // let contactDao: BaseDAO<Contact> = new BaseDAO(Contact, sqldb);
+      // await contactDao.dropTable();
       await userDao.dropTable();
     } catch (err) {
       fail(err);
@@ -152,7 +163,7 @@ describe('test QueryModel', () => {
   it('instantiate query-model for class having metadata', () => {
     try {
       const qbUser = new QueryModel(User);
-      const qbContact = new QueryModel(Contact);
+      // const qbContact = new QueryModel(Contact);
     } catch (err) {
       fail(err);
     }
@@ -438,6 +449,154 @@ describe('test QueryModel', () => {
     done();
   });
 
+  it('`eq` Date (INT) predicate (shorthand form)', async (done) => {
+    try {
+      const userDao = new BaseDAO(User, sqldb);
+      const res = await userDao.selectAll({userCreated: new Date('2018-01-03')});
+      expect(res.length).toBe(1);
+      expect(res[0].userId).toBe(3);
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+
+  it('`eq` Date (INT) predicate (normal form)', async (done) => {
+    try {
+      const userDao = new BaseDAO(User, sqldb);
+      const res = await userDao.selectAll({userCreated: {eq: new Date('2018-01-04')}});
+      expect(res.length).toBe(1);
+      expect(res[0].userId).toBe(4);
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+
+  it('`isBetween` Date (INT) predicate', async (done) => {
+    try {
+      const userDao = new BaseDAO(User, sqldb);
+      const res = await userDao.selectAll({userCreated: {isBetween: [new Date('2018-01-03'), new Date('2018-01-04')]}});
+      expect(res.length).toBe(2);
+      expect(res[0].userId >= 3 || res[0].userId <= 4).toBeTruthy();
+      expect(res[1].userId >= 3 || res[1].userId <= 4).toBeTruthy();
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+
+  it('`isNotBetween` Date (INT) predicate', async (done) => {
+    try {
+      const userDao = new BaseDAO(User, sqldb);
+      const res =
+          await userDao.selectAll({userCreated: {isNotBetween: [new Date('2018-01-03'), new Date('2018-01-04')]}});
+      expect(res.length).toBe(4);
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+
+  it('`eq` Date (TEXT) predicate (shorthand form)', async (done) => {
+    try {
+      const userDao = new BaseDAO(User, sqldb);
+      const res = await userDao.selectAll({userUpdated: new Date('2018-01-03')});
+      expect(res.length).toBe(1);
+      expect(res[0].userId).toBe(4);
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+
+  it('`eq` Date (TEXT) predicate (normal form)', async (done) => {
+    try {
+      const userDao = new BaseDAO(User, sqldb);
+      const res = await userDao.selectAll({userUpdated: {eq: new Date('2018-01-04')}});
+      expect(res.length).toBe(1);
+      expect(res[0].userId).toBe(3);
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+
+  it('`isBetween` Date (TEXT) predicate', async (done) => {
+    try {
+      const userDao = new BaseDAO(User, sqldb);
+      const res = await userDao.selectAll({userUpdated: {isBetween: [new Date('2018-01-03'), new Date('2018-01-04')]}});
+      expect(res.length).toBe(2);
+      expect(res[0].userId >= 3 || res[0].userId <= 4).toBeTruthy();
+      expect(res[1].userId >= 3 || res[1].userId <= 4).toBeTruthy();
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+
+  it('`isNotBetween` Date (TEXT) predicate', async (done) => {
+    try {
+      const userDao = new BaseDAO(User, sqldb);
+      const res =
+          await userDao.selectAll({userUpdated: {isNotBetween: [new Date('2018-01-03'), new Date('2018-01-04')]}});
+      expect(res.length).toBe(4);
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+
+  it('`eq` boolean (INT) predicate (shorthand form)', async (done) => {
+    try {
+      const userDao = new BaseDAO(User, sqldb);
+      const res = await userDao.selectAll({userFlag1: true});
+      expect(res.length).toBe(1);
+      expect(res[0].userId).toBe(1);
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+
+  it('`neq` boolean (INT) predicate', async (done) => {
+    try {
+      const userDao = new BaseDAO(User, sqldb);
+      const res = await userDao.selectAll({userFlag1: {neq: true}});
+      expect(res.length).toBe(1);
+      expect(res[0].userId).toBe(2);
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+
+  it('`eq` boolean (TEXT) predicate (shorthand form)', async (done) => {
+    try {
+      const userDao = new BaseDAO(User, sqldb);
+      const res = await userDao.selectAll({userFlag2: true});
+      expect(res.length).toBe(1);
+      expect(res[0].userId).toBe(2);
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+
+  it('`neq` boolean (TEXT) predicate', async (done) => {
+    try {
+      const userDao = new BaseDAO(User, sqldb);
+      const res = await userDao.selectAll({userFlag2: {neq: true}});
+      expect(res.length).toBe(1);
+      expect(res[0].userId).toBe(1);
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+
+
+
   it('`isNull` true predicate', async (done) => {
     try {
       const userDao = new BaseDAO(User, sqldb);
@@ -486,19 +645,6 @@ describe('test QueryModel', () => {
     done();
   });
 
-  it('`raw` predicate', async (done) => {
-    try {
-      const userDao = new BaseDAO(User, sqldb);
-      const res = await userDao.selectAll({userLoginName: {raw: '= \'Alfa\''}});
-      expect(res.length).toBe(1);
-      expect(res[0].userId).toBe(1);
-    } catch (err) {
-      fail(err);
-    }
-    done();
-  });
-
-
   it('`isIn` throwing', async (done) => {
     try {
       const userDao = new BaseDAO(User, sqldb);
@@ -539,8 +685,19 @@ describe('test QueryModel', () => {
     done();
   });
 
+  it('where: `not` (`sql`)', async (done) => {
+    try {
+      const userDao = new BaseDAO(User, sqldb);
+      const res = await userDao.selectAll({not: {sql: 'user_followers != 5'}});
+      expect(res.length).toBe(1);
+      expect(res[0].userId).toBe(2);
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
 
-  it('condition: `not` (`ne`)', async (done) => {
+  it('where: `not` (`ne`)', async (done) => {
     try {
       const userDao = new BaseDAO(User, sqldb);
       const res = await userDao.selectAll({not: {userFollowers: {neq: 5}}});
@@ -685,7 +842,6 @@ describe('test QueryModel', () => {
       expect(res.length).toBe(6);
       expect(res[0].userId).toBeUndefined();
       expect(res[0].userLoginName).toBeDefined();
-      console.log(JSON.stringify(res, undefined, 2));
     } catch (err) {
       fail(err);
     }
@@ -712,7 +868,6 @@ describe('test QueryModel', () => {
       expect(res.length).toBe(6);
       expect(res[0].userId).toBeDefined();
       expect(res[0].userLoginName).toBeDefined();
-      console.log(JSON.stringify(res, undefined, 2));
     } catch (err) {
       fail(err);
     }
@@ -738,15 +893,9 @@ describe('test QueryModel', () => {
       expect(res.length).toBe(6);
       expect(res[0].userId).toBeDefined();
       expect(res[0].userLoginName).toBeDefined();
-      console.log(JSON.stringify(res, undefined, 2));
     } catch (err) {
       fail(err);
     }
     done();
   });
-
-  // TODO: additional types: Data, boolean and Json(?)
-
-
-
 });

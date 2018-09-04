@@ -7,27 +7,25 @@ import {Condition, isModelPredicates, LogicalOperatorType, ModelPredicates} from
 export class QueryCondition<MT> implements QueryOperation {
   readonly op!: LogicalOperatorType;
   readonly subOperations: (QueryCondition<MT>|QueryModelPredicates<MT>)[];
+  sql: string;
 
   constructor(cond: Condition<MT>) {
     this.subOperations = [];
+    this.sql = '';
     const keys = Object.keys(cond);
     /* istanbul ignore if */
-    if (keys.length === 0) {
-      // should not happen: we currently default to empty predicates
-      this.op = 'none';
-      return;
-    }
-    /* istanbul ignore if */
-    if (keys.length > 1) {
-      throw new Error(`multiple operations: ${keys.toString()}`);
+    if (keys.length !== 1) {
+      throw new Error(`unknown operation: ${keys.toString()}`);
     }
     const key = keys[0];
     /* istanbul ignore if */
-    if (key !== 'not' && key !== 'and' && key !== 'or') {
+    if (key !== 'not' && key !== 'and' && key !== 'or' && key !== 'sql') {
       throw new Error(`unknown operation: '${key}'`);
     }
     this.op = key;
-    if (this.op === 'not') {
+    if (this.op === 'sql') {
+      this.sql = (cond as any)[key] as string;
+    } else if (this.op === 'not') {
       const value = (cond as any)[key] as Condition<MT>| ModelPredicates<MT>;
       if (isModelPredicates(value)) {
         this.subOperations.push(new QueryModelPredicates<MT>(value));
@@ -47,10 +45,8 @@ export class QueryCondition<MT> implements QueryOperation {
   }
 
   async toSql(metaModel: MetaModel, params: Object, tablePrefix: string): Promise<string> {
-    /* istanbul ignore if */
-    if (this.op === 'none') {
-      // should not happen: we currently default to empty predicates
-      return '';
+    if (this.op === 'sql') {
+      return this.sql;
     }
     const parts: string[] = [];
     for (const subOperation of this.subOperations) {

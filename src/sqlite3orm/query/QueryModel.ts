@@ -159,7 +159,6 @@ export class QueryModel<T> extends QueryModelBase<T> {
       if (limitClause.length) {
         sql += `  ${limitClause}\n`;
       }
-      console.log(`!!! QUERY:\n${sql}`);
       return sql;
     } catch (e) {
       return Promise.reject(e);

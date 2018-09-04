@@ -1,17 +1,9 @@
 
-/*
- * TODO: improve Where-Condition
- * .) include relations to retrieve child models and their parent models in one shot
- * .) include subqueries
- * .) column expressions
- *
- */
-
 type Primitive = string|number|boolean;
 
 
 export type ComparisonOperatorType = 'eq'|'neq'|'gt'|'gte'|'lt'|'lte'|'isIn'|'isNotIn'|'isBetween'|'isNotBetween'|
-    'isLike'|'isNotLike'|'isNull'|'isNotNull'|'raw';
+    'isLike'|'isNotLike'|'isNull'|'isNotNull';
 
 
 export interface PropertyComparisons<T> {
@@ -30,7 +22,6 @@ export interface PropertyComparisons<T> {
   isNotLike?: T&string;
   isNull?: boolean;
   isNotNull?: boolean;
-  raw?: string;
 }
 
 
@@ -53,9 +44,6 @@ const pred: ModelPredicates<Post> = {
 const pred2: ModelPredicates<Post> = {
   likes: {isBetween: [0, 4]}
 };
-const pred3: ModelPredicates<Post> = {
-  likes: {raw: '>= (select avg(likes) from Post)'}
-};
 
 
 */
@@ -66,7 +54,7 @@ export type PropertyPredicates<PT> = PropertyComparisons<Promise<PT>|PT>|(PT&Sho
 
 export type ModelPredicates<MT> = {
   [K in keyof MT]?: PropertyPredicates<MT[K]>;
-}&{not?: never, or?: never, and?: never};
+}&{not?: never, or?: never, and?: never, sql?: never};
 
 export function getPropertyPredicates<MT, K extends keyof MT>(
     modelPredicate: ModelPredicates<MT>, key: K): PropertyPredicates<MT[K]> {
@@ -98,15 +86,17 @@ const cond3: Condition<Post> = {
 
 */
 
-export type LogicalOperatorType = 'none'|'not'|'or'|'and';
+export type LogicalOperatorType = 'not'|'or'|'and'|'sql';
 
 export type Condition<MT> = {
   not: (Condition<MT>|ModelPredicates<MT>)
-}|{or: (Condition<MT>|ModelPredicates<MT>)[]}|{and: (Condition<MT>|ModelPredicates<MT>)[]}|ModelPredicates<MT>;
+}|{or: (Condition<MT>|ModelPredicates<MT>)[]}|{and: (Condition<MT>|ModelPredicates<MT>)[]}|{sql: string}|
+    ModelPredicates<MT>;
 
 
 export function isModelPredicates<MT>(cond?: Condition<MT>): cond is ModelPredicates<MT> {
-  return cond && (cond as any).not === undefined && (cond as any).or === undefined && (cond as any).and === undefined ?
+  return cond && (cond as any).not === undefined && (cond as any).or === undefined && (cond as any).and === undefined &&
+          (cond as any).sql === undefined ?
       true :
       false;
 }

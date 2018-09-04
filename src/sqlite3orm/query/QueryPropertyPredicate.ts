@@ -21,7 +21,6 @@ export class QueryPropertyPredicate<PT> implements QueryOperation {
       case 'isNotLike':
       case 'isNull':
       case 'isNotNull':
-      case 'raw':
         this.op = opName;
         break;
       /* istanbul ignore next */
@@ -30,24 +29,15 @@ export class QueryPropertyPredicate<PT> implements QueryOperation {
     }
   }
 
-  // TODO:
-  // tslint:disable cyclomatic-complexity
   async toSql(metaModel: MetaModel, params: Object, tablePrefix: string): Promise<string> {
     const prop = metaModel.getProperty(this.propertyKey);
     let sql = `${tablePrefix}${prop.field.quotedName} `;
     const value = await this.value;
 
-    if (this.op === 'raw') {
-      sql += value;
-    } else {
-      sql += this.operatorSql(value);
-    }
+    sql += this.operatorSql(value);
 
     switch (this.op) {
       // no host variable:
-      case 'raw':
-        return `(${sql})`;
-
       case 'isNull':
       case 'isNotNull':
         return sql;
