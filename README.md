@@ -171,12 +171,12 @@ In order to read from or write to the database, you can use the `BaseDAO<Model>'
 
 ```TypeScript
 interface Filter<ModelType> {
-  select?: Columns<ModelType>;     // the columns which should be returned by the select
-  where?: Where<ModelType>;        // the conditions for the WHERE-clause
-  order?: OrderColumns<ModelType>; // the columns to use for 'ORDER BY'-clause
-  limit?: number;                  // the limit for the 'LIMIT'-clause
-  offset?: number;                 // the offset for the 'LIMIT'-clause
-  tableAlias?: string;             // a table alias to use for the query
+  select?: Columns<ModelType>;      // the columns which should be returned by the select
+  where?: Where<ModelType>;         // the conditions for the WHERE-clause
+  order?: OrderColumns<ModelType>;  // the columns to use for 'ORDER BY'-clause
+  limit?: number;                   // the limit for the 'LIMIT'-clause
+  offset?: number;                  // the offset for the 'LIMIT'-clause
+  tableAlias?: string;              // a table alias to use for the query
 }
 ```
 
