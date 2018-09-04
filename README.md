@@ -165,7 +165,7 @@ In order to read from or write to the database, you can use the `BaseDAO<Model>'
 
 ```
 
-## Typesafe queries syntax
+## Typesafe query syntax
 
 ### Filter
 
@@ -201,7 +201,7 @@ A simple predicate is defined for a specific property of the model, the comparis
 {userLoginName: {eq: 'donald'}}   // transforms to: WHERE user_loginname = 'donald'
 ```
 
-For the 'eq' operator shorthand form exist:
+For the 'eq' operator a shorthand form exist:
 
 ```TypeScript
 {userLoginName: 'donald'}         // transforms to: WHERE user_loginname = 'donald'
@@ -247,7 +247,7 @@ EXISTS (select 1 from CONTACTS C where C.user_id = T.user_id)
 }   // transforms to: WHERE NOT ( user_deleted = 1 OR user_deleted IS NULL )
 ```
 
-> NOTE: If you want to use user input as part of the sql expression, it is highly recommendet to user host variables instead. The value for the host variables can be defined using an additional and optional 'params' object
+> NOTE: If you want to use user input as part of the sql expression, it is highly recommendet to use host variables instead. The value for the host variables can be defined using an additional and optional 'params' object
 
 #### additional filter properties and other things worth mentioning
 
