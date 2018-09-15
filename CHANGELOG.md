@@ -2,6 +2,7 @@
 
 | Release   | Notes                                                                                                                       |
 |-----------|-----------------------------------------------------------------------------------------------------------------------------|
+| 2.4.1     | autoupgrade detection for autoIncrement changes                                                                             |
 | 2.4.0     | [2.4.0 changes](#2.4.0-changes)                                                                                             |
 | 2.3.2     | customizable serialize/deserialize; support for date in milliseconds unix epoch                                             |
 | 2.3.1     | descending index columns                                                                                                    |

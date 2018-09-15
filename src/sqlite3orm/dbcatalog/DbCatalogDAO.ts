@@ -73,8 +73,9 @@ export class DbCatalogDAO {
 
       if (info.primaryKey.length === 1 && info.columns[info.primaryKey[0]].typeAffinity === 'INTEGER') {
         // dirty hack to check if this column is autoincrementable
-        // not checked: if autoincrement is part of column/index/foreign key name; if autoincrement is part of default
-        // literal text
+        // not checked: if autoincrement is part of column/index/foreign key name
+        // not checked: if autoincrement is part of default literal text
+        // however, test is sufficient for autoupgrade
         const schema = quotedSchema || '"main"';
         const res = await this.sqldb.all(
             `select * from ${
