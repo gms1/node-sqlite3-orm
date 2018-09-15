@@ -31,8 +31,11 @@ export interface DbForeignKeyInfo {
 
 export interface DbTableInfo {
   name: string;
+  tableName: string;
+  schemaName?: string;
   columns: {[key: string]: DbColumnInfo};
   primaryKey: string[];
+  autoIncrement?: boolean;
   indexes: {[key: string]: DbIndexInfo};
   foreignKeys: {[key: string]: DbForeignKeyInfo};
 }

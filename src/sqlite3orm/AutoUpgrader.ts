@@ -132,6 +132,12 @@ export class AutoUpgrader {
       return {tableInfo, opts, upgradeMode: UpgradeMode.RECREATE};
     }
 
+    // test if autoIncrement is equal, otherwise return UpgradeMode.RECREATE
+    if (table.autoIncrement && !tableInfo.autoIncrement || !table.autoIncrement && tableInfo.autoIncrement) {
+      debug(`  autoIncrement changed`);
+      return {tableInfo, opts, upgradeMode: UpgradeMode.RECREATE};
+    }
+
     // test if foreign key definitions are equal, otherwise return UpgradeMode.RECREATE
     if (table.mapNameToFKDef.size !== Object.keys(tableInfo.foreignKeys).length) {
       debug(`  foreign key added or removed`);
@@ -176,7 +182,6 @@ export class AutoUpgrader {
         return {tableInfo, opts, upgradeMode: UpgradeMode.RECREATE};
       }
     }
-    // tslint:enable cyclomatic-complexity
 
     // test if primary key columns are equal, otherwise return UpgradeMode.RECREATE
     if (table.mapNameToIdentityField.size !== tableInfo.primaryKey.length) {
@@ -222,6 +227,7 @@ export class AutoUpgrader {
       }
     }
 
+    // tslint:enable cyclomatic-complexity
     return {tableInfo, opts, upgradeMode: UpgradeMode.ACTUAL};
   }
 

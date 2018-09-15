@@ -31,13 +31,6 @@ export function quoteAndUnqualiyIdentifier(name: string): string {
   return quoteSimpleIdentifier(unqualifyIdentifier(name));
 }
 
-/*
-
-export function quoteAndQualifyIdentifier(name: string): string {
-  return quoteIdentifier(qualifiyIdentifier(name));
-}
-*/
-
 export function splitIdentifiers(name: string): {identName: string, identSchema?: string} {
   const identifiers = name.split('.');
 
@@ -45,15 +38,5 @@ export function splitIdentifiers(name: string): {identName: string, identSchema?
     return {identSchema: identifiers[0], identName: identifiers[1]};
   } else {
     return {identName: identifiers[0]};
-  }
-}
-
-export function quoteAndSplitIdentifiers(name: string): {identName: string, identSchema?: string} {
-  const {identName, identSchema} = splitIdentifiers(name);
-
-  if (identSchema) {
-    return {identName: quoteSimpleIdentifier(identName), identSchema: quoteSimpleIdentifier(identSchema)};
-  } else {
-    return {identName: quoteSimpleIdentifier(identName)};
   }
 }

@@ -1,6 +1,6 @@
 import {SqlDatabase} from '../core';
 import {FKDefinition} from '../metadata';
-import {quoteAndSplitIdentifiers, quoteSimpleIdentifier} from '../utils';
+import {quoteSimpleIdentifier, splitIdentifiers} from '../utils';
 
 import {DbColumnInfo, DbForeignKeyInfo, DbIndexColumnInfo, DbIndexInfo, DbTableInfo} from './DbTableInfo';
 
@@ -28,17 +28,33 @@ export class DbCatalogDAO {
     });
   }
 
-  async readTableInfo(fullTableName: string): Promise<DbTableInfo|undefined> {
+  async readTableInfo(tableName: string, schemaName?: string): Promise<DbTableInfo|undefined> {
     try {
-      const {identName, identSchema} = quoteAndSplitIdentifiers(fullTableName);
-      const tableInfo = await this.callSchemaPragma('table_info', identName, identSchema);
+      if (!schemaName) {
+        // tableName could be qualified by schema
+        const {identName, identSchema} = splitIdentifiers(tableName);
+        tableName = identName;
+        schemaName = identSchema;
+      }
+
+      const quotedName = quoteSimpleIdentifier(tableName);
+      const quotedSchema = schemaName ? quoteSimpleIdentifier(schemaName) : undefined;
+      const tableInfo = await this.callSchemaPragma('table_info', quotedName, quotedSchema);
       if (tableInfo.length === 0) {
         return undefined;
       }
-      const idxList = await this.callSchemaPragma('index_list', identName, identSchema);
-      const fkList = await this.callSchemaPragma('foreign_key_list', identName, identSchema);
+      const idxList = await this.callSchemaPragma('index_list', quotedName, quotedSchema);
+      const fkList = await this.callSchemaPragma('foreign_key_list', quotedName, quotedSchema);
 
-      const info: DbTableInfo = {name: fullTableName, columns: {}, primaryKey: [], indexes: {}, foreignKeys: {}};
+      const info: DbTableInfo = {
+        name: schemaName ? `${schemaName}.${tableName}` : tableName,
+        tableName,
+        schemaName,
+        columns: {},
+        primaryKey: [],
+        indexes: {},
+        foreignKeys: {}
+      };
 
 
       tableInfo.sort((colA, colB) => colA.pk - colB.pk).forEach((col) => {
@@ -55,12 +71,27 @@ export class DbCatalogDAO {
         }
       });
 
+      if (info.primaryKey.length === 1 && info.columns[info.primaryKey[0]].typeAffinity === 'INTEGER') {
+        // dirty hack to check if this column is autoincrementable
+        // not checked: if autoincrement is part of column/index/foreign key name; if autoincrement is part of default
+        // literal text
+        const schema = quotedSchema || '"main"';
+        const res = await this.sqldb.all(
+            `select * from ${
+                             schema
+                           }.sqlite_master where type='table' and name=:tableName and sql like '%AUTOINCREMENT%'`,
+            {':tableName': tableName});
+        if (res && res.length === 1) {
+          info.autoIncrement = true;
+        }
+      }
+
       const promises: Promise<DbIndexInfo>[] = [];
       idxList.forEach((idx) => {
         if (idx.origin !== 'pk') {
           promises.push(new Promise((resolve, reject) => {
             const idxInfo: DbIndexInfo = {name: idx.name, unique: !!idx.unique, partial: !!idx.partial, columns: []};
-            this.callSchemaPragma('index_xinfo', quoteSimpleIdentifier(idx.name), identSchema)
+            this.callSchemaPragma('index_xinfo', quoteSimpleIdentifier(idx.name), quotedSchema)
                 .then((xinfo) => {
                   xinfo.sort((idxColA, idxColB) => idxColA.seqno - idxColB.seqno).forEach((idxCol) => {
                     if (idxCol.cid >= 0) {

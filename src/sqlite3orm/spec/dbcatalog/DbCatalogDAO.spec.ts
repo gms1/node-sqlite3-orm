@@ -143,6 +143,7 @@ describe('test DbTableInfo.discover', () => {
       expect(parentInfo!.name).toBe(PARENT_TABLEQ, 'parent info');
 
       expect(Object.keys(parentInfo!.columns).length).toBe(2, 'parent info: columns');
+      expect(parentInfo!.autoIncrement).toBeFalsy('parent info: autoIncrement');
 
       expect(parentInfo!.columns.ID1).toBeDefined('parent info: column ID1');
       expect(parentInfo!.columns.ID1.type).toBe('INTEGER', 'parent info: column ID1');
@@ -164,6 +165,7 @@ describe('test DbTableInfo.discover', () => {
 
       expect(childInfo).toBeDefined('child info');
       expect(childInfo!.name).toBe(CHILD_TABLEQ, 'child info');
+      expect(childInfo!.autoIncrement).toBeTruthy('childinfo: autoIncrement');
 
       expect(Object.keys(childInfo!.columns).length).toBe(5, 'child info: columns');
 

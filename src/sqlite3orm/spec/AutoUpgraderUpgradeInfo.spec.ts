@@ -15,8 +15,8 @@ import {
   table,
   UpgradeInfo
 } from '..';
-import {index, fk} from '../metadata/decorators';
 import {UpgradeMode, UpgradeOptions} from '../AutoUpgrader';
+import {fk, index} from '../metadata/decorators';
 
 const TEST_TABLE = 'AU:TABLE';
 const TEST_PARENT_TABLE = 'AU:PARENT_TABLE';
@@ -41,6 +41,8 @@ describe('test autoupgrade - upgrade info', () => {
   let catalogDao: DbCatalogDAO;
   const tableInfo: DbTableInfo = {
     name: TEST_TABLE,
+    tableName: TEST_TABLE,
+    autoIncrement: true,
     columns: {
       ID: {name: 'ID', typeAffinity: 'INTEGER', type: 'INT', notNull: true, defaultValue: null},
 
