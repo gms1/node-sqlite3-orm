@@ -815,7 +815,7 @@ describe('test autoupgrade - upgrade info', () => {
         }
       }
 
-      @table({name: TEST_TABLE, autoIncrement: undefined})  // !!! <= primary key removed
+      @table({name: TEST_TABLE, autoIncrement: true})
       class Model1 {
         // @id({name: 'ID', dbtype: 'INTEGER NOT NULL'}) // !!! <= primary key removed
         @field({name: 'ID', dbtype: 'INTEGER NOT NULL'})
@@ -876,7 +876,7 @@ describe('test autoupgrade - upgrade info', () => {
 
 
   // ---------------------------------------------
-  it('recreate because of primary key removed', async (done) => {
+  it('recreate because of primary key changed', async (done) => {
     try {
       @table({name: TEST_PARENT_TABLE})
       class ParentModel {
@@ -891,7 +891,7 @@ describe('test autoupgrade - upgrade info', () => {
         }
       }
 
-      @table({name: TEST_TABLE, autoIncrement: undefined})  // !!! <= primary key changed
+      @table({name: TEST_TABLE, autoIncrement: true})
       class Model1 {
         // @id({name: 'ID', dbtype: 'INTEGER NOT NULL'}) // !!! <= primary key changed
         @field({name: 'ID', dbtype: 'INTEGER NOT NULL'})
@@ -927,6 +927,81 @@ describe('test autoupgrade - upgrade info', () => {
         fld3?: string;
 
         @id({name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14'})  // !!! <= primary key changed
+        fld4?: number;
+
+        @field({name: 'FLD5', dbtype: 'TEXT NOT NULL DEFAULT(\'foo\')'})
+        fld5?: string;
+
+        constructor() {
+          this.id = 0;
+        }
+      }
+
+      const metaModel = Reflect.getMetadata(METADATA_MODEL_KEY, Model1.prototype) as MetaModel;
+
+      const upgradeInfo = autoUpgrader._getUpgradeInfo(metaModel.table, tableInfo);
+
+      expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
+      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.RECREATE, 'upgradeMode should be RECREATE');
+
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+
+
+  // ---------------------------------------------
+  it('recreate because of autoincrement changed', async (done) => {
+    try {
+      @table({name: TEST_PARENT_TABLE})
+      class ParentModel {
+        @id({name: 'ID1', dbtype: 'INTEGER NOT NULL'})
+        id1: number;
+
+        @id({name: 'ID2', dbtype: 'INTEGER NOT NULL'})
+        id2: number;
+
+        constructor() {
+          this.id1 = this.id2 = 0;
+        }
+      }
+
+      @table({name: TEST_TABLE, autoIncrement: false})  // !!! <= autoIncrement changed
+      class Model1 {
+        @id({name: 'ID', dbtype: 'INTEGER NOT NULL'})
+        id: number;
+
+        @field({name: 'PARENT1_ID1', dbtype: 'INTEGER'}) @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
+        parent1Id1?: number;
+        @field({name: 'PARENT1_ID2', dbtype: 'INTEGER'}) @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID2')
+        parent1Id2?: number;
+
+        @field({name: 'PARENT2_ID1', dbtype: 'INTEGER'})
+        @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID1')
+        @index('IDX_PARENT2')
+        parent2Id1?: number;
+        @field({name: 'PARENT2_ID2', dbtype: 'INTEGER'})
+        @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID2')
+        @index('IDX_PARENT2')
+        parent2Id2?: number;
+
+        @field({name: 'PARENT3_ID1', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        parent3Id1?: number;
+        @field({name: 'PARENT3_ID2', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        parent3Id2?: number;
+
+
+        @field({name: 'FLD1', dbtype: 'TEXT'})
+        fld1?: string;
+
+        @field({name: 'FLD2', dbtype: 'TEXT NOT NULL'})
+        fld2?: string;
+
+        @field({name: 'FLD3', dbtype: 'TEXT NOT NULL DEFAULT \'foo\''})
+        fld3?: string;
+
+        @field({name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14'})
         fld4?: number;
 
         @field({name: 'FLD5', dbtype: 'TEXT NOT NULL DEFAULT(\'foo\')'})

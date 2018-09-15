@@ -132,12 +132,6 @@ export class AutoUpgrader {
       return {tableInfo, opts, upgradeMode: UpgradeMode.RECREATE};
     }
 
-    // test if autoIncrement is equal, otherwise return UpgradeMode.RECREATE
-    if (table.autoIncrement && !tableInfo.autoIncrement || !table.autoIncrement && tableInfo.autoIncrement) {
-      debug(`  autoIncrement changed`);
-      return {tableInfo, opts, upgradeMode: UpgradeMode.RECREATE};
-    }
-
     // test if foreign key definitions are equal, otherwise return UpgradeMode.RECREATE
     if (table.mapNameToFKDef.size !== Object.keys(tableInfo.foreignKeys).length) {
       debug(`  foreign key added or removed`);
@@ -198,6 +192,12 @@ export class AutoUpgrader {
         debug(`  primary key column changed`);
         return {tableInfo, opts, upgradeMode: UpgradeMode.RECREATE};
       }
+    }
+
+    // test if autoIncrement is equal, otherwise return UpgradeMode.RECREATE
+    if (table.autoIncrementField && !tableInfo.autoIncrement || !table.autoIncrementField && tableInfo.autoIncrement) {
+      debug(`  autoIncrement changed`);
+      return {tableInfo, opts, upgradeMode: UpgradeMode.RECREATE};
     }
 
     // test if no column needs to be added, otherwise return UpgradeMode.ALTER
