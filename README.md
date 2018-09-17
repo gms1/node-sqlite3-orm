@@ -301,8 +301,7 @@ One possibility to achieve this could be to use a connection pool and to perform
   let pool = new SqlConnectionPool();
 
   // open the database connection pool with 1 to 2 database connections:
-  //    do not use a private memory database for the connection pool :hint:
-  await pool.open(SQL_MEMORY_DB_SHARED, SQL_OPEN_DEFAULT, 1, 2);
+  await pool.open('/path/to/mydata.db', SQL_OPEN_DEFAULT, 1, 2);
 
   let con1 = await pool.get();
   let con2 = await pool.get();

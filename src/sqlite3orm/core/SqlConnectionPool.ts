@@ -51,8 +51,6 @@ export class SqlConnectionPool {
    * Open a database connection pool
    *
    * @param databaseFile - The path to the database file or URI
-   * filename (see SQL_MEMORY_DB_SHARED/SQL_MEMORY_DB_PRIVATE for an in-memory
-   * database)
    * @param [mode=SQL_OPEN_DEFAULT] - A bit flag combination of: SQL_OPEN_CREATE |
    * SQL_OPEN_READONLY | SQL_OPEN_READWRITE
    * @param [min=1] minimum connections whihc should be opened by this connection pool

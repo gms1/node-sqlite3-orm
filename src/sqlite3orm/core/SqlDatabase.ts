@@ -12,27 +12,17 @@ export const SQL_OPEN_READONLY = OPEN_READONLY;
 export const SQL_OPEN_READWRITE = OPEN_READWRITE;
 export const SQL_OPEN_CREATE = OPEN_CREATE;
 
-export const SQL_MEMORY_DB_SHARED = 'file:sqlite3orm?mode=memory&cache=shared';
-export const SQL_MEMORY_DB_PRIVATE = ':memory:';
 export const SQL_DEFAULT_SCHEMA = 'main';
 
+export const SQL_MEMORY_DB_PRIVATE = ':memory:';
+
+// shared memory database is currently not supported by node-sqlite3
+//   see: https://github.com/mapbox/node-sqlite3/issues/710
+// but can be enabled by building node-sqlite3 and sqlite3 from source
+// see docs/enable-URI.md
+export const SQL_MEMORY_DB_SHARED = 'file:sqlite3orm?mode=memory&cache=shared';
+
 const debug = _dbg('sqlite3orm:database');
-
-
-// NOTE:
-// our tests defined in 'SqlDatabase.spec.ts' are working fine using
-// private-cache mode:
-//   export const SQL_MEMORY_DB_PRIVATE = ':memory:';
-//   export const SQL_MEMORY_DB_PRIVATE = 'file::memory:?cache=off';
-// but failing, if private-cache mode is explicitly defined:
-//   export const SQL_MEMORY_DB_PRIVATE = 'file::memory:?cache=private';
-// could it be, that the last URI opens the memory in shared-cache mode?
-// but even running jasmine using `jasmine /path/to/Database.spec.js` works as
-// expected,
-// only if jasmine is called without any spec.js, these tests are failing in the
-// 'beforeAll' function, with:
-//   Error: SQLITE_ERROR: table TEST already exists
-//   Error: SQLITE_CONSTRAINT: UNIQUE constraint failed: TEST.id
 
 // tslint:disable-next-line: no-bitwise
 export const SQL_OPEN_DEFAULT = SQL_OPEN_READWRITE | SQL_OPEN_CREATE;
@@ -66,8 +56,6 @@ export class SqlDatabase {
    * Open a database connection
    *
    * @param databaseFile - The path to the database file or URI
-   * filename (see SQL_MEMORY_DB_SHARED/SQL_MEMORY_DB_PRIVATE for an in-memory
-   * database)
    * @param [mode=SQL_OPEN_DEFAULT] - A bit flag combination of: SQL_OPEN_CREATE |
    * SQL_OPEN_READONLY | SQL_OPEN_READWRITE
    * @returns A promise
