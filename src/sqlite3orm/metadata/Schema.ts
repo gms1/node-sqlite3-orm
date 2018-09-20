@@ -1,9 +1,10 @@
 // import * as core from './core';
 
-import {Table} from './Table';
-import {TableOpts} from './decorators';
 import {SqlDatabase} from '../core';
 import {qualifiyIdentifier} from '../utils';
+
+import {TableOpts} from './decorators';
+import {Table} from './Table';
 
 /**
  * A singleton holding the database schema definitions
@@ -140,9 +141,9 @@ export class Schema {
    * @param name - The name of the table
    * @returns A promise
    */
-  public createTable(sqldb: SqlDatabase, name: string): Promise<void> {
+  public createTable(sqldb: SqlDatabase, name: string, force?: boolean): Promise<void> {
     const table = this.getTable(name);
-    return sqldb.exec(table.getCreateTableStatement());
+    return sqldb.exec(table.getCreateTableStatement(force));
   }
 
   /**

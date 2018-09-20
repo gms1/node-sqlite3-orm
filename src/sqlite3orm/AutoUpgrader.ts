@@ -265,7 +265,7 @@ export class AutoUpgrader {
     debug(`  => create table`);
 
     // create table
-    factories.push(() => this.sqldb.exec(table.getCreateTableStatement()));
+    factories.push(() => this.sqldb.exec(table.getCreateTableStatement(true)));
 
     // create all indexes
     table.mapNameToIDXDef.forEach((idx) => {
@@ -362,7 +362,7 @@ export class AutoUpgrader {
     factories.push(() => this.sqldb.exec(`ALTER TABLE ${table.quotedName} RENAME TO ${tmpTableName}`));
 
     // create table
-    factories.push(() => this.sqldb.exec(table.createCreateTableStatement(addFields)));
+    factories.push(() => this.sqldb.exec(table.createCreateTableStatement(true, addFields)));
 
     // data transfer
     let colNames;

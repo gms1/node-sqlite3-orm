@@ -1,18 +1,18 @@
 import * as core from '../core/core';
+import {
+  qualifiyIdentifier,
+  quoteAndUnqualiyIdentifier,
+  quoteIdentifier,
+  quoteSimpleIdentifier,
+  splitIdentifiers
+} from '../utils';
 
+import {FieldOpts} from './decorators';
 // tslint:disable no-use-before-declare
 import {Field} from './Field';
 import {FKDefinition} from './FKDefinition';
 import {IDXDefinition} from './IDXDefinition';
-import {
-  quoteIdentifier,
-  quoteAndUnqualiyIdentifier,
-  quoteSimpleIdentifier,
-  qualifiyIdentifier,
-  splitIdentifiers
-} from '../utils';
 import {MetaModel} from './MetaModel';
-import {FieldOpts} from './decorators';
 import {PropertyType} from './PropertyType';
 
 /**
@@ -268,8 +268,8 @@ export class Table {
    *
    * @returns The sql-statement
    */
-  public getCreateTableStatement(): string {
-    return this.createCreateTableStatement();
+  public getCreateTableStatement(force?: boolean): string {
+    return this.createCreateTableStatement(force);
   }
 
   /**
@@ -334,7 +334,7 @@ export class Table {
    * Generate SQL Statements
    *
    */
-  public createCreateTableStatement(addFields?: Field[]): string {
+  public createCreateTableStatement(force?: boolean, addFields?: Field[]): string {
     const colNamesPK: string[] = [];
     const colDefs: string[] = [];
 
@@ -368,7 +368,11 @@ export class Table {
     }
     // --------------------------------------------------------------
     // generate CREATE TABLE statement
-    let stmt = `CREATE TABLE IF NOT EXISTS ${quotedTableName} (\n  `;
+    let stmt = 'CREATE TABLE ';
+    if (!force) {
+      stmt += 'IF NOT EXISTS ';
+    }
+    stmt += `${quotedTableName} (\n  `;
 
     // add column definitions
     stmt += colDefs.join(',\n  ');

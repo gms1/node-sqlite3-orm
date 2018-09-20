@@ -109,7 +109,7 @@ describe('test metaModels', () => {
         col?: Date;
       }
       let testTable = schema().getTable('MPT4A:T1');
-      let sqlCreateTable = testTable.getCreateTableStatement();
+      let sqlCreateTable = testTable.getCreateTableStatement(true);
       let sqlCreateIndex = testTable.getCreateIndexStatement('MPT4A:IDX1');
       let testModel = getModelMetadata(Model1);
     } catch (err) {

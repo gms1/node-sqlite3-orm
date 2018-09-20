@@ -13,7 +13,7 @@ import {
   table,
   UpgradeInfo
 } from '..';
-import {index, fk} from '../metadata/decorators';
+import {fk, index} from '../metadata/decorators';
 
 const TEST_TABLE = 'AU:TABLE';
 const TEST_PARENT_TABLE = 'AU:PARENT_TABLE';
@@ -24,13 +24,13 @@ function debug(formatter: any, ...args: any[]): void {
 
 // public methods for easier testing
 class SpecAutoUpgrader extends AutoUpgrader {
-  async createTable(tab: Table): Promise<void> {
+  createTable(tab: Table): Promise<void> {
     return super.createTable(tab);
   }
-  async alterTable(tab: Table, upgradeInfo: UpgradeInfo): Promise<void> {
+  alterTable(tab: Table, upgradeInfo: UpgradeInfo): Promise<void> {
     return super.alterTable(tab, upgradeInfo);
   }
-  async recreateTable(tab: Table, upgradeInfo: UpgradeInfo): Promise<void> {
+  recreateTable(tab: Table, upgradeInfo: UpgradeInfo): Promise<void> {
     return super.recreateTable(tab, upgradeInfo);
   }
 }

@@ -438,8 +438,8 @@ export class BaseDAO<T extends Object> {
    *
    * @returns {Promise<void>}
    */
-  public createTable(): Promise<void> {
-    return this.sqldb.exec(this.table.getCreateTableStatement());
+  public createTable(force?: boolean): Promise<void> {
+    return this.sqldb.exec(this.table.getCreateTableStatement(force));
   }
 
   /**
