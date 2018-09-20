@@ -3,7 +3,7 @@
 // tslint:disable-next-line no-require-imports
 import * as _dbg from 'debug';
 
-import {SQL_OPEN_DEFAULT, SqlDatabase} from './SqlDatabase';
+import {SQL_OPEN_CREATE, SQL_OPEN_DEFAULT, SqlDatabase} from './SqlDatabase';
 import {SqlDatabaseSettings} from './SqlDatabaseSettings';
 
 const debug = _dbg('sqlite3orm:pool');
@@ -15,8 +15,6 @@ const debug = _dbg('sqlite3orm:pool');
  * @class SqlConnectionPool
  */
 export class SqlConnectionPool {
-  opening?: Promise<void>;
-
   private databaseFile?: string;
 
   private mode: number;
@@ -32,6 +30,8 @@ export class SqlConnectionPool {
   private readonly inUse: Set<SqlDatabase>;
 
   private settings?: SqlDatabaseSettings;
+
+  private _opening?: Promise<void>;
 
 
   /**
@@ -57,53 +57,73 @@ export class SqlConnectionPool {
    * @param [max=0] maximum connections which can be opened by this connection pool
    * @returns A promise
    */
-  open(
+  async open(
       databaseFile: string, mode: number = SQL_OPEN_DEFAULT, min: number = 1, max: number = 0,
       settings?: SqlDatabaseSettings): Promise<void> {
-    const opening = new Promise<void>(async (resolve, reject) => {
+    if (this._opening) {
+      try {
+        await this._opening;
+        // tslint:disable-next-line no-bitwise
+        if (this.databaseFile === databaseFile && (mode & ~SQL_OPEN_CREATE) === this.mode) {
+          // already opened
+          return;
+        }
+      } catch (err) {
+      }
+    }
+    this._opening = this.openInternal(databaseFile, mode, min, max, settings);
+    try {
+      await this._opening;
+    } catch (err) {
+      return Promise.reject(err);
+    } finally {
+      this._opening = undefined;
+    }
+    return;
+  }
+
+  protected async openInternal(
+      databaseFile: string, mode: number = SQL_OPEN_DEFAULT, min: number = 1, max: number = 0,
+      settings?: SqlDatabaseSettings): Promise<void> {
+    try {
+      await this.close();
+    } catch (err) {
+    }
+    try {
+      this.databaseFile = databaseFile;
+      this.mode = mode;
+      this.min = min;
+      this.max = max;
+      this.settings = settings;
+      this.curr = 0;
+      this.inPool.length = 0;
+
+      const promises: Promise<void>[] = [];
+
+      if (this.min < 1) {
+        this.min = 1;
+      }
+      let sqldb = new SqlDatabase();
+      await sqldb.openByPool(this, this.databaseFile, this.mode, this.settings);
+      this.inPool.push(sqldb);
+
+      // tslint:disable-next-line no-bitwise
+      this.mode &= ~SQL_OPEN_CREATE;
+      for (let i = 1; i < this.min; i++) {
+        sqldb = new SqlDatabase();
+        promises.push(sqldb.openByPool(this, this.databaseFile, this.mode, this.settings));
+        this.inPool.push(sqldb);
+      }
+      await Promise.all(promises);
+      debug(`pool: opened: ${this.curr} connections open (${this.inPool.length} in pool)`);
+    } catch (err) {
       try {
         await this.close();
-      } catch (err) {
+      } catch (_ignore) {
       }
-      try {
-        this.databaseFile = databaseFile;
-        this.opening = opening;
-        this.mode = mode;
-        this.min = min;
-        this.max = max;
-        this.settings = settings;
-        this.curr = 0;
-        this.inPool.length = 0;
-
-        const promises: Promise<void>[] = [];
-
-        if (this.min < 1) {
-          this.min = 1;
-        }
-        let sqldb = new SqlDatabase();
-        await sqldb.openByPool(this, this.databaseFile, this.mode, this.settings);
-        this.inPool.push(sqldb);
-
-        for (let i = 1; i < this.min; i++) {
-          sqldb = new SqlDatabase();
-          promises.push(sqldb.openByPool(this, this.databaseFile, this.mode, this.settings));
-          this.inPool.push(sqldb);
-        }
-        await Promise.all(promises);
-        debug(`pool: opened: ${this.curr} connections open (${this.inPool.length} in pool)`);
-        this.opening = undefined;
-        resolve();
-      } catch (err) {
-        this.opening = undefined;
-        try {
-          await this.close();
-        } catch (_ignore) {
-        }
-        debug(`opening pool to ${databaseFile} failed: ${err.message}`);
-        reject(err);
-      }
-    });
-    return opening;
+      debug(`opening pool to ${databaseFile} failed: ${err.message}`);
+      return Promise.reject(err);
+    }
   }
 
   /**
