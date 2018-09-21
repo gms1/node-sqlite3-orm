@@ -216,10 +216,15 @@ export class SqlConnectionPool {
       this.inUse.delete(sqldb);
     }
     if (sqldb.isOpen()) {
-      // transfer database connection
-      const newsqldb = new SqlDatabase();
-      await newsqldb.recycleByPool(this, sqldb, this.settings);
-      this.inPool.push(newsqldb);
+      if (sqldb.dirty) {
+        // close database connection
+        await sqldb.closeByPool();
+      } else {
+        // transfer database connection
+        const newsqldb = new SqlDatabase();
+        await newsqldb.recycleByPool(this, sqldb, this.settings);
+        this.inPool.push(newsqldb);
+      }
       this.curr--;
       debug(`pool: ${this.curr} connections open (${this.inPool.length} in pool)`);
     }

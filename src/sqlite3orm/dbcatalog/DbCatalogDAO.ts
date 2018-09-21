@@ -39,12 +39,13 @@ export class DbCatalogDAO {
 
       const quotedName = quoteSimpleIdentifier(tableName);
       const quotedSchema = schemaName ? quoteSimpleIdentifier(schemaName) : undefined;
-      const tableInfo = await this.callSchemaPragma('table_info', quotedName, quotedSchema);
+
+      const tableInfo = await this.callSchemaQueryPragma('table_info', quotedName, quotedSchema);
       if (tableInfo.length === 0) {
         return undefined;
       }
-      const idxList = await this.callSchemaPragma('index_list', quotedName, quotedSchema);
-      const fkList = await this.callSchemaPragma('foreign_key_list', quotedName, quotedSchema);
+      const idxList = await this.callSchemaQueryPragma('index_list', quotedName, quotedSchema);
+      const fkList = await this.callSchemaQueryPragma('foreign_key_list', quotedName, quotedSchema);
 
       const info: DbTableInfo = {
         name: schemaName ? `${schemaName}.${tableName}` : tableName,
@@ -80,7 +81,7 @@ export class DbCatalogDAO {
         const res = await this.sqldb.all(
             `select * from ${
                              schema
-                           }.sqlite_master where type='table' and name=:tableName and sql like '%AUTOINCREMENT%'`,
+                           }.sqlite_master where type='table' and name=:tableName and UPPER(sql) like '%AUTOINCREMENT%'`,
             {':tableName': tableName});
         if (res && res.length === 1) {
           info.autoIncrement = true;
@@ -92,7 +93,7 @@ export class DbCatalogDAO {
         if (idx.origin !== 'pk') {
           promises.push(new Promise((resolve, reject) => {
             const idxInfo: DbIndexInfo = {name: idx.name, unique: !!idx.unique, partial: !!idx.partial, columns: []};
-            this.callSchemaPragma('index_xinfo', quoteSimpleIdentifier(idx.name), quotedSchema)
+            this.callSchemaQueryPragma('index_xinfo', quoteSimpleIdentifier(idx.name), quotedSchema)
                 .then((xinfo) => {
                   xinfo.sort((idxColA, idxColB) => idxColA.seqno - idxColB.seqno).forEach((idxCol) => {
                     if (idxCol.cid >= 0) {
@@ -149,7 +150,7 @@ export class DbCatalogDAO {
     }
   }
 
-  protected schemaPragma(pragmaName: string, identifierName: string, identifierSchema?: string): string {
+  protected schemaQueryPragma(pragmaName: string, identifierName: string, identifierSchema?: string): string {
     if (identifierSchema) {
       return `${identifierSchema}.${pragmaName}(${identifierName})`;
     } else {
@@ -157,8 +158,9 @@ export class DbCatalogDAO {
     }
   }
 
-  protected callSchemaPragma(pragmaName: string, identifierName: string, identifierSchema?: string): Promise<any[]> {
-    return this.sqldb.all(`PRAGMA ${this.schemaPragma(pragmaName, identifierName, identifierSchema)}`);
+  protected callSchemaQueryPragma(pragmaName: string, identifierName: string, identifierSchema?: string):
+      Promise<any[]> {
+    return this.sqldb.all(`PRAGMA ${this.schemaQueryPragma(pragmaName, identifierName, identifierSchema)}`);
   }
 
 

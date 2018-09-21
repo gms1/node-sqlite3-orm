@@ -46,6 +46,8 @@ export class SqlDatabase {
   private dbId?: number;
   private pool?: SqlConnectionPool;
 
+  dirty?: boolean;
+
   /**
    * Creates an instance of SqlDatabase.
    *
