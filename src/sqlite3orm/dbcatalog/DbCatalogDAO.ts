@@ -40,6 +40,23 @@ export class DbCatalogDAO {
       const quotedName = quoteSimpleIdentifier(tableName);
       const quotedSchema = schemaName ? quoteSimpleIdentifier(schemaName) : undefined;
 
+      // TODO: sqlite3 issue regarding schema queries from multiple connections
+      // The result of table_info seems to be somehow cached, so subsequent calls to table_info may return wrong results
+      // The scenario where this problem was detected:
+      //    connection 1:   PRAGMA table_info('FOO_TABLE') => ok (no data)
+      //    connection 2:   PRAGMA table_info('FOO_TABLE') => ok (no data)
+      //    connection 2:   CREATE TABLE FOO_TABLE (...)
+      //    connection 3:   PRAGMA table_info('FOO_TABLE') => ok (data)
+      //    connection 2:   PRAGMA table_info('FOO_TABLE') => ok (data)
+      //    connection 1:   PRAGMA table_info('FOO_TABLE') => NOT OK (NO DATA)
+      // known workarounds:
+      //    1) perform all schema discovery and schema modifications from the same connection
+      //    2) if using a connection pool, do not recycle a connection after performing schema queries
+      //    3) not verified yet: using shared cache
+
+      //  workaround for issue described above (required by e.g 'loopback-connector-sqlite3x')
+      this.sqldb.dirty = true;
+
       const tableInfo = await this.callSchemaQueryPragma('table_info', quotedName, quotedSchema);
       if (tableInfo.length === 0) {
         return undefined;
