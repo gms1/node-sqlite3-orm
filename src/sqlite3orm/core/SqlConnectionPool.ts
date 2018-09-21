@@ -1,8 +1,9 @@
 // import * as core from './core';
-
+// tslint:disable no-bitwise
 // tslint:disable-next-line no-require-imports
 import * as _dbg from 'debug';
 
+import {SqlConnectionPoolDatabase} from './SqlConnectionPoolDatabase';
 import {SQL_OPEN_CREATE, SQL_OPEN_DEFAULT, SqlDatabase} from './SqlDatabase';
 import {SqlDatabaseSettings} from './SqlDatabaseSettings';
 
@@ -25,9 +26,9 @@ export class SqlConnectionPool {
 
   private curr: number;
 
-  private readonly inPool: SqlDatabase[];
+  private readonly inPool: SqlConnectionPoolDatabase[];
 
-  private readonly inUse: Set<SqlDatabase>;
+  private readonly inUse: Set<SqlConnectionPoolDatabase>;
 
   private settings?: SqlDatabaseSettings;
 
@@ -41,7 +42,7 @@ export class SqlConnectionPool {
   constructor() {
     this.databaseFile = undefined;
     this.mode = SQL_OPEN_DEFAULT;
-    this.inUse = new Set<SqlDatabase>();
+    this.inUse = new Set<SqlConnectionPoolDatabase>();
     this.inPool = [];
     this.min = this.max = 0;
     this.curr = 0;
@@ -63,7 +64,6 @@ export class SqlConnectionPool {
     if (this._opening) {
       try {
         await this._opening;
-        // tslint:disable-next-line no-bitwise
         if (this.databaseFile === databaseFile && (mode & ~SQL_OPEN_CREATE) === this.mode) {
           // already opened
           return;
@@ -103,14 +103,13 @@ export class SqlConnectionPool {
       if (this.min < 1) {
         this.min = 1;
       }
-      let sqldb = new SqlDatabase();
+      let sqldb = new SqlConnectionPoolDatabase();
       await sqldb.openByPool(this, this.databaseFile, this.mode, this.settings);
       this.inPool.push(sqldb);
 
-      // tslint:disable-next-line no-bitwise
       this.mode &= ~SQL_OPEN_CREATE;
       for (let i = 1; i < this.min; i++) {
-        sqldb = new SqlDatabase();
+        sqldb = new SqlConnectionPoolDatabase();
         promises.push(sqldb.openByPool(this, this.databaseFile, this.mode, this.settings));
         this.inPool.push(sqldb);
       }
@@ -169,14 +168,14 @@ export class SqlConnectionPool {
    */
   async get(timeout: number = 0): Promise<SqlDatabase> {
     try {
-      let sqldb: SqlDatabase|undefined;
+      let sqldb: SqlConnectionPoolDatabase|undefined;
       const cond = () => this.inPool.length > 0;
       if (this.max > 0 && !cond() && this.inUse.size >= this.max) {
         await wait(cond, timeout);
       }
       if (this.inPool.length > 0) {
         // tslint:disable-next-line no-unnecessary-type-assertion
-        sqldb = this.inPool.shift() as SqlDatabase;
+        sqldb = this.inPool.shift() as SqlConnectionPoolDatabase;
         if (this.max > 0) {
           this.inUse.add(sqldb);
         }
@@ -187,10 +186,11 @@ export class SqlConnectionPool {
       if (!this.databaseFile) {
         throw new Error(`connection pool not opened`);
       }
-      sqldb = new SqlDatabase();
+      sqldb = new SqlConnectionPoolDatabase();
       await sqldb.openByPool(this, this.databaseFile, this.mode, this.settings);
       this.curr++;
       debug(`pool: ${this.curr} connections open (${this.inPool.length} in pool)`);
+      /* istanbul ignore if */
       if (this.max > 0) {
         this.inUse.add(sqldb);
       }
@@ -208,20 +208,21 @@ export class SqlConnectionPool {
    */
   async release(sqldb: SqlDatabase): Promise<void> {
     /* istanbul ignore if */
-    if (this !== sqldb.getPool()) {
+    if (!(sqldb instanceof SqlConnectionPoolDatabase) || this !== sqldb.pool) {
       // not opened by this pool
-      return;
+      return sqldb.close();
     }
     if (this.max > 0 && this.inUse.has(sqldb)) {
       this.inUse.delete(sqldb);
     }
+    /* istanbul ignore else */
     if (sqldb.isOpen()) {
       if (sqldb.dirty) {
         // close database connection
         await sqldb.closeByPool();
       } else {
         // transfer database connection
-        const newsqldb = new SqlDatabase();
+        const newsqldb = new SqlConnectionPoolDatabase();
         await newsqldb.recycleByPool(this, sqldb, this.settings);
         this.inPool.push(newsqldb);
       }

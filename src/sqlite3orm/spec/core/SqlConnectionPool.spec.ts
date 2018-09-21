@@ -1,4 +1,6 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
+// tslint:disable no-non-null-assertion
+
 import {
   SQL_MEMORY_DB_SHARED,
   SQL_OPEN_DEFAULT,
@@ -253,6 +255,123 @@ describe('test SqlConnectionPool', () => {
     }
 
   });
+
+  it('expect opening pool multiple times (using same file and mode) to succeed', async (done) => {
+    const pool = new SqlConnectionPool();
+    try {
+      await Promise.all([
+        pool.open(SQL_MEMORY_DB_SHARED, SQL_OPEN_DEFAULT, 3),
+        pool.open(SQL_MEMORY_DB_SHARED, SQL_OPEN_DEFAULT, 3),
+        pool.open(SQL_MEMORY_DB_SHARED, SQL_OPEN_DEFAULT, 3),
+      ]);
+    } catch (err) {
+      fail(err);
+    }
+    expect(pool.isOpen()).toBeTruthy();
+    done();
+  });
+
+
+  it('expect opening pool multiple times (using different files) to fail', async (done) => {
+    const pool = new SqlConnectionPool();
+    try {
+      await Promise.all([
+        pool.open('test1.db', SQL_OPEN_DEFAULT, 3),
+        pool.open('test2.db', SQL_OPEN_DEFAULT, 3),
+        pool.open('test3.db', SQL_OPEN_DEFAULT, 3),
+      ]);
+    } catch (err) {
+      fail(err);
+    }
+    // the last one wins ( same as running sequential )
+    expect(pool.isOpen()).toBeTruthy();
+    done();
+  });
+
+
+  it('getting connections from pool having max-limit should work', async (done) => {
+    const pool = new SqlConnectionPool();
+    let conn1: SqlDatabase|undefined;
+    let conn2: SqlDatabase|undefined;
+    try {
+      await pool.open(SQL_MEMORY_DB_SHARED, SQL_OPEN_DEFAULT, 1, 1);
+      expect(pool.isOpen()).toBeTruthy();
+      conn1 = await pool.get(100);
+    } catch (err) {
+      fail(err);
+    }
+
+    try {
+      conn2 = await pool.get(200);
+      fail('getting second connection from pool having max==2 should have thrown');
+    } catch (err) {
+    }
+
+    try {
+      await Promise.all([
+        pool.get(500).then((conn) => {
+          conn2 = conn;
+        }),
+        conn1!.close()
+      ]);
+    } catch (err) {
+      fail(err);
+    }
+    expect(conn2).toBeDefined();
+
+    done();
+  });
+
+  it('getting connections from pool without max-limit should succeed', async (done) => {
+    const pool = new SqlConnectionPool();
+    try {
+      await pool.open(SQL_MEMORY_DB_SHARED, SQL_OPEN_DEFAULT, 1);
+    } catch (err) {
+      fail(err);
+    }
+    expect(pool.isOpen()).toBeTruthy();
+
+    try {
+      const conn1 = await pool.get(100);
+      const conn2 = await pool.get(100);
+      const conn3 = await pool.get(100);
+      await conn3.close();
+      await conn2.close();
+      await conn1.close();
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+
+
+  it('closing pool having connections in use should succeed', async (done) => {
+    const pool = new SqlConnectionPool();
+    let conn1: SqlDatabase|undefined;
+    let conn2: SqlDatabase|undefined;
+    try {
+      await pool.open(SQL_MEMORY_DB_SHARED, SQL_OPEN_DEFAULT, 1, 2);
+      expect(pool.isOpen()).toBeTruthy();
+      conn1 = await pool.get(100);
+      conn2 = await pool.get(100);
+    } catch (err) {
+      fail(err);
+    }
+
+    try {
+      await conn1!.close();
+      await pool.close();
+    } catch (err) {
+      fail(err);
+    }
+
+    expect(pool.isOpen()).toBeFalsy();
+    expect(conn1!.isOpen()).toBeFalsy();
+    expect(conn2!.isOpen()).toBeFalsy();
+    done();
+  });
+
+
 
 });
 

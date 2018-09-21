@@ -237,8 +237,20 @@ describe('test SqlDatabase', () => {
     }
     done();
   });
+
   // ---------------------------------------------
-  it('expect insert into not existing table should throw', async (done) => {
+  it('expect closed database to throw on adding event listener', async (done) => {
+    try {
+      await sqldb.close();
+      sqldb.on('error', () => {});
+      fail('closed database should throw on adding event listener');
+    } catch (err) {
+    }
+    done();
+  });
+
+  // ---------------------------------------------
+  it('expect insert into not existing table to throw', async (done) => {
     try {
       SqlDatabase.verbose();
       await sqldb.exec('INSERT INTO NOTEXIST (col) values (\'testvalue 3\')');
@@ -249,22 +261,37 @@ describe('test SqlDatabase', () => {
   });
 
   // ---------------------------------------------
-  // TODO: close-event
-  /*
-  it('expect closing database to trigger close-event', async(done) => {
+  it('expect get from not existing table to throw', async (done) => {
     try {
-      let isOpen = true;
-      sqldb.on('close', () => isOpen = false);
-      await sqldb.close();
-      expect(isOpen).toBeFalsy('close-event not fired');
+      SqlDatabase.verbose();
+      await sqldb.get('SELECT id from NOTEXIST');
+      fail('get from not existing table should throw');
+    } catch (err) {
+    }
+    done();
+  });
+
+  // ---------------------------------------------
+  it('expect prepare from not existing table to throw', async (done) => {
+    try {
+      SqlDatabase.verbose();
+      await sqldb.prepare('SELECT id from NOTEXIST');
+      fail('prepare from not existing table should throw');
+    } catch (err) {
+    }
+    done();
+  });
+
+  // ---------------------------------------------
+  it('expect adding event listener to succeed on open database', async (done) => {
+    let errors = 0;
+    try {
+      sqldb.on('error', () => errors++);
     } catch (err) {
       fail(err);
     }
     done();
   });
-  */
-
-
 
 });
 

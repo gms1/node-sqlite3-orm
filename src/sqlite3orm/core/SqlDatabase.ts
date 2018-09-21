@@ -4,7 +4,6 @@
 import * as _dbg from 'debug';
 import {Database, OPEN_CREATE, OPEN_READONLY, OPEN_READWRITE, Statement, verbose as sqlverbose} from 'sqlite3';
 
-import {SqlConnectionPool} from './SqlConnectionPool';
 import {SqlDatabaseSettings} from './SqlDatabaseSettings';
 import {SqlRunResult, SqlStatement} from './SqlStatement';
 
@@ -40,11 +39,10 @@ export const SQL_OPEN_DEFAULT = SQL_OPEN_READWRITE | SQL_OPEN_CREATE;
  * @class SqlDatabase
  */
 export class SqlDatabase {
-  private static lastId: number = 0;
+  protected static lastId: number = 0;
 
-  private db?: Database;
-  private dbId?: number;
-  private pool?: SqlConnectionPool;
+  protected db?: Database;
+  protected dbId?: number;
 
   dirty?: boolean;
 
@@ -63,9 +61,6 @@ export class SqlDatabase {
    * @returns A promise
    */
   public async open(databaseFile: string, mode?: number, settings?: SqlDatabaseSettings): Promise<void> {
-    if (this.pool) {
-      await this.pool.release(this);
-    }
     return new Promise<void>((resolve, reject) => {
              const db = new Database(databaseFile, mode || SQL_OPEN_DEFAULT, (err) => {
                if (err) {
@@ -93,9 +88,6 @@ export class SqlDatabase {
    * @returns {Promise<void>}
    */
   public close(): Promise<void> {
-    if (this.pool) {
-      return this.pool.release(this);
-    }
     return new Promise<void>((resolve, reject) => {
       if (!this.db) {
         resolve();
@@ -381,13 +373,6 @@ ${sql}`);
    * @param event
    * @param listener
    */
-  public on(event: 'open', listener: () => void): this;
-  /**
-   *
-   *
-   * @param event
-   * @param listener
-   */
   public on(event: 'close', listener: () => void): this;
   /**
    *
@@ -536,87 +521,5 @@ ${sql}`);
    */
   public static verbose(): void {
     sqlverbose();
-  }
-
-  /*
-  @internal
-  */
-  public openByPool(pool: SqlConnectionPool, databaseFile: string, mode?: number, settings?: SqlDatabaseSettings):
-      Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-             const db = new Database(databaseFile, mode || SQL_OPEN_DEFAULT, (err) => {
-               if (err) {
-                 reject(err);
-               } else {
-                 this.pool = pool;
-                 this.db = db;
-                 this.dbId = SqlDatabase.lastId++;
-                 debug(`${this.dbId}: opened`);
-                 resolve();
-               }
-             });
-           })
-        .then((): Promise<void> => {
-          if (settings) {
-            return this.applySettings(settings);
-          }
-          return Promise.resolve();
-        });
-  }
-
-  /*
-  @internal
-  */
-  public closeByPool(): Promise<void> {
-    this.pool = undefined;
-    return new Promise<void>((resolve, reject) => {
-      if (!this.db) {
-        resolve();
-      } else {
-        const db = this.db;
-        debug(`${this.dbId}: close`);
-        this.db = undefined;
-        this.dbId = undefined;
-        db.close((err) => {
-          db.removeAllListeners();
-          if (err) {
-            reject(err);
-          } else {
-            resolve();
-          }
-        });
-      }
-    });
-  }
-
-  /*
-  @internal
-  */
-  public async recycleByPool(pool: SqlConnectionPool, sqldb: SqlDatabase, settings?: SqlDatabaseSettings):
-      Promise<void> {
-    if (sqldb.db) {
-      sqldb.db.removeAllListeners();
-      // move
-      this.db = sqldb.db;
-      this.dbId = sqldb.dbId;
-      this.pool = pool;
-      // reapply default settings
-      if (settings) {
-        try {
-          await this.applySettings(settings);
-        } catch (err) {
-        }
-      }
-    }
-    sqldb.db = undefined;
-    sqldb.dbId = undefined;
-    sqldb.pool = undefined;
-  }
-
-  /*
-  @internal
-  */
-  public getPool(): SqlConnectionPool|undefined {
-    return this.pool;
   }
 }
