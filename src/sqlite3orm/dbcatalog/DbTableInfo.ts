@@ -32,7 +32,7 @@ export interface DbForeignKeyInfo {
 export interface DbTableInfo {
   name: string;
   tableName: string;
-  schemaName?: string;
+  schemaName: string;
   columns: {[key: string]: DbColumnInfo};
   primaryKey: string[];
   autoIncrement?: boolean;

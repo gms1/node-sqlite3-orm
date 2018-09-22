@@ -9,6 +9,7 @@ import {
   METADATA_MODEL_KEY,
   MetaModel,
   schema,
+  SQL_DEFAULT_SCHEMA,
   SQL_MEMORY_DB_PRIVATE,
   SqlDatabase,
   Table,
@@ -42,6 +43,7 @@ describe('test autoupgrade - upgrade info', () => {
   const tableInfo: DbTableInfo = {
     name: TEST_TABLE,
     tableName: TEST_TABLE,
+    schemaName: SQL_DEFAULT_SCHEMA,
     autoIncrement: true,
     columns: {
       ID: {name: 'ID', typeAffinity: 'INTEGER', type: 'INT', notNull: true, defaultValue: null},

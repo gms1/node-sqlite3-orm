@@ -1,8 +1,7 @@
 export {AutoUpgrader, UpgradeInfo, UpgradeMode} from './AutoUpgrader';
-
 export {BaseDAO} from './BaseDAO';
-
 export {
+  SQL_DEFAULT_SCHEMA,
   SQL_MEMORY_DB_PRIVATE,
   SQL_MEMORY_DB_SHARED,
   SQL_OPEN_CREATE,
@@ -15,9 +14,7 @@ export {
   SqlRunResult,
   SqlStatement
 } from './core';
-
 export {DbCatalogDAO, DbColumnInfo, DbForeignKeyInfo, DbIndexInfo, DbTableInfo} from './dbcatalog';
-
 export {
   field,
   Field,
@@ -41,7 +38,6 @@ export {
   TableOpts,
   ValueTransformer
 } from './metadata';
-
 export {
   Columns,
   Condition,

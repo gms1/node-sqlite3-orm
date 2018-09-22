@@ -12,30 +12,28 @@ import {
   index,
   MetaModel,
   MetaProperty,
-  qualifiyIdentifier,
+  qualifiySchemaIdentifier,
   Schema,
   schema,
   SQL_MEMORY_DB_PRIVATE,
   SqlDatabase,
   table,
-  Table,
-  unqualifyIdentifier
 } from '../..';
 
 
 const TABLE_PARENT_TABLE_NAME = 'S:PARENTTABLE';
-const TABLE_PARENT_TABLE_NAMEQ = qualifiyIdentifier(TABLE_PARENT_TABLE_NAME);
+const TABLE_PARENT_TABLE_NAMEQ = qualifiySchemaIdentifier(TABLE_PARENT_TABLE_NAME, 'main');
 const TABLE_PARENT_FIELD_ID_NAME = 'ID';
 const TABLE_PARENT_FIELD_NAME_NAME = 'NAME';
 
 const TABLE_CHILD_TABLE_NAME = 'S:CHILD TABLE';
-const TABLE_CHILD_TABLE_NAMEQ = qualifiyIdentifier(TABLE_CHILD_TABLE_NAME);
+const TABLE_CHILD_TABLE_NAMEQ = qualifiySchemaIdentifier(TABLE_CHILD_TABLE_NAME, 'main');
 const TABLE_CHILD_FIELD_ID_NAME = 'ID';
 const TABLE_CHILD_FIELD_NAME_NAME = 'NAME';
 const TABLE_CHILD_FIELD_FK_NAME = 'PARENT_ID';
 const TABLE_CHILD_FK_CONSTRAINT_NAME = 'PARENT_CHILDS';
 const TABLE_CHILD_IDX_NAME = 'S:CHILD PARENT IDX';
-const TABLE_CHILD_IDX_NAMEQ = qualifiyIdentifier(TABLE_CHILD_IDX_NAME);
+const TABLE_CHILD_IDX_NAMEQ = qualifiySchemaIdentifier(TABLE_CHILD_IDX_NAME, 'main');
 
 const TABLE_TESTTABLE_NAME = 'S:TESTTABLE';
 

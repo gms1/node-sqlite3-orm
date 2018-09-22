@@ -1,10 +1,10 @@
 import * as core from '../core/core';
 import {
-  qualifiyIdentifier,
-  quoteAndUnqualiyIdentifier,
+  qualifiySchemaIdentifier,
+  quoteAndUnqualifyIdentifier,
   quoteIdentifier,
   quoteSimpleIdentifier,
-  splitIdentifiers
+  splitSchemaIdentifier
 } from '../utils';
 
 import {FieldOpts} from './decorators';
@@ -27,7 +27,7 @@ export class Table {
   }
 
   get schemaName(): string|undefined {
-    return splitIdentifiers(this.name).identSchema;
+    return splitSchemaIdentifier(this.name).identSchema;
   }
 
   /**
@@ -229,13 +229,13 @@ export class Table {
   public hasIDXDefinition(name: string): IDXDefinition|undefined {
     // NOTE: creating a index in schema1 on a table in schema2 is not supported by Sqlite3
     //  so using qualifiedIndentifier is currently not required
-    return this.mapNameToIDXDef.get(qualifiyIdentifier(name));
+    return this.mapNameToIDXDef.get(qualifiySchemaIdentifier(name, this.schemaName));
   }
 
   public getIDXDefinition(name: string): IDXDefinition {
     // NOTE: creating a index in schema1 on a table in schema2 is not supported by Sqlite3
     //  so using qualifiedIndentifier is currently not required
-    const idxDef = this.mapNameToIDXDef.get(qualifiyIdentifier(name));
+    const idxDef = this.mapNameToIDXDef.get(qualifiySchemaIdentifier(name, this.schemaName));
     if (!idxDef) {
       throw new Error(`table '${this.name}': index ${name} not registered yet`);
     }
@@ -245,7 +245,7 @@ export class Table {
   public addIDXDefinition(idxDef: IDXDefinition): IDXDefinition {
     // NOTE: creating a index in schema1 on a table in schema2 is not supported by Sqlite3
     //  so using qualifiedIndentifier is currently not required
-    const qname = qualifiyIdentifier(idxDef.name);
+    const qname = qualifiySchemaIdentifier(idxDef.name, this.schemaName);
     const oldIdxDef = this.mapNameToIDXDef.get(qname);
     if (!oldIdxDef) {
       this.mapNameToIDXDef.set(qname, idxDef);
@@ -313,7 +313,7 @@ export class Table {
     const idxCols = idxDef.fields.map((field) => quoteSimpleIdentifier(field.name) + (field.desc ? ' DESC' : ''));
     // tslint:disable-next-line: restrict-plus-operands
     return 'CREATE ' + (unique ? 'UNIQUE ' : ' ') +
-        `INDEX IF NOT EXISTS ${quoteIdentifier(idxName)} ON ${quoteAndUnqualiyIdentifier(this.name)} ` +
+        `INDEX IF NOT EXISTS ${quoteIdentifier(idxName)} ON ${quoteAndUnqualifyIdentifier(this.name)} ` +
         `(` + idxCols.join(', ') + ')';
   }
 
@@ -396,7 +396,7 @@ export class Table {
       stmt += ')\n';
 
       // if fk.foreignTableName has qualifier it must match the qualifier of this.name
-      const {identName, identSchema} = splitIdentifiers(fk.foreignTableName);
+      const {identName, identSchema} = splitSchemaIdentifier(fk.foreignTableName);
 
       const tableSchema = this.schemaName;
       /* istanbul ignore next */

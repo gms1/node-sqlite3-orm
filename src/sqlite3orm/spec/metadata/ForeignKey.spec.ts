@@ -5,7 +5,7 @@ import {
   fk,
   id,
   index,
-  qualifiyIdentifier,
+  qualifiySchemaIdentifier,
   schema,
   SQL_MEMORY_DB_PRIVATE,
   SqlDatabase,
@@ -15,17 +15,17 @@ import {
 const PREFIX = 'FK:';
 
 const PARENT_TABLE_NAME = `${PREFIX} P T`;
-const PARENT_TABLE_NAMEQ = qualifiyIdentifier(PARENT_TABLE_NAME);
+const PARENT_TABLE_NAMEQ = qualifiySchemaIdentifier(PARENT_TABLE_NAME, 'main');
 
 const PARENT_COL_ID1 = 'parent id';
 const PARENT_COL_ID2 = 'parent id2';
 const PARENT_COL_REF = 'ref';
 
 const CHILD_TABLE_NAME = `${PREFIX} CT`;
-const CHILD_TABLE_NAMEQ = qualifiyIdentifier(CHILD_TABLE_NAME);
+const CHILD_TABLE_NAMEQ = qualifiySchemaIdentifier(CHILD_TABLE_NAME, 'main');
 
 const CHILD_IDX_NAME = `${PREFIX} CI`;
-const CHILD_IDX_NAMEQ = qualifiyIdentifier(CHILD_IDX_NAME);
+const CHILD_IDX_NAMEQ = qualifiySchemaIdentifier(CHILD_IDX_NAME, 'main');
 
 const CHILD_FK_ID_NAME = 'FK PARENT ID';
 const CHILD_FK_REF_NAME = 'FK PARENT REF';

@@ -4,7 +4,7 @@ import * as _dbg from 'debug';
 import {SqlDatabase} from './core/SqlDatabase';
 import {DbCatalogDAO, DbTableInfo} from './dbcatalog';
 import {Field, FKDefinition, schema, Table} from './metadata';
-import {PromiseFactories, qualifiyIdentifier, quoteIdentifier, sequentialize} from './utils';
+import {PromiseFactories, qualifiySchemaIdentifier, quoteIdentifier, sequentialize} from './utils';
 
 const debug = _dbg('sqlite3orm:autoupgrade');
 
@@ -65,12 +65,7 @@ export class AutoUpgrader {
     // upgrade tables
     try {
       if (Array.isArray(tables)) {
-        const factories: PromiseFactories<void> = [];
-        tables.forEach((table) => {
-          factories.push(() => this._upgradeTable(table, opts));
-        });
-
-        await sequentialize(factories);
+        await sequentialize(tables.map((table) => () => this._upgradeTable(table, opts)));
 
       } else {
         await this._upgradeTable(tables, opts);
@@ -212,7 +207,7 @@ export class AutoUpgrader {
       return {tableInfo, opts, upgradeMode: UpgradeMode.ALTER};
     }
     for (const name of Object.keys(tableInfo.indexes)) {
-      const idx = table.mapNameToIDXDef.get(qualifiyIdentifier(name));
+      const idx = table.mapNameToIDXDef.get(qualifiySchemaIdentifier(name, tableInfo.schemaName));
       if (!idx) {
         debug(`  index '${name}' dropped`);
         return {tableInfo, opts, upgradeMode: UpgradeMode.ALTER};
@@ -295,7 +290,7 @@ export class AutoUpgrader {
 
     // drop indexes
     Object.keys(tableInfo.indexes).forEach((name) => {
-      const idx = table.mapNameToIDXDef.get(qualifiyIdentifier(name));
+      const idx = table.mapNameToIDXDef.get(qualifiySchemaIdentifier(name, tableInfo.schemaName));
       if (!idx) {
         debug(`  => drop index '${name}'`);
         factories.push(() => this.sqldb.exec(`DROP INDEX IF EXISTS ${quoteIdentifier(name)}`));

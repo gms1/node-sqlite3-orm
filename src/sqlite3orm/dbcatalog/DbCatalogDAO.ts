@@ -1,6 +1,6 @@
-import {SqlDatabase} from '../core';
+import {SQL_DEFAULT_SCHEMA, SqlDatabase} from '../core';
 import {FKDefinition} from '../metadata';
-import {quoteSimpleIdentifier, splitIdentifiers} from '../utils';
+import {quoteSimpleIdentifier, splitSchemaIdentifier} from '../utils';
 
 import {DbColumnInfo, DbForeignKeyInfo, DbIndexColumnInfo, DbIndexInfo, DbTableInfo} from './DbTableInfo';
 
@@ -30,15 +30,12 @@ export class DbCatalogDAO {
 
   async readTableInfo(tableName: string, schemaName?: string): Promise<DbTableInfo|undefined> {
     try {
-      if (!schemaName) {
-        // tableName could be qualified by schema
-        const {identName, identSchema} = splitIdentifiers(tableName);
-        tableName = identName;
-        schemaName = identSchema;
-      }
+      const {identName, identSchema} = splitSchemaIdentifier(tableName);
+      tableName = identName;
+      schemaName = identSchema || schemaName || SQL_DEFAULT_SCHEMA;
 
       const quotedName = quoteSimpleIdentifier(tableName);
-      const quotedSchema = schemaName ? quoteSimpleIdentifier(schemaName) : undefined;
+      const quotedSchema = quoteSimpleIdentifier(schemaName);
 
       // TODO: sqlite3 issue regarding schema queries from multiple connections
       // The result of table_info seems to be somehow cached, so subsequent calls to table_info may return wrong results
@@ -65,7 +62,7 @@ export class DbCatalogDAO {
       const fkList = await this.callSchemaQueryPragma('foreign_key_list', quotedName, quotedSchema);
 
       const info: DbTableInfo = {
-        name: schemaName ? `${schemaName}.${tableName}` : tableName,
+        name: `${schemaName}.${tableName}`,
         tableName,
         schemaName,
         columns: {},
@@ -131,6 +128,9 @@ export class DbCatalogDAO {
         info.indexes[idxInfo.name] = idxInfo;
       });
 
+      // NOTE: because we are currently not able to discover the FK constraint name
+      // (not reported by 'foreign_key_list' pragma)
+      // we are currently using a 'genericForeignKeyId' here, which is readable, but does not look like an identifier
       let lastId: number;
       let lastFk: any;
       let fromCols: string[] = [];
@@ -167,17 +167,9 @@ export class DbCatalogDAO {
     }
   }
 
-  protected schemaQueryPragma(pragmaName: string, identifierName: string, identifierSchema?: string): string {
-    if (identifierSchema) {
-      return `${identifierSchema}.${pragmaName}(${identifierName})`;
-    } else {
-      return `${pragmaName}(${identifierName})`;
-    }
-  }
-
-  protected callSchemaQueryPragma(pragmaName: string, identifierName: string, identifierSchema?: string):
+  protected callSchemaQueryPragma(pragmaName: string, identifierName: string, identifierSchema: string):
       Promise<any[]> {
-    return this.sqldb.all(`PRAGMA ${this.schemaQueryPragma(pragmaName, identifierName, identifierSchema)}`);
+    return this.sqldb.all(`PRAGMA ${identifierSchema}.${pragmaName}(${identifierName})`);
   }
 
 
