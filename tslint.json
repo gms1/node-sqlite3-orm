@@ -1,7 +1,6 @@
 {
   "rules": {
     "adjacent-overload-signatures": true,
-    "ban-comma-operator": true,
     "ban-types": false,
     "member-access": false,
     "member-ordering": [
@@ -29,7 +28,7 @@
     "no-non-null-assertion": true,
     "no-parameter-reassignment": false,
     "no-reference": true,
-    "no-unnecessary-type-assertion": false,
+    "no-unnecessary-type-assertion": true,
     "no-var-requires": true,
     "only-arrow-functions": [
       true,
@@ -55,7 +54,8 @@
       }
     ],
     "unified-signatures": true,
-    "await-promise": false,
+    "await-promise": true,
+    "ban-comma-operator": true,
     "ban": true,
     "curly": true,
     "forin": true,
@@ -75,11 +75,11 @@
     "no-empty": false,
     "no-eval": true,
     "no-floating-promises": [
-      false
+      true
     ],
-    "no-for-in-array": false,
+    "no-for-in-array": true,
     "no-implicit-dependencies": true,
-    "no-inferred-empty-object-type": false,
+    "no-inferred-empty-object-type": true,
     "no-invalid-this": [
       true,
       "check-function-in-method"
@@ -102,18 +102,18 @@
         "allow-destructuring": true
       }
     ],
-    "no-unbound-method": false,
+    "no-unbound-method": true,
     "no-unnecessary-class": true,
     "no-unsafe-any": false,
     "no-unsafe-finally": true,
     "no-unused-expression": true,
-    "no-unused-variable": false,
-    "no-use-before-declare": false,
+    "no-unused-variable": true,
+    "no-use-before-declare": true,
     "no-var-keyword": true,
     "no-void-expression": false,
     "prefer-conditional-expression": false,
     "radix": true,
-    "restrict-plus-operands": false,
+    "restrict-plus-operands": true,
     "strict-boolean-expressions": false,
     "strict-type-predicates": false,
     "switch-default": false,
@@ -121,13 +121,13 @@
       true,
       "allow-null-check"
     ],
-    "use-default-type-parameter": false,
+    "use-default-type-parameter": true,
     "use-isnan": true,
     "cyclomatic-complexity": [
       true,
       18
     ],
-    "deprecation": false,
+    "deprecation": true,
     "eofline": true,
     "indent": [
       true,
@@ -153,6 +153,7 @@
     "no-require-imports": true,
     "object-literal-sort-keys": false,
     "prefer-const": true,
+    "prefer-readonly": true,
     "trailing-comma": [
       true,
       {
@@ -186,11 +187,11 @@
     ],
     "interface-over-type-literal": true,
     "jsdoc-format": false,
-    "match-default-export-name": false,
+    "match-default-export-name": true,
     "newline-before-return": false,
     "new-parens": true,
     "no-angle-bracket-type-assertion": true,
-    "no-boolean-literal-compare": false,
+    "no-boolean-literal-compare": true,
     "no-consecutive-blank-lines": [
       false
     ],
@@ -198,7 +199,7 @@
     "no-redundant-jsdoc": false,
     "no-trailing-whitespace": true,
     "no-unnecessary-initializer": true,
-    "no-unnecessary-qualifier": false,
+    "no-unnecessary-qualifier": true,
     "object-literal-key-quotes": [
       true,
       "as-needed"
@@ -221,7 +222,7 @@
       "single",
       "avoid-escape"
     ],
-    "return-undefined": false,
+    "return-undefined": true,
     "semicolon": [
       true,
       "always"

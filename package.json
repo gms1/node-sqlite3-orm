@@ -30,7 +30,7 @@
     "clean": "rimraf dist/*",
     "build": "tsc -p tsconfig.json",
     "rebuild": "npm run clean && npm run build",
-    "lint": "tslint -p tsconfig.json -c tslint.full.json",
+    "lint": "tslint -p tsconfig.json -c tslint.json",
     "test:run": "node spec/jasmine-runner.js",
     "test": "npm run rebuild && npm run test:run",
     "watch": "tsc -w -p tsconfig.json",
