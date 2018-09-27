@@ -58,7 +58,7 @@ export type ModelPredicates<MT> = {
 
 export function getPropertyPredicates<MT, K extends keyof MT>(
     modelPredicate: ModelPredicates<MT>, key: K): PropertyPredicates<MT[K]> {
-  return modelPredicate[key];
+  return (modelPredicate[key] || {}) as PropertyPredicates<MT[K]>;
 }
 
 export function getPropertyComparison<MT, K extends keyof MT>(

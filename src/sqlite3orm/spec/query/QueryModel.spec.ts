@@ -213,6 +213,31 @@ describe('test QueryModel', () => {
     done();
   });
 
+
+
+  it('`eq` undefined predicate should filter all', async (done) => {
+    try {
+      const userDao = new BaseDAO(User, sqldb);
+      const res = await userDao.selectAll({userLoginName: {neq: undefined}});
+      expect(res.length).toBe(0);
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+
+
+  it('undefined predicates should not filter', async (done) => {
+    try {
+      const userDao = new BaseDAO(User, sqldb);
+      const res = await userDao.selectAll({userLoginName: undefined});
+      expect(res.length).toBe(6);
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+
   it('`ne` string predicate', async (done) => {
     try {
       const userDao = new BaseDAO(User, sqldb);
