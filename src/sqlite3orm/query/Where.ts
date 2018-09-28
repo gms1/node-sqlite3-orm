@@ -57,8 +57,8 @@ export type ModelPredicates<MT> = {
 }&{not?: never, or?: never, and?: never, sql?: never};
 
 export function getPropertyPredicates<MT, K extends keyof MT>(
-    modelPredicate: ModelPredicates<MT>, key: K): PropertyPredicates<MT[K]> {
-  return (modelPredicate[key] || {}) as PropertyPredicates<MT[K]>;
+    modelPredicates: ModelPredicates<MT>, key: K): PropertyPredicates<MT[K]> {
+  return (modelPredicates[key] || {eq: undefined}) as PropertyPredicates<MT[K]>;
 }
 
 export function getPropertyComparison<MT, K extends keyof MT>(

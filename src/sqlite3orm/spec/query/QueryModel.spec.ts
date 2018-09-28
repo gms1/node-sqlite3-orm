@@ -215,10 +215,10 @@ describe('test QueryModel', () => {
 
 
 
-  it('`eq` undefined predicate should filter all', async (done) => {
+  it('undefined `neq` comparison value should be treated as `null` value', async (done) => {
     try {
       const userDao = new BaseDAO(User, sqldb);
-      const res = await userDao.selectAll({userLoginName: {neq: undefined}});
+      const res = await userDao.selectAll({userLoginName: {neq: undefined}}); // this is NOT equivalent to: IS NOT NULL!!!
       expect(res.length).toBe(0);
     } catch (err) {
       fail(err);
@@ -227,10 +227,21 @@ describe('test QueryModel', () => {
   });
 
 
-  it('undefined predicates should not filter', async (done) => {
+  it('undefined comparison (shorthand form of {eq: undefined}) should be treated as `null` value', async (done) => {
     try {
       const userDao = new BaseDAO(User, sqldb);
-      const res = await userDao.selectAll({userLoginName: undefined});
+      const res = await userDao.selectAll({userLoginName: undefined}); // this is NOT equivalent to: IS NULL!!!
+      expect(res.length).toBe(0);
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+
+  it('empty where should not select all', async (done) => {
+    try {
+      const userDao = new BaseDAO(User, sqldb);
+      const res = await userDao.selectAll({});
       expect(res.length).toBe(6);
     } catch (err) {
       fail(err);
