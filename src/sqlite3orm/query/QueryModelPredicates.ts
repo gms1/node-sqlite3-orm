@@ -12,7 +12,9 @@ export class QueryModelPredicates<MT> implements QueryOperation {
     const keys = Object.keys(pred);
     keys.forEach((propertyKey) => {
       const propertyPredicates = getPropertyPredicates(pred, propertyKey as keyof MT);
-      if (typeof propertyPredicates !== 'object' || propertyPredicates instanceof Date) {
+
+      if (typeof propertyPredicates !== 'object' || propertyPredicates instanceof Date ||
+          propertyPredicates instanceof Promise) {
         // shorthand form for 'eq' comparison
         this.subOperations.push(new QueryPropertyPredicate(propertyKey, 'eq', propertyPredicates));
       } else {

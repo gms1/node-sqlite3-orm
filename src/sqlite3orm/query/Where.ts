@@ -7,19 +7,19 @@ export type ComparisonOperatorType = 'eq'|'neq'|'gt'|'gte'|'lt'|'lte'|'isIn'|'is
 
 
 export interface PropertyComparisons<T> {
-  eq?: T;
-  neq?: T;
-  gt?: T;
-  gte?: T;
-  lt?: T;
-  lte?: T;
+  eq?: T|Promise<T>;
+  neq?: T|Promise<T>;
+  gt?: T|Promise<T>;
+  gte?: T|Promise<T>;
+  lt?: T|Promise<T>;
+  lte?: T|Promise<T>;
 
-  isIn?: T[];
-  isNotIn?: T[];
-  isBetween?: [T, T];
-  isNotBetween?: [T, T];
-  isLike?: T&string;
-  isNotLike?: T&string;
+  isIn?: T[]|Promise<T[]>;
+  isNotIn?: T[]|Promise<T[]>;
+  isBetween?: [T, T]|Promise<[T, T]>;
+  isNotBetween?: [T, T]|Promise<[T, T]>;
+  isLike?: (T&string)|Promise<T&string>;
+  isNotLike?: (T&string)|Promise<T&string>;
   isNull?: boolean;
   isNotNull?: boolean;
 }
@@ -28,29 +28,29 @@ export interface PropertyComparisons<T> {
 /*
  * ModelPredicates<MT>:
  * predicates defined on model properties to apply on table fields:
- * */
-
-/* usage: * /
-interface Post {
-  id: number;
-  title: string;
-  author: string;
-  likes: number;
-}
-
-const pred: ModelPredicates<Post> = {
-  title: 'hello'
-};
-const pred2: ModelPredicates<Post> = {
-  likes: {isBetween: [0, 4]}
-};
-
-
-*/
+ *
+ * usage:
+ *   interface Post {
+ *     id: number;
+ *     title: string;
+ *     author: string;
+ *     likes: number;
+ *   }
+ *
+ *   const pred: ModelPredicates<Post> = {
+ *     title: 'hello'
+ *   };
+ *   const pred2: ModelPredicates<Post> = {
+ *     title: 'hello',
+ *     likes: {isBetween: [0, 4]}
+ *   };
+ *
+ *
+ */
 
 type ShortHandType = Primitive|Date;
 
-export type PropertyPredicates<PT> = PropertyComparisons<Promise<PT>|PT>|(PT&ShortHandType);
+export type PropertyPredicates<PT> = PropertyComparisons<PT>|(PT&ShortHandType)|Promise<(PT&ShortHandType)>;
 
 export type ModelPredicates<MT> = {
   [K in keyof MT]?: PropertyPredicates<MT[K]>;
@@ -67,24 +67,22 @@ export function getPropertyComparison<MT, K extends keyof MT>(
 }
 
 /*
- * Condition<MT>* conditions defined on model to apply to the where - clause *
+ * Condition<MT>:
+ * condition defined on model to apply to the where - clause
  *
- * */
-
-
-/* usage: * /
-
-const cond1: Condition<Post> = {
-  not: {title: 'foo'}
-};
-const cond2: Condition<Post> = {
-  or: [{title: 'foo'}, {title: 'bar'}]
-};
-const cond3: Condition<Post> = {
-  and: [{author: 'gms'}, {or: [{title: {isLike: '%hello%'}}, {title: {isLike: '%world%'}}]}]
-};
-
-*/
+ * usage:
+ *
+ *   const cond1: Condition<Post> = {
+ *     not: {title: 'foo'}
+ *   };
+ *   const cond2: Condition<Post> = {
+ *     or: [{title: 'foo'}, {title: 'bar'}]
+ *   };
+ *   const cond3: Condition<Post> = {
+ *     and: [{author: 'gms'}, {or: [{title: {isLike: '%hello%'}}, {title: {isLike: '%world%'}}]}]
+ *   };
+ *
+ */
 
 export type LogicalOperatorType = 'not'|'or'|'and'|'sql';
 
@@ -106,5 +104,6 @@ export function isModelPredicates<MT>(cond?: Condition<MT>): cond is ModelPredic
  * Where<MT>
  *
  * alias for Condition<MT>|string
- *  */
+ *
+ */
 export type Where<MT> = Condition<MT>|string;

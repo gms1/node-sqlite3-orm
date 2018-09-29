@@ -201,6 +201,18 @@ describe('test QueryModel', () => {
     done();
   });
 
+  it('`eq` Promise<string> predicate (shorthand form)', async (done) => {
+    try {
+      const userDao = new BaseDAO(User, sqldb);
+      const res = await userDao.selectAll({userLoginName: Promise.resolve('Charlie')});
+      expect(res.length).toBe(1);
+      expect(res[0].userId).toBe(3);
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+
   it('`eq` string predicate (normal form)', async (done) => {
     try {
       const userDao = new BaseDAO(User, sqldb);
@@ -215,7 +227,7 @@ describe('test QueryModel', () => {
 
 
 
-  it('undefined `neq` comparison value should be treated as `null` value', async (done) => {
+  it('undefined `neq` comparison value should be treated as `null` value (empty result set)', async (done) => {
     try {
       const userDao = new BaseDAO(User, sqldb);
       const res = await userDao.selectAll({userLoginName: {neq: undefined}}); // this is NOT equivalent to: IS NOT NULL!!!
@@ -227,7 +239,7 @@ describe('test QueryModel', () => {
   });
 
 
-  it('undefined comparison (shorthand form of {eq: undefined}) should be treated as `null` value', async (done) => {
+  it('undefined comparison (shorthand form of {eq: undefined}) should be treated as `null` value (empty result set)', async (done) => {
     try {
       const userDao = new BaseDAO(User, sqldb);
       const res = await userDao.selectAll({userLoginName: undefined}); // this is NOT equivalent to: IS NULL!!!
@@ -308,7 +320,7 @@ describe('test QueryModel', () => {
     done();
   });
 
-  it('`isBetween` string predicate', async (done) => {
+  it('`isBetween` [string,string] predicate', async (done) => {
     try {
       const userDao = new BaseDAO(User, sqldb);
       const res = await userDao.selectAll({userLoginName: {isBetween: ['Alfa', 'Bravo']}});
@@ -319,7 +331,19 @@ describe('test QueryModel', () => {
     done();
   });
 
-  it('`isNotBetween` string predicate', async (done) => {
+  it('`isBetween` Promise<[string,string]> predicate', async (done) => {
+    try {
+      const userDao = new BaseDAO(User, sqldb);
+      const res = await userDao.selectAll({userLoginName: {isBetween: Promise.resolve(['Alfa', 'Bravo']) as Promise<[string, string]>}});
+      expect(res.length).toBe(2);
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+
+
+  it('`isNotBetween` [string,string] predicate', async (done) => {
     try {
       const userDao = new BaseDAO(User, sqldb);
       const res = await userDao.selectAll({userLoginName: {isNotBetween: ['Charlie', 'Z']}});
@@ -330,7 +354,7 @@ describe('test QueryModel', () => {
     done();
   });
 
-  it('`isIn` string predicate', async (done) => {
+  it('`isIn` string[] predicate', async (done) => {
     try {
       const userDao = new BaseDAO(User, sqldb);
       const res = await userDao.selectAll({userLoginName: {isIn: ['Alfa']}});
@@ -342,10 +366,22 @@ describe('test QueryModel', () => {
     done();
   });
 
-  it('`isNotIn` string predicate', async (done) => {
+  it('`isNotIn` string[] predicate', async (done) => {
     try {
       const userDao = new BaseDAO(User, sqldb);
       const res = await userDao.selectAll({userLoginName: {isNotIn: ['Bravo', 'Charlie', 'Delta', 'Echo', 'Foxtrot']}});
+      expect(res.length).toBe(1);
+      expect(res[0].userId).toBe(1);
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+
+  it('`isNotIn` Promise<string[]> predicate', async (done) => {
+    try {
+      const userDao = new BaseDAO(User, sqldb);
+      const res = await userDao.selectAll({userLoginName: {isNotIn: Promise.resolve(['Bravo', 'Charlie', 'Delta', 'Echo', 'Foxtrot'])}});
       expect(res.length).toBe(1);
       expect(res[0].userId).toBe(1);
     } catch (err) {
@@ -461,7 +497,7 @@ describe('test QueryModel', () => {
     done();
   });
 
-  it('`isIn` number predicate', async (done) => {
+  it('`isIn` number[] predicate', async (done) => {
     try {
       const userDao = new BaseDAO(User, sqldb);
       const res = await userDao.selectAll({userFollowers: {isIn: [6]}});
@@ -473,7 +509,7 @@ describe('test QueryModel', () => {
     done();
   });
 
-  it('`isNotIn` number predicate', async (done) => {
+  it('`isNotIn` number[] predicate', async (done) => {
     try {
       const userDao = new BaseDAO(User, sqldb);
       const res = await userDao.selectAll({userFollowers: {isNotIn: [5, 4, 3, 2, 1]}});
