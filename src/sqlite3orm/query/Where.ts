@@ -16,8 +16,8 @@ export interface PropertyComparisons<T> {
 
   isIn?: T[]|Promise<T[]>;
   isNotIn?: T[]|Promise<T[]>;
-  isBetween?: [T, T]|Promise<[T, T]>;
-  isNotBetween?: [T, T]|Promise<[T, T]>;
+  isBetween?: [T | Promise<T>, T|Promise<T>];
+  isNotBetween?: [T | Promise<T>, T|Promise<T>];
   isLike?: (T&string)|Promise<T&string>;
   isNotLike?: (T&string)|Promise<T&string>;
   isNull?: boolean;

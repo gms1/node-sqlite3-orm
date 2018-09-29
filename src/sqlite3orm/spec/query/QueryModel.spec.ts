@@ -331,10 +331,10 @@ describe('test QueryModel', () => {
     done();
   });
 
-  it('`isBetween` Promise<[string,string]> predicate', async (done) => {
+  it('`isBetween` [Promise<string>,string] predicate', async (done) => {
     try {
       const userDao = new BaseDAO(User, sqldb);
-      const res = await userDao.selectAll({userLoginName: {isBetween: Promise.resolve(['Alfa', 'Bravo']) as Promise<[string, string]>}});
+      const res = await userDao.selectAll({userLoginName: {isBetween: [Promise.resolve('Alfa'), 'Bravo']}});
       expect(res.length).toBe(2);
     } catch (err) {
       fail(err);
