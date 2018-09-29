@@ -15,7 +15,7 @@ describe('test SqlConnectionPool', () => {
 
   it('expect pool to be able to open a database using default settings', async (done) => {
     try {
-      let pool = new SqlConnectionPool();
+      let pool = new SqlConnectionPool('TESTPOOL');
       await pool.open(SQL_MEMORY_DB_SHARED);
       expect(pool.isOpen()).toBeTruthy();
 
@@ -64,6 +64,8 @@ describe('test SqlConnectionPool', () => {
       const fileName = 'testsqlite3.db';
       await pool.open(fileName, SQL_OPEN_DEFAULT, 2, 2);
       expect(pool.isOpen()).toBeTruthy();
+      expect(pool.poolSize).toBe(2);
+      expect(pool.openSize).toBe(0);
 
       // getting first connection
       let sqldb1 = await pool.get(100);
@@ -116,6 +118,8 @@ describe('test SqlConnectionPool', () => {
 
       await pool.open(fileName, SQL_OPEN_DEFAULT, 2, 2);
       expect(pool.isOpen()).toBeTruthy();
+      expect(pool.poolSize).toBe(2);
+      expect(pool.openSize).toBe(0);
 
       sqldb1 = await pool.get(100);
 
@@ -139,6 +143,8 @@ describe('test SqlConnectionPool', () => {
       let pool = new SqlConnectionPool();
       await pool.open(SQL_MEMORY_DB_SHARED, SQL_OPEN_DEFAULT, 2, 2);
       expect(pool.isOpen()).toBeTruthy();
+      expect(pool.poolSize).toBe(2);
+      expect(pool.openSize).toBe(0);
 
       // getting first connection
       let sqldb1 = await pool.get(100);
@@ -198,6 +204,8 @@ describe('test SqlConnectionPool', () => {
 
       await pool.open(SQL_MEMORY_DB_SHARED, SQL_OPEN_DEFAULT, 2, 2);
       expect(pool.isOpen()).toBeTruthy();
+      expect(pool.poolSize).toBe(2);
+      expect(pool.openSize).toBe(0);
 
       sqldb1 = await pool.get(100);
 
@@ -223,6 +231,8 @@ describe('test SqlConnectionPool', () => {
       let pool = new SqlConnectionPool();
       await pool.open('::/.', SQL_OPEN_READWRITE);
       expect(pool.isOpen()).toBeFalsy();
+      expect(pool.poolSize).toBe(0);
+      expect(pool.openSize).toBe(0);
 
       // getting first connection
       let sqldb1 = await pool.get(100);
@@ -289,7 +299,7 @@ describe('test SqlConnectionPool', () => {
   });
 
 
-  it('getting connections from pool having max-limit should work', async (done) => {
+  it('getting connections from pool having max-limit should succeed', async (done) => {
     const pool = new SqlConnectionPool();
     let conn1: SqlDatabase|undefined;
     let conn2: SqlDatabase|undefined;
@@ -345,29 +355,97 @@ describe('test SqlConnectionPool', () => {
   });
 
 
-  it('closing pool having connections in use should succeed', async (done) => {
+  it('closing pool having connections open should succeed', async (done) => {
     const pool = new SqlConnectionPool();
     let conn1: SqlDatabase|undefined;
     let conn2: SqlDatabase|undefined;
+    let conn3: SqlDatabase|undefined;
     try {
-      await pool.open(SQL_MEMORY_DB_SHARED, SQL_OPEN_DEFAULT, 1, 2);
+      await pool.open(SQL_MEMORY_DB_SHARED, SQL_OPEN_DEFAULT, 2, 3);
       expect(pool.isOpen()).toBeTruthy();
+      expect(pool.poolSize).toBe(2);
+      expect(pool.openSize).toBe(0);
       conn1 = await pool.get(100);
+      expect(pool.poolSize).toBe(1);
+      expect(pool.openSize).toBe(1);
       conn2 = await pool.get(100);
+      expect(pool.poolSize).toBe(0);
+      expect(pool.openSize).toBe(2);
+      conn3 = await pool.get(1000);
+      expect(pool.poolSize).toBe(0);
+      expect(pool.openSize).toBe(3);
     } catch (err) {
       fail(err);
     }
 
     try {
       await conn1!.close();
+      expect(pool.poolSize).toBe(1);
+      expect(pool.openSize).toBe(2);
+      await conn3!.close();
+      expect(pool.poolSize).toBe(2);
+      expect(pool.openSize).toBe(1);
       await pool.close();
     } catch (err) {
       fail(err);
     }
 
     expect(pool.isOpen()).toBeFalsy();
+    expect(pool.poolSize).toBe(0);
+    expect(pool.openSize).toBe(0);
+
     expect(conn1!.isOpen()).toBeFalsy();
     expect(conn2!.isOpen()).toBeFalsy();
+    expect(conn3!.isOpen()).toBeFalsy();
+    done();
+  });
+
+
+  it('connection should be closed by pool having min connections in pool', async (done) => {
+    const pool = new SqlConnectionPool();
+    let conn1: SqlDatabase|undefined;
+    let conn2: SqlDatabase|undefined;
+    let conn3: SqlDatabase|undefined;
+    try {
+      await pool.open(SQL_MEMORY_DB_SHARED, SQL_OPEN_DEFAULT, 2, 3);
+      expect(pool.isOpen()).toBeTruthy();
+      expect(pool.poolSize).toBe(2);
+      expect(pool.openSize).toBe(0);
+      conn1 = await pool.get(100);
+      expect(pool.poolSize).toBe(1);
+      expect(pool.openSize).toBe(1);
+      conn2 = await pool.get(100);
+      expect(pool.poolSize).toBe(0);
+      expect(pool.openSize).toBe(2);
+      conn3 = await pool.get(1000);
+      expect(pool.poolSize).toBe(0);
+      expect(pool.openSize).toBe(3);
+    } catch (err) {
+      fail(err);
+    }
+
+    try {
+      await conn1!.close();
+      expect(pool.poolSize).toBe(1);
+      expect(pool.openSize).toBe(2);
+      await conn2!.close();
+      expect(pool.poolSize).toBe(2);
+      expect(pool.openSize).toBe(1);
+      await conn3!.close();
+      expect(pool.poolSize).toBe(2);  // <= one connection closed (inPool.length >= min)
+      expect(pool.openSize).toBe(0);
+      await pool.close();
+    } catch (err) {
+      fail(err);
+    }
+
+    expect(pool.isOpen()).toBeFalsy();
+    expect(pool.poolSize).toBe(0);
+    expect(pool.openSize).toBe(0);
+
+    expect(conn1!.isOpen()).toBeFalsy();
+    expect(conn2!.isOpen()).toBeFalsy();
+    expect(conn3!.isOpen()).toBeFalsy();
     done();
   });
 

@@ -24,8 +24,6 @@ export class SqlConnectionPool {
 
   private max: number;
 
-  private curr: number;
-
   private readonly inPool: SqlConnectionPoolDatabase[];
 
   private readonly inUse: Set<SqlConnectionPoolDatabase>;
@@ -34,18 +32,23 @@ export class SqlConnectionPool {
 
   private _opening?: Promise<void>;
 
+  get poolSize(): number {
+    return this.inPool.length;
+  }
+  get openSize(): number {
+    return this.inUse.size;
+  }
 
   /**
    * Creates an instance of SqlConnectionPool.
    *
    */
-  constructor() {
+  constructor(public readonly name: string = '') {
     this.databaseFile = undefined;
     this.mode = SQL_OPEN_DEFAULT;
     this.inUse = new Set<SqlConnectionPoolDatabase>();
     this.inPool = [];
     this.min = this.max = 0;
-    this.curr = 0;
   }
 
   /**
@@ -54,7 +57,7 @@ export class SqlConnectionPool {
    * @param databaseFile - The path to the database file or URI
    * @param [mode=SQL_OPEN_DEFAULT] - A bit flag combination of: SQL_OPEN_CREATE |
    * SQL_OPEN_READONLY | SQL_OPEN_READWRITE
-   * @param [min=1] minimum connections whihc should be opened by this connection pool
+   * @param [min=1] minimum connections which should be opened by this connection pool
    * @param [max=0] maximum connections which can be opened by this connection pool
    * @returns A promise
    */
@@ -95,7 +98,6 @@ export class SqlConnectionPool {
       this.min = min;
       this.max = max;
       this.settings = settings;
-      this.curr = 0;
       this.inPool.length = 0;
 
       const promises: Promise<void>[] = [];
@@ -114,13 +116,16 @@ export class SqlConnectionPool {
         this.inPool.push(sqldb);
       }
       await Promise.all(promises);
-      debug(`pool: opened: ${this.curr} connections open (${this.inPool.length} in pool)`);
+      if (this.name.length) {
+        SqlConnectionPool.openNamedPools.set(this.name, this);
+      }
+      debug(`pool ${this.name}: opened: ${this.inUse.size} connections open (${this.inPool.length} in pool)`);
     } catch (err) {
       try {
         await this.close();
       } catch (_ignore) {
       }
-      debug(`opening pool to ${databaseFile} failed: ${err.message}`);
+      debug(`pool ${this.name}: opening ${databaseFile} failed: ${err.message}`);
       return Promise.reject(err);
     }
   }
@@ -133,7 +138,16 @@ export class SqlConnectionPool {
   async close(): Promise<void> {
     try {
       if (this.databaseFile) {
-        debug(`pool: closing: ${this.curr} connections open (${this.inPool.length} in pool)`);
+        if (this.inUse.size) {
+          debug(`pool ${this.name}: closing: forcibly closing ${
+                                                                this.inUse.size
+                                                              } opened connections (${this.inPool.length} in pool)`);
+        } else {
+          debug(`pool ${this.name}: closing: ${this.inUse.size} connections open (${this.inPool.length} in pool)`);
+        }
+      }
+      if (this.name.length) {
+        SqlConnectionPool.openNamedPools.delete(this.name);
       }
       this.databaseFile = undefined;
       this.mode = SQL_OPEN_DEFAULT;
@@ -148,7 +162,7 @@ export class SqlConnectionPool {
       this.inUse.clear();
       await Promise.all(promises);
     } catch (err) /* istanbul ignore next */ {
-      debug(`closing pool failed: ${err.message}`);
+      debug(`pool ${this.name}: closing failed: ${err.message}`);
       return Promise.reject(err);
     }
   }
@@ -176,11 +190,8 @@ export class SqlConnectionPool {
       if (this.inPool.length > 0) {
         // tslint:disable-next-line no-unnecessary-type-assertion
         sqldb = this.inPool.shift() as SqlConnectionPoolDatabase;
-        if (this.max > 0) {
-          this.inUse.add(sqldb);
-        }
-        this.curr++;
-        debug(`pool: ${this.curr} connections open (${this.inPool.length} in pool)`);
+        this.inUse.add(sqldb);
+        debug(`pool ${this.name}: ${this.inUse.size} connections open (${this.inPool.length} in pool)`);
         return sqldb;
       }
       if (!this.databaseFile) {
@@ -188,15 +199,11 @@ export class SqlConnectionPool {
       }
       sqldb = new SqlConnectionPoolDatabase();
       await sqldb.openByPool(this, this.databaseFile, this.mode, this.settings);
-      this.curr++;
-      debug(`pool: ${this.curr} connections open (${this.inPool.length} in pool)`);
-      /* istanbul ignore if */
-      if (this.max > 0) {
-        this.inUse.add(sqldb);
-      }
+      this.inUse.add(sqldb);
+      debug(`pool ${this.name}: ${this.inUse.size} connections open (${this.inPool.length} in pool)`);
       return sqldb;
     } catch (err) {
-      debug(`getting connection from pool failed: ${err.message}`);
+      debug(`pool ${this.name}: getting connection from pool failed: ${err.message}`);
       return Promise.reject(err);
     }
   }
@@ -212,12 +219,10 @@ export class SqlConnectionPool {
       // not opened by this pool
       return sqldb.close();
     }
-    if (this.max > 0 && this.inUse.has(sqldb)) {
-      this.inUse.delete(sqldb);
-    }
+    this.inUse.delete(sqldb);
     /* istanbul ignore else */
     if (sqldb.isOpen()) {
-      if (sqldb.dirty) {
+      if (sqldb.dirty || this.inPool.length >= this.min) {
         // close database connection
         await sqldb.closeByPool();
       } else {
@@ -226,10 +231,13 @@ export class SqlConnectionPool {
         await newsqldb.recycleByPool(this, sqldb, this.settings);
         this.inPool.push(newsqldb);
       }
-      this.curr--;
-      debug(`pool: ${this.curr} connections open (${this.inPool.length} in pool)`);
+      debug(`pool ${this.name}: ${this.inUse.size} connections open (${this.inPool.length} in pool)`);
     }
   }
+
+  // tslint:disable member-ordering
+
+  static readonly openNamedPools: Map<string, SqlConnectionPool> = new Map<string, SqlConnectionPool>();
 }
 
 // TODO: move this function or find a better one:
