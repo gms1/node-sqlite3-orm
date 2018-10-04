@@ -1,8 +1,8 @@
 # CHANGELOG
 
 | Release   | Notes                                                                                                                       |
-|-----------|-----------------------------------------------------------------------------------------------------------------------------|
-| 2.4.2     | maintenance releases                                                                                                        |
+| --------- | --------------------------------------------------------------------------------------------------------------------------- |
+| 2.4.2-3   | maintenance releases                                                                                                        |
 | 2.4.1     | autoupgrade detection for autoIncrement changes                                                                             |
 | 2.4.0     | [2.4.0 changes](#2.4.0-changes)                                                                                             |
 | 2.3.2     | customizable serialize/deserialize; support for date in milliseconds unix epoch                                             |
@@ -28,46 +28,46 @@
 
 ### new features
 
-* typesafe queries
+- typesafe queries
 
 ### breaking changes
 
-* MetaModel: get*Statement() methods have been moved to the new QueryModel
-* BaseDAO: protected members have been moved to the new QueryModel
+- MetaModel: get\*Statement() methods have been moved to the new QueryModel
+- BaseDAO: protected members have been moved to the new QueryModel
 
 ## 2.1.0 changes
 
 ### new features
 
-* DbCatalogDAO for reading schemas, tables, table-definitions, index-definitions and foreign key-definitions
-* SqlDatabaseSettings for applying pragma settings on opening a connection to a database
+- DbCatalogDAO for reading schemas, tables, table-definitions, index-definitions and foreign key-definitions
+- SqlDatabaseSettings for applying pragma settings on opening a connection to a database
 
 ## 2.0.0 changes
 
 ### new features
 
-* support for mapping a table to multiple model classes
-* support for schema qualified table and index names
-* quoted identifiers
-* optional parameter 'isUnique' for the 'index' decorator
-* BaseDAO
-  * selectAllChildsOf: same as calling selectAllOf from the child-DAO
-  * selectByChild: select the parent of a child
-  * selectParentOf: same as selectByChild from the child-DAO
-* debugging utility: [see debug](https://www.npmjs.com/package/debug)
+- support for mapping a table to multiple model classes
+- support for schema qualified table and index names
+- quoted identifiers
+- optional parameter 'isUnique' for the 'index' decorator
+- BaseDAO
+  - selectAllChildsOf: same as calling selectAllOf from the child-DAO
+  - selectByChild: select the parent of a child
+  - selectParentOf: same as selectByChild from the child-DAO
+- debugging utility: [see debug](https://www.npmjs.com/package/debug)
 
 ### breaking changes
 
-* BaseDAO
+- BaseDAO
 
       some protected member-functions have been changed (e.g setHostParam ) or removed (e.g setProperty ).
 
-* reflect metadata key 'METADATA_TABLE_KEY'
+- reflect metadata key 'METADATA_TABLE_KEY'
 
       previously 'METADATA_TABLE_KEY' has been used to reference a Table class instance,
       now the 'METADATA_MODEL_KEY' references a MetaModel class instance which is mapped to a Table class instance
 
-* Table/View
+- Table/View
 
       all model (class and property) related things have been moved to the new MetaModel/MetaProperty classes
       the getters for the DML statements have been moved to MetaModel and deprecated getters have been removed
