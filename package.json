@@ -50,7 +50,7 @@
     "sqlite3": "^4.0.2"
   },
   "devDependencies": {
-    "@types/debug": "0.0.30",
+    "@types/debug": "0.0.31",
     "@types/fs-extra": "^5.0.4",
     "@types/jasmine": "^2.8.8",
     "@types/node": "^10.11.3",
