@@ -1,3 +1,4 @@
+// tslint:disable callable-types
 
 import {SqlDatabase} from '../core';
 

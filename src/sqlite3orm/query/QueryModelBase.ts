@@ -1,3 +1,4 @@
+// tslint:disable callable-types
 
 import {METADATA_MODEL_KEY, MetaModel, MetaProperty, Table} from '../metadata';
 
@@ -329,7 +330,6 @@ export class QueryModelBase<T> {
         foreignKeyRefCols.set(constraintName, fkDef.fields.map((field) => field.foreignColumnName));
         // tslint:enable no-non-null-assertion
       }
-
     });
     return {primaryKeyProps, primaryKeyPredicates, foreignKeyPredicates, foreignKeyProps, foreignKeyRefCols};
   }

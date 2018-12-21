@@ -1,3 +1,4 @@
+// tslint:disable callable-types
 // tslint:disable-next-line: no-import-side-effect
 // import * as core from './core';
 
