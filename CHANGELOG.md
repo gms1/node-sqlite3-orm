@@ -2,7 +2,7 @@
 
 | Release   | Notes                                                                                                                       |
 | --------- | --------------------------------------------------------------------------------------------------------------------------- |
-| 2.4.2-6   | maintenance releases                                                                                                        |
+| 2.4.2-7   | maintenance releases                                                                                                        |
 | 2.4.1     | autoupgrade detection for autoIncrement changes                                                                             |
 | 2.4.0     | [2.4.0 changes](#2.4.0-changes)                                                                                             |
 | 2.3.2     | customizable serialize/deserialize; support for date in milliseconds unix epoch                                             |
