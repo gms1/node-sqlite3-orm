@@ -14,10 +14,10 @@ import {
   SqlDatabase,
   Table,
   table,
-  UpgradeInfo
+  UpgradeInfo,
 } from '..';
-import {UpgradeMode, UpgradeOptions} from '../AutoUpgrader';
-import {fk, index} from '../metadata/decorators';
+import { UpgradeMode, UpgradeOptions } from '../AutoUpgrader';
+import { fk, index } from '../metadata/decorators';
 
 const TEST_TABLE = 'AU:TABLE';
 const TEST_PARENT_TABLE = 'AU:PARENT_TABLE';
@@ -36,7 +36,6 @@ class SpecAutoUpgrader extends AutoUpgrader {
 // ---------------------------------------------
 
 describe('test autoupgrade - upgrade info', () => {
-
   let sqldb: SqlDatabase;
   let autoUpgrader: SpecAutoUpgrader;
   let catalogDao: DbCatalogDAO;
@@ -46,22 +45,82 @@ describe('test autoupgrade - upgrade info', () => {
     schemaName: SQL_DEFAULT_SCHEMA,
     autoIncrement: true,
     columns: {
-      ID: {name: 'ID', typeAffinity: 'INTEGER', type: 'INT', notNull: true, defaultValue: null},
+      ID: { name: 'ID', typeAffinity: 'INTEGER', type: 'INT', notNull: true, defaultValue: null },
 
-      PARENT1_ID1: {name: 'PARENT1_ID1', typeAffinity: 'INTEGER', type: 'INT', notNull: false, defaultValue: null},
-      PARENT1_ID2: {name: 'PARENT1_ID2', typeAffinity: 'INTEGER', type: 'INT', notNull: false, defaultValue: null},
+      PARENT1_ID1: {
+        name: 'PARENT1_ID1',
+        typeAffinity: 'INTEGER',
+        type: 'INT',
+        notNull: false,
+        defaultValue: null,
+      },
+      PARENT1_ID2: {
+        name: 'PARENT1_ID2',
+        typeAffinity: 'INTEGER',
+        type: 'INT',
+        notNull: false,
+        defaultValue: null,
+      },
 
-      PARENT2_ID1: {name: 'PARENT2_ID1', typeAffinity: 'INTEGER', type: 'INT', notNull: false, defaultValue: null},
-      PARENT2_ID2: {name: 'PARENT2_ID2', typeAffinity: 'INTEGER', type: 'INT', notNull: false, defaultValue: null},
+      PARENT2_ID1: {
+        name: 'PARENT2_ID1',
+        typeAffinity: 'INTEGER',
+        type: 'INT',
+        notNull: false,
+        defaultValue: null,
+      },
+      PARENT2_ID2: {
+        name: 'PARENT2_ID2',
+        typeAffinity: 'INTEGER',
+        type: 'INT',
+        notNull: false,
+        defaultValue: null,
+      },
 
-      PARENT3_ID1: {name: 'PARENT3_ID1', typeAffinity: 'INTEGER', type: 'INT', notNull: false, defaultValue: null},
-      PARENT3_ID2: {name: 'PARENT3_ID2', typeAffinity: 'INTEGER', type: 'INT', notNull: false, defaultValue: null},
+      PARENT3_ID1: {
+        name: 'PARENT3_ID1',
+        typeAffinity: 'INTEGER',
+        type: 'INT',
+        notNull: false,
+        defaultValue: null,
+      },
+      PARENT3_ID2: {
+        name: 'PARENT3_ID2',
+        typeAffinity: 'INTEGER',
+        type: 'INT',
+        notNull: false,
+        defaultValue: null,
+      },
 
-      FLD1: {name: 'FLD1', typeAffinity: 'TEXT', type: 'CHAR', notNull: false, defaultValue: null},
-      FLD2: {name: 'FLD2', typeAffinity: 'TEXT', type: 'CHAR', notNull: true, defaultValue: null},
-      FLD3: {name: 'FLD3', typeAffinity: 'TEXT', type: 'CHAR', notNull: true, defaultValue: '\'foo\''},
-      FLD4: {name: 'FLD4', typeAffinity: 'REAL', type: 'DOUBLE', notNull: true, defaultValue: '3.14'},
-      FLD5: {name: 'FLD5', typeAffinity: 'TEXT', type: 'CHAR', notNull: true, defaultValue: '\'foo\''}
+      FLD1: {
+        name: 'FLD1',
+        typeAffinity: 'TEXT',
+        type: 'CHAR',
+        notNull: false,
+        defaultValue: null,
+      },
+      FLD2: { name: 'FLD2', typeAffinity: 'TEXT', type: 'CHAR', notNull: true, defaultValue: null },
+      FLD3: {
+        name: 'FLD3',
+        typeAffinity: 'TEXT',
+        type: 'CHAR',
+        notNull: true,
+        defaultValue: "'foo'",
+      },
+      FLD4: {
+        name: 'FLD4',
+        typeAffinity: 'REAL',
+        type: 'DOUBLE',
+        notNull: true,
+        defaultValue: '3.14',
+      },
+      FLD5: {
+        name: 'FLD5',
+        typeAffinity: 'TEXT',
+        type: 'CHAR',
+        notNull: true,
+        defaultValue: "'foo'",
+      },
     },
     primaryKey: ['ID'],
     indexes: {
@@ -70,26 +129,32 @@ describe('test autoupgrade - upgrade info', () => {
         unique: false,
         partial: false,
         columns: [
-          {name: 'PARENT2_ID1', desc: false, coll: '', key: true},
-          {name: 'PARENT2_ID2', desc: false, coll: '', key: true}
-        ]
+          { name: 'PARENT2_ID1', desc: false, coll: '', key: true },
+          { name: 'PARENT2_ID2', desc: false, coll: '', key: true },
+        ],
       },
       IDX_PARENT3: {
         name: 'IDX_PARENT3',
         unique: false,
         partial: false,
         columns: [
-          {name: 'PARENT3_ID1', desc: false, coll: '', key: true},
-          {name: 'PARENT3_ID2', desc: false, coll: '', key: true}
-        ]
-      }
+          { name: 'PARENT3_ID1', desc: false, coll: '', key: true },
+          { name: 'PARENT3_ID2', desc: false, coll: '', key: true },
+        ],
+      },
     },
     foreignKeys: {
-      '(PARENT1_ID1,PARENT1_ID2) => AU:PARENT_TABLE(ID1,ID2)':
-          {refTable: TEST_PARENT_TABLE, columns: ['PARENT1_ID1', 'PARENT1_ID2'], refColumns: ['ID1', 'ID2']},
-      '(PARENT2_ID1,PARENT2_ID2) => AU:PARENT_TABLE(ID1,ID2)':
-          {refTable: TEST_PARENT_TABLE, columns: ['PARENT2_ID1', 'PARENT2_ID2'], refColumns: ['ID1', 'ID2']}
-    }
+      '(PARENT1_ID1,PARENT1_ID2) => AU:PARENT_TABLE(ID1,ID2)': {
+        refTable: TEST_PARENT_TABLE,
+        columns: ['PARENT1_ID1', 'PARENT1_ID2'],
+        refColumns: ['ID1', 'ID2'],
+      },
+      '(PARENT2_ID1,PARENT2_ID2) => AU:PARENT_TABLE(ID1,ID2)': {
+        refTable: TEST_PARENT_TABLE,
+        columns: ['PARENT2_ID1', 'PARENT2_ID2'],
+        refColumns: ['ID1', 'ID2'],
+      },
+    },
   };
 
   // ---------------------------------------------
@@ -120,16 +185,15 @@ describe('test autoupgrade - upgrade info', () => {
     done();
   });
 
-
   // ---------------------------------------------
   it('actual', async (done) => {
     try {
-      @table({name: TEST_PARENT_TABLE})
+      @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
-        @id({name: 'ID1', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
         id1: number;
 
-        @id({name: 'ID2', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
         id2: number;
 
         constructor() {
@@ -137,44 +201,47 @@ describe('test autoupgrade - upgrade info', () => {
         }
       }
 
-      @table({name: TEST_TABLE, autoIncrement: true})
+      @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
-        @id({name: 'ID', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
         id: number;
 
-        @field({name: 'PARENT1_ID1', dbtype: 'INTEGER'}) @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
+        @field({ name: 'PARENT1_ID1', dbtype: 'INTEGER' })
+        @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
         parent1Id1?: number;
-        @field({name: 'PARENT1_ID2', dbtype: 'INTEGER'}) @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID2')
+        @field({ name: 'PARENT1_ID2', dbtype: 'INTEGER' })
+        @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID2')
         parent1Id2?: number;
 
-        @field({name: 'PARENT2_ID1', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT2_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID1')
         @index('IDX_PARENT2')
         parent2Id1?: number;
-        @field({name: 'PARENT2_ID2', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT2_ID2', dbtype: 'INTEGER' })
         @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID2')
         @index('IDX_PARENT2')
         parent2Id2?: number;
 
-        @field({name: 'PARENT3_ID1', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        @field({ name: 'PARENT3_ID1', dbtype: 'INTEGER' })
+        @index('IDX_PARENT3')
         parent3Id1?: number;
-        @field({name: 'PARENT3_ID2', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        @field({ name: 'PARENT3_ID2', dbtype: 'INTEGER' })
+        @index('IDX_PARENT3')
         parent3Id2?: number;
 
-
-        @field({name: 'FLD1', dbtype: 'TEXT'})
+        @field({ name: 'FLD1', dbtype: 'TEXT' })
         fld1?: string;
 
-        @field({name: 'FLD2', dbtype: 'TEXT NOT NULL'})
+        @field({ name: 'FLD2', dbtype: 'TEXT NOT NULL' })
         fld2?: string;
 
-        @field({name: 'FLD3', dbtype: 'TEXT NOT NULL DEFAULT \'foo\''})
+        @field({ name: 'FLD3', dbtype: "TEXT NOT NULL DEFAULT 'foo'" })
         fld3?: string;
 
-        @field({name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14'})
+        @field({ name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14' })
         fld4?: number;
 
-        @field({name: 'FLD5', dbtype: 'TEXT NOT NULL DEFAULT(\'foo\')'})
+        @field({ name: 'FLD5', dbtype: "TEXT NOT NULL DEFAULT('foo')" })
         fld5?: string;
 
         constructor() {
@@ -188,23 +255,21 @@ describe('test autoupgrade - upgrade info', () => {
 
       expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
       expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.ACTUAL, 'upgradeMode should be ACTUAL');
-
     } catch (err) {
       fail(err);
     }
     done();
   });
 
-
   // ---------------------------------------------
   it('create', async (done) => {
     try {
-      @table({name: TEST_PARENT_TABLE})
+      @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
-        @id({name: 'ID1', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
         id1: number;
 
-        @id({name: 'ID2', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
         id2: number;
 
         constructor() {
@@ -212,44 +277,47 @@ describe('test autoupgrade - upgrade info', () => {
         }
       }
 
-      @table({name: TEST_TABLE, autoIncrement: true})
+      @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
-        @id({name: 'ID', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
         id: number;
 
-        @field({name: 'PARENT1_ID1', dbtype: 'INTEGER'}) @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
+        @field({ name: 'PARENT1_ID1', dbtype: 'INTEGER' })
+        @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
         parent1Id1?: number;
-        @field({name: 'PARENT1_ID2', dbtype: 'INTEGER'}) @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID2')
+        @field({ name: 'PARENT1_ID2', dbtype: 'INTEGER' })
+        @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID2')
         parent1Id2?: number;
 
-        @field({name: 'PARENT2_ID1', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT2_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID1')
         @index('IDX_PARENT2')
         parent2Id1?: number;
-        @field({name: 'PARENT2_ID2', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT2_ID2', dbtype: 'INTEGER' })
         @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID2')
         @index('IDX_PARENT2')
         parent2Id2?: number;
 
-        @field({name: 'PARENT3_ID1', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        @field({ name: 'PARENT3_ID1', dbtype: 'INTEGER' })
+        @index('IDX_PARENT3')
         parent3Id1?: number;
-        @field({name: 'PARENT3_ID2', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        @field({ name: 'PARENT3_ID2', dbtype: 'INTEGER' })
+        @index('IDX_PARENT3')
         parent3Id2?: number;
 
-
-        @field({name: 'FLD1', dbtype: 'TEXT'})
+        @field({ name: 'FLD1', dbtype: 'TEXT' })
         fld1?: string;
 
-        @field({name: 'FLD2', dbtype: 'TEXT NOT NULL'})
+        @field({ name: 'FLD2', dbtype: 'TEXT NOT NULL' })
         fld2?: string;
 
-        @field({name: 'FLD3', dbtype: 'TEXT NOT NULL DEFAULT \'foo\''})
+        @field({ name: 'FLD3', dbtype: "TEXT NOT NULL DEFAULT 'foo'" })
         fld3?: string;
 
-        @field({name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14'})
+        @field({ name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14' })
         fld4?: number;
 
-        @field({name: 'FLD5', dbtype: 'TEXT NOT NULL DEFAULT(\'foo\')'})
+        @field({ name: 'FLD5', dbtype: "TEXT NOT NULL DEFAULT('foo')" })
         fld5?: string;
 
         constructor() {
@@ -263,7 +331,6 @@ describe('test autoupgrade - upgrade info', () => {
 
       expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
       expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.CREATE, 'upgradeMode should be CREATE');
-
     } catch (err) {
       fail(err);
     }
@@ -273,12 +340,12 @@ describe('test autoupgrade - upgrade info', () => {
   // ---------------------------------------------
   it('forced recreate', async (done) => {
     try {
-      @table({name: TEST_PARENT_TABLE})
+      @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
-        @id({name: 'ID1', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
         id1: number;
 
-        @id({name: 'ID2', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
         id2: number;
 
         constructor() {
@@ -286,44 +353,47 @@ describe('test autoupgrade - upgrade info', () => {
         }
       }
 
-      @table({name: TEST_TABLE, autoIncrement: true})
+      @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
-        @id({name: 'ID', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
         id: number;
 
-        @field({name: 'PARENT1_ID1', dbtype: 'INTEGER'}) @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
+        @field({ name: 'PARENT1_ID1', dbtype: 'INTEGER' })
+        @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
         parent1Id1?: number;
-        @field({name: 'PARENT1_ID2', dbtype: 'INTEGER'}) @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID2')
+        @field({ name: 'PARENT1_ID2', dbtype: 'INTEGER' })
+        @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID2')
         parent1Id2?: number;
 
-        @field({name: 'PARENT2_ID1', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT2_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID1')
         @index('IDX_PARENT2')
         parent2Id1?: number;
-        @field({name: 'PARENT2_ID2', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT2_ID2', dbtype: 'INTEGER' })
         @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID2')
         @index('IDX_PARENT2')
         parent2Id2?: number;
 
-        @field({name: 'PARENT3_ID1', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        @field({ name: 'PARENT3_ID1', dbtype: 'INTEGER' })
+        @index('IDX_PARENT3')
         parent3Id1?: number;
-        @field({name: 'PARENT3_ID2', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        @field({ name: 'PARENT3_ID2', dbtype: 'INTEGER' })
+        @index('IDX_PARENT3')
         parent3Id2?: number;
 
-
-        @field({name: 'FLD1', dbtype: 'TEXT'})
+        @field({ name: 'FLD1', dbtype: 'TEXT' })
         fld1?: string;
 
-        @field({name: 'FLD2', dbtype: 'TEXT NOT NULL'})
+        @field({ name: 'FLD2', dbtype: 'TEXT NOT NULL' })
         fld2?: string;
 
-        @field({name: 'FLD3', dbtype: 'TEXT NOT NULL DEFAULT \'foo\''})
+        @field({ name: 'FLD3', dbtype: "TEXT NOT NULL DEFAULT 'foo'" })
         fld3?: string;
 
-        @field({name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14'})
+        @field({ name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14' })
         fld4?: number;
 
-        @field({name: 'FLD5', dbtype: 'TEXT NOT NULL DEFAULT(\'foo\')'})
+        @field({ name: 'FLD5', dbtype: "TEXT NOT NULL DEFAULT('foo')" })
         fld5?: string;
 
         constructor() {
@@ -333,28 +403,27 @@ describe('test autoupgrade - upgrade info', () => {
 
       const metaModel = Reflect.getMetadata(METADATA_MODEL_KEY, Model1.prototype) as MetaModel;
 
-      const upgradeInfo =
-          autoUpgrader._getUpgradeInfo(metaModel.table, tableInfo, {forceRecreate: true});  // !!! <= forced recreate
+      const upgradeInfo = autoUpgrader._getUpgradeInfo(metaModel.table, tableInfo, {
+        forceRecreate: true,
+      }); // !!! <= forced recreate
 
       expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
       expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.RECREATE, 'upgradeMode should be RECREATE');
-
     } catch (err) {
       fail(err);
     }
     done();
   });
-
 
   // ---------------------------------------------
   it('recreate because of added/removed foreign key', async (done) => {
     try {
-      @table({name: TEST_PARENT_TABLE})
+      @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
-        @id({name: 'ID1', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
         id1: number;
 
-        @id({name: 'ID2', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
         id2: number;
 
         constructor() {
@@ -362,48 +431,49 @@ describe('test autoupgrade - upgrade info', () => {
         }
       }
 
-      @table({name: TEST_TABLE, autoIncrement: true})
+      @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
-        @id({name: 'ID', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
         id: number;
 
-        @field({name: 'PARENT1_ID1', dbtype: 'INTEGER'}) @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
+        @field({ name: 'PARENT1_ID1', dbtype: 'INTEGER' })
+        @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
         parent1Id1?: number;
-        @field({name: 'PARENT1_ID2', dbtype: 'INTEGER'}) @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID2')
+        @field({ name: 'PARENT1_ID2', dbtype: 'INTEGER' })
+        @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID2')
         parent1Id2?: number;
 
-        @field({name: 'PARENT2_ID1', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT2_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID1')
         @index('IDX_PARENT2')
         parent2Id1?: number;
-        @field({name: 'PARENT2_ID2', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT2_ID2', dbtype: 'INTEGER' })
         @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID2')
         @index('IDX_PARENT2')
         parent2Id2?: number;
 
-        @field({name: 'PARENT3_ID1', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT3_ID1', dbtype: 'INTEGER' })
         @index('IDX_PARENT3')
-        @fk('FK_PARENT3', TEST_PARENT_TABLE, 'ID1')  // !!! <= added foreign key
+        @fk('FK_PARENT3', TEST_PARENT_TABLE, 'ID1') // !!! <= added foreign key
         parent3Id1?: number;
-        @field({name: 'PARENT3_ID2', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT3_ID2', dbtype: 'INTEGER' })
         @index('IDX_PARENT3')
-        @fk('FK_PARENT3', TEST_PARENT_TABLE, 'ID2')  // !!! <= added foreign key
+        @fk('FK_PARENT3', TEST_PARENT_TABLE, 'ID2') // !!! <= added foreign key
         parent3Id2?: number;
 
-
-        @field({name: 'FLD1', dbtype: 'TEXT'})
+        @field({ name: 'FLD1', dbtype: 'TEXT' })
         fld1?: string;
 
-        @field({name: 'FLD2', dbtype: 'TEXT NOT NULL'})
+        @field({ name: 'FLD2', dbtype: 'TEXT NOT NULL' })
         fld2?: string;
 
-        @field({name: 'FLD3', dbtype: 'TEXT NOT NULL DEFAULT \'foo\''})
+        @field({ name: 'FLD3', dbtype: "TEXT NOT NULL DEFAULT 'foo'" })
         fld3?: string;
 
-        @field({name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14'})
+        @field({ name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14' })
         fld4?: number;
 
-        @field({name: 'FLD5', dbtype: 'TEXT NOT NULL DEFAULT(\'foo\')'})
+        @field({ name: 'FLD5', dbtype: "TEXT NOT NULL DEFAULT('foo')" })
         fld5?: string;
 
         constructor() {
@@ -417,23 +487,21 @@ describe('test autoupgrade - upgrade info', () => {
 
       expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
       expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.RECREATE, 'upgradeMode should be RECREATE');
-
     } catch (err) {
       fail(err);
     }
     done();
   });
 
-
   // ---------------------------------------------
   it('recreate because of changed foreign key', async (done) => {
     try {
-      @table({name: TEST_PARENT_TABLE})
+      @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
-        @id({name: 'ID1', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
         id1: number;
 
-        @id({name: 'ID2', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
         id2: number;
 
         constructor() {
@@ -441,46 +509,47 @@ describe('test autoupgrade - upgrade info', () => {
         }
       }
 
-      @table({name: TEST_TABLE, autoIncrement: true})
+      @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
-        @id({name: 'ID', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
         id: number;
 
-        @field({name: 'PARENT1_ID2', dbtype: 'INTEGER'})
-        @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID2')  // !!! <= changed foreign key
+        @field({ name: 'PARENT1_ID2', dbtype: 'INTEGER' })
+        @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID2') // !!! <= changed foreign key
         parent1Id2?: number;
-        @field({name: 'PARENT1_ID1', dbtype: 'INTEGER'})
-        @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')  // !!! <= changed foreign key
+        @field({ name: 'PARENT1_ID1', dbtype: 'INTEGER' })
+        @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1') // !!! <= changed foreign key
         parent1Id1?: number;
 
-        @field({name: 'PARENT2_ID1', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT2_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID1')
         @index('IDX_PARENT2')
         parent2Id1?: number;
-        @field({name: 'PARENT2_ID2', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT2_ID2', dbtype: 'INTEGER' })
         @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID2')
         @index('IDX_PARENT2')
         parent2Id2?: number;
 
-        @field({name: 'PARENT3_ID1', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        @field({ name: 'PARENT3_ID1', dbtype: 'INTEGER' })
+        @index('IDX_PARENT3')
         parent3Id1?: number;
-        @field({name: 'PARENT3_ID2', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        @field({ name: 'PARENT3_ID2', dbtype: 'INTEGER' })
+        @index('IDX_PARENT3')
         parent3Id2?: number;
 
-
-        @field({name: 'FLD1', dbtype: 'TEXT'})
+        @field({ name: 'FLD1', dbtype: 'TEXT' })
         fld1?: string;
 
-        @field({name: 'FLD2', dbtype: 'TEXT NOT NULL'})
+        @field({ name: 'FLD2', dbtype: 'TEXT NOT NULL' })
         fld2?: string;
 
-        @field({name: 'FLD3', dbtype: 'TEXT NOT NULL DEFAULT \'foo\''})
+        @field({ name: 'FLD3', dbtype: "TEXT NOT NULL DEFAULT 'foo'" })
         fld3?: string;
 
-        @field({name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14'})
+        @field({ name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14' })
         fld4?: number;
 
-        @field({name: 'FLD5', dbtype: 'TEXT NOT NULL DEFAULT(\'foo\')'})
+        @field({ name: 'FLD5', dbtype: "TEXT NOT NULL DEFAULT('foo')" })
         fld5?: string;
 
         constructor() {
@@ -494,7 +563,6 @@ describe('test autoupgrade - upgrade info', () => {
 
       expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
       expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.RECREATE, 'upgradeMode should be RECREATE');
-
     } catch (err) {
       fail(err);
     }
@@ -504,12 +572,12 @@ describe('test autoupgrade - upgrade info', () => {
   // ---------------------------------------------
   it('recreate because of dropped column', async (done) => {
     try {
-      @table({name: TEST_PARENT_TABLE})
+      @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
-        @id({name: 'ID1', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
         id1: number;
 
-        @id({name: 'ID2', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
         id2: number;
 
         constructor() {
@@ -517,41 +585,44 @@ describe('test autoupgrade - upgrade info', () => {
         }
       }
 
-      @table({name: TEST_TABLE, autoIncrement: true})
+      @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
-        @id({name: 'ID', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
         id: number;
 
-        @field({name: 'PARENT1_ID1', dbtype: 'INTEGER'}) @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
+        @field({ name: 'PARENT1_ID1', dbtype: 'INTEGER' })
+        @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
         parent1Id1?: number;
-        @field({name: 'PARENT1_ID2', dbtype: 'INTEGER'}) @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID2')
+        @field({ name: 'PARENT1_ID2', dbtype: 'INTEGER' })
+        @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID2')
         parent1Id2?: number;
 
-        @field({name: 'PARENT2_ID1', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT2_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID1')
         @index('IDX_PARENT2')
         parent2Id1?: number;
-        @field({name: 'PARENT2_ID2', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT2_ID2', dbtype: 'INTEGER' })
         @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID2')
         @index('IDX_PARENT2')
         parent2Id2?: number;
 
-        @field({name: 'PARENT3_ID1', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        @field({ name: 'PARENT3_ID1', dbtype: 'INTEGER' })
+        @index('IDX_PARENT3')
         parent3Id1?: number;
-        @field({name: 'PARENT3_ID2', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        @field({ name: 'PARENT3_ID2', dbtype: 'INTEGER' })
+        @index('IDX_PARENT3')
         parent3Id2?: number;
 
-
-        @field({name: 'FLD1', dbtype: 'TEXT'})
+        @field({ name: 'FLD1', dbtype: 'TEXT' })
         fld1?: string;
 
-        @field({name: 'FLD2', dbtype: 'TEXT NOT NULL'})
+        @field({ name: 'FLD2', dbtype: 'TEXT NOT NULL' })
         fld2?: string;
 
-        @field({name: 'FLD3', dbtype: 'TEXT NOT NULL DEFAULT \'foo\''})
+        @field({ name: 'FLD3', dbtype: "TEXT NOT NULL DEFAULT 'foo'" })
         fld3?: string;
 
-        @field({name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14'})
+        @field({ name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14' })
         fld4?: number;
 
         // @field({name: 'FLD5', dbtype: 'TEXT NOT NULL DEFAULT(\'foo\')'})  // !!! <= dropped column
@@ -568,7 +639,6 @@ describe('test autoupgrade - upgrade info', () => {
 
       expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
       expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.RECREATE, 'upgradeMode should be RECREATE');
-
     } catch (err) {
       fail(err);
     }
@@ -578,12 +648,12 @@ describe('test autoupgrade - upgrade info', () => {
   // ---------------------------------------------
   it('recreate and keep dropped not-null column', async (done) => {
     try {
-      @table({name: TEST_PARENT_TABLE})
+      @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
-        @id({name: 'ID1', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
         id1: number;
 
-        @id({name: 'ID2', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
         id2: number;
 
         constructor() {
@@ -591,41 +661,44 @@ describe('test autoupgrade - upgrade info', () => {
         }
       }
 
-      @table({name: TEST_TABLE, autoIncrement: true})
+      @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
-        @id({name: 'ID', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
         id: number;
 
-        @field({name: 'PARENT1_ID1', dbtype: 'INTEGER'}) @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
+        @field({ name: 'PARENT1_ID1', dbtype: 'INTEGER' })
+        @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
         parent1Id1?: number;
-        @field({name: 'PARENT1_ID2', dbtype: 'INTEGER'}) @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID2')
+        @field({ name: 'PARENT1_ID2', dbtype: 'INTEGER' })
+        @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID2')
         parent1Id2?: number;
 
-        @field({name: 'PARENT2_ID1', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT2_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID1')
         @index('IDX_PARENT2')
         parent2Id1?: number;
-        @field({name: 'PARENT2_ID2', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT2_ID2', dbtype: 'INTEGER' })
         @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID2')
         @index('IDX_PARENT2')
         parent2Id2?: number;
 
-        @field({name: 'PARENT3_ID1', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        @field({ name: 'PARENT3_ID1', dbtype: 'INTEGER' })
+        @index('IDX_PARENT3')
         parent3Id1?: number;
-        @field({name: 'PARENT3_ID2', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        @field({ name: 'PARENT3_ID2', dbtype: 'INTEGER' })
+        @index('IDX_PARENT3')
         parent3Id2?: number;
 
-
-        @field({name: 'FLD1', dbtype: 'TEXT'})
+        @field({ name: 'FLD1', dbtype: 'TEXT' })
         fld1?: string;
 
-        @field({name: 'FLD2', dbtype: 'TEXT NOT NULL'})
+        @field({ name: 'FLD2', dbtype: 'TEXT NOT NULL' })
         fld2?: string;
 
-        @field({name: 'FLD3', dbtype: 'TEXT NOT NULL DEFAULT \'foo\''})
+        @field({ name: 'FLD3', dbtype: "TEXT NOT NULL DEFAULT 'foo'" })
         fld3?: string;
 
-        @field({name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14'})
+        @field({ name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14' })
         fld4?: number;
 
         // @field({name: 'FLD5', dbtype: 'TEXT NOT NULL DEFAULT(\'foo\')'})  // !!! <= dropped not-null column
@@ -638,28 +711,27 @@ describe('test autoupgrade - upgrade info', () => {
 
       const metaModel = Reflect.getMetadata(METADATA_MODEL_KEY, Model1.prototype) as MetaModel;
 
-      const upgradeInfo =
-          autoUpgrader._getUpgradeInfo(metaModel.table, tableInfo, {keepOldColumns: true});  // !!! <= keep
+      const upgradeInfo = autoUpgrader._getUpgradeInfo(metaModel.table, tableInfo, {
+        keepOldColumns: true,
+      }); // !!! <= keep
 
       expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
       expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.RECREATE, 'upgradeMode should be RECREATE');
-
     } catch (err) {
       fail(err);
     }
     done();
   });
 
-
   // ---------------------------------------------
   it('actual because of kept dropped nullable column', async (done) => {
     try {
-      @table({name: TEST_PARENT_TABLE})
+      @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
-        @id({name: 'ID1', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
         id1: number;
 
-        @id({name: 'ID2', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
         id2: number;
 
         constructor() {
@@ -667,44 +739,47 @@ describe('test autoupgrade - upgrade info', () => {
         }
       }
 
-      @table({name: TEST_TABLE, autoIncrement: true})
+      @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
-        @id({name: 'ID', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
         id: number;
 
-        @field({name: 'PARENT1_ID1', dbtype: 'INTEGER'}) @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
+        @field({ name: 'PARENT1_ID1', dbtype: 'INTEGER' })
+        @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
         parent1Id1?: number;
-        @field({name: 'PARENT1_ID2', dbtype: 'INTEGER'}) @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID2')
+        @field({ name: 'PARENT1_ID2', dbtype: 'INTEGER' })
+        @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID2')
         parent1Id2?: number;
 
-        @field({name: 'PARENT2_ID1', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT2_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID1')
         @index('IDX_PARENT2')
         parent2Id1?: number;
-        @field({name: 'PARENT2_ID2', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT2_ID2', dbtype: 'INTEGER' })
         @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID2')
         @index('IDX_PARENT2')
         parent2Id2?: number;
 
-        @field({name: 'PARENT3_ID1', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        @field({ name: 'PARENT3_ID1', dbtype: 'INTEGER' })
+        @index('IDX_PARENT3')
         parent3Id1?: number;
-        @field({name: 'PARENT3_ID2', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        @field({ name: 'PARENT3_ID2', dbtype: 'INTEGER' })
+        @index('IDX_PARENT3')
         parent3Id2?: number;
-
 
         // @field({name: 'FLD1', dbtype: 'TEXT'})  // !!! <= dropped nullable column
         // fld1?: string;
 
-        @field({name: 'FLD2', dbtype: 'TEXT NOT NULL'})
+        @field({ name: 'FLD2', dbtype: 'TEXT NOT NULL' })
         fld2?: string;
 
-        @field({name: 'FLD3', dbtype: 'TEXT NOT NULL DEFAULT \'foo\''})
+        @field({ name: 'FLD3', dbtype: "TEXT NOT NULL DEFAULT 'foo'" })
         fld3?: string;
 
-        @field({name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14'})
+        @field({ name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14' })
         fld4?: number;
 
-        @field({name: 'FLD5', dbtype: 'TEXT NOT NULL DEFAULT(\'foo\')'})
+        @field({ name: 'FLD5', dbtype: "TEXT NOT NULL DEFAULT('foo')" })
         fld5?: string;
 
         constructor() {
@@ -714,12 +789,12 @@ describe('test autoupgrade - upgrade info', () => {
 
       const metaModel = Reflect.getMetadata(METADATA_MODEL_KEY, Model1.prototype) as MetaModel;
 
-      const upgradeInfo =
-          autoUpgrader._getUpgradeInfo(metaModel.table, tableInfo, {keepOldColumns: true});  // !!! <= keep
+      const upgradeInfo = autoUpgrader._getUpgradeInfo(metaModel.table, tableInfo, {
+        keepOldColumns: true,
+      }); // !!! <= keep
 
       expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
       expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.ACTUAL, 'upgradeMode should be ACTUAL');
-
     } catch (err) {
       fail(err);
     }
@@ -729,12 +804,12 @@ describe('test autoupgrade - upgrade info', () => {
   // ---------------------------------------------
   it('recreate because of changed column', async (done) => {
     try {
-      @table({name: TEST_PARENT_TABLE})
+      @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
-        @id({name: 'ID1', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
         id1: number;
 
-        @id({name: 'ID2', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
         id2: number;
 
         constructor() {
@@ -742,44 +817,47 @@ describe('test autoupgrade - upgrade info', () => {
         }
       }
 
-      @table({name: TEST_TABLE, autoIncrement: true})
+      @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
-        @id({name: 'ID', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
         id: number;
 
-        @field({name: 'PARENT1_ID1', dbtype: 'INTEGER'}) @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
+        @field({ name: 'PARENT1_ID1', dbtype: 'INTEGER' })
+        @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
         parent1Id1?: number;
-        @field({name: 'PARENT1_ID2', dbtype: 'INTEGER'}) @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID2')
+        @field({ name: 'PARENT1_ID2', dbtype: 'INTEGER' })
+        @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID2')
         parent1Id2?: number;
 
-        @field({name: 'PARENT2_ID1', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT2_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID1')
         @index('IDX_PARENT2')
         parent2Id1?: number;
-        @field({name: 'PARENT2_ID2', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT2_ID2', dbtype: 'INTEGER' })
         @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID2')
         @index('IDX_PARENT2')
         parent2Id2?: number;
 
-        @field({name: 'PARENT3_ID1', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        @field({ name: 'PARENT3_ID1', dbtype: 'INTEGER' })
+        @index('IDX_PARENT3')
         parent3Id1?: number;
-        @field({name: 'PARENT3_ID2', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        @field({ name: 'PARENT3_ID2', dbtype: 'INTEGER' })
+        @index('IDX_PARENT3')
         parent3Id2?: number;
 
-
-        @field({name: 'FLD1', dbtype: 'TEXT'})
+        @field({ name: 'FLD1', dbtype: 'TEXT' })
         fld1?: string;
 
-        @field({name: 'FLD2', dbtype: 'TEXT NOT NULL'})
+        @field({ name: 'FLD2', dbtype: 'TEXT NOT NULL' })
         fld2?: string;
 
-        @field({name: 'FLD3', dbtype: 'TEXT NOT NULL DEFAULT \'foo\''})
+        @field({ name: 'FLD3', dbtype: "TEXT NOT NULL DEFAULT 'foo'" })
         fld3?: string;
 
-        @field({name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14'})
+        @field({ name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14' })
         fld4?: number;
 
-        @field({name: 'FLD5', dbtype: 'REAL NOT NULL DEFAULT 3.14'})  // !!! <= changed column
+        @field({ name: 'FLD5', dbtype: 'REAL NOT NULL DEFAULT 3.14' }) // !!! <= changed column
         fld5?: number;
 
         constructor() {
@@ -793,23 +871,21 @@ describe('test autoupgrade - upgrade info', () => {
 
       expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
       expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.RECREATE, 'upgradeMode should be RECREATE');
-
     } catch (err) {
       fail(err);
     }
     done();
   });
-
 
   // ---------------------------------------------
   it('recreate because of primary key removed', async (done) => {
     try {
-      @table({name: TEST_PARENT_TABLE})
+      @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
-        @id({name: 'ID1', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
         id1: number;
 
-        @id({name: 'ID2', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
         id2: number;
 
         constructor() {
@@ -817,45 +893,48 @@ describe('test autoupgrade - upgrade info', () => {
         }
       }
 
-      @table({name: TEST_TABLE, autoIncrement: true})
+      @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
         // @id({name: 'ID', dbtype: 'INTEGER NOT NULL'}) // !!! <= primary key removed
-        @field({name: 'ID', dbtype: 'INTEGER NOT NULL'})
+        @field({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
         id: number;
 
-        @field({name: 'PARENT1_ID1', dbtype: 'INTEGER'}) @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
+        @field({ name: 'PARENT1_ID1', dbtype: 'INTEGER' })
+        @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
         parent1Id1?: number;
-        @field({name: 'PARENT1_ID2', dbtype: 'INTEGER'}) @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID2')
+        @field({ name: 'PARENT1_ID2', dbtype: 'INTEGER' })
+        @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID2')
         parent1Id2?: number;
 
-        @field({name: 'PARENT2_ID1', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT2_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID1')
         @index('IDX_PARENT2')
         parent2Id1?: number;
-        @field({name: 'PARENT2_ID2', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT2_ID2', dbtype: 'INTEGER' })
         @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID2')
         @index('IDX_PARENT2')
         parent2Id2?: number;
 
-        @field({name: 'PARENT3_ID1', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        @field({ name: 'PARENT3_ID1', dbtype: 'INTEGER' })
+        @index('IDX_PARENT3')
         parent3Id1?: number;
-        @field({name: 'PARENT3_ID2', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        @field({ name: 'PARENT3_ID2', dbtype: 'INTEGER' })
+        @index('IDX_PARENT3')
         parent3Id2?: number;
 
-
-        @field({name: 'FLD1', dbtype: 'TEXT'})
+        @field({ name: 'FLD1', dbtype: 'TEXT' })
         fld1?: string;
 
-        @field({name: 'FLD2', dbtype: 'TEXT NOT NULL'})
+        @field({ name: 'FLD2', dbtype: 'TEXT NOT NULL' })
         fld2?: string;
 
-        @field({name: 'FLD3', dbtype: 'TEXT NOT NULL DEFAULT \'foo\''})
+        @field({ name: 'FLD3', dbtype: "TEXT NOT NULL DEFAULT 'foo'" })
         fld3?: string;
 
-        @field({name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14'})
+        @field({ name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14' })
         fld4?: number;
 
-        @field({name: 'FLD5', dbtype: 'TEXT NOT NULL DEFAULT(\'foo\')'})
+        @field({ name: 'FLD5', dbtype: "TEXT NOT NULL DEFAULT('foo')" })
         fld5?: string;
 
         constructor() {
@@ -869,23 +948,21 @@ describe('test autoupgrade - upgrade info', () => {
 
       expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
       expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.RECREATE, 'upgradeMode should be RECREATE');
-
     } catch (err) {
       fail(err);
     }
     done();
   });
-
 
   // ---------------------------------------------
   it('recreate because of primary key changed', async (done) => {
     try {
-      @table({name: TEST_PARENT_TABLE})
+      @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
-        @id({name: 'ID1', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
         id1: number;
 
-        @id({name: 'ID2', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
         id2: number;
 
         constructor() {
@@ -893,45 +970,48 @@ describe('test autoupgrade - upgrade info', () => {
         }
       }
 
-      @table({name: TEST_TABLE, autoIncrement: true})
+      @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
         // @id({name: 'ID', dbtype: 'INTEGER NOT NULL'}) // !!! <= primary key changed
-        @field({name: 'ID', dbtype: 'INTEGER NOT NULL'})
+        @field({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
         id: number;
 
-        @field({name: 'PARENT1_ID1', dbtype: 'INTEGER'}) @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
+        @field({ name: 'PARENT1_ID1', dbtype: 'INTEGER' })
+        @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
         parent1Id1?: number;
-        @field({name: 'PARENT1_ID2', dbtype: 'INTEGER'}) @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID2')
+        @field({ name: 'PARENT1_ID2', dbtype: 'INTEGER' })
+        @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID2')
         parent1Id2?: number;
 
-        @field({name: 'PARENT2_ID1', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT2_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID1')
         @index('IDX_PARENT2')
         parent2Id1?: number;
-        @field({name: 'PARENT2_ID2', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT2_ID2', dbtype: 'INTEGER' })
         @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID2')
         @index('IDX_PARENT2')
         parent2Id2?: number;
 
-        @field({name: 'PARENT3_ID1', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        @field({ name: 'PARENT3_ID1', dbtype: 'INTEGER' })
+        @index('IDX_PARENT3')
         parent3Id1?: number;
-        @field({name: 'PARENT3_ID2', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        @field({ name: 'PARENT3_ID2', dbtype: 'INTEGER' })
+        @index('IDX_PARENT3')
         parent3Id2?: number;
 
-
-        @field({name: 'FLD1', dbtype: 'TEXT'})
+        @field({ name: 'FLD1', dbtype: 'TEXT' })
         fld1?: string;
 
-        @field({name: 'FLD2', dbtype: 'TEXT NOT NULL'})
+        @field({ name: 'FLD2', dbtype: 'TEXT NOT NULL' })
         fld2?: string;
 
-        @field({name: 'FLD3', dbtype: 'TEXT NOT NULL DEFAULT \'foo\''})
+        @field({ name: 'FLD3', dbtype: "TEXT NOT NULL DEFAULT 'foo'" })
         fld3?: string;
 
-        @id({name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14'})  // !!! <= primary key changed
+        @id({ name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14' }) // !!! <= primary key changed
         fld4?: number;
 
-        @field({name: 'FLD5', dbtype: 'TEXT NOT NULL DEFAULT(\'foo\')'})
+        @field({ name: 'FLD5', dbtype: "TEXT NOT NULL DEFAULT('foo')" })
         fld5?: string;
 
         constructor() {
@@ -945,23 +1025,21 @@ describe('test autoupgrade - upgrade info', () => {
 
       expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
       expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.RECREATE, 'upgradeMode should be RECREATE');
-
     } catch (err) {
       fail(err);
     }
     done();
   });
-
 
   // ---------------------------------------------
   it('recreate because of autoincrement changed', async (done) => {
     try {
-      @table({name: TEST_PARENT_TABLE})
+      @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
-        @id({name: 'ID1', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
         id1: number;
 
-        @id({name: 'ID2', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
         id2: number;
 
         constructor() {
@@ -969,44 +1047,47 @@ describe('test autoupgrade - upgrade info', () => {
         }
       }
 
-      @table({name: TEST_TABLE, autoIncrement: false})  // !!! <= autoIncrement changed
+      @table({ name: TEST_TABLE, autoIncrement: false }) // !!! <= autoIncrement changed
       class Model1 {
-        @id({name: 'ID', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
         id: number;
 
-        @field({name: 'PARENT1_ID1', dbtype: 'INTEGER'}) @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
+        @field({ name: 'PARENT1_ID1', dbtype: 'INTEGER' })
+        @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
         parent1Id1?: number;
-        @field({name: 'PARENT1_ID2', dbtype: 'INTEGER'}) @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID2')
+        @field({ name: 'PARENT1_ID2', dbtype: 'INTEGER' })
+        @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID2')
         parent1Id2?: number;
 
-        @field({name: 'PARENT2_ID1', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT2_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID1')
         @index('IDX_PARENT2')
         parent2Id1?: number;
-        @field({name: 'PARENT2_ID2', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT2_ID2', dbtype: 'INTEGER' })
         @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID2')
         @index('IDX_PARENT2')
         parent2Id2?: number;
 
-        @field({name: 'PARENT3_ID1', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        @field({ name: 'PARENT3_ID1', dbtype: 'INTEGER' })
+        @index('IDX_PARENT3')
         parent3Id1?: number;
-        @field({name: 'PARENT3_ID2', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        @field({ name: 'PARENT3_ID2', dbtype: 'INTEGER' })
+        @index('IDX_PARENT3')
         parent3Id2?: number;
 
-
-        @field({name: 'FLD1', dbtype: 'TEXT'})
+        @field({ name: 'FLD1', dbtype: 'TEXT' })
         fld1?: string;
 
-        @field({name: 'FLD2', dbtype: 'TEXT NOT NULL'})
+        @field({ name: 'FLD2', dbtype: 'TEXT NOT NULL' })
         fld2?: string;
 
-        @field({name: 'FLD3', dbtype: 'TEXT NOT NULL DEFAULT \'foo\''})
+        @field({ name: 'FLD3', dbtype: "TEXT NOT NULL DEFAULT 'foo'" })
         fld3?: string;
 
-        @field({name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14'})
+        @field({ name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14' })
         fld4?: number;
 
-        @field({name: 'FLD5', dbtype: 'TEXT NOT NULL DEFAULT(\'foo\')'})
+        @field({ name: 'FLD5', dbtype: "TEXT NOT NULL DEFAULT('foo')" })
         fld5?: string;
 
         constructor() {
@@ -1020,23 +1101,21 @@ describe('test autoupgrade - upgrade info', () => {
 
       expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
       expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.RECREATE, 'upgradeMode should be RECREATE');
-
     } catch (err) {
       fail(err);
     }
     done();
   });
 
-
   // ---------------------------------------------
   it('alter because of added column', async (done) => {
     try {
-      @table({name: TEST_PARENT_TABLE})
+      @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
-        @id({name: 'ID1', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
         id1: number;
 
-        @id({name: 'ID2', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
         id2: number;
 
         constructor() {
@@ -1044,47 +1123,50 @@ describe('test autoupgrade - upgrade info', () => {
         }
       }
 
-      @table({name: TEST_TABLE, autoIncrement: true})
+      @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
-        @id({name: 'ID', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
         id: number;
 
-        @field({name: 'PARENT1_ID1', dbtype: 'INTEGER'}) @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
+        @field({ name: 'PARENT1_ID1', dbtype: 'INTEGER' })
+        @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
         parent1Id1?: number;
-        @field({name: 'PARENT1_ID2', dbtype: 'INTEGER'}) @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID2')
+        @field({ name: 'PARENT1_ID2', dbtype: 'INTEGER' })
+        @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID2')
         parent1Id2?: number;
 
-        @field({name: 'PARENT2_ID1', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT2_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID1')
         @index('IDX_PARENT2')
         parent2Id1?: number;
-        @field({name: 'PARENT2_ID2', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT2_ID2', dbtype: 'INTEGER' })
         @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID2')
         @index('IDX_PARENT2')
         parent2Id2?: number;
 
-        @field({name: 'PARENT3_ID1', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        @field({ name: 'PARENT3_ID1', dbtype: 'INTEGER' })
+        @index('IDX_PARENT3')
         parent3Id1?: number;
-        @field({name: 'PARENT3_ID2', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        @field({ name: 'PARENT3_ID2', dbtype: 'INTEGER' })
+        @index('IDX_PARENT3')
         parent3Id2?: number;
 
-
-        @field({name: 'FLD1', dbtype: 'TEXT'})
+        @field({ name: 'FLD1', dbtype: 'TEXT' })
         fld1?: string;
 
-        @field({name: 'FLD2', dbtype: 'TEXT NOT NULL'})
+        @field({ name: 'FLD2', dbtype: 'TEXT NOT NULL' })
         fld2?: string;
 
-        @field({name: 'FLD3', dbtype: 'TEXT NOT NULL DEFAULT \'foo\''})
+        @field({ name: 'FLD3', dbtype: "TEXT NOT NULL DEFAULT 'foo'" })
         fld3?: string;
 
-        @field({name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14'})
+        @field({ name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14' })
         fld4?: number;
 
-        @field({name: 'FLD5', dbtype: 'TEXT NOT NULL DEFAULT(\'foo\')'})
+        @field({ name: 'FLD5', dbtype: "TEXT NOT NULL DEFAULT('foo')" })
         fld5?: string;
 
-        @field({name: 'FLD6', dbtype: 'TEXT'})  // !!! <= added column
+        @field({ name: 'FLD6', dbtype: 'TEXT' }) // !!! <= added column
         fld6?: string;
 
         constructor() {
@@ -1098,23 +1180,21 @@ describe('test autoupgrade - upgrade info', () => {
 
       expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
       expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.ALTER, 'upgradeMode should be ALTER');
-
     } catch (err) {
       fail(err);
     }
     done();
   });
-
 
   // ---------------------------------------------
   it('alter because of added index', async (done) => {
     try {
-      @table({name: TEST_PARENT_TABLE})
+      @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
-        @id({name: 'ID1', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
         id1: number;
 
-        @id({name: 'ID2', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
         id2: number;
 
         constructor() {
@@ -1122,48 +1202,49 @@ describe('test autoupgrade - upgrade info', () => {
         }
       }
 
-      @table({name: TEST_TABLE, autoIncrement: true})
+      @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
-        @id({name: 'ID', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
         id: number;
 
-        @field({name: 'PARENT1_ID1', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT1_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
-        @index('IDX_PARENT1')  // !!! <= added index
+        @index('IDX_PARENT1') // !!! <= added index
         parent1Id1?: number;
-        @index('IDX_PARENT1')  // !!! <= added index
-        @field({name: 'PARENT1_ID2', dbtype: 'INTEGER'})
+        @index('IDX_PARENT1') // !!! <= added index
+        @field({ name: 'PARENT1_ID2', dbtype: 'INTEGER' })
         @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID2')
         parent1Id2?: number;
 
-        @field({name: 'PARENT2_ID1', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT2_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID1')
         @index('IDX_PARENT2')
         parent2Id1?: number;
-        @field({name: 'PARENT2_ID2', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT2_ID2', dbtype: 'INTEGER' })
         @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID2')
         @index('IDX_PARENT2')
         parent2Id2?: number;
 
-        @field({name: 'PARENT3_ID1', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        @field({ name: 'PARENT3_ID1', dbtype: 'INTEGER' })
+        @index('IDX_PARENT3')
         parent3Id1?: number;
-        @field({name: 'PARENT3_ID2', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        @field({ name: 'PARENT3_ID2', dbtype: 'INTEGER' })
+        @index('IDX_PARENT3')
         parent3Id2?: number;
 
-
-        @field({name: 'FLD1', dbtype: 'TEXT'})
+        @field({ name: 'FLD1', dbtype: 'TEXT' })
         fld1?: string;
 
-        @field({name: 'FLD2', dbtype: 'TEXT NOT NULL'})
+        @field({ name: 'FLD2', dbtype: 'TEXT NOT NULL' })
         fld2?: string;
 
-        @field({name: 'FLD3', dbtype: 'TEXT NOT NULL DEFAULT \'foo\''})
+        @field({ name: 'FLD3', dbtype: "TEXT NOT NULL DEFAULT 'foo'" })
         fld3?: string;
 
-        @field({name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14'})
+        @field({ name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14' })
         fld4?: number;
 
-        @field({name: 'FLD5', dbtype: 'TEXT NOT NULL DEFAULT(\'foo\')'})
+        @field({ name: 'FLD5', dbtype: "TEXT NOT NULL DEFAULT('foo')" })
         fld5?: string;
 
         constructor() {
@@ -1177,23 +1258,21 @@ describe('test autoupgrade - upgrade info', () => {
 
       expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
       expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.ALTER, 'upgradeMode should be ALTER');
-
     } catch (err) {
       fail(err);
     }
     done();
   });
 
-
   // ---------------------------------------------
   it('alter because of added and dropped index', async (done) => {
     try {
-      @table({name: TEST_PARENT_TABLE})
+      @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
-        @id({name: 'ID1', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
         id1: number;
 
-        @id({name: 'ID2', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
         id2: number;
 
         constructor() {
@@ -1201,46 +1280,49 @@ describe('test autoupgrade - upgrade info', () => {
         }
       }
 
-      @table({name: TEST_TABLE, autoIncrement: true})
+      @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
-        @id({name: 'ID', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
         id: number;
 
-        @field({name: 'PARENT1_ID1', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT1_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
-        @index('IDX_PARENT1')  // !!! <= added index
+        @index('IDX_PARENT1') // !!! <= added index
         parent1Id1?: number;
-        @field({name: 'PARENT1_ID2', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT1_ID2', dbtype: 'INTEGER' })
         @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID2')
-        @index('IDX_PARENT1')  // !!! <= added index
+        @index('IDX_PARENT1') // !!! <= added index
         parent1Id2?: number;
 
-        @field({name: 'PARENT2_ID1', dbtype: 'INTEGER'}) @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID1')
+        @field({ name: 'PARENT2_ID1', dbtype: 'INTEGER' })
+        @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID1')
         // @index('IDX_PARENT2') // !!! <= dropped index
         parent2Id1?: number;
-        @field({name: 'PARENT2_ID2', dbtype: 'INTEGER'}) @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID2')
+        @field({ name: 'PARENT2_ID2', dbtype: 'INTEGER' })
+        @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID2')
         // @index('IDX_PARENT2') // !!! <= dropped index
         parent2Id2?: number;
 
-        @field({name: 'PARENT3_ID1', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        @field({ name: 'PARENT3_ID1', dbtype: 'INTEGER' })
+        @index('IDX_PARENT3')
         parent3Id1?: number;
-        @field({name: 'PARENT3_ID2', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        @field({ name: 'PARENT3_ID2', dbtype: 'INTEGER' })
+        @index('IDX_PARENT3')
         parent3Id2?: number;
 
-
-        @field({name: 'FLD1', dbtype: 'TEXT'})
+        @field({ name: 'FLD1', dbtype: 'TEXT' })
         fld1?: string;
 
-        @field({name: 'FLD2', dbtype: 'TEXT NOT NULL'})
+        @field({ name: 'FLD2', dbtype: 'TEXT NOT NULL' })
         fld2?: string;
 
-        @field({name: 'FLD3', dbtype: 'TEXT NOT NULL DEFAULT \'foo\''})
+        @field({ name: 'FLD3', dbtype: "TEXT NOT NULL DEFAULT 'foo'" })
         fld3?: string;
 
-        @field({name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14'})
+        @field({ name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14' })
         fld4?: number;
 
-        @field({name: 'FLD5', dbtype: 'TEXT NOT NULL DEFAULT(\'foo\')'})
+        @field({ name: 'FLD5', dbtype: "TEXT NOT NULL DEFAULT('foo')" })
         fld5?: string;
 
         constructor() {
@@ -1254,7 +1336,6 @@ describe('test autoupgrade - upgrade info', () => {
 
       expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
       expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.ALTER, 'upgradeMode should be ALTER');
-
     } catch (err) {
       fail(err);
     }
@@ -1264,12 +1345,12 @@ describe('test autoupgrade - upgrade info', () => {
   // ---------------------------------------------
   it('alter because of changed index', async (done) => {
     try {
-      @table({name: TEST_PARENT_TABLE})
+      @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
-        @id({name: 'ID1', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
         id1: number;
 
-        @id({name: 'ID2', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
         id2: number;
 
         constructor() {
@@ -1277,46 +1358,49 @@ describe('test autoupgrade - upgrade info', () => {
         }
       }
 
-      @table({name: TEST_TABLE, autoIncrement: true})
+      @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
-        @id({name: 'ID', dbtype: 'INTEGER NOT NULL'})
+        @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
         id: number;
 
-        @field({name: 'PARENT1_ID1', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT1_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
-        @index('IDX_PARENT2')  // !!! <= changed index
+        @index('IDX_PARENT2') // !!! <= changed index
         parent1Id1?: number;
-        @field({name: 'PARENT1_ID2', dbtype: 'INTEGER'})
+        @field({ name: 'PARENT1_ID2', dbtype: 'INTEGER' })
         @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID2')
-        @index('IDX_PARENT2')  // !!! <= changed index
+        @index('IDX_PARENT2') // !!! <= changed index
         parent1Id2?: number;
 
-        @field({name: 'PARENT2_ID1', dbtype: 'INTEGER'}) @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID1')
+        @field({ name: 'PARENT2_ID1', dbtype: 'INTEGER' })
+        @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID1')
         // @index('IDX_PARENT2') // !!! <= changed index
         parent2Id1?: number;
-        @field({name: 'PARENT2_ID2', dbtype: 'INTEGER'}) @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID2')
+        @field({ name: 'PARENT2_ID2', dbtype: 'INTEGER' })
+        @fk('FK_PARENT2', TEST_PARENT_TABLE, 'ID2')
         // @index('IDX_PARENT2') // !!! <= changed index
         parent2Id2?: number;
 
-        @field({name: 'PARENT3_ID1', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        @field({ name: 'PARENT3_ID1', dbtype: 'INTEGER' })
+        @index('IDX_PARENT3')
         parent3Id1?: number;
-        @field({name: 'PARENT3_ID2', dbtype: 'INTEGER'}) @index('IDX_PARENT3')
+        @field({ name: 'PARENT3_ID2', dbtype: 'INTEGER' })
+        @index('IDX_PARENT3')
         parent3Id2?: number;
 
-
-        @field({name: 'FLD1', dbtype: 'TEXT'})
+        @field({ name: 'FLD1', dbtype: 'TEXT' })
         fld1?: string;
 
-        @field({name: 'FLD2', dbtype: 'TEXT NOT NULL'})
+        @field({ name: 'FLD2', dbtype: 'TEXT NOT NULL' })
         fld2?: string;
 
-        @field({name: 'FLD3', dbtype: 'TEXT NOT NULL DEFAULT \'foo\''})
+        @field({ name: 'FLD3', dbtype: "TEXT NOT NULL DEFAULT 'foo'" })
         fld3?: string;
 
-        @field({name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14'})
+        @field({ name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14' })
         fld4?: number;
 
-        @field({name: 'FLD5', dbtype: 'TEXT NOT NULL DEFAULT(\'foo\')'})
+        @field({ name: 'FLD5', dbtype: "TEXT NOT NULL DEFAULT('foo')" })
         fld5?: string;
 
         constructor() {
@@ -1330,11 +1414,9 @@ describe('test autoupgrade - upgrade info', () => {
 
       expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
       expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.ALTER, 'upgradeMode should be ALTER');
-
     } catch (err) {
       fail(err);
     }
     done();
   });
-
 });

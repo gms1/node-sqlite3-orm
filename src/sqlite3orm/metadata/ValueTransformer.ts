@@ -1,4 +1,3 @@
-
 export interface ValueTransformer {
   /*
    * serialize property value to DB

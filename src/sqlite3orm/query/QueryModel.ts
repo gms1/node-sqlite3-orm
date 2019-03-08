@@ -1,19 +1,17 @@
 // tslint:disable callable-types
 
-import {SqlDatabase} from '../core';
+import { SqlDatabase } from '../core';
 
-import {Filter} from './Filter';
-import {QueryCondition} from './QueryCondition';
-import {QueryModelBase} from './QueryModelBase';
-import {QueryModelPredicates} from './QueryModelPredicates';
-import {isModelPredicates, Where} from './Where';
-
+import { Filter } from './Filter';
+import { QueryCondition } from './QueryCondition';
+import { QueryModelBase } from './QueryModelBase';
+import { QueryModelPredicates } from './QueryModelPredicates';
+import { isModelPredicates, Where } from './Where';
 
 export class QueryModel<T> extends QueryModelBase<T> {
-  constructor(type: {new(): T}) {
+  constructor(type: { new (): T }) {
     super(type);
   }
-
 
   /**
    * Select all models using an optional filter
@@ -38,7 +36,6 @@ export class QueryModel<T> extends QueryModelBase<T> {
     }
   }
 
-
   /**
    * Select all partial models using a filter
    *
@@ -47,7 +44,11 @@ export class QueryModel<T> extends QueryModelBase<T> {
    * @param [params] - An optional object with additional host parameter
    * @returns A promise of array of partial models
    */
-  async selectPartialAll(sqldb: SqlDatabase, filter: Filter<T>, params?: Object): Promise<Partial<T>[]> {
+  async selectPartialAll(
+    sqldb: SqlDatabase,
+    filter: Filter<T>,
+    params?: Object,
+  ): Promise<Partial<T>[]> {
     try {
       params = Object.assign({}, params);
       const select = await this.getSelectStatement(filter, params);
@@ -71,7 +72,10 @@ export class QueryModel<T> extends QueryModelBase<T> {
    */
   async selectModel(sqldb: SqlDatabase, model: T): Promise<T> {
     try {
-      const row = await sqldb.get(this.getSelectByIdStatement(), this.bindPrimaryKeyInputParams(model));
+      const row = await sqldb.get(
+        this.getSelectByIdStatement(),
+        this.bindPrimaryKeyInputParams(model),
+      );
       model = this.updateModelFromRow(model, row);
     } catch (e /* istanbul ignore next */) {
       return Promise.reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
@@ -89,7 +93,10 @@ export class QueryModel<T> extends QueryModelBase<T> {
   async selectModelById(sqldb: SqlDatabase, input: Partial<T>): Promise<T> {
     let model: T = new this.type();
     try {
-      const row = await sqldb.get(this.getSelectByIdStatement(), this.bindPrimaryKeyInputParams(input));
+      const row = await sqldb.get(
+        this.getSelectByIdStatement(),
+        this.bindPrimaryKeyInputParams(input),
+      );
       model = this.updateModelFromRow(model, row);
     } catch (e /* istanbul ignore next */) {
       return Promise.reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
@@ -100,8 +107,12 @@ export class QueryModel<T> extends QueryModelBase<T> {
   /*
    * select each model using a callback
    */
-  async selectEach(sqldb: SqlDatabase, callback: (err: Error, model: T) => void, filter?: Filter<T>, params?: Object):
-      Promise<number> {
+  async selectEach(
+    sqldb: SqlDatabase,
+    callback: (err: Error, model: T) => void,
+    filter?: Filter<T>,
+    params?: Object,
+  ): Promise<number> {
     try {
       params = Object.assign({}, params);
       const select = await this.getSelectStatement(this.toSelectAllColumnsFilter(filter), params);
@@ -114,7 +125,6 @@ export class QueryModel<T> extends QueryModelBase<T> {
       return Promise.reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
     }
   }
-
 
   public async getWhereClause(filter: Filter<T>, params: Object): Promise<string> {
     if (!filter || !filter.where) {
@@ -134,7 +144,7 @@ export class QueryModel<T> extends QueryModelBase<T> {
     const tableAlias = filter.tableAlias ? filter.tableAlias : undefined;
     const tablePrefix = tableAlias && tableAlias.length ? `${tableAlias}.` : '';
 
-    let oper: QueryCondition<T>|QueryModelPredicates<T>;
+    let oper: QueryCondition<T> | QueryModelPredicates<T>;
     if (isModelPredicates(where)) {
       oper = new QueryModelPredicates<T>(where);
     } else {
@@ -166,7 +176,7 @@ export class QueryModel<T> extends QueryModelBase<T> {
     }
   }
 
-  protected getSelectColumns(filter?: Filter<T>): (keyof T)[]|undefined {
+  protected getSelectColumns(filter?: Filter<T>): (keyof T)[] | undefined {
     if (!filter || !filter.select) {
       return undefined;
     }

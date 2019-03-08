@@ -3,5 +3,5 @@ export enum PropertyType {
   BOOLEAN = 1,
   STRING,
   NUMBER,
-  DATE
+  DATE,
 }

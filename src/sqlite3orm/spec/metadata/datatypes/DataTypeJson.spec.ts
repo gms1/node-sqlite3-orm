@@ -1,5 +1,5 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-import {BaseDAO, field, id, schema, SQL_MEMORY_DB_PRIVATE, SqlDatabase, table} from '../../..';
+import { BaseDAO, field, id, schema, SQL_MEMORY_DB_PRIVATE, SqlDatabase, table } from '../../..';
 
 const DATATYPE_JSON_TABLE = 'DJ:DATATYPE_JSON';
 
@@ -8,21 +8,18 @@ interface JsonData {
   scores: number[];
 }
 
-
-@table({name: DATATYPE_JSON_TABLE, autoIncrement: true})
+@table({ name: DATATYPE_JSON_TABLE, autoIncrement: true })
 class DataTypeJson {
-  @id({name: 'id', dbtype: 'INTEGER NOT NULL'})
+  @id({ name: 'id', dbtype: 'INTEGER NOT NULL' })
   id: number;
 
-  @field({name: 'my_json_text', dbtype: 'TEXT', isJson: true})
+  @field({ name: 'my_json_text', dbtype: 'TEXT', isJson: true })
   myJsonData?: JsonData;
 
   constructor() {
     this.id = 0;
   }
 }
-
-
 
 describe('test Json data', () => {
   let sqldb: SqlDatabase;
@@ -44,7 +41,7 @@ describe('test Json data', () => {
     try {
       // write
       const model: DataTypeJson = new DataTypeJson();
-      model.myJsonData = {notes: 'hello', scores: [3, 5, 1]};
+      model.myJsonData = { notes: 'hello', scores: [3, 5, 1] };
       await dao.insert(model);
 
       // read
@@ -59,12 +56,10 @@ describe('test Json data', () => {
       expect(model2.myJsonData.scores[0]).toBe(model2.myJsonData.scores[0]);
       expect(model2.myJsonData.scores[1]).toBe(model2.myJsonData.scores[1]);
       expect(model2.myJsonData.scores[2]).toBe(model2.myJsonData.scores[2]);
-
     } catch (err) {
       fail(err);
     }
     done();
-
   });
 
   it('expect reading/writing Json properties from/to the database to succeed', async (done) => {
@@ -81,7 +76,5 @@ describe('test Json data', () => {
       fail(err);
     }
     done();
-
   });
-
 });

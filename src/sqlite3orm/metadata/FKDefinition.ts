@@ -18,8 +18,10 @@ export class FKDefinition {
 
   get id(): string {
     return FKDefinition.genericForeignKeyId(
-        this.fields.map((field) => field.name), this.foreignTableName,
-        this.fields.map((field) => field.foreignColumnName));
+      this.fields.map((field) => field.name),
+      this.foreignTableName,
+      this.fields.map((field) => field.foreignColumnName),
+    );
   }
 
   public constructor(name: string, foreignTableName: string) {

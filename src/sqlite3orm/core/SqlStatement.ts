@@ -1,6 +1,6 @@
 // import * as core from './core';
 
-import {Statement} from 'sqlite3';
+import { Statement } from 'sqlite3';
 
 export interface SqlRunResult {
   lastID: number;
@@ -83,7 +83,7 @@ export class SqlStatement {
           reject(err);
         } else {
           // tslint:disable-next-line: no-invalid-this
-          const res: SqlRunResult = {lastID: this.lastID, changes: this.changes};
+          const res: SqlRunResult = { lastID: this.lastID, changes: this.changes };
           resolve(res);
         }
       });

@@ -1,16 +1,15 @@
 // tslint:disable callable-types
 
-import {METADATA_MODEL_KEY, MetaModel, MetaProperty, Table} from '../metadata';
+import { METADATA_MODEL_KEY, MetaModel, MetaProperty, Table } from '../metadata';
 
 export const TABLEALIAS = 'T';
 
-
 export class QueryModelBase<T> {
-  readonly type: {new(): T};
+  readonly type: { new (): T };
   readonly metaModel: MetaModel;
   readonly table: Table;
 
-  constructor(type: {new(): T}) {
+  constructor(type: { new (): T }) {
     this.type = type;
     this.metaModel = Reflect.getMetadata(METADATA_MODEL_KEY, type.prototype);
     if (!this.metaModel) {
@@ -22,8 +21,6 @@ export class QueryModelBase<T> {
     }
   }
 
-
-
   /**
    * Get 'SELECT ALL'-statement
    *
@@ -34,7 +31,8 @@ export class QueryModelBase<T> {
     const tablePrefix = tableAlias.length ? `${tableAlias}.` : '';
     const props = this.getPropertiesFromKeys(keys);
     let stmt = 'SELECT\n';
-    stmt += `  ${tablePrefix}` + props.map((prop) => prop.field.quotedName).join(`,\n  ${tablePrefix}`);
+    stmt +=
+      `  ${tablePrefix}` + props.map((prop) => prop.field.quotedName).join(`,\n  ${tablePrefix}`);
     stmt += `\nFROM ${this.table.quotedName} ${tableAlias}\n`;
     return stmt;
   }
@@ -48,10 +46,10 @@ export class QueryModelBase<T> {
     const tablePrefix = tableAlias && tableAlias.length ? `${tableAlias}.` : '';
     let stmt = this.getSelectAllStatement(keys, tableAlias);
     stmt += 'WHERE\n';
-    stmt += `  ${tablePrefix}` + this.metaModel.qmCache.primaryKeyPredicates.join(` AND ${tablePrefix}`);
+    stmt +=
+      `  ${tablePrefix}` + this.metaModel.qmCache.primaryKeyPredicates.join(` AND ${tablePrefix}`);
     return stmt;
   }
-
 
   /**
    * Get 'UPDATE ALL' statement
@@ -68,10 +66,11 @@ export class QueryModelBase<T> {
     }
 
     let stmt = `UPDATE ${this.table.quotedName} SET\n  `;
-    stmt += props.map((prop) => `${prop.field.quotedName} = ${prop.getHostParameterName()}`).join(',\n  ');
+    stmt += props
+      .map((prop) => `${prop.field.quotedName} = ${prop.getHostParameterName()}`)
+      .join(',\n  ');
     return stmt;
   }
-
 
   /**
    * Get 'UPDATE BY PRIMARY KEY' statement
@@ -84,7 +83,6 @@ export class QueryModelBase<T> {
     stmt += this.metaModel.qmCache.primaryKeyPredicates.join(' AND ');
     return stmt;
   }
-
 
   /**
    * Get 'DELETE ALL'-statement
@@ -106,7 +104,6 @@ export class QueryModelBase<T> {
     stmt += this.metaModel.qmCache.primaryKeyPredicates.join(' AND ');
     return stmt;
   }
-
 
   /**
    * Get 'INSERT INTO'-statement
@@ -136,7 +133,7 @@ export class QueryModelBase<T> {
    * @param constraintName - The constraint name
    * @returns The partial where-clause
    */
-  public getForeignKeyPredicates(constraintName: string): string[]|undefined {
+  public getForeignKeyPredicates(constraintName: string): string[] | undefined {
     return this.metaModel.qmCache.foreignKeyPredicates.get(constraintName);
   }
 
@@ -146,10 +143,9 @@ export class QueryModelBase<T> {
    * @param constraintName - The constraint name
    * @returns The properties holding the foreign key
    */
-  public getForeignKeyProps(constraintName: string): MetaProperty[]|undefined {
+  public getForeignKeyProps(constraintName: string): MetaProperty[] | undefined {
     return this.metaModel.qmCache.foreignKeyProps.get(constraintName);
   }
-
 
   /**
    * Get the reference (parent) columns for a foreign key constraint
@@ -157,11 +153,9 @@ export class QueryModelBase<T> {
    * @param constraintName - The constraint name
    * @returns The referenced column names
    */
-  public getForeignKeyRefCols(constraintName: string): string[]|undefined {
+  public getForeignKeyRefCols(constraintName: string): string[] | undefined {
     return this.metaModel.qmCache.foreignKeyRefCols.get(constraintName);
   }
-
-
 
   public getPropertiesFromKeys(keys?: (keyof T)[], addIdentity?: boolean): MetaProperty[] {
     let props: MetaProperty[];
@@ -181,8 +175,11 @@ export class QueryModelBase<T> {
       /* istanbul ignore if */
       if (addIdentity) {
         // for later use
-        props.push(...this.metaModel.qmCache.primaryKeyProps.filter(
-            (prop: MetaProperty) => !addedMap.has(prop.key as keyof T)));
+        props.push(
+          ...this.metaModel.qmCache.primaryKeyProps.filter(
+            (prop: MetaProperty) => !addedMap.has(prop.key as keyof T),
+          ),
+        );
       }
     } else {
       props = Array.from(this.metaModel.properties.values());
@@ -190,7 +187,10 @@ export class QueryModelBase<T> {
     return props;
   }
 
-  public getPropertiesFromColumnNames(cols: string[], notFoundCols?: string[]): MetaProperty[]|undefined {
+  public getPropertiesFromColumnNames(
+    cols: string[],
+    notFoundCols?: string[],
+  ): MetaProperty[] | undefined {
     const resProps: MetaProperty[] = [];
     /* istanbul ignore if */
     if (!notFoundCols) {
@@ -238,14 +238,20 @@ export class QueryModelBase<T> {
   }
 
   public bindForeignParams<F extends Object>(
-      foreignQueryModel: QueryModelBase<F>, constraintName: string, foreignObject: F, more: Object = {}): Object {
+    foreignQueryModel: QueryModelBase<F>,
+    constraintName: string,
+    foreignObject: F,
+    more: Object = {},
+  ): Object {
     const hostParams: Object = Object.assign({}, more);
     const fkProps = this.getForeignKeyProps(constraintName);
     const refCols = this.getForeignKeyRefCols(constraintName);
 
     /* istanbul ignore if */
     if (!fkProps || !refCols || fkProps.length !== refCols.length) {
-      throw new Error(`bind information for '${constraintName}' in table '${this.table.name}' is incomplete`);
+      throw new Error(
+        `bind information for '${constraintName}' in table '${this.table.name}' is incomplete`,
+      );
     }
 
     const refNotFoundCols: string[] = [];
@@ -253,7 +259,9 @@ export class QueryModelBase<T> {
     /* istanbul ignore if */
     if (!refProps || refNotFoundCols.length) {
       const s = '"' + refNotFoundCols.join('", "') + '"';
-      throw new Error(`in '${foreignQueryModel.metaModel.name}': no property mapped to these fields: ${s}`);
+      throw new Error(
+        `in '${foreignQueryModel.metaModel.name}': no property mapped to these fields: ${s}`,
+      );
     }
 
     for (let i = 0; i < fkProps.length; ++i) {
@@ -264,9 +272,11 @@ export class QueryModelBase<T> {
     return hostParams;
   }
 
-
-
-  public bindAllInputParams(model: Partial<T>, subset?: (keyof T)[], addIdentity?: boolean): Object {
+  public bindAllInputParams(
+    model: Partial<T>,
+    subset?: (keyof T)[],
+    addIdentity?: boolean,
+  ): Object {
     const hostParams: Object = {};
     const props = this.getPropertiesFromKeys(subset as (keyof T)[], addIdentity);
     props.forEach((prop) => {
@@ -278,9 +288,11 @@ export class QueryModelBase<T> {
   public bindNonPrimaryKeyInputParams(model: Partial<T>, subset?: (keyof T)[]): Object {
     const hostParams: Object = {};
     const props = this.getPropertiesFromKeys(subset as (keyof T)[]);
-    props.filter((prop) => !prop.field.isIdentity).forEach((prop) => {
-      this.setHostParam(hostParams, prop, model);
-    });
+    props
+      .filter((prop) => !prop.field.isIdentity)
+      .forEach((prop) => {
+        this.setHostParam(hostParams, prop, model);
+      });
     return hostParams;
   }
 
@@ -292,7 +304,6 @@ export class QueryModelBase<T> {
     return hostParams;
   }
 
-
   private buildCache(): QueryModelCache {
     /* istanbul ignore if */
     if (!this.metaModel.properties.size) {
@@ -302,9 +313,9 @@ export class QueryModelBase<T> {
     // primary key predicates
     const props = Array.from(this.metaModel.properties.values());
     const primaryKeyProps = props.filter((prop) => prop.field.isIdentity);
-    const primaryKeyPredicates =
-        primaryKeyProps.map((prop) => `${prop.field.quotedName}=${prop.getHostParameterName()}`);
-
+    const primaryKeyPredicates = primaryKeyProps.map(
+      (prop) => `${prop.field.quotedName}=${prop.getHostParameterName()}`,
+    );
 
     // --------------------------------------------------------------
     // generate SELECT-fk condition
@@ -323,7 +334,9 @@ export class QueryModelBase<T> {
       });
       /* istanbul ignore else */
       if (fkProps.length === fkDef.fields.length) {
-        const selectCondition = fkProps.map((prop) => `${prop.field.quotedName}=${prop.getHostParameterName()}`);
+        const selectCondition = fkProps.map(
+          (prop) => `${prop.field.quotedName}=${prop.getHostParameterName()}`,
+        );
         // tslint:disable no-non-null-assertion
         foreignKeyPredicates.set(constraintName, selectCondition);
         foreignKeyProps.set(constraintName, fkProps);
@@ -331,10 +344,15 @@ export class QueryModelBase<T> {
         // tslint:enable no-non-null-assertion
       }
     });
-    return {primaryKeyProps, primaryKeyPredicates, foreignKeyPredicates, foreignKeyProps, foreignKeyRefCols};
+    return {
+      primaryKeyProps,
+      primaryKeyPredicates,
+      foreignKeyPredicates,
+      foreignKeyProps,
+      foreignKeyRefCols,
+    };
   }
 }
-
 
 export interface QueryModelCache {
   primaryKeyProps: MetaProperty[];

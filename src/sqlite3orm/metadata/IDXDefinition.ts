@@ -13,7 +13,10 @@ export class IDXDefinition {
 
   get id(): string {
     return IDXDefinition.genericIndexId(
-        this.name, this.fields.map((field) => field.desc ? `${field.name} DESC` : field.name), this.isUnique);
+      this.name,
+      this.fields.map((field) => (field.desc ? `${field.name} DESC` : field.name)),
+      this.isUnique,
+    );
   }
 
   constructor(name: string, isUnique?: boolean) {

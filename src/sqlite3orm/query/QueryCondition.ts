@@ -1,12 +1,12 @@
-import {MetaModel} from '../metadata';
+import { MetaModel } from '../metadata';
 
-import {QueryModelPredicates} from './QueryModelPredicates';
-import {QueryOperation} from './QueryOperation';
-import {Condition, isModelPredicates, LogicalOperatorType, ModelPredicates} from './Where';
+import { QueryModelPredicates } from './QueryModelPredicates';
+import { QueryOperation } from './QueryOperation';
+import { Condition, isModelPredicates, LogicalOperatorType, ModelPredicates } from './Where';
 
 export class QueryCondition<MT> implements QueryOperation {
   readonly op!: LogicalOperatorType;
-  readonly subOperations: (QueryCondition<MT>|QueryModelPredicates<MT>)[];
+  readonly subOperations: (QueryCondition<MT> | QueryModelPredicates<MT>)[];
   sql: string;
 
   constructor(cond: Condition<MT>) {
@@ -26,14 +26,14 @@ export class QueryCondition<MT> implements QueryOperation {
     if (this.op === 'sql') {
       this.sql = (cond as any)[key] as string;
     } else if (this.op === 'not') {
-      const value = (cond as any)[key] as Condition<MT>| ModelPredicates<MT>;
+      const value = (cond as any)[key] as Condition<MT> | ModelPredicates<MT>;
       if (isModelPredicates(value)) {
         this.subOperations.push(new QueryModelPredicates<MT>(value));
       } else {
         this.subOperations.push(new QueryCondition<MT>(value));
       }
     } else {
-      const value = (cond as any)[key] as (Condition<MT>| ModelPredicates<MT>)[];
+      const value = (cond as any)[key] as (Condition<MT> | ModelPredicates<MT>)[];
       value.forEach((item) => {
         if (isModelPredicates(item)) {
           this.subOperations.push(new QueryModelPredicates<MT>(item));

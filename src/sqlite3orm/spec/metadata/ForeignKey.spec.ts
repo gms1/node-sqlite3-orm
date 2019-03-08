@@ -9,7 +9,7 @@ import {
   schema,
   SQL_MEMORY_DB_PRIVATE,
   SqlDatabase,
-  table
+  table,
 } from '../..';
 
 const PREFIX = 'FK:';
@@ -30,18 +30,18 @@ const CHILD_IDX_NAMEQ = qualifiySchemaIdentifier(CHILD_IDX_NAME, 'main');
 const CHILD_FK_ID_NAME = 'FK PARENT ID';
 const CHILD_FK_REF_NAME = 'FK PARENT REF';
 
-@table({name: PARENT_TABLE_NAMEQ})
+@table({ name: PARENT_TABLE_NAMEQ })
 class Parent {
-  @id({name: PARENT_COL_ID1, dbtype: 'INTEGER NOT NULL'})
+  @id({ name: PARENT_COL_ID1, dbtype: 'INTEGER NOT NULL' })
   id1: number;
 
-  @id({name: PARENT_COL_ID2, dbtype: 'INTEGER NOT NULL'})
+  @id({ name: PARENT_COL_ID2, dbtype: 'INTEGER NOT NULL' })
   id2: number;
 
-  @field({name: PARENT_COL_REF, dbtype: 'TEXT'})
+  @field({ name: PARENT_COL_REF, dbtype: 'TEXT' })
   ref?: string;
 
-  @field({name: 'parent info', dbtype: 'TEXT'})
+  @field({ name: 'parent info', dbtype: 'TEXT' })
   parentInfo?: string;
 
   constructor() {
@@ -50,25 +50,26 @@ class Parent {
   }
 }
 
-@table({name: CHILD_TABLE_NAMEQ, withoutRowId: true})
+@table({ name: CHILD_TABLE_NAMEQ, withoutRowId: true })
 class Child {
-  @id({name: 'child id', dbtype: 'INTEGER NOT NULL'})
+  @id({ name: 'child id', dbtype: 'INTEGER NOT NULL' })
   id: number;
 
-  @field({name: 'child info', dbtype: 'TEXT'})
+  @field({ name: 'child info', dbtype: 'TEXT' })
   childInfo?: string;
 
   @fk(CHILD_FK_ID_NAME, PARENT_TABLE_NAME, PARENT_COL_ID1)
-  @field({name: 'child parent id1', dbtype: 'INTEGER'})
+  @field({ name: 'child parent id1', dbtype: 'INTEGER' })
   @index(CHILD_IDX_NAMEQ)
   parentId1?: number;
 
   @fk(CHILD_FK_ID_NAME, PARENT_TABLE_NAME, PARENT_COL_ID2)
-  @field({name: 'child parent id2', dbtype: 'INTEGER'})
+  @field({ name: 'child parent id2', dbtype: 'INTEGER' })
   @index(CHILD_IDX_NAMEQ)
   parentId2?: number;
 
-  @fk(CHILD_FK_REF_NAME, PARENT_TABLE_NAME, PARENT_COL_REF) @field({name: 'child parent ref', dbtype: 'TEXT'})
+  @fk(CHILD_FK_REF_NAME, PARENT_TABLE_NAME, PARENT_COL_REF)
+  @field({ name: 'child parent ref', dbtype: 'TEXT' })
   ref?: string;
 
   constructor() {
@@ -78,7 +79,6 @@ class Child {
 
 // NOTES: it seems sqlite3 does not support schema names for the referenced tabled in foreign key definitions
 //  e.g try to change 'PARENT_TABLE_NAME2' to 'PARENT_TABLE_NAME' in the @fk decorators above
-
 
 async function createSchema(sqldb: SqlDatabase): Promise<void> {
   // create all the tables if they do not exist:
@@ -92,7 +92,6 @@ async function dropSchema(sqldb: SqlDatabase): Promise<void> {
   await schema().dropTable(sqldb, CHILD_TABLE_NAME);
   await schema().dropTable(sqldb, PARENT_TABLE_NAME);
 }
-
 
 // ---------------------------------------------
 
@@ -111,7 +110,6 @@ describe('test Foreign Keys', () => {
 
       parentDAO = new BaseDAO(Parent, sqldb);
       childDAO = new BaseDAO(Child, sqldb);
-
     } catch (err) {
       fail(err);
     }
@@ -206,13 +204,9 @@ describe('test Foreign Keys', () => {
       expect(parent.id1).toBe(2);
       expect(parent.id2).toBe(1);
       expect(parent.parentInfo).toBe('2.1');
-
-
     } catch (err) {
       fail(err);
     }
     done();
   });
-
-
 });

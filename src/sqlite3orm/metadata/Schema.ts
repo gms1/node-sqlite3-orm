@@ -1,10 +1,10 @@
 // import * as core from './core';
 
-import {SqlDatabase} from '../core';
-import {qualifiySchemaIdentifier} from '../utils';
+import { SqlDatabase } from '../core';
+import { qualifiySchemaIdentifier } from '../utils';
 
-import {TableOpts} from './decorators';
-import {Table} from './Table';
+import { TableOpts } from './decorators';
+import { Table } from './Table';
 
 /**
  * A singleton holding the database schema definitions
@@ -22,11 +22,10 @@ export class Schema {
 
   private readonly mapNameToTable!: Map<string, Table>;
 
-
   private _dateInMilliSeconds?: boolean;
   get dateInMilliSeconds(): boolean {
     // tslint:disable-next-line triple-equals
-    return (this._dateInMilliSeconds == undefined) ? false : this._dateInMilliSeconds;
+    return this._dateInMilliSeconds == undefined ? false : this._dateInMilliSeconds;
   }
   set dateInMilliSeconds(val: boolean) {
     this._dateInMilliSeconds = val;
@@ -53,7 +52,7 @@ export class Schema {
    * @returns The table definition or undefined
    */
 
-  public hasTable(name: string): Table|undefined {
+  public hasTable(name: string): Table | undefined {
     return this.mapNameToTable.get(qualifiySchemaIdentifier(name));
   }
 
@@ -98,7 +97,11 @@ export class Schema {
       if (opts.withoutRowId != undefined) {
         // tslint:disable-next-line triple-equals
         if (table.isWithoutRowIdDefined && opts.withoutRowId != table.withoutRowId) {
-          throw new Error(`conflicting withoutRowId settings: new: ${opts.withoutRowId}, old ${table.withoutRowId}`);
+          throw new Error(
+            `conflicting withoutRowId settings: new: ${opts.withoutRowId}, old ${
+              table.withoutRowId
+            }`,
+          );
         }
         table.withoutRowId = opts.withoutRowId;
       }
@@ -106,7 +109,11 @@ export class Schema {
       if (opts.autoIncrement != undefined) {
         // tslint:disable-next-line triple-equals
         if (table.isAutoIncrementDefined && opts.autoIncrement != table.autoIncrement) {
-          throw new Error(`conflicting autoIncrement settings: new: ${opts.autoIncrement}, old ${table.autoIncrement}`);
+          throw new Error(
+            `conflicting autoIncrement settings: new: ${opts.autoIncrement}, old ${
+              table.autoIncrement
+            }`,
+          );
         }
         table.autoIncrement = opts.autoIncrement;
       }
@@ -114,7 +121,6 @@ export class Schema {
 
     return table;
   }
-
 
   /**
    * delete a table definition
@@ -166,7 +172,11 @@ export class Schema {
    * @param colName - The name of the column
    * @returns A promise
    */
-  public alterTableAddColumn(sqldb: SqlDatabase, tableName: string, colName: string): Promise<void> {
+  public alterTableAddColumn(
+    sqldb: SqlDatabase,
+    tableName: string,
+    colName: string,
+  ): Promise<void> {
     const table = this.getTable(tableName);
     return sqldb.exec(table.getAlterTableAddColumnStatement(colName));
   }
@@ -180,7 +190,12 @@ export class Schema {
    * @param [unique] - create unique index
    * @returns A promise
    */
-  public createIndex(sqldb: SqlDatabase, tableName: string, idxName: string, unique?: boolean): Promise<void> {
+  public createIndex(
+    sqldb: SqlDatabase,
+    tableName: string,
+    idxName: string,
+    unique?: boolean,
+  ): Promise<void> {
     const table = this.getTable(tableName);
     return sqldb.exec(table.getCreateIndexStatement(idxName, unique));
   }

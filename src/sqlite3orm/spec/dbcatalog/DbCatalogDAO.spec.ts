@@ -10,7 +10,7 @@ import {
   index,
   SQL_MEMORY_DB_PRIVATE,
   SqlDatabase,
-  table
+  table,
 } from '../..';
 
 const PREFIX = 'DC';
@@ -20,12 +20,12 @@ const PARENT_TABLEQ = `main.${PARENT_TABLE}`;
 const CHILD_TABLE = `${PREFIX}:CHILD TABLE`;
 const CHILD_TABLEQ = `main.${CHILD_TABLE}`;
 
-@table({name: PARENT_TABLEQ})
+@table({ name: PARENT_TABLEQ })
 class ParentTable {
-  @id({name: 'ID1', dbtype: 'INTEGER NOT NULL'})
+  @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
   id1: number;
 
-  @id({name: 'ID2', dbtype: 'INTEGER NOT NULL'})
+  @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
   id2: number;
 
   constructor() {
@@ -33,41 +33,50 @@ class ParentTable {
   }
 }
 
-@table({name: CHILD_TABLEQ, autoIncrement: true})
+@table({ name: CHILD_TABLEQ, autoIncrement: true })
 class ChildTable {
-  @field({name: 'PID2', dbtype: 'INTEGER'}) @fk('PARENT1', PARENT_TABLE, 'ID2') @index('PIDX1')
+  @field({ name: 'PID2', dbtype: 'INTEGER' })
+  @fk('PARENT1', PARENT_TABLE, 'ID2')
+  @index('PIDX1')
   pid2?: number;
 
-  @field({name: 'PID1', dbtype: 'INTEGER'}) @fk('PARENT1', PARENT_TABLE, 'ID1') @index('PIDX1')
+  @field({ name: 'PID1', dbtype: 'INTEGER' })
+  @fk('PARENT1', PARENT_TABLE, 'ID1')
+  @index('PIDX1')
   pid1?: number;
 
-  @id({name: 'ID', dbtype: 'INTEGER NOT NULL'})
+  @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
   id: number;
 
-  @field({name: 'PID3', dbtype: 'INTEGER'}) @fk('PARENT2', PARENT_TABLE, 'ID1') @index('PIDX2')
+  @field({ name: 'PID3', dbtype: 'INTEGER' })
+  @fk('PARENT2', PARENT_TABLE, 'ID1')
+  @index('PIDX2')
   pid3?: number;
 
-  @field({name: 'PID4', dbtype: 'INTEGER'}) @fk('PARENT2', PARENT_TABLE, 'ID2') @index('PIDX2', false, true)
+  @field({ name: 'PID4', dbtype: 'INTEGER' })
+  @fk('PARENT2', PARENT_TABLE, 'ID2')
+  @index('PIDX2', false, true)
   pid4?: number;
-
-
 
   constructor() {
     this.id = 0;
   }
 }
 
-@table({name: CHILD_TABLEQ})
+@table({ name: CHILD_TABLEQ })
 class ChildTableSubset {
-  @field({name: 'PID3', dbtype: 'INTEGER'}) @fk('PARENT2', PARENT_TABLE, 'ID1') @index('PIDX2')
+  @field({ name: 'PID3', dbtype: 'INTEGER' })
+  @fk('PARENT2', PARENT_TABLE, 'ID1')
+  @index('PIDX2')
   pid3?: number;
 
-  @field({name: 'PID4', dbtype: 'INTEGER'}) @fk('PARENT2', PARENT_TABLE, 'ID2') @index('PIDX2', false, true)
+  @field({ name: 'PID4', dbtype: 'INTEGER' })
+  @fk('PARENT2', PARENT_TABLE, 'ID2')
+  @index('PIDX2', false, true)
   pid4?: number;
 
   constructor() {}
 }
-
 
 // ---------------------------------------------
 
@@ -76,7 +85,6 @@ describe('test DbTableInfo.discover', () => {
   let parentDao: BaseDAO<ParentTable>;
   let childDao: BaseDAO<ChildTable>;
   let dbCatDao: DbCatalogDAO;
-
 
   // ---------------------------------------------
   beforeEach(async (done) => {
@@ -92,7 +100,6 @@ describe('test DbTableInfo.discover', () => {
       await childDao.createTable();
       await childDao.createIndex('PIDX1');
       await childDao.createIndex('PIDX2');
-
     } catch (err) {
       fail(err);
     }
@@ -127,7 +134,6 @@ describe('test DbTableInfo.discover', () => {
 
       const invalidInfo = await dbCatDao.readTableInfo('NOT EXISTING TABLE');
       expect(invalidInfo).toBeUndefined(`not existing table info`);
-
     } catch (err) {
       fail(err);
     }
@@ -212,30 +218,77 @@ describe('test DbTableInfo.discover', () => {
 
       expect(Object.keys(childInfo!.foreignKeys).length).toBe(2, 'childinfo: fk');
 
-      const fkName1 = FKDefinition.genericForeignKeyId(['PID2', 'PID1'], PARENT_TABLE, ['ID2', 'ID1']);
+      const fkName1 = FKDefinition.genericForeignKeyId(['PID2', 'PID1'], PARENT_TABLE, [
+        'ID2',
+        'ID1',
+      ]);
       expect(childInfo!.foreignKeys[fkName1]).toBeDefined(`childinfo: fk ${fkName1}`);
-      expect(childInfo!.foreignKeys[fkName1].refTable).toBe(PARENT_TABLE, `childinfo: fk ${fkName1}`);
+      expect(childInfo!.foreignKeys[fkName1].refTable).toBe(
+        PARENT_TABLE,
+        `childinfo: fk ${fkName1}`,
+      );
 
-      expect(childInfo!.foreignKeys[fkName1].columns.length).toBe(2, `childinfo: fk ${fkName1} columns`);
-      expect(childInfo!.foreignKeys[fkName1].columns[0]).toBe('PID2', `childinfo: fk ${fkName1} columns`);
-      expect(childInfo!.foreignKeys[fkName1].columns[1]).toBe('PID1', `childinfo: fk ${fkName1} columns`);
+      expect(childInfo!.foreignKeys[fkName1].columns.length).toBe(
+        2,
+        `childinfo: fk ${fkName1} columns`,
+      );
+      expect(childInfo!.foreignKeys[fkName1].columns[0]).toBe(
+        'PID2',
+        `childinfo: fk ${fkName1} columns`,
+      );
+      expect(childInfo!.foreignKeys[fkName1].columns[1]).toBe(
+        'PID1',
+        `childinfo: fk ${fkName1} columns`,
+      );
 
-      expect(childInfo!.foreignKeys[fkName1].refColumns.length).toBe(2, `childinfo: fk ${fkName1} refColumns`);
-      expect(childInfo!.foreignKeys[fkName1].refColumns[0]).toBe('ID2', `childinfo: fk ${fkName1} refColumns`);
-      expect(childInfo!.foreignKeys[fkName1].refColumns[1]).toBe('ID1', `childinfo: fk ${fkName1} refColumns`);
+      expect(childInfo!.foreignKeys[fkName1].refColumns.length).toBe(
+        2,
+        `childinfo: fk ${fkName1} refColumns`,
+      );
+      expect(childInfo!.foreignKeys[fkName1].refColumns[0]).toBe(
+        'ID2',
+        `childinfo: fk ${fkName1} refColumns`,
+      );
+      expect(childInfo!.foreignKeys[fkName1].refColumns[1]).toBe(
+        'ID1',
+        `childinfo: fk ${fkName1} refColumns`,
+      );
 
-      const fkName2 = FKDefinition.genericForeignKeyId(['PID3', 'PID4'], PARENT_TABLE, ['ID1', 'ID2']);
+      const fkName2 = FKDefinition.genericForeignKeyId(['PID3', 'PID4'], PARENT_TABLE, [
+        'ID1',
+        'ID2',
+      ]);
       expect(childInfo!.foreignKeys[fkName2]).toBeDefined(`childinfo: fk ${fkName2}`);
-      expect(childInfo!.foreignKeys[fkName2].refTable).toBe(PARENT_TABLE, `childinfo: fk ${fkName2}`);
+      expect(childInfo!.foreignKeys[fkName2].refTable).toBe(
+        PARENT_TABLE,
+        `childinfo: fk ${fkName2}`,
+      );
 
-      expect(childInfo!.foreignKeys[fkName2].columns.length).toBe(2, `childinfo: fk ${fkName2} columns`);
-      expect(childInfo!.foreignKeys[fkName2].columns[0]).toBe('PID3', `childinfo: fk ${fkName2} columns`);
-      expect(childInfo!.foreignKeys[fkName2].columns[1]).toBe('PID4', `childinfo: fk ${fkName2} columns`);
+      expect(childInfo!.foreignKeys[fkName2].columns.length).toBe(
+        2,
+        `childinfo: fk ${fkName2} columns`,
+      );
+      expect(childInfo!.foreignKeys[fkName2].columns[0]).toBe(
+        'PID3',
+        `childinfo: fk ${fkName2} columns`,
+      );
+      expect(childInfo!.foreignKeys[fkName2].columns[1]).toBe(
+        'PID4',
+        `childinfo: fk ${fkName2} columns`,
+      );
 
-      expect(childInfo!.foreignKeys[fkName2].refColumns.length).toBe(2, `childinfo: fk ${fkName2} refColumns`);
-      expect(childInfo!.foreignKeys[fkName2].refColumns[0]).toBe('ID1', `childinfo: fk ${fkName2} refColumns`);
-      expect(childInfo!.foreignKeys[fkName2].refColumns[1]).toBe('ID2', `childinfo: fk ${fkName2} refColumns`);
-
+      expect(childInfo!.foreignKeys[fkName2].refColumns.length).toBe(
+        2,
+        `childinfo: fk ${fkName2} refColumns`,
+      );
+      expect(childInfo!.foreignKeys[fkName2].refColumns[0]).toBe(
+        'ID1',
+        `childinfo: fk ${fkName2} refColumns`,
+      );
+      expect(childInfo!.foreignKeys[fkName2].refColumns[1]).toBe(
+        'ID2',
+        `childinfo: fk ${fkName2} refColumns`,
+      );
     } catch (err) {
       fail(err);
     }
@@ -243,15 +296,12 @@ describe('test DbTableInfo.discover', () => {
   });
 
   // ---------------------------------------------
-  it('expect type affinity for \'BLOB\' to be \'BLOB\'', () => {
-
+  it("expect type affinity for 'BLOB' to be 'BLOB'", () => {
     expect(DbCatalogDAO.getTypeAffinity('BLOB')).toBe('BLOB');
   });
 
   // ---------------------------------------------
-  it('expect type affinity for \'FOO\' to be \'NUMERIC\' (default)', () => {
-
+  it("expect type affinity for 'FOO' to be 'NUMERIC' (default)", () => {
     expect(DbCatalogDAO.getTypeAffinity('FOO')).toBe('NUMERIC');
   });
-
 });

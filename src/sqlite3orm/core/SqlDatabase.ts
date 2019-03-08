@@ -2,10 +2,17 @@
 
 // tslint:disable-next-line no-require-imports
 import * as _dbg from 'debug';
-import {Database, OPEN_CREATE, OPEN_READONLY, OPEN_READWRITE, Statement, verbose as sqlverbose} from 'sqlite3';
+import {
+  Database,
+  OPEN_CREATE,
+  OPEN_READONLY,
+  OPEN_READWRITE,
+  Statement,
+  verbose as sqlverbose,
+} from 'sqlite3';
 
-import {SqlDatabaseSettings} from './SqlDatabaseSettings';
-import {SqlRunResult, SqlStatement} from './SqlStatement';
+import { SqlDatabaseSettings } from './SqlDatabaseSettings';
+import { SqlRunResult, SqlStatement } from './SqlStatement';
 
 export const SQL_OPEN_READONLY = OPEN_READONLY;
 export const SQL_OPEN_READWRITE = OPEN_READWRITE;
@@ -60,26 +67,31 @@ export class SqlDatabase {
    * SQL_OPEN_READONLY | SQL_OPEN_READWRITE
    * @returns A promise
    */
-  public async open(databaseFile: string, mode?: number, settings?: SqlDatabaseSettings): Promise<void> {
+  public async open(
+    databaseFile: string,
+    mode?: number,
+    settings?: SqlDatabaseSettings,
+  ): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-             const db = new Database(databaseFile, mode || SQL_OPEN_DEFAULT, (err) => {
-               if (err) {
-                 debug(`opening connection to ${databaseFile} failed: ${err.message}`);
-                 reject(err);
-               } else {
-                 this.db = db;
-                 this.dbId = SqlDatabase.lastId++;
-                 debug(`${this.dbId}: opened`);
-                 resolve();
-               }
-             });
-           })
-        .then((): Promise<void> => {
-          if (settings) {
-            return this.applySettings(settings);
-          }
-          return Promise.resolve();
-        });
+      const db = new Database(databaseFile, mode || SQL_OPEN_DEFAULT, (err) => {
+        if (err) {
+          debug(`opening connection to ${databaseFile} failed: ${err.message}`);
+          reject(err);
+        } else {
+          this.db = db;
+          this.dbId = SqlDatabase.lastId++;
+          debug(`${this.dbId}: opened`);
+          resolve();
+        }
+      });
+    }).then(
+      (): Promise<void> => {
+        if (settings) {
+          return this.applySettings(settings);
+        }
+        return Promise.resolve();
+      },
+    );
   }
 
   /**
@@ -143,12 +155,15 @@ export class SqlDatabase {
         // do not use arrow function for this callback
         // the below 'this' should not reference our self
         if (err) {
-          debug(`${self.dbId}: failed sql: ${err.message}
-${sql}\nparams: `, params);
+          debug(
+            `${self.dbId}: failed sql: ${err.message}
+${sql}\nparams: `,
+            params,
+          );
           reject(err);
         } else {
           // tslint:disable-next-line: no-invalid-this
-          const res: SqlRunResult = {lastID: this.lastID, changes: this.changes};
+          const res: SqlRunResult = { lastID: this.lastID, changes: this.changes };
           resolve(res);
         }
       });
@@ -227,7 +242,11 @@ ${sql}`);
    * @param [callback] - The callback function
    * @returns A promise
    */
-  public each(sql: string, params?: any, callback?: (err: Error, row: any) => void): Promise<number> {
+  public each(
+    sql: string,
+    params?: any,
+    callback?: (err: Error, row: any) => void,
+  ): Promise<number> {
     return new Promise<number>((resolve, reject) => {
       /* istanbul ignore if */
       if (!this.db) {
@@ -340,9 +359,9 @@ ${sql}`);
    */
   public transactionalize<T>(callback: () => Promise<T>): Promise<T> {
     return this.run('BEGIN IMMEDIATE TRANSACTION')
-        .then(callback)
-        .then((res) => this.run('COMMIT TRANSACTION').then(() => Promise.resolve(res)))
-        .catch((err) => this.run('ROLLBACK TRANSACTION').then(() => Promise.reject(err)));
+      .then(callback)
+      .then((res) => this.run('COMMIT TRANSACTION').then(() => Promise.resolve(res)))
+      .catch((err) => this.run('ROLLBACK TRANSACTION').then(() => Promise.reject(err)));
   }
 
   // tslint:disable unified-signatures
@@ -445,7 +464,11 @@ ${sql}`);
       }
       /* istanbul ignore else */
       if (settings.ignoreCheckConstraints) {
-        this._addPragmaSetting(promises, 'ignore_check_constraints', settings.ignoreCheckConstraints);
+        this._addPragmaSetting(
+          promises,
+          'ignore_check_constraints',
+          settings.ignoreCheckConstraints,
+        );
       }
       /* istanbul ignore else */
       if (settings.queryOnly) {
@@ -472,7 +495,9 @@ ${sql}`);
             this.parallelize();
             break;
           default:
-            throw new Error(`failed to read executionMode setting: ${settings.executionMode.toString()}`);
+            throw new Error(
+              `failed to read executionMode setting: ${settings.executionMode.toString()}`,
+            );
         }
       } else {
         this.parallelize();
@@ -486,7 +511,11 @@ ${sql}`);
     return Promise.resolve();
   }
 
-  protected _addPragmaSettings(promises: Promise<void>[], pragma: string, setting: string|string[]): void {
+  protected _addPragmaSettings(
+    promises: Promise<void>[],
+    pragma: string,
+    setting: string | string[],
+  ): void {
     if (Array.isArray(setting)) {
       setting.forEach((val) => {
         this._addPragmaSetting(promises, pragma, val);
@@ -496,7 +525,11 @@ ${sql}`);
     }
   }
 
-  protected _addPragmaSetting(promises: Promise<void>[], pragma: string, setting: string|number): void {
+  protected _addPragmaSetting(
+    promises: Promise<void>[],
+    pragma: string,
+    setting: string | number,
+  ): void {
     if (typeof setting === 'number') {
       promises.push(this.exec(`PRAGMA ${pragma} = ${setting}`));
       return;

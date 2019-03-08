@@ -1,5 +1,11 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-import {SQL_MEMORY_DB_PRIVATE, SQL_OPEN_DEFAULT, SQL_OPEN_READWRITE, SqlDatabase, SqlDatabaseSettings} from '../..';
+import {
+  SQL_MEMORY_DB_PRIVATE,
+  SQL_OPEN_DEFAULT,
+  SQL_OPEN_READWRITE,
+  SqlDatabase,
+  SqlDatabaseSettings,
+} from '../..';
 
 // ---------------------------------------------
 
@@ -11,8 +17,13 @@ describe('test SqlDatabase', () => {
     try {
       sqldb = new SqlDatabase();
       await sqldb.open(SQL_MEMORY_DB_PRIVATE);
-      await sqldb.exec('CREATE TABLE TEST (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, col VARCHAR(50))');
-      await sqldb.run('INSERT INTO TEST (id, col) values (:a, :b)', {':a': 0, ':b': 'testvalue 0'});
+      await sqldb.exec(
+        'CREATE TABLE TEST (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, col VARCHAR(50))',
+      );
+      await sqldb.run('INSERT INTO TEST (id, col) values (:a, :b)', {
+        ':a': 0,
+        ':b': 'testvalue 0',
+      });
     } catch (err) {
       fail(err);
     }
@@ -33,14 +44,14 @@ describe('test SqlDatabase', () => {
   it('expect basic dmls to succeed', async (done) => {
     try {
       // insert id=1 should work
-      let res = await sqldb.run('INSERT INTO TEST (id,col) values (1,\'testvalue 1/1\')');
+      let res = await sqldb.run("INSERT INTO TEST (id,col) values (1,'testvalue 1/1')");
       expect(res.lastID).toBe(1);
-      let row = await sqldb.get('SELECT col FROM TEST WHERE id=:id', {':id': 1});
+      let row = await sqldb.get('SELECT col FROM TEST WHERE id=:id', { ':id': 1 });
       expect(row.col).toBe('testvalue 1/1');
 
       // insert id=1 should fail
       try {
-        await sqldb.run('INSERT INTO TEST (id,col) values (1,\'testvalue 1/2\')');
+        await sqldb.run("INSERT INTO TEST (id,col) values (1,'testvalue 1/2')");
         fail();
       } catch (err) {
         // tslint:disable-next-line: restrict-plus-operands
@@ -51,7 +62,7 @@ describe('test SqlDatabase', () => {
     }
     // insert without id should work
     try {
-      let res = await sqldb.run('INSERT INTO TEST (col) values (\'testvalue 2\')');
+      let res = await sqldb.run("INSERT INTO TEST (col) values ('testvalue 2')");
       expect(res.lastID).toBe(2);
     } catch (err) {
       fail(err);
@@ -84,7 +95,7 @@ describe('test SqlDatabase', () => {
     try {
       // prepared update should work
       let stmt = await sqldb.prepare('UPDATE TEST set col = $col WHERE ID=$id');
-      let res = await stmt.run({$id: 1, $col: 'testvalue 1/3'});
+      let res = await stmt.run({ $id: 1, $col: 'testvalue 1/3' });
       expect(res.changes).toBe(1);
       await stmt.finalize();
       let row = await sqldb.get('SELECT col FROM TEST WHERE id=?', 1);
@@ -96,26 +107,28 @@ describe('test SqlDatabase', () => {
     try {
       let res2: any[] = [];
       // select using parameter should work
-      let count = await sqldb.each('SELECT id, col FROM TEST WHERE id >= ? order by id', [0], (err, row) => {
-        if (err) {
-          err.message = 'error row: ' + err.message;
-          fail(err);
-        } else {
-          res2.push(row);
-        }
-      });
+      let count = await sqldb.each(
+        'SELECT id, col FROM TEST WHERE id >= ? order by id',
+        [0],
+        (err, row) => {
+          if (err) {
+            err.message = 'error row: ' + err.message;
+            fail(err);
+          } else {
+            res2.push(row);
+          }
+        },
+      );
       expect(count).toBeGreaterThan(1);
       expect(res2[0].id).toBe(0);
       expect(res2[0].col).toBe('testvalue 0');
       expect(res2[1].id).toBe(1);
       expect(res2[1].col).toBe('testvalue 1/3');
-
     } catch (err) {
       fail(err);
     }
     done();
   });
-
 
   // ---------------------------------------------
   it('expect transaction to commit on end', async (done) => {
@@ -181,30 +194,27 @@ describe('test SqlDatabase', () => {
   it('expect closed database to throw on exec', async (done) => {
     try {
       await sqldb.close();
-      await sqldb.exec('INSERT INTO TEST (col) values (\'testvalue 3\')');
+      await sqldb.exec("INSERT INTO TEST (col) values ('testvalue 3')");
       fail('closed database should throw on exec');
-    } catch (err) {
-    }
+    } catch (err) {}
     done();
   });
   // ---------------------------------------------
   it('expect closed database to throw on prepare', async (done) => {
     try {
       await sqldb.close();
-      await sqldb.prepare('INSERT INTO TEST (col) values (\'testvalue 3\')');
+      await sqldb.prepare("INSERT INTO TEST (col) values ('testvalue 3')");
       fail('closed database should throw on prepare');
-    } catch (err) {
-    }
+    } catch (err) {}
     done();
   });
   // ---------------------------------------------
   it('expect closed database to throw on run', async (done) => {
     try {
       await sqldb.close();
-      await sqldb.run('INSERT INTO TEST (col) values (\'testvalue 3\')');
+      await sqldb.run("INSERT INTO TEST (col) values ('testvalue 3')");
       fail('closed database should throw on run');
-    } catch (err) {
-    }
+    } catch (err) {}
     done();
   });
   // ---------------------------------------------
@@ -213,8 +223,7 @@ describe('test SqlDatabase', () => {
       await sqldb.close();
       await sqldb.get('SELECT col from TEST');
       fail('closed database should throw on get');
-    } catch (err) {
-    }
+    } catch (err) {}
     done();
   });
   // ---------------------------------------------
@@ -223,8 +232,7 @@ describe('test SqlDatabase', () => {
       await sqldb.close();
       await sqldb.all('SELECT col from TEST');
       fail('closed database should throw on all');
-    } catch (err) {
-    }
+    } catch (err) {}
     done();
   });
   // ---------------------------------------------
@@ -233,8 +241,7 @@ describe('test SqlDatabase', () => {
       await sqldb.close();
       await sqldb.each('SELECT col from TEST', () => {});
       fail('closed database should throw on each');
-    } catch (err) {
-    }
+    } catch (err) {}
     done();
   });
 
@@ -244,8 +251,7 @@ describe('test SqlDatabase', () => {
       await sqldb.close();
       sqldb.on('error', () => {});
       fail('closed database should throw on adding event listener');
-    } catch (err) {
-    }
+    } catch (err) {}
     done();
   });
 
@@ -253,10 +259,9 @@ describe('test SqlDatabase', () => {
   it('expect insert into not existing table to throw', async (done) => {
     try {
       SqlDatabase.verbose();
-      await sqldb.exec('INSERT INTO NOTEXIST (col) values (\'testvalue 3\')');
+      await sqldb.exec("INSERT INTO NOTEXIST (col) values ('testvalue 3')");
       fail('insert into not existing table should throw');
-    } catch (err) {
-    }
+    } catch (err) {}
     done();
   });
 
@@ -266,8 +271,7 @@ describe('test SqlDatabase', () => {
       SqlDatabase.verbose();
       await sqldb.get('SELECT id from NOTEXIST');
       fail('get from not existing table should throw');
-    } catch (err) {
-    }
+    } catch (err) {}
     done();
   });
 
@@ -277,8 +281,7 @@ describe('test SqlDatabase', () => {
       SqlDatabase.verbose();
       await sqldb.prepare('SELECT id from NOTEXIST');
       fail('prepare from not existing table should throw');
-    } catch (err) {
-    }
+    } catch (err) {}
     done();
   });
 
@@ -292,9 +295,7 @@ describe('test SqlDatabase', () => {
     }
     done();
   });
-
 });
-
 
 describe('test SqlDatabase Settings', () => {
   // ---------------------------------------------
@@ -311,7 +312,7 @@ describe('test SqlDatabase Settings', () => {
         readUncommitted: 'TRUE',
         recursiveTriggers: 'TRUE',
         secureDelete: ['FAST', 'temp.TRUE'],
-        executionMode: 'PARALLELIZE'
+        executionMode: 'PARALLELIZE',
       };
       const sqldb = new SqlDatabase();
       await sqldb.open(SQL_MEMORY_DB_PRIVATE, SQL_OPEN_DEFAULT, settings);
@@ -328,31 +329,27 @@ describe('test SqlDatabase Settings', () => {
       const sqldb = new SqlDatabase();
       await sqldb.open('::/.', SQL_OPEN_READWRITE);
       fail(`should not succeed`);
-    } catch (err) {
-    }
+    } catch (err) {}
     done();
   });
 
-
   it('should fail to open using wrong setting (schema having dot)', async (done) => {
     try {
-      const settings: SqlDatabaseSettings = {synchronous: ['NOTEXIST.YYY.FULL']};
+      const settings: SqlDatabaseSettings = { synchronous: ['NOTEXIST.YYY.FULL'] };
       const sqldb = new SqlDatabase();
       await sqldb.open(SQL_MEMORY_DB_PRIVATE, SQL_OPEN_DEFAULT, settings);
       fail(`should not succeed`);
-    } catch (err) {
-    }
+    } catch (err) {}
     done();
   });
 
   it('should fail to open using wrong setting (empty)', async (done) => {
     try {
-      const settings: SqlDatabaseSettings = {synchronous: ['']};
+      const settings: SqlDatabaseSettings = { synchronous: [''] };
       const sqldb = new SqlDatabase();
       await sqldb.open(SQL_MEMORY_DB_PRIVATE, SQL_OPEN_DEFAULT, settings);
       fail(`should not succeed`);
-    } catch (err) {
-    }
+    } catch (err) {}
     done();
   });
 
@@ -369,21 +366,19 @@ describe('test SqlDatabase Settings', () => {
         readUncommitted: 'TRUE',
         recursiveTriggers: 'TRUE',
         secureDelete: ['FAST', 'temp.TRUE'],
-        executionMode: 'NOTEXIST'
+        executionMode: 'NOTEXIST',
       };
       const sqldb = new SqlDatabase();
       await sqldb.open(SQL_MEMORY_DB_PRIVATE, SQL_OPEN_DEFAULT, settings);
       fail(`should not succeed`);
-    } catch (err) {
-    }
+    } catch (err) {}
     done();
   });
 
   it('should succeed to open serialized', async (done) => {
     try {
       const settings: SqlDatabaseSettings = {
-
-        executionMode: 'SERIALIZE'
+        executionMode: 'SERIALIZE',
       };
       const sqldb = new SqlDatabase();
       await sqldb.open(SQL_MEMORY_DB_PRIVATE, SQL_OPEN_DEFAULT, settings);
@@ -394,5 +389,4 @@ describe('test SqlDatabase Settings', () => {
     }
     done();
   });
-
 });

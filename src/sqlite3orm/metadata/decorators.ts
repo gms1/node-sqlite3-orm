@@ -2,8 +2,8 @@
 import 'reflect-metadata';
 // import * as core from './core';
 
-import {MetaModel, KeyType} from './MetaModel';
-import {ValueTransformer} from './ValueTransformer';
+import { MetaModel, KeyType } from './MetaModel';
+import { ValueTransformer } from './ValueTransformer';
 
 export const METADATA_MODEL_KEY = 'sqlite3orm:model';
 
@@ -31,7 +31,6 @@ export interface TableOpts {
    */
   autoIncrement?: boolean;
 }
-
 
 /**
  * Options for the property decorators '@field' and '@id'
@@ -65,7 +64,6 @@ export interface FieldOpts {
   transform?: ValueTransformer;
 }
 
-
 /**
  * Get the model metadata
  *
@@ -78,7 +76,6 @@ export function getModelMetadata(target: Function): MetaModel {
   }
   return Reflect.getMetadata(METADATA_MODEL_KEY, target.prototype);
 }
-
 
 /**
  * Helper function for decorating a class and map it to a database table
@@ -101,10 +98,17 @@ function decorateTableClass(target: Function, opts: TableOpts): void {
  * primary key
  * @returns The field class instance
  */
-function decorateFieldProperty(target: Object|Function, key: KeyType, opts: FieldOpts, isIdentity: boolean): void {
+function decorateFieldProperty(
+  target: Object | Function,
+  key: KeyType,
+  opts: FieldOpts,
+  isIdentity: boolean,
+): void {
   if (typeof target === 'function') {
     // not decorating static property
-    throw new Error(`decorating static property '${key.toString()}' using field-decorator is not supported`);
+    throw new Error(
+      `decorating static property '${key.toString()}' using field-decorator is not supported`,
+    );
   }
 
   const metaModel = getModelMetadata(target.constructor);
@@ -117,7 +121,6 @@ function decorateFieldProperty(target: Object|Function, key: KeyType, opts: Fiel
   metaModel.setPropertyField(key, isIdentity, opts);
 }
 
-
 /**
  * Helper function for decorating a property and map it to a foreign key field
  *
@@ -129,11 +132,17 @@ function decorateFieldProperty(target: Object|Function, key: KeyType, opts: Fiel
  * @returns - The field class instance
  */
 function decorateForeignKeyProperty(
-    target: Object|Function, key: KeyType, constraintName: string, foreignTableName: string,
-    foreignTableField: string): void {
+  target: Object | Function,
+  key: KeyType,
+  constraintName: string,
+  foreignTableName: string,
+  foreignTableField: string,
+): void {
   if (typeof target === 'function') {
     // not decorating static property
-    throw new Error(`decorating static property '${key.toString()}' using fk-decorator is not supported`);
+    throw new Error(
+      `decorating static property '${key.toString()}' using fk-decorator is not supported`,
+    );
   }
 
   const metaModel = getModelMetadata(target.constructor);
@@ -151,10 +160,17 @@ function decorateForeignKeyProperty(
  * @returns The field class instance
  */
 function decorateIndexProperty(
-    target: Object|Function, key: KeyType, indexName: string, isUnique?: boolean, desc?: boolean): void {
+  target: Object | Function,
+  key: KeyType,
+  indexName: string,
+  isUnique?: boolean,
+  desc?: boolean,
+): void {
   if (typeof target === 'function') {
     // not decorating static property
-    throw new Error(`decorating static property '${key.toString()}' using index-decorator is not supported`);
+    throw new Error(
+      `decorating static property '${key.toString()}' using index-decorator is not supported`,
+    );
   }
 
   const metaModel = getModelMetadata(target.constructor);
@@ -172,7 +188,7 @@ function decorateIndexProperty(
  * @returns The decorator function
  */
 export function table(opts: TableOpts = {}): (target: Function) => void {
-  return ((target: Function) => decorateTableClass(target, opts));
+  return (target: Function) => decorateTableClass(target, opts);
 }
 
 /**
@@ -184,9 +200,9 @@ export function table(opts: TableOpts = {}): (target: Function) => void {
  * @returns The decorator function
  */
 export function field(opts: FieldOpts = {}): (target: Object, key: KeyType) => void {
-  return ((target: Object, key: KeyType) => {
+  return (target: Object, key: KeyType) => {
     decorateFieldProperty(target, key, opts, false);
-  });
+  };
 }
 
 /**
@@ -198,9 +214,9 @@ export function field(opts: FieldOpts = {}): (target: Object, key: KeyType) => v
  * @returns The decorator function
  */
 export function id(opts: FieldOpts = {}): (target: Object, key: KeyType) => void {
-  return ((target: Object, key: KeyType) => {
+  return (target: Object, key: KeyType) => {
     decorateFieldProperty(target, key, opts, true);
-  });
+  };
 }
 
 /**
@@ -213,11 +229,14 @@ export function id(opts: FieldOpts = {}): (target: Object, key: KeyType) => void
  * @param foreignTableField - The referenced table field
  * @returns The decorator function
  */
-export function fk(constraintName: string, foreignTableName: string, foreignTableField: string): (
-    target: Object, key: KeyType) => void {
-  return ((target: Object, key: KeyType) => {
+export function fk(
+  constraintName: string,
+  foreignTableName: string,
+  foreignTableField: string,
+): (target: Object, key: KeyType) => void {
+  return (target: Object, key: KeyType) => {
     decorateForeignKeyProperty(target, key, constraintName, foreignTableName, foreignTableField);
-  });
+  };
 }
 
 /**
@@ -229,8 +248,12 @@ export function fk(constraintName: string, foreignTableName: string, foreignTabl
  * @param [desc] - descending order for this column
  * @returns The decorator function
  */
-export function index(indexName: string, isUnique?: boolean, desc?: boolean): (target: Object, key: KeyType) => void {
-  return ((target: Object, key: KeyType) => {
+export function index(
+  indexName: string,
+  isUnique?: boolean,
+  desc?: boolean,
+): (target: Object, key: KeyType) => void {
+  return (target: Object, key: KeyType) => {
     decorateIndexProperty(target, key, indexName, isUnique, desc);
-  });
+  };
 }

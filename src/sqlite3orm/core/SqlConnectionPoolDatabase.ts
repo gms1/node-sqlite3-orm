@@ -1,10 +1,10 @@
 // tslint:disable-next-line no-require-imports
 import * as _dbg from 'debug';
-import {Database} from 'sqlite3';
+import { Database } from 'sqlite3';
 
-import {SqlConnectionPool} from './SqlConnectionPool';
-import {SQL_OPEN_DEFAULT, SqlDatabase} from './SqlDatabase';
-import {SqlDatabaseSettings} from './SqlDatabaseSettings';
+import { SqlConnectionPool } from './SqlConnectionPool';
+import { SQL_OPEN_DEFAULT, SqlDatabase } from './SqlDatabase';
+import { SqlDatabaseSettings } from './SqlDatabaseSettings';
 
 const debug = _dbg('sqlite3orm:database');
 
@@ -19,7 +19,11 @@ export class SqlConnectionPoolDatabase extends SqlDatabase {
     }
   }
 
-  public async open(databaseFile: string, mode?: number, settings?: SqlDatabaseSettings): Promise<void> {
+  public async open(
+    databaseFile: string,
+    mode?: number,
+    settings?: SqlDatabaseSettings,
+  ): Promise<void> {
     /* istanbul ignore else */
     if (this.isOpen()) {
       /* istanbul ignore else */
@@ -39,31 +43,35 @@ export class SqlConnectionPoolDatabase extends SqlDatabase {
     return super.open(databaseFile, mode, settings);
   }
 
-
   /*
   @internal
   */
-  public openByPool(pool: SqlConnectionPool, databaseFile: string, mode?: number, settings?: SqlDatabaseSettings):
-      Promise<void> {
+  public openByPool(
+    pool: SqlConnectionPool,
+    databaseFile: string,
+    mode?: number,
+    settings?: SqlDatabaseSettings,
+  ): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-             const db = new Database(databaseFile, mode || SQL_OPEN_DEFAULT, (err) => {
-               if (err) {
-                 reject(err);
-               } else {
-                 this.pool = pool;
-                 this.db = db;
-                 this.dbId = SqlDatabase.lastId++;
-                 debug(`${this.dbId}: opened`);
-                 resolve();
-               }
-             });
-           })
-        .then((): Promise<void> => {
-          if (settings) {
-            return this.applySettings(settings);
-          }
-          return Promise.resolve();
-        });
+      const db = new Database(databaseFile, mode || SQL_OPEN_DEFAULT, (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          this.pool = pool;
+          this.db = db;
+          this.dbId = SqlDatabase.lastId++;
+          debug(`${this.dbId}: opened`);
+          resolve();
+        }
+      });
+    }).then(
+      (): Promise<void> => {
+        if (settings) {
+          return this.applySettings(settings);
+        }
+        return Promise.resolve();
+      },
+    );
   }
 
   /*
@@ -96,8 +104,11 @@ export class SqlConnectionPoolDatabase extends SqlDatabase {
   /*
   @internal
   */
-  public async recycleByPool(pool: SqlConnectionPool, sqldb: SqlConnectionPoolDatabase, settings?: SqlDatabaseSettings):
-      Promise<void> {
+  public async recycleByPool(
+    pool: SqlConnectionPool,
+    sqldb: SqlConnectionPoolDatabase,
+    settings?: SqlDatabaseSettings,
+  ): Promise<void> {
     /* istanbul ignore else */
     if (sqldb.db) {
       sqldb.db.removeAllListeners();
@@ -109,8 +120,7 @@ export class SqlConnectionPoolDatabase extends SqlDatabase {
       if (settings) {
         try {
           await this.applySettings(settings);
-        } catch (err) {
-        }
+        } catch (err) {}
       }
     }
     sqldb.db = undefined;

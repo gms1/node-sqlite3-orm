@@ -1,29 +1,38 @@
+type Primitive = string | number | boolean;
 
-type Primitive = string|number|boolean;
-
-
-export type ComparisonOperatorType = 'eq'|'neq'|'gt'|'gte'|'lt'|'lte'|'isIn'|'isNotIn'|'isBetween'|'isNotBetween'|
-    'isLike'|'isNotLike'|'isNull'|'isNotNull';
-
+export type ComparisonOperatorType =
+  | 'eq'
+  | 'neq'
+  | 'gt'
+  | 'gte'
+  | 'lt'
+  | 'lte'
+  | 'isIn'
+  | 'isNotIn'
+  | 'isBetween'
+  | 'isNotBetween'
+  | 'isLike'
+  | 'isNotLike'
+  | 'isNull'
+  | 'isNotNull';
 
 export interface PropertyComparisons<T> {
-  eq?: T|Promise<T>;
-  neq?: T|Promise<T>;
-  gt?: T|Promise<T>;
-  gte?: T|Promise<T>;
-  lt?: T|Promise<T>;
-  lte?: T|Promise<T>;
+  eq?: T | Promise<T>;
+  neq?: T | Promise<T>;
+  gt?: T | Promise<T>;
+  gte?: T | Promise<T>;
+  lt?: T | Promise<T>;
+  lte?: T | Promise<T>;
 
-  isIn?: T[]|Promise<T[]>;
-  isNotIn?: T[]|Promise<T[]>;
-  isBetween?: [T | Promise<T>, T|Promise<T>];
-  isNotBetween?: [T | Promise<T>, T|Promise<T>];
-  isLike?: (T&string)|Promise<T&string>;
-  isNotLike?: (T&string)|Promise<T&string>;
+  isIn?: T[] | Promise<T[]>;
+  isNotIn?: T[] | Promise<T[]>;
+  isBetween?: [T | Promise<T>, T | Promise<T>];
+  isNotBetween?: [T | Promise<T>, T | Promise<T>];
+  isLike?: (T & string) | Promise<T & string>;
+  isNotLike?: (T & string) | Promise<T & string>;
   isNull?: boolean;
   isNotNull?: boolean;
 }
-
 
 /*
  * ModelPredicates<MT>:
@@ -48,21 +57,31 @@ export interface PropertyComparisons<T> {
  *
  */
 
-type ShortHandType = Primitive|Date;
+type ShortHandType = Primitive | Date;
 
-export type PropertyPredicates<PT> = PropertyComparisons<PT>|(PT&ShortHandType)|Promise<(PT&ShortHandType)>;
+export type PropertyPredicates<PT> =
+  | PropertyComparisons<PT>
+  | (PT & ShortHandType)
+  | Promise<PT & ShortHandType>;
 
-export type ModelPredicates<MT> = {
-  [K in keyof MT]?: PropertyPredicates<MT[K]>;
-}&{not?: never, or?: never, and?: never, sql?: never};
+export type ModelPredicates<MT> = { [K in keyof MT]?: PropertyPredicates<MT[K]> } & {
+  not?: never;
+  or?: never;
+  and?: never;
+  sql?: never;
+};
 
 export function getPropertyPredicates<MT, K extends keyof MT>(
-    modelPredicates: ModelPredicates<MT>, key: K): PropertyPredicates<MT[K]> {
-  return (modelPredicates[key] || {eq: undefined}) as PropertyPredicates<MT[K]>;
+  modelPredicates: ModelPredicates<MT>,
+  key: K,
+): PropertyPredicates<MT[K]> {
+  return (modelPredicates[key] || { eq: undefined }) as PropertyPredicates<MT[K]>;
 }
 
 export function getPropertyComparison<MT, K extends keyof MT>(
-    propertyPredicate: PropertyPredicates<MT[K]>, key: string): any {
+  propertyPredicate: PropertyPredicates<MT[K]>,
+  key: string,
+): any {
   return (propertyPredicate as any)[key];
 }
 
@@ -84,21 +103,26 @@ export function getPropertyComparison<MT, K extends keyof MT>(
  *
  */
 
-export type LogicalOperatorType = 'not'|'or'|'and'|'sql';
+export type LogicalOperatorType = 'not' | 'or' | 'and' | 'sql';
 
-export type Condition<MT> = {
-  not: (Condition<MT>|ModelPredicates<MT>)
-}|{or: (Condition<MT>|ModelPredicates<MT>)[]}|{and: (Condition<MT>|ModelPredicates<MT>)[]}|{sql: string}|
-    ModelPredicates<MT>;
-
+export type Condition<MT> =
+  | {
+      not: Condition<MT> | ModelPredicates<MT>;
+    }
+  | { or: (Condition<MT> | ModelPredicates<MT>)[] }
+  | { and: (Condition<MT> | ModelPredicates<MT>)[] }
+  | { sql: string }
+  | ModelPredicates<MT>;
 
 export function isModelPredicates<MT>(cond?: Condition<MT>): cond is ModelPredicates<MT> {
-  return cond && (cond as any).not === undefined && (cond as any).or === undefined && (cond as any).and === undefined &&
-          (cond as any).sql === undefined ?
-      true :
-      false;
+  return cond &&
+    (cond as any).not === undefined &&
+    (cond as any).or === undefined &&
+    (cond as any).and === undefined &&
+    (cond as any).sql === undefined
+    ? true
+    : false;
 }
-
 
 /*
  * Where<MT>
@@ -106,4 +130,4 @@ export function isModelPredicates<MT>(cond?: Condition<MT>): cond is ModelPredic
  * alias for Condition<MT>|string
  *
  */
-export type Where<MT> = Condition<MT>|string;
+export type Where<MT> = Condition<MT> | string;

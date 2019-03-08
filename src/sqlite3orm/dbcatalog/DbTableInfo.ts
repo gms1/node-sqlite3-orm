@@ -12,8 +12,8 @@ export interface DbColumnInfo extends DbColumnTypeInfo {
 export interface DbIndexColumnInfo {
   name: string;
   desc: boolean;
-  coll: string;  // collating sequence
-  key: boolean;  // key (true) or auxiliary (false) column
+  coll: string; // collating sequence
+  key: boolean; // key (true) or auxiliary (false) column
 }
 
 export interface DbIndexInfo {
@@ -33,9 +33,9 @@ export interface DbTableInfo {
   name: string;
   tableName: string;
   schemaName: string;
-  columns: {[key: string]: DbColumnInfo};
+  columns: { [key: string]: DbColumnInfo };
   primaryKey: string[];
   autoIncrement?: boolean;
-  indexes: {[key: string]: DbIndexInfo};
-  foreignKeys: {[key: string]: DbForeignKeyInfo};
+  indexes: { [key: string]: DbIndexInfo };
+  foreignKeys: { [key: string]: DbForeignKeyInfo };
 }

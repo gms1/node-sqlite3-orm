@@ -1,8 +1,8 @@
-import {MetaModel} from '../metadata';
+import { MetaModel } from '../metadata';
 
-import {QueryOperation} from './QueryOperation';
-import {QueryPropertyPredicate} from './QueryPropertyPredicate';
-import {getPropertyComparison, getPropertyPredicates, ModelPredicates} from './Where';
+import { QueryOperation } from './QueryOperation';
+import { QueryPropertyPredicate } from './QueryPropertyPredicate';
+import { getPropertyComparison, getPropertyPredicates, ModelPredicates } from './Where';
 
 export class QueryModelPredicates<MT> implements QueryOperation {
   subOperations: QueryPropertyPredicate<MT[keyof MT]>[];
@@ -13,15 +13,20 @@ export class QueryModelPredicates<MT> implements QueryOperation {
     keys.forEach((propertyKey) => {
       const propertyPredicates = getPropertyPredicates(pred, propertyKey as keyof MT);
 
-      if (typeof propertyPredicates !== 'object' || propertyPredicates instanceof Date ||
-          propertyPredicates instanceof Promise) {
+      if (
+        typeof propertyPredicates !== 'object' ||
+        propertyPredicates instanceof Date ||
+        propertyPredicates instanceof Promise
+      ) {
         // shorthand form for 'eq' comparison
         this.subOperations.push(new QueryPropertyPredicate(propertyKey, 'eq', propertyPredicates));
       } else {
         const comparisonKeys = Object.keys(propertyPredicates);
         comparisonKeys.forEach((comparisonOp) => {
           const comparison = getPropertyComparison(propertyPredicates, comparisonOp);
-          this.subOperations.push(new QueryPropertyPredicate(propertyKey, comparisonOp, comparison));
+          this.subOperations.push(
+            new QueryPropertyPredicate(propertyKey, comparisonOp, comparison),
+          );
         });
       }
     });

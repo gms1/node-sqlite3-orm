@@ -1,10 +1,15 @@
 // tslint:disable-next-line no-require-imports
 import * as _dbg from 'debug';
 
-import {SqlDatabase} from './core/SqlDatabase';
-import {DbCatalogDAO, DbTableInfo} from './dbcatalog';
-import {Field, FKDefinition, schema, Table} from './metadata';
-import {PromiseFactories, qualifiySchemaIdentifier, quoteIdentifier, sequentialize} from './utils';
+import { SqlDatabase } from './core/SqlDatabase';
+import { DbCatalogDAO, DbTableInfo } from './dbcatalog';
+import { Field, FKDefinition, schema, Table } from './metadata';
+import {
+  PromiseFactories,
+  qualifiySchemaIdentifier,
+  quoteIdentifier,
+  sequentialize,
+} from './utils';
 
 const debug = _dbg('sqlite3orm:autoupgrade');
 
@@ -17,7 +22,7 @@ export enum UpgradeMode {
   ACTUAL = 0,
   CREATE = 1,
   ALTER,
-  RECREATE
+  RECREATE,
 }
 
 export interface UpgradeInfo {
@@ -48,9 +53,9 @@ export class AutoUpgrader {
   /*
    * upgrade specified tables
    */
-  async upgradeTables(tables: Table[]|Table, opts?: UpgradeOptions): Promise<void> {
+  async upgradeTables(tables: Table[] | Table, opts?: UpgradeOptions): Promise<void> {
     let fkEnabled: boolean;
-    let error: Error|undefined;
+    let error: Error | undefined;
 
     // set fkEnabled and if foreign key constraints are enabled, disable them
     try {
@@ -66,7 +71,6 @@ export class AutoUpgrader {
     try {
       if (Array.isArray(tables)) {
         await sequentialize(tables.map((table) => () => this._upgradeTable(table, opts)));
-
       } else {
         await this._upgradeTable(tables, opts);
       }
@@ -89,22 +93,24 @@ export class AutoUpgrader {
     }
   }
 
-
-  isActual(tables: Table|Table[], opts?: UpgradeOptions): Promise<boolean> {
+  isActual(tables: Table | Table[], opts?: UpgradeOptions): Promise<boolean> {
     const promises: Promise<boolean>[] = [];
     if (Array.isArray(tables)) {
       tables.forEach((tab) => {
-        promises.push(this.getUpgradeInfo(tab, opts).then((info) => info.upgradeMode === UpgradeMode.ACTUAL));
+        promises.push(
+          this.getUpgradeInfo(tab, opts).then((info) => info.upgradeMode === UpgradeMode.ACTUAL),
+        );
       });
     } else {
-      promises.push(this.getUpgradeInfo(tables, opts).then((info) => info.upgradeMode === UpgradeMode.ACTUAL));
+      promises.push(
+        this.getUpgradeInfo(tables, opts).then((info) => info.upgradeMode === UpgradeMode.ACTUAL),
+      );
     }
     return Promise.all(promises).then((results) => results.reduce((prev, curr) => prev && curr));
   }
 
-
   async getUpgradeInfo(table: Table, opts?: UpgradeOptions): Promise<UpgradeInfo> {
-    let tableInfo: DbTableInfo|undefined;
+    let tableInfo: DbTableInfo | undefined;
     try {
       tableInfo = await this.catalogDao.readTableInfo(table.name);
     } catch (err /* istanbul ignore next */) {
@@ -113,31 +119,38 @@ export class AutoUpgrader {
     return this._getUpgradeInfo(table, tableInfo, opts);
   }
 
-
   // tslint:disable cyclomatic-complexity
-  protected _getUpgradeInfo(table: Table, tableInfo?: DbTableInfo, opts?: UpgradeOptions): UpgradeInfo {
-    opts = AutoUpgrader.defaults || opts ? Object.assign({}, AutoUpgrader.defaults, opts) : undefined;
+  protected _getUpgradeInfo(
+    table: Table,
+    tableInfo?: DbTableInfo,
+    opts?: UpgradeOptions,
+  ): UpgradeInfo {
+    opts =
+      AutoUpgrader.defaults || opts ? Object.assign({}, AutoUpgrader.defaults, opts) : undefined;
 
     if (!tableInfo) {
       debug(`  does not exist`);
-      return {tableInfo, opts, upgradeMode: UpgradeMode.CREATE};
+      return { tableInfo, opts, upgradeMode: UpgradeMode.CREATE };
     }
     if (opts && opts.forceRecreate) {
       debug(`  forcing recreate`);
-      return {tableInfo, opts, upgradeMode: UpgradeMode.RECREATE};
+      return { tableInfo, opts, upgradeMode: UpgradeMode.RECREATE };
     }
 
     // test if foreign key definitions are equal, otherwise return UpgradeMode.RECREATE
     if (table.mapNameToFKDef.size !== Object.keys(tableInfo.foreignKeys).length) {
       debug(`  foreign key added or removed`);
-      return {tableInfo, opts, upgradeMode: UpgradeMode.RECREATE};
+      return { tableInfo, opts, upgradeMode: UpgradeMode.RECREATE };
     }
     for (const fk of table.mapNameToFKDef.values()) {
       const genName = FKDefinition.genericForeignKeyId(
-          fk.fields.map((f) => f.name), fk.foreignTableName, fk.fields.map((field) => field.foreignColumnName));
+        fk.fields.map((f) => f.name),
+        fk.foreignTableName,
+        fk.fields.map((field) => field.foreignColumnName),
+      );
       if (!tableInfo.foreignKeys[genName]) {
         debug(`  foreign key definition for '${fk.name}' changed`);
-        return {tableInfo, opts, upgradeMode: UpgradeMode.RECREATE};
+        return { tableInfo, opts, upgradeMode: UpgradeMode.RECREATE };
       }
     }
 
@@ -153,7 +166,7 @@ export class AutoUpgrader {
           } else {
             debug(`  column dropped '${colName}'`);
           }
-          return {tableInfo, opts, upgradeMode: UpgradeMode.RECREATE};
+          return { tableInfo, opts, upgradeMode: UpgradeMode.RECREATE };
         } else {
           oldColumnsCount += 1;
           debug(`  column to keep '${colName}'`);
@@ -161,21 +174,24 @@ export class AutoUpgrader {
         }
       }
       const newFldDef = Field.parseDbType(field.dbtype);
-      if (!newFldDef || (newFldDef.typeAffinity !== tableInfo.columns[colName].typeAffinity) ||
-          (newFldDef.notNull !== tableInfo.columns[colName].notNull) ||
-          // tslint:disable-next-line triple-equals
-          (newFldDef.defaultValue != tableInfo.columns[colName].defaultValue)) {
+      if (
+        !newFldDef ||
+        newFldDef.typeAffinity !== tableInfo.columns[colName].typeAffinity ||
+        newFldDef.notNull !== tableInfo.columns[colName].notNull ||
+        // tslint:disable-next-line triple-equals
+        newFldDef.defaultValue != tableInfo.columns[colName].defaultValue
+      ) {
         debug(`  column changed '${colName}'`);
         // debug(`    old: `, JSON.stringify(tableInfo.columns[colName]));
         // debug(`    new: `, JSON.stringify(newFldDef));
-        return {tableInfo, opts, upgradeMode: UpgradeMode.RECREATE};
+        return { tableInfo, opts, upgradeMode: UpgradeMode.RECREATE };
       }
     }
 
     // test if primary key columns are equal, otherwise return UpgradeMode.RECREATE
     if (table.mapNameToIdentityField.size !== tableInfo.primaryKey.length) {
       debug(`  primary key column added or removed`);
-      return {tableInfo, opts, upgradeMode: UpgradeMode.RECREATE};
+      return { tableInfo, opts, upgradeMode: UpgradeMode.RECREATE };
     }
 
     let pkIdx = 0;
@@ -185,32 +201,35 @@ export class AutoUpgrader {
       }
       if (fld.name !== tableInfo.primaryKey[pkIdx++]) {
         debug(`  primary key column changed`);
-        return {tableInfo, opts, upgradeMode: UpgradeMode.RECREATE};
+        return { tableInfo, opts, upgradeMode: UpgradeMode.RECREATE };
       }
     }
 
     // test if autoIncrement is equal, otherwise return UpgradeMode.RECREATE
-    if (table.autoIncrementField && !tableInfo.autoIncrement || !table.autoIncrementField && tableInfo.autoIncrement) {
+    if (
+      (table.autoIncrementField && !tableInfo.autoIncrement) ||
+      (!table.autoIncrementField && tableInfo.autoIncrement)
+    ) {
       debug(`  autoIncrement changed`);
-      return {tableInfo, opts, upgradeMode: UpgradeMode.RECREATE};
+      return { tableInfo, opts, upgradeMode: UpgradeMode.RECREATE };
     }
 
     // test if no column needs to be added, otherwise return UpgradeMode.ALTER
-    if ((Object.keys(tableInfo.columns).length - oldColumnsCount) !== table.fields.length) {
+    if (Object.keys(tableInfo.columns).length - oldColumnsCount !== table.fields.length) {
       debug(`  column(s) added`);
-      return {tableInfo, opts, upgradeMode: UpgradeMode.ALTER};
+      return { tableInfo, opts, upgradeMode: UpgradeMode.ALTER };
     }
 
     // test if no index needs to be changed, otherwise return UpgradeMode.ALTER
-    if ((Object.keys(tableInfo.indexes).length) !== table.mapNameToIDXDef.size) {
+    if (Object.keys(tableInfo.indexes).length !== table.mapNameToIDXDef.size) {
       debug(`  indexes added or removed`);
-      return {tableInfo, opts, upgradeMode: UpgradeMode.ALTER};
+      return { tableInfo, opts, upgradeMode: UpgradeMode.ALTER };
     }
     for (const name of Object.keys(tableInfo.indexes)) {
       const idx = table.mapNameToIDXDef.get(qualifiySchemaIdentifier(name, tableInfo.schemaName));
       if (!idx) {
         debug(`  index '${name}' dropped`);
-        return {tableInfo, opts, upgradeMode: UpgradeMode.ALTER};
+        return { tableInfo, opts, upgradeMode: UpgradeMode.ALTER };
       }
       const oldCols = tableInfo.indexes[name].columns.map((idxCol) => idxCol.name).join(',');
       const newCols = idx.fields.map((fld) => fld.name).join(',');
@@ -218,14 +237,13 @@ export class AutoUpgrader {
         debug(`  index '${name}' changed`);
         // debug(`     old: ${oldCols}`);
         // debug(`     new: ${newCols}`);
-        return {tableInfo, opts, upgradeMode: UpgradeMode.ALTER};
+        return { tableInfo, opts, upgradeMode: UpgradeMode.ALTER };
       }
     }
 
     // tslint:enable cyclomatic-complexity
-    return {tableInfo, opts, upgradeMode: UpgradeMode.ACTUAL};
+    return { tableInfo, opts, upgradeMode: UpgradeMode.ACTUAL };
   }
-
 
   protected async _upgradeTable(table: Table, opts?: UpgradeOptions): Promise<void> {
     debug(`upgradeTable(${table.name}):`);
@@ -244,12 +262,11 @@ export class AutoUpgrader {
         return this.alterTable(table, upgradeInfo);
       case UpgradeMode.RECREATE:
         return this.recreateTable(table, upgradeInfo);
-        /* istanbul ignore next */
+      /* istanbul ignore next */
       default:
         return Promise.reject(`table '${table.name}': unknown upgrade-mode detected`);
     }
   }
-
 
   /*
    * create table and indexes
@@ -269,7 +286,6 @@ export class AutoUpgrader {
     });
     return sequentialize(factories).then(() => {});
   }
-
 
   /*
    * alter table and add missing table colums and indexes
@@ -294,7 +310,7 @@ export class AutoUpgrader {
       if (!idx) {
         debug(`  => drop index '${name}'`);
         factories.push(() => this.sqldb.exec(`DROP INDEX IF EXISTS ${quoteIdentifier(name)}`));
-        delete tableInfo.indexes[name];  // delete to enable re-creation
+        delete tableInfo.indexes[name]; // delete to enable re-creation
         return;
       }
       const oldCols = tableInfo.indexes[name].columns.map((idxCol) => idxCol.name).join(',');
@@ -304,7 +320,7 @@ export class AutoUpgrader {
         // debug(`     oldCols='${oldCols}'`);
         // debug(`     newCols='${newCols}'`);
         factories.push(() => this.sqldb.exec(`DROP INDEX IF EXISTS ${quoteIdentifier(name)}`));
-        delete tableInfo.indexes[name];  // delete to enable re-creation
+        delete tableInfo.indexes[name]; // delete to enable re-creation
         return;
       }
     });
@@ -319,8 +335,6 @@ export class AutoUpgrader {
 
     return sequentialize(factories).then(() => {});
   }
-
-
 
   /*
    * recreate table
@@ -354,7 +368,9 @@ export class AutoUpgrader {
     const tmpTableName = quoteIdentifier(table.name + '_autoupgrade');
 
     // rename old table
-    factories.push(() => this.sqldb.exec(`ALTER TABLE ${table.quotedName} RENAME TO ${tmpTableName}`));
+    factories.push(() =>
+      this.sqldb.exec(`ALTER TABLE ${table.quotedName} RENAME TO ${tmpTableName}`),
+    );
 
     // create table
     factories.push(() => this.sqldb.exec(table.createCreateTableStatement(true, addFields)));
@@ -362,12 +378,14 @@ export class AutoUpgrader {
     // data transfer
     let colNames;
     if (keepOldColumns) {
-      colNames = Object.keys(tableInfo.columns).map((colName) => quoteIdentifier(colName)).join(',');
+      colNames = Object.keys(tableInfo.columns)
+        .map((colName) => quoteIdentifier(colName))
+        .join(',');
     } else {
       colNames = Object.keys(tableInfo.columns)
-                     .filter((colName) => table.mapNameToField.has(colName))
-                     .map((colName) => quoteIdentifier(colName))
-                     .join(',');
+        .filter((colName) => table.mapNameToField.has(colName))
+        .map((colName) => quoteIdentifier(colName))
+        .join(',');
     }
 
     const insertStmt = `INSERT INTO ${table.quotedName} (
@@ -381,7 +399,6 @@ FROM  ${tmpTableName}`;
     // drop old table
     factories.push(() => this.sqldb.exec(`DROP TABLE ${tmpTableName}`));
 
-
     // create all indexes
     table.mapNameToIDXDef.forEach((idx) => {
       debug(`  => create index '${idx.name}'`);
@@ -390,7 +407,6 @@ FROM  ${tmpTableName}`;
 
     return this.sqldb.transactionalize(() => sequentialize(factories).then(() => {}));
   }
-
 
   /*
    * get current foreign key enforcement status
@@ -406,8 +422,6 @@ FROM  ${tmpTableName}`;
     const val = enable ? 'TRUE' : 'FALSE';
     return this.sqldb.exec(`PRAGMA foreign_keys = ${val}`);
   }
-
-
 
   static debug(formatter: any, ...args: any[]): void {
     debug(formatter, ...args);

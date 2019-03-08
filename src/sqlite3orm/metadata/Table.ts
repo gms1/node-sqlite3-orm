@@ -4,16 +4,16 @@ import {
   quoteAndUnqualifyIdentifier,
   quoteIdentifier,
   quoteSimpleIdentifier,
-  splitSchemaIdentifier
+  splitSchemaIdentifier,
 } from '../utils';
 
-import {FieldOpts} from './decorators';
+import { FieldOpts } from './decorators';
 // tslint:disable no-use-before-declare
-import {Field} from './Field';
-import {FKDefinition} from './FKDefinition';
-import {IDXDefinition} from './IDXDefinition';
-import {MetaModel} from './MetaModel';
-import {PropertyType} from './PropertyType';
+import { Field } from './Field';
+import { FKDefinition } from './FKDefinition';
+import { IDXDefinition } from './IDXDefinition';
+import { MetaModel } from './MetaModel';
+import { PropertyType } from './PropertyType';
 
 /**
  * Class holding a table definition (name of the table and fields in the table)
@@ -26,7 +26,7 @@ export class Table {
     return quoteIdentifier(this.name);
   }
 
-  get schemaName(): string|undefined {
+  get schemaName(): string | undefined {
     return splitSchemaIdentifier(this.name).identSchema;
   }
 
@@ -76,9 +76,9 @@ export class Table {
    * The field mapped to the primary key; only set if the
    * AUTOINCREMENT feature can be used
    */
-  private _autoIncrementField: Field|undefined;
+  private _autoIncrementField: Field | undefined;
 
-  get autoIncrementField(): Field|undefined {
+  get autoIncrementField(): Field | undefined {
     return this._autoIncrementField;
   }
 
@@ -94,9 +94,7 @@ export class Table {
   // map index name to index key definition
   readonly mapNameToIDXDef: Map<string, IDXDefinition>;
 
-
   readonly models: Set<MetaModel>;
-
 
   /**
    * Creates an instance of Table.
@@ -112,13 +110,12 @@ export class Table {
     this.models = new Set<MetaModel>();
   }
 
-
   /**
    * Test if table has a column with the given column name
    *
    * @param colName - The name of the column
    */
-  public hasTableField(name: string): Field|undefined {
+  public hasTableField(name: string): Field | undefined {
     return this.mapNameToField.get(name);
   }
 
@@ -146,7 +143,12 @@ export class Table {
    * @returns The field definition
    */
   // tslint:disable cyclomatic-complexity
-  public getOrAddTableField(name: string, isIdentity: boolean, opts?: FieldOpts, propertyType?: PropertyType): Field {
+  public getOrAddTableField(
+    name: string,
+    isIdentity: boolean,
+    opts?: FieldOpts,
+    propertyType?: PropertyType,
+  ): Field {
     let field = this.mapNameToField.get(name);
     if (!field) {
       // create field
@@ -160,11 +162,15 @@ export class Table {
     } else {
       // merge field
       if (field.isIdentity !== isIdentity) {
-        throw new Error(`conflicting identity setting: new: ${isIdentity}, old: ${field.isIdentity}`);
+        throw new Error(
+          `conflicting identity setting: new: ${isIdentity}, old: ${field.isIdentity}`,
+        );
       }
       if (opts && opts.dbtype) {
         if (field.isDbTypeDefined && field.dbtype !== opts.dbtype) {
-          throw new Error(`conflicting dbtype setting: new: '${opts.dbtype}', old: '${field.dbtype}'`);
+          throw new Error(
+            `conflicting dbtype setting: new: '${opts.dbtype}', old: '${field.dbtype}'`,
+          );
         }
         field.dbtype = opts.dbtype;
       }
@@ -177,17 +183,26 @@ export class Table {
       }
       // tslint:disable-next-line triple-equals
       if (opts && opts.dateInMilliSeconds != undefined) {
-        if (field.isDateInMilliSecondsDefined && field.dateInMilliSeconds !== opts.dateInMilliSeconds) {
-          throw new Error(`conflicting dateInMilliSeconds setting: new: ${
-                                                                          opts.dateInMilliSeconds
-                                                                        }, old: ${field.dateInMilliSeconds}`);
+        if (
+          field.isDateInMilliSecondsDefined &&
+          field.dateInMilliSeconds !== opts.dateInMilliSeconds
+        ) {
+          throw new Error(
+            `conflicting dateInMilliSeconds setting: new: ${opts.dateInMilliSeconds}, old: ${
+              field.dateInMilliSeconds
+            }`,
+          );
         }
         field.dateInMilliSeconds = opts.dateInMilliSeconds;
       }
     }
     if (field.isIdentity) {
-      if (this.autoIncrement && !this.withoutRowId && this.mapNameToIdentityField.size === 1 &&
-          field.dbTypeInfo.typeAffinity === 'INTEGER') {
+      if (
+        this.autoIncrement &&
+        !this.withoutRowId &&
+        this.mapNameToIdentityField.size === 1 &&
+        field.dbTypeInfo.typeAffinity === 'INTEGER'
+      ) {
         this._autoIncrementField = field;
       } else {
         this._autoIncrementField = undefined;
@@ -197,8 +212,7 @@ export class Table {
   }
   // tslint:enable cyclomatic-complexity
 
-
-  public hasFKDefinition(name: string): FKDefinition|undefined {
+  public hasFKDefinition(name: string): FKDefinition | undefined {
     return this.mapNameToFKDef.get(name);
   }
 
@@ -217,16 +231,20 @@ export class Table {
     } else {
       // check conflicts
       if (oldFkDef.id !== fkDef.id) {
-        core.debugORM(`table '${this.name}': conflicting foreign key definition for '${fkDef.name}'`);
+        core.debugORM(
+          `table '${this.name}': conflicting foreign key definition for '${fkDef.name}'`,
+        );
         core.debugORM(`   old: ${oldFkDef.id}`);
         core.debugORM(`   new: ${fkDef.id}`);
-        throw new Error(`table '${this.name}': conflicting foreign key definition for '${fkDef.name}'`);
+        throw new Error(
+          `table '${this.name}': conflicting foreign key definition for '${fkDef.name}'`,
+        );
       }
     }
     return fkDef;
   }
 
-  public hasIDXDefinition(name: string): IDXDefinition|undefined {
+  public hasIDXDefinition(name: string): IDXDefinition | undefined {
     // NOTE: creating a index in schema1 on a table in schema2 is not supported by Sqlite3
     //  so using qualifiedIndentifier is currently not required
     return this.mapNameToIDXDef.get(qualifiySchemaIdentifier(name, this.schemaName));
@@ -260,8 +278,6 @@ export class Table {
     }
     return idxDef;
   }
-
-
 
   /**
    * Get 'CREATE TABLE'-statement using 'IF NOT EXISTS'-clause
@@ -303,18 +319,29 @@ export class Table {
   public getCreateIndexStatement(idxName: string, unique?: boolean): string {
     const idxDef = this.hasIDXDefinition(idxName);
     if (!idxDef) {
-      throw new Error(`table '${this.name}': index '${idxName}' is not defined on table '${this.name}'`);
+      throw new Error(
+        `table '${this.name}': index '${idxName}' is not defined on table '${this.name}'`,
+      );
     }
     // tslint:disable-next-line triple-equals
     if (unique == undefined) {
       unique = idxDef.isUnique ? true : false;
     }
 
-    const idxCols = idxDef.fields.map((field) => quoteSimpleIdentifier(field.name) + (field.desc ? ' DESC' : ''));
+    const idxCols = idxDef.fields.map(
+      (field) => quoteSimpleIdentifier(field.name) + (field.desc ? ' DESC' : ''),
+    );
     // tslint:disable-next-line: restrict-plus-operands
-    return 'CREATE ' + (unique ? 'UNIQUE ' : ' ') +
-        `INDEX IF NOT EXISTS ${quoteIdentifier(idxName)} ON ${quoteAndUnqualifyIdentifier(this.name)} ` +
-        `(` + idxCols.join(', ') + ')';
+    return (
+      'CREATE ' +
+      (unique ? 'UNIQUE ' : ' ') +
+      `INDEX IF NOT EXISTS ${quoteIdentifier(idxName)} ON ${quoteAndUnqualifyIdentifier(
+        this.name,
+      )} ` +
+      `(` +
+      idxCols.join(', ') +
+      ')'
+    );
   }
 
   /**
@@ -325,7 +352,9 @@ export class Table {
   public getDropIndexStatement(idxName: string): string {
     const idxDef = this.hasIDXDefinition(idxName);
     if (!idxDef) {
-      throw new Error(`table '${this.name}': index '${idxName}' is not defined on table '${this.name}'`);
+      throw new Error(
+        `table '${this.name}': index '${idxName}' is not defined on table '${this.name}'`,
+      );
     }
     return `DROP INDEX IF EXISTS ${quoteIdentifier(idxName)}`;
   }
@@ -383,12 +412,13 @@ export class Table {
       stmt += ')';
     }
 
-
     // add foreign key constraint definition:
     this.mapNameToFKDef.forEach((fk, fkName) => {
       /* istanbul ignore if */
       if (!fk.fields.length || !fk.fields.length || fk.fields.length !== fk.fields.length) {
-        throw new Error(`table '${this.name}': foreign key constraint '${fkName}' definition is incomplete`);
+        throw new Error(
+          `table '${this.name}': foreign key constraint '${fkName}' definition is incomplete`,
+        );
       }
       stmt += `,\n  CONSTRAINT ${quoteSimpleIdentifier(fk.name)}\n`;
       stmt += `    FOREIGN KEY (`;
@@ -396,23 +426,28 @@ export class Table {
       stmt += ')\n';
 
       // if fk.foreignTableName has qualifier it must match the qualifier of this.name
-      const {identName, identSchema} = splitSchemaIdentifier(fk.foreignTableName);
+      const { identName, identSchema } = splitSchemaIdentifier(fk.foreignTableName);
 
       const tableSchema = this.schemaName;
       /* istanbul ignore next */
-      if (identSchema &&
-          ((identSchema === 'main' && tableSchema && tableSchema !== identSchema) ||
-           (identSchema !== 'main' && (!tableSchema || tableSchema !== identSchema)))) {
+      if (
+        identSchema &&
+        ((identSchema === 'main' && tableSchema && tableSchema !== identSchema) ||
+          (identSchema !== 'main' && (!tableSchema || tableSchema !== identSchema)))
+      ) {
         throw new Error(
-            `table '${this.name}': foreign key '${fkName}' references table in wrong schema: '${fk.foreignTableName}'`);
+          `table '${this.name}': foreign key '${fkName}' references table in wrong schema: '${
+            fk.foreignTableName
+          }'`,
+        );
       }
 
       stmt += `    REFERENCES ${quoteSimpleIdentifier(identName)} (`;
       // tslint:disable-next-line: restrict-plus-operands
-      stmt += fk.fields.map((field) => quoteSimpleIdentifier(field.foreignColumnName)).join(', ') +
-          ') ON DELETE CASCADE';  // TODO: hard-coded 'ON DELETE CASCADE'
+      stmt +=
+        fk.fields.map((field) => quoteSimpleIdentifier(field.foreignColumnName)).join(', ') +
+        ') ON DELETE CASCADE'; // TODO: hard-coded 'ON DELETE CASCADE'
       stmt += '\n';
-
     });
     stmt += '\n)';
     if (this.withoutRowId) {

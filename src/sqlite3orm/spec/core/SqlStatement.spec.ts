@@ -1,5 +1,5 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-import {SQL_MEMORY_DB_PRIVATE, SqlDatabase, SqlStatement} from '../..';
+import { SQL_MEMORY_DB_PRIVATE, SqlDatabase, SqlStatement } from '../..';
 
 // ---------------------------------------------
 
@@ -11,8 +11,13 @@ describe('test SqlStatement', () => {
     try {
       sqldb = new SqlDatabase();
       await sqldb.open(SQL_MEMORY_DB_PRIVATE);
-      await sqldb.exec('CREATE TABLE TEST (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, col VARCHAR(50))');
-      await sqldb.run('INSERT INTO TEST (id, col) values (:a, :b)', {':a': 0, ':b': 'testvalue 0'});
+      await sqldb.exec(
+        'CREATE TABLE TEST (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, col VARCHAR(50))',
+      );
+      await sqldb.run('INSERT INTO TEST (id, col) values (:a, :b)', {
+        ':a': 0,
+        ':b': 'testvalue 0',
+      });
     } catch (err) {
       fail(err);
     }
@@ -47,15 +52,13 @@ describe('test SqlStatement', () => {
     try {
       // statement is not prepared
       await selStmt.run();
-      fail('\"run\" should failed on finalized statement');
-    } catch (err) {
-    }
+      fail('"run" should failed on finalized statement');
+    } catch (err) {}
     try {
       // statement is not prepared
       await selStmt.get();
-      fail('\"get\" should failed on finalized statement');
-    } catch (err) {
-    }
+      fail('"get" should failed on finalized statement');
+    } catch (err) {}
     // prepare select where id>=?
     selStmt = await sqldb.prepare('SELECT id, col FROM TEST WHERE id>=? ORDER BY id');
     try {
@@ -63,11 +66,15 @@ describe('test SqlStatement', () => {
       let allRows = await selStmt.all(0);
       expect(allRows.length).toBe(2, 'result from prepared statement should have 2 rows');
       expect(allRows[0].id).toBe(0, 'result from prepared statement should have id=0 as first row');
-      expect(allRows[0].col)
-          .toBe('testvalue 0', 'result from prepared statement have col=\"testvalue 0\" in first row');
+      expect(allRows[0].col).toBe(
+        'testvalue 0',
+        'result from prepared statement have col="testvalue 0" in first row',
+      );
       expect(allRows[1].id).toBe(1, 'result from prepared statement should have id=1 as first row');
-      expect(allRows[1].col)
-          .toBe('testvalue 1', 'result from prepared statement have col=\"testvalue 1\" in first row');
+      expect(allRows[1].col).toBe(
+        'testvalue 1',
+        'result from prepared statement have col="testvalue 1" in first row',
+      );
     } catch (err) {
       fail(err);
     }
@@ -77,11 +84,15 @@ describe('test SqlStatement', () => {
       await selStmt.each(0, (err: any, row: any) => allRows.push(row));
       expect(allRows.length).toBe(2, 'result from prepared statement should have 2 rows');
       expect(allRows[0].id).toBe(0, 'result from prepared statement should have id=0 as first row');
-      expect(allRows[0].col)
-          .toBe('testvalue 0', 'result from prepared statement have col=\"testvalue 0\" in first row');
+      expect(allRows[0].col).toBe(
+        'testvalue 0',
+        'result from prepared statement have col="testvalue 0" in first row',
+      );
       expect(allRows[1].id).toBe(1, 'result from prepared statement should have id=1 as first row');
-      expect(allRows[1].col)
-          .toBe('testvalue 1', 'result from prepared statement have col=\"testvalue 1\" in first row');
+      expect(allRows[1].col).toBe(
+        'testvalue 1',
+        'result from prepared statement have col="testvalue 1" in first row',
+      );
     } catch (err) {
       fail(err);
     }
@@ -90,6 +101,4 @@ describe('test SqlStatement', () => {
   });
 
   // ---------------------------------------------
-
-
 });

@@ -1,9 +1,8 @@
-
-import {backtickQuoteSimpleIdentifier} from '../utils';
-import {DbColumnTypeInfo, DbCatalogDAO} from '../dbcatalog';
-import {PropertyType} from './PropertyType';
-import {FieldOpts} from './decorators';
-import {schema} from './Schema';
+import { backtickQuoteSimpleIdentifier } from '../utils';
+import { DbColumnTypeInfo, DbCatalogDAO } from '../dbcatalog';
+import { PropertyType } from './PropertyType';
+import { FieldOpts } from './decorators';
+import { schema } from './Schema';
 
 /**
  * Class holding a field definition
@@ -50,8 +49,13 @@ export class Field {
   }
 
   get dbTypeInfo(): DbColumnTypeInfo {
-    return this._dbTypeInfo ||
-        {typeAffinity: DbCatalogDAO.getTypeAffinity(this.dbDefaultType), notNull: false, defaultValue: undefined};
+    return (
+      this._dbTypeInfo || {
+        typeAffinity: DbCatalogDAO.getTypeAffinity(this.dbDefaultType),
+        notNull: false,
+        defaultValue: undefined,
+      }
+    );
   }
 
   /**
@@ -61,7 +65,7 @@ export class Field {
 
   get isJson(): boolean {
     // tslint:disable-next-line triple-equals
-    return (this._isJson == undefined) ? false : this._isJson;
+    return this._isJson == undefined ? false : this._isJson;
   }
   set isJson(isJson: boolean) {
     this._isJson = isJson;
@@ -71,11 +75,12 @@ export class Field {
     return this._isJson == undefined ? false : true;
   }
 
-
   private _dateInMilliSeconds?: boolean;
   get dateInMilliSeconds(): boolean {
     // tslint:disable-next-line triple-equals
-    return (this._dateInMilliSeconds == undefined) ? schema().dateInMilliSeconds : this._dateInMilliSeconds;
+    return this._dateInMilliSeconds == undefined
+      ? schema().dateInMilliSeconds
+      : this._dateInMilliSeconds;
   }
   set dateInMilliSeconds(val: boolean) {
     this._dateInMilliSeconds = val;
@@ -94,7 +99,12 @@ export class Field {
    * Creates an instance of Field.
    *
    */
-  public constructor(name: string, isIdentity?: boolean, opts?: FieldOpts, propertyType?: PropertyType) {
+  public constructor(
+    name: string,
+    isIdentity?: boolean,
+    opts?: FieldOpts,
+    propertyType?: PropertyType,
+  ) {
     this.name = name;
     this.isIdentity = !!isIdentity;
 
@@ -133,7 +143,6 @@ export class Field {
     // otherwise 'TEXT' will be used as default
   }
 
-
   static parseDbType(dbtype: string): DbColumnTypeInfo {
     const typeDefMatches = /^\s*((\w+)(\s*\(\s*\d+\s*(,\s*\d+\s*)?\))?)(.*)$/.exec(dbtype);
 
@@ -154,7 +163,7 @@ export class Field {
     const defaultLiteralMatches = /\bDEFAULT\s+(('[^']*')+)/i.exec(rest);
     if (defaultLiteralMatches) {
       defaultValue = defaultLiteralMatches[1];
-      defaultValue.replace(/\'\'/g, '\'');
+      defaultValue.replace(/\'\'/g, "'");
     }
     const defaultExprMatches = /\bDEFAULT\s*\(([^\)]*)\)/i.exec(rest);
     if (defaultExprMatches) {
@@ -165,6 +174,6 @@ export class Field {
     // debug(`type='${typeName}'`);
     // debug(`notNull='${notNull}'`);
     // debug(`default='${defaultValue}'`);
-    return {typeAffinity, notNull, defaultValue};
+    return { typeAffinity, notNull, defaultValue };
   }
 }

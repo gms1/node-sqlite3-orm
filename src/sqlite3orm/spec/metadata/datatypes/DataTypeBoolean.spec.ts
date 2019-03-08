@@ -1,28 +1,26 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-import {BaseDAO, field, id, schema, SQL_MEMORY_DB_PRIVATE, SqlDatabase, table} from '../../..';
+import { BaseDAO, field, id, schema, SQL_MEMORY_DB_PRIVATE, SqlDatabase, table } from '../../..';
 
 const DATATYPE_BOOLEAN_TABLE = 'DB:DATATYPE_BOOLEAN';
 
-@table({name: DATATYPE_BOOLEAN_TABLE})
+@table({ name: DATATYPE_BOOLEAN_TABLE })
 class DataTypeBoolean {
-  @id({name: 'id', dbtype: 'INTEGER NOT NULL'})
+  @id({ name: 'id', dbtype: 'INTEGER NOT NULL' })
   id: number;
 
-  @field({name: 'my_bool_text', dbtype: 'TEXT'})
+  @field({ name: 'my_bool_text', dbtype: 'TEXT' })
   myBool2Text?: boolean;
 
-  @field({name: 'my_bool_int', dbtype: 'INTEGER'})
+  @field({ name: 'my_bool_int', dbtype: 'INTEGER' })
   myBool2Int?: boolean;
 
-  @field({name: 'my_bool_real', dbtype: 'REAL'})
+  @field({ name: 'my_bool_real', dbtype: 'REAL' })
   myBool2Real?: boolean;
 
   constructor() {
     this.id = 0;
   }
 }
-
-
 
 describe('test boolean type', () => {
   let sqldb: SqlDatabase;
@@ -57,7 +55,7 @@ describe('test boolean type', () => {
       model.myBool2Int = true;
       model.myBool2Real = true;
       await dao.insert(model);
-      row = await sqlstmt.get({':id': model.id});
+      row = await sqlstmt.get({ ':id': model.id });
       expect(row.id).toBe(model.id);
       expect(row.my_bool_text).toBe('1');
       expect(row.my_bool_int).toBe(1);
@@ -69,7 +67,7 @@ describe('test boolean type', () => {
       model.myBool2Int = false;
       model.myBool2Real = false;
       await dao.insert(model);
-      row = await sqlstmt.get({':id': model.id});
+      row = await sqlstmt.get({ ':id': model.id });
       expect(row.id).toBe(model.id);
       expect(row.my_bool_text).toBe('0');
       expect(row.my_bool_int).toBe(0);
@@ -80,7 +78,7 @@ describe('test boolean type', () => {
       model = new DataTypeBoolean();
       model.id = oldid;
       await dao.insert(model);
-      row = await sqlstmt.get({':id': model.id});
+      row = await sqlstmt.get({ ':id': model.id });
       expect(row.id).toBe(model.id);
       // tslint:disable: no-null-keyword
       expect(row.my_bool_text).toBe(null);
@@ -95,7 +93,6 @@ describe('test boolean type', () => {
     done();
   });
 
-
   it('expect reading boolean properties from database to succeed', async (done) => {
     try {
       let sqlstmt = await sqldb.prepare(`INSERT INTO "${DATATYPE_BOOLEAN_TABLE}"
@@ -105,73 +102,158 @@ describe('test boolean type', () => {
 
       // all true
       ++model.id;
-      await sqlstmt.run({':id': model.id, ':my_bool_text': true, ':my_bool_int': true, ':my_bool_real': true});
+      await sqlstmt.run({
+        ':id': model.id,
+        ':my_bool_text': true,
+        ':my_bool_int': true,
+        ':my_bool_real': true,
+      });
       model = await dao.select(model);
-      expect(typeof model.myBool2Text).toBe('boolean', `record ${model.id}: myBool2Text should be of type boolean`);
-      expect(typeof model.myBool2Int).toBe('boolean', `record ${model.id}: myBool2Int should be of type boolean`);
-      expect(typeof model.myBool2Real).toBe('boolean', `record ${model.id}: myBool2Real should be of type boolean`);
+      expect(typeof model.myBool2Text).toBe(
+        'boolean',
+        `record ${model.id}: myBool2Text should be of type boolean`,
+      );
+      expect(typeof model.myBool2Int).toBe(
+        'boolean',
+        `record ${model.id}: myBool2Int should be of type boolean`,
+      );
+      expect(typeof model.myBool2Real).toBe(
+        'boolean',
+        `record ${model.id}: myBool2Real should be of type boolean`,
+      );
       expect(model.myBool2Text).toBeTruthy(`record ${model.id}: myBool2Text should be true`);
       expect(model.myBool2Int).toBeTruthy(`record ${model.id}: myBool2Int should be true`);
       expect(model.myBool2Real).toBeTruthy(`record ${model.id}: myBool2Real should be true`);
 
       // all false
       ++model.id;
-      await sqlstmt.run({':id': model.id, ':my_bool_text': false, ':my_bool_int': false, ':my_bool_real': false});
+      await sqlstmt.run({
+        ':id': model.id,
+        ':my_bool_text': false,
+        ':my_bool_int': false,
+        ':my_bool_real': false,
+      });
       model = await dao.select(model);
-      expect(typeof model.myBool2Text).toBe('boolean', `record ${model.id}: myBool2Text should be of type boolean`);
-      expect(typeof model.myBool2Int).toBe('boolean', `record ${model.id}: myBool2Int should be of type boolean`);
-      expect(typeof model.myBool2Real).toBe('boolean', `record ${model.id}: myBool2Real should be of type boolean`);
+      expect(typeof model.myBool2Text).toBe(
+        'boolean',
+        `record ${model.id}: myBool2Text should be of type boolean`,
+      );
+      expect(typeof model.myBool2Int).toBe(
+        'boolean',
+        `record ${model.id}: myBool2Int should be of type boolean`,
+      );
+      expect(typeof model.myBool2Real).toBe(
+        'boolean',
+        `record ${model.id}: myBool2Real should be of type boolean`,
+      );
       expect(model.myBool2Text).toBeFalsy(`record ${model.id}: myBool2Text should be false`);
       expect(model.myBool2Int).toBeFalsy(`record ${model.id}: myBool2Int should be false`);
       expect(model.myBool2Real).toBeFalsy(`record ${model.id}: myBool2Real should be false`);
 
       // all undefined
       ++model.id;
-      await sqlstmt.run(
-          {':id': model.id, ':my_bool_text': undefined, ':my_bool_int': undefined, ':my_bool_real': undefined});
+      await sqlstmt.run({
+        ':id': model.id,
+        ':my_bool_text': undefined,
+        ':my_bool_int': undefined,
+        ':my_bool_real': undefined,
+      });
       model = await dao.select(model);
-      expect(typeof model.myBool2Text).toBe('undefined', `record ${model.id}: myBool2Text should be of type undefined`);
-      expect(typeof model.myBool2Int).toBe('undefined', `record ${model.id}: myBool2Int should be of type undefined`);
-      expect(typeof model.myBool2Real).toBe('undefined', `record ${model.id}: myBool2Real should be of type undefined`);
+      expect(typeof model.myBool2Text).toBe(
+        'undefined',
+        `record ${model.id}: myBool2Text should be of type undefined`,
+      );
+      expect(typeof model.myBool2Int).toBe(
+        'undefined',
+        `record ${model.id}: myBool2Int should be of type undefined`,
+      );
+      expect(typeof model.myBool2Real).toBe(
+        'undefined',
+        `record ${model.id}: myBool2Real should be of type undefined`,
+      );
 
       // all null
       // tslint:disable: no-null-keyword
       ++model.id;
-      await sqlstmt.run({':id': model.id, ':my_bool_text': null, ':my_bool_int': null, ':my_bool_real': null});
+      await sqlstmt.run({
+        ':id': model.id,
+        ':my_bool_text': null,
+        ':my_bool_int': null,
+        ':my_bool_real': null,
+      });
       model = await dao.select(model);
-      expect(typeof model.myBool2Text).toBe('undefined', `record ${model.id}: myBool2Text should be of type undefined`);
-      expect(typeof model.myBool2Int).toBe('undefined', `record ${model.id}: myBool2Int should be of type undefined`);
-      expect(typeof model.myBool2Real).toBe('undefined', `record ${model.id}: myBool2Real should be of type undefined`);
+      expect(typeof model.myBool2Text).toBe(
+        'undefined',
+        `record ${model.id}: myBool2Text should be of type undefined`,
+      );
+      expect(typeof model.myBool2Int).toBe(
+        'undefined',
+        `record ${model.id}: myBool2Int should be of type undefined`,
+      );
+      expect(typeof model.myBool2Real).toBe(
+        'undefined',
+        `record ${model.id}: myBool2Real should be of type undefined`,
+      );
       // tslint:enable: no-null-keyword
 
       // myBool2Text is '0'
       ++model.id;
-      await sqlstmt.run({':id': model.id, ':my_bool_text': '0', ':my_bool_int': undefined, ':my_bool_real': undefined});
+      await sqlstmt.run({
+        ':id': model.id,
+        ':my_bool_text': '0',
+        ':my_bool_int': undefined,
+        ':my_bool_real': undefined,
+      });
       model = await dao.select(model);
-      expect(typeof model.myBool2Text).toBe('boolean', `record ${model.id}: myBool2Text should be of type boolean`);
+      expect(typeof model.myBool2Text).toBe(
+        'boolean',
+        `record ${model.id}: myBool2Text should be of type boolean`,
+      );
       expect(model.myBool2Text).toBeFalsy(`record ${model.id}: myBool2Text should be false`);
 
       // myBool2Text is '1'
       ++model.id;
-      await sqlstmt.run({':id': model.id, ':my_bool_text': '1', ':my_bool_int': undefined, ':my_bool_real': undefined});
+      await sqlstmt.run({
+        ':id': model.id,
+        ':my_bool_text': '1',
+        ':my_bool_int': undefined,
+        ':my_bool_real': undefined,
+      });
       model = await dao.select(model);
-      expect(typeof model.myBool2Text).toBe('boolean', `record ${model.id}: myBool2Text should be of type boolean`);
+      expect(typeof model.myBool2Text).toBe(
+        'boolean',
+        `record ${model.id}: myBool2Text should be of type boolean`,
+      );
       expect(model.myBool2Text).toBeTruthy(`record ${model.id}: myBool2Text should be true`);
 
       // myBool2Text is 'false'
       ++model.id;
-      await sqlstmt.run(
-          {':id': model.id, ':my_bool_text': 'false', ':my_bool_int': undefined, ':my_bool_real': undefined});
+      await sqlstmt.run({
+        ':id': model.id,
+        ':my_bool_text': 'false',
+        ':my_bool_int': undefined,
+        ':my_bool_real': undefined,
+      });
       model = await dao.select(model);
-      expect(typeof model.myBool2Text).toBe('boolean', `record ${model.id}: myBool2Text should be of type boolean`);
+      expect(typeof model.myBool2Text).toBe(
+        'boolean',
+        `record ${model.id}: myBool2Text should be of type boolean`,
+      );
       expect(model.myBool2Text).toBeFalsy(`record ${model.id}: myBool2Text should be false`);
 
       // myBool2Text is 'true'
       ++model.id;
-      await sqlstmt.run(
-          {':id': model.id, ':my_bool_text': 'true', ':my_bool_int': undefined, ':my_bool_real': undefined});
+      await sqlstmt.run({
+        ':id': model.id,
+        ':my_bool_text': 'true',
+        ':my_bool_int': undefined,
+        ':my_bool_real': undefined,
+      });
       model = await dao.select(model);
-      expect(typeof model.myBool2Text).toBe('boolean', `record ${model.id}: myBool2Text should be of type boolean`);
+      expect(typeof model.myBool2Text).toBe(
+        'boolean',
+        `record ${model.id}: myBool2Text should be of type boolean`,
+      );
       expect(model.myBool2Text).toBeTruthy(`record ${model.id}: myBool2Text should be true`);
 
       await sqlstmt.finalize();
@@ -180,7 +262,4 @@ describe('test boolean type', () => {
     }
     done();
   });
-
-
-
 });

@@ -1,5 +1,5 @@
-export {AutoUpgrader, UpgradeInfo, UpgradeMode} from './AutoUpgrader';
-export {BaseDAO} from './BaseDAO';
+export { AutoUpgrader, UpgradeInfo, UpgradeMode } from './AutoUpgrader';
+export { BaseDAO } from './BaseDAO';
 export {
   SQL_DEFAULT_SCHEMA,
   SQL_MEMORY_DB_PRIVATE,
@@ -12,9 +12,15 @@ export {
   SqlDatabase,
   SqlDatabaseSettings,
   SqlRunResult,
-  SqlStatement
+  SqlStatement,
 } from './core';
-export {DbCatalogDAO, DbColumnInfo, DbForeignKeyInfo, DbIndexInfo, DbTableInfo} from './dbcatalog';
+export {
+  DbCatalogDAO,
+  DbColumnInfo,
+  DbForeignKeyInfo,
+  DbIndexInfo,
+  DbTableInfo,
+} from './dbcatalog';
 export {
   field,
   Field,
@@ -36,7 +42,7 @@ export {
   table,
   Table,
   TableOpts,
-  ValueTransformer
+  ValueTransformer,
 } from './metadata';
 export {
   Columns,
@@ -47,7 +53,7 @@ export {
   PropertyPredicates,
   QueryModel,
   TABLEALIAS,
-  Where
+  Where,
 } from './query';
 
 export * from './utils';

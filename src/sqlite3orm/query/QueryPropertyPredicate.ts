@@ -1,7 +1,7 @@
-import {KeyType, MetaModel, MetaProperty} from '../metadata';
+import { KeyType, MetaModel, MetaProperty } from '../metadata';
 
-import {QueryOperation} from './QueryOperation';
-import {ComparisonOperatorType} from './Where';
+import { QueryOperation } from './QueryOperation';
+import { ComparisonOperatorType } from './Where';
 
 export class QueryPropertyPredicate<PT> implements QueryOperation {
   op: ComparisonOperatorType;
@@ -59,11 +59,15 @@ export class QueryPropertyPredicate<PT> implements QueryOperation {
       case 'isNotBetween':
         /* istanbul ignore if */
         if (!Array.isArray(value)) {
-          throw new Error(`expected array parameter for BETWEEN-operation on '${this.propertyKey.toString()}`);
+          throw new Error(
+            `expected array parameter for BETWEEN-operation on '${this.propertyKey.toString()}`,
+          );
         }
         /* istanbul ignore if */
         if (value.length !== 2) {
-          throw new Error(`expected 2-tuple for BETWEEN-operation on '${this.propertyKey.toString()}`);
+          throw new Error(
+            `expected 2-tuple for BETWEEN-operation on '${this.propertyKey.toString()}`,
+          );
         }
         const from = await value[0];
         const to = await value[1];
@@ -76,7 +80,9 @@ export class QueryPropertyPredicate<PT> implements QueryOperation {
       case 'isNotIn':
         /* istanbul ignore if */
         if (!Array.isArray(value)) {
-          throw new Error(`expected array parameter for IN-operation on '${this.propertyKey.toString()}`);
+          throw new Error(
+            `expected array parameter for IN-operation on '${this.propertyKey.toString()}`,
+          );
         }
         if (!value.length) {
           throw new Error(`expected a value for IN-operation on '${this.propertyKey.toString()}`);

@@ -1,12 +1,12 @@
 // import * as core from './core';
 
 // tslint:disable-next-line no-require-imports
-import {FieldOpts} from './decorators';
+import { FieldOpts } from './decorators';
 import * as transformers from './DefaultValueTransformers';
-import {Field} from './Field';
-import {KeyType, MetaModel} from './MetaModel';
-import {PropertyType} from './PropertyType';
-import {ValueTransformer} from './ValueTransformer';
+import { Field } from './Field';
+import { KeyType, MetaModel } from './MetaModel';
+import { PropertyType } from './PropertyType';
+import { ValueTransformer } from './ValueTransformer';
 
 export class MetaProperty {
   /**
@@ -24,7 +24,9 @@ export class MetaProperty {
       return this._field;
     }
     /* istanbul ignore next */
-    throw new Error(`meta model property '${this.className}.${this.key.toString()}' not fully initialized yet`);
+    throw new Error(
+      `meta model property '${this.className}.${this.key.toString()}' not fully initialized yet`,
+    );
   }
 
   private _transform!: ValueTransformer;
@@ -37,7 +39,7 @@ export class MetaProperty {
   }
 
   // called from decorator
-  setPropertyType(propertyType: Function|string): void {
+  setPropertyType(propertyType: Function | string): void {
     let typeName: string;
     /* istanbul ignore else */
     if (typeof propertyType === 'function') {
@@ -63,7 +65,6 @@ export class MetaProperty {
         break;
     }
   }
-
 
   valueToDB(value: any): any {
     return this._transform.toDB(value);
@@ -91,7 +92,9 @@ export class MetaProperty {
     try {
       this._field = model.table.getOrAddTableField(name, isIdentity, opts, this.propertyType);
     } catch (err) {
-      throw new Error(`property '${this.className}.${this.key.toString()}': failed to add field: ${err.message}`);
+      throw new Error(
+        `property '${this.className}.${this.key.toString()}': failed to add field: ${err.message}`,
+      );
     }
 
     // add mapping from column name to this property

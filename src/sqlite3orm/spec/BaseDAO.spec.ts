@@ -1,6 +1,17 @@
 // tslint:disable prefer-const max-classes-per-file no-unnecessary-class no-unused-variable
 // tslint:disable no-non-null-assertion
-import {BaseDAO, field, fk, id, index, METADATA_MODEL_KEY, schema, SQL_MEMORY_DB_PRIVATE, SqlDatabase, table} from '..';
+import {
+  BaseDAO,
+  field,
+  fk,
+  id,
+  index,
+  METADATA_MODEL_KEY,
+  schema,
+  SQL_MEMORY_DB_PRIVATE,
+  SqlDatabase,
+  table,
+} from '..';
 
 const USERS_TABLE = 'BD:USERS TABLE';
 const CONTACTS_TABLE = 'main.BD:CONTACTS TABLE';
@@ -10,12 +21,12 @@ const TEST_INDEX_TABLE2 = 'temp.BD:INDEX_TABLE';
 const TEST_DB_DEFAULTS = 'BD:TEST_DB_DEFAULTS_TABLE';
 const TEST_DB_DEFAULTS2 = 'BD:TEST_DB_DEFAULTS_TABLE2';
 
-@table({name: USERS_TABLE})
+@table({ name: USERS_TABLE })
 class User {
-  @id({name: 'user_id', dbtype: 'INTEGER NOT NULL'})
+  @id({ name: 'user_id', dbtype: 'INTEGER NOT NULL' })
   userId: number;
 
-  @field({name: 'user_loginname', dbtype: 'TEXT NOT NULL'})
+  @field({ name: 'user_loginname', dbtype: 'TEXT NOT NULL' })
   userLoginName: string;
 
   notMapped?: string;
@@ -26,20 +37,21 @@ class User {
   }
 }
 
-@table({name: CONTACTS_TABLE, autoIncrement: true})
+@table({ name: CONTACTS_TABLE, autoIncrement: true })
 class Contact {
   static userConstraint: string = 'user';
 
-  @id({name: 'contact_id', dbtype: 'INTEGER NOT NULL'})
+  @id({ name: 'contact_id', dbtype: 'INTEGER NOT NULL' })
   contactId: number;
 
-  @field({name: 'contact_email', dbtype: 'TEXT'})
+  @field({ name: 'contact_email', dbtype: 'TEXT' })
   emailAddress: string;
 
-  @field({name: 'contact_mobile', dbtype: 'TEXT'})
+  @field({ name: 'contact_mobile', dbtype: 'TEXT' })
   mobile: string;
 
-  @fk(Contact.userConstraint, USERS_TABLE, 'user_id') @field({name: 'user_id', dbtype: 'INTEGER NOT NULL'})
+  @fk(Contact.userConstraint, USERS_TABLE, 'user_id')
+  @field({ name: 'user_id', dbtype: 'INTEGER NOT NULL' })
   userId: number;
 
   notMapped?: string;
@@ -93,17 +105,26 @@ describe('test BaseDAO', () => {
 
       await userDao.select(user1);
       expect(user1.userId).toBe(user2.userId, 'userId does not match after first update');
-      expect(user1.userLoginName).toBe(user2.userLoginName, 'userLoginName does not match after first update');
+      expect(user1.userLoginName).toBe(
+        user2.userLoginName,
+        'userLoginName does not match after first update',
+      );
 
-      user1 = await userDao.selectById({userId: 1});
+      user1 = await userDao.selectById({ userId: 1 });
       expect(user1.userId).toBe(user2.userId, 'userId does not match using selectById');
-      expect(user1.userLoginName).toBe(user2.userLoginName, 'userLoginName does not match using selectById');
+      expect(user1.userLoginName).toBe(
+        user2.userLoginName,
+        'userLoginName does not match using selectById',
+      );
 
       let allUsers1 = await userDao.selectAll();
       expect(allUsers1.length).toBe(1);
       user2 = allUsers1[0];
       expect(user1.userId).toBe(user2.userId, 'userId does not match after select all');
-      expect(user1.userLoginName).toBe(user2.userLoginName, 'userLoginName does not match after select all');
+      expect(user1.userLoginName).toBe(
+        user2.userLoginName,
+        'userLoginName does not match after select all',
+      );
 
       await userDao.delete(user1);
       let allUsers2 = await userDao.selectAll();
@@ -166,15 +187,17 @@ describe('test BaseDAO', () => {
 
       user.userId = 1;
       let contactsUser1$1 = await contactDao.selectAllOf(
-          Contact.userConstraint, User, user, ' AND contact_email=:contact_email',
-          {':contact_email': 'user1@test2.net'});
+        Contact.userConstraint,
+        User,
+        user,
+        ' AND contact_email=:contact_email',
+        { ':contact_email': 'user1@test2.net' },
+      );
       expect(contactsUser1$1.length).toBe(1);
-
     } catch (err) {
       fail(err);
     }
     done();
-
   });
 
   // ---------------------------------------------
@@ -189,10 +212,8 @@ describe('test BaseDAO', () => {
     try {
       let noTableDao: BaseDAO<NoTable> = new BaseDAO(NoTable, sqldb);
       fail('instantiation BaseDAO for class without table-definition should have thrown');
-    } catch (err) {
-    }
+    } catch (err) {}
     done();
-
   });
 
   // ---------------------------------------------
@@ -211,10 +232,8 @@ describe('test BaseDAO', () => {
       user1.userLoginName = 'login1/2';
       await userDao.insert(user1);
       fail('inserting duplicate id should have thrown');
-    } catch (err) {
-    }
+    } catch (err) {}
     done();
-
   });
 
   // ---------------------------------------------
@@ -222,14 +241,12 @@ describe('test BaseDAO', () => {
     let user1: User = new User();
     let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
     try {
-      user1.userId = undefined as any as number;
+      user1.userId = (undefined as any) as number;
       user1.userLoginName = 'login1/2';
       await userDao.update(user1);
       fail('updating using wrong id should have thrown');
-    } catch (err) {
-    }
+    } catch (err) {}
     done();
-
   });
 
   // ---------------------------------------------
@@ -245,13 +262,11 @@ describe('test BaseDAO', () => {
     }
     try {
       user1.userId = 1;
-      user1.userLoginName = undefined as any as string;
+      user1.userLoginName = (undefined as any) as string;
       await userDao.update(user1);
       fail('updating not null column with null should have thrown');
-    } catch (err) {
-    }
+    } catch (err) {}
     done();
-
   });
 
   // ---------------------------------------------
@@ -259,14 +274,12 @@ describe('test BaseDAO', () => {
     let user1: User = new User();
     let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
     try {
-      user1.userId = undefined as any as number;
+      user1.userId = (undefined as any) as number;
       user1.userLoginName = 'login1/2';
       await userDao.delete(user1);
       fail('deleting using wrong id should have thrown');
-    } catch (err) {
-    }
+    } catch (err) {}
     done();
-
   });
 
   // ---------------------------------------------
@@ -274,14 +287,12 @@ describe('test BaseDAO', () => {
     let user1: User = new User();
     let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
     try {
-      user1.userId = undefined as any as number;
+      user1.userId = (undefined as any) as number;
       user1.userLoginName = 'login1/2';
       await userDao.deleteById(user1);
       fail('deleting using wrong id should have thrown');
-    } catch (err) {
-    }
+    } catch (err) {}
     done();
-
   });
 
   // ---------------------------------------------
@@ -292,25 +303,22 @@ describe('test BaseDAO', () => {
       user1.userId = 1;
       user1.userLoginName = 'login1/1';
       await userDao.insert(user1);
-      await userDao.selectById({userId: 1});
+      await userDao.selectById({ userId: 1 });
       expect(user1.userId).toBe(1, 'userId does not match after insert');
       user1.userId = 1;
-      await userDao.deleteById({userId: 1});
+      await userDao.deleteById({ userId: 1 });
     } catch (err) {
       fail(err);
     }
     try {
-      await userDao.selectById({userId: 1});
+      await userDao.selectById({ userId: 1 });
       fail('row should have been deleted');
-    } catch (err) {
-    }
+    } catch (err) {}
     try {
       await userDao.selectAll('WHERE noColumn=9');
       fail('a condition using not existing column should have thrown');
-    } catch (err) {
-    }
+    } catch (err) {}
     done();
-
   });
 
   // ---------------------------------------------
@@ -320,10 +328,8 @@ describe('test BaseDAO', () => {
     try {
       await userDao.selectAll('WHERE noColumn=9');
       fail('a condition using not existing column should have thrown');
-    } catch (err) {
-    }
+    } catch (err) {}
     done();
-
   });
   // ---------------------------------------------
   it('expect selectEach to throw on failure', async (done) => {
@@ -333,10 +339,8 @@ describe('test BaseDAO', () => {
       user1.userId = 1;
       await userDao.selectEach(() => {}, 'WHERE noColumn=9');
       fail('a condition using not existing column should have thrown');
-    } catch (err) {
-    }
+    } catch (err) {}
     done();
-
   });
 
   // ---------------------------------------------
@@ -352,15 +356,14 @@ describe('test BaseDAO', () => {
     }
     try {
       let user2: User = new User();
-      await userDao.selectEach((err, usr) => user2 = usr, 'WHERE user_id=1');
+      await userDao.selectEach((err, usr) => (user2 = usr), 'WHERE user_id=1');
       expect(user1.userId).toBe(user2.userId, 'userId does not match');
       expect(user1.userLoginName).toBe(user2.userLoginName, 'userLoginName does not match');
-      await userDao.selectEach((err, usr) => user2 = usr);
+      await userDao.selectEach((err, usr) => (user2 = usr));
     } catch (err) {
       fail(err);
     }
     done();
-
   });
 
   // ---------------------------------------------
@@ -370,32 +373,30 @@ describe('test BaseDAO', () => {
     try {
       let usersContact1 = await userDao.selectAllOf('undefConstraint', Contact, contact);
       fail('selectAllOf for undefined constraint should have failed');
-    } catch (err) {
-    }
+    } catch (err) {}
     done();
-
   });
 
   // ---------------------------------------------
 
-  @table({name: TEST_SET_PROP_TABLE})
+  @table({ name: TEST_SET_PROP_TABLE })
   class TestSetProperty {
-    @id({name: 'id', dbtype: 'INTEGER NOT NULL'})
+    @id({ name: 'id', dbtype: 'INTEGER NOT NULL' })
     id: number;
 
-    @field({name: 'my_bool_text', dbtype: 'TEXT'})
+    @field({ name: 'my_bool_text', dbtype: 'TEXT' })
     myBool2Text?: boolean;
 
-    @field({name: 'my_number_text', dbtype: 'TEXT'})
+    @field({ name: 'my_number_text', dbtype: 'TEXT' })
     myNumber2Text?: number;
 
-    @field({name: 'my_string_int', dbtype: 'INTEGER'})
+    @field({ name: 'my_string_int', dbtype: 'INTEGER' })
     myString2Number?: string;
 
-    @field({name: 'my_date_sec_real', dbtype: 'REAL', dateInMilliSeconds: false})
+    @field({ name: 'my_date_sec_real', dbtype: 'REAL', dateInMilliSeconds: false })
     myDate2Seconds?: Date;
 
-    @field({name: 'my_date_milli_real', dbtype: 'REAL', dateInMilliSeconds: true})
+    @field({ name: 'my_date_milli_real', dbtype: 'REAL', dateInMilliSeconds: true })
     myDate2Milliseconds?: Date;
 
     notMapped?: string;
@@ -404,8 +405,6 @@ describe('test BaseDAO', () => {
       this.id = 0;
     }
   }
-
-
 
   // ---------------------------------------------
   it('expect setProperty to work if conversion is required', async (done) => {
@@ -430,7 +429,7 @@ describe('test BaseDAO', () => {
           3.14
         )
       `);
-      testRow = await testDao.selectById({id: 1});
+      testRow = await testDao.selectById({ id: 1 });
       expect(testRow.myBool2Text).toBeUndefined();
       expect(testRow.myNumber2Text).toBe(42);
       expect(testRow.myString2Number).toBe('24');
@@ -440,18 +439,18 @@ describe('test BaseDAO', () => {
       fail(err);
     }
     done();
-
   });
 
-  @table({name: TEST_INDEX_TABLE1, autoIncrement: true})
+  @table({ name: TEST_INDEX_TABLE1, autoIncrement: true })
   class TestIndexTable1 {
-    @id({name: 'id', dbtype: 'INTEGER NOT NULL'})
+    @id({ name: 'id', dbtype: 'INTEGER NOT NULL' })
     id: number;
 
-    @field({name: 'info', dbtype: 'TEXT'}) @index('index_table_idx')
+    @field({ name: 'info', dbtype: 'TEXT' })
+    @index('index_table_idx')
     info?: string;
 
-    @field({name: 'otherId', dbtype: 'INTEGER'})
+    @field({ name: 'otherId', dbtype: 'INTEGER' })
     otherId?: number;
 
     notMapped?: string;
@@ -461,15 +460,16 @@ describe('test BaseDAO', () => {
     }
   }
 
-  @table({name: TEST_INDEX_TABLE2, autoIncrement: true})
+  @table({ name: TEST_INDEX_TABLE2, autoIncrement: true })
   class TestIndexTable2 {
-    @id({name: 'id', dbtype: 'INTEGER NOT NULL'})
+    @id({ name: 'id', dbtype: 'INTEGER NOT NULL' })
     id: number;
 
-    @field({name: 'info', dbtype: 'TEXT'}) @index('index_table_idx')
+    @field({ name: 'info', dbtype: 'TEXT' })
+    @index('index_table_idx')
     info?: string;
 
-    @field({name: 'otherId', dbtype: 'INTEGER'})
+    @field({ name: 'otherId', dbtype: 'INTEGER' })
     otherId?: number;
 
     notMapped?: string;
@@ -478,7 +478,6 @@ describe('test BaseDAO', () => {
       this.id = 0;
     }
   }
-
 
   // ---------------------------------------------
   it('expect create tables/indexes to work for tables/indexes having same name but different schema ', async (done) => {
@@ -499,22 +498,21 @@ describe('test BaseDAO', () => {
     done();
   });
 
-
-  @table({name: TEST_DB_DEFAULTS, autoIncrement: true})
+  @table({ name: TEST_DB_DEFAULTS, autoIncrement: true })
   class TestDbDefaultsFull {
-    @id({name: 'id', dbtype: 'INTEGER NOT NULL'})
+    @id({ name: 'id', dbtype: 'INTEGER NOT NULL' })
     id: number;
 
-    @field({name: 'my_bool', dbtype: 'TEXT DEFAULT 1'})
+    @field({ name: 'my_bool', dbtype: 'TEXT DEFAULT 1' })
     myBool?: boolean;
 
-    @field({name: 'my_integer', dbtype: 'INTEGER DEFAULT 42'})
+    @field({ name: 'my_integer', dbtype: 'INTEGER DEFAULT 42' })
     myInt?: number;
 
-    @field({name: 'my_string', dbtype: 'TEXT DEFAULT \'sqlite3orm\''})
+    @field({ name: 'my_string', dbtype: "TEXT DEFAULT 'sqlite3orm'" })
     myString?: string;
 
-    @field({name: 'my_real', dbtype: 'REAL DEFAULT 3.1415692'})
+    @field({ name: 'my_real', dbtype: 'REAL DEFAULT 3.1415692' })
     myReal?: number;
 
     notMapped?: string;
@@ -524,9 +522,9 @@ describe('test BaseDAO', () => {
     }
   }
 
-  @table({name: TEST_DB_DEFAULTS})
+  @table({ name: TEST_DB_DEFAULTS })
   class TestDbDefaultsMin {
-    @id({name: 'id', dbtype: 'INTEGER NOT NULL'})
+    @id({ name: 'id', dbtype: 'INTEGER NOT NULL' })
     id: number;
 
     notMapped?: string;
@@ -536,22 +534,21 @@ describe('test BaseDAO', () => {
     }
   }
 
-
-  @table({name: TEST_DB_DEFAULTS2, autoIncrement: false})
+  @table({ name: TEST_DB_DEFAULTS2, autoIncrement: false })
   class TestDbDefaultsFull2 {
-    @id({name: 'id', dbtype: 'INTEGER NOT NULL'})
+    @id({ name: 'id', dbtype: 'INTEGER NOT NULL' })
     id: number;
 
-    @field({name: 'my_bool', dbtype: 'TEXT DEFAULT 1'})
+    @field({ name: 'my_bool', dbtype: 'TEXT DEFAULT 1' })
     myBool?: boolean;
 
-    @field({name: 'my_integer', dbtype: 'INTEGER DEFAULT 42'})
+    @field({ name: 'my_integer', dbtype: 'INTEGER DEFAULT 42' })
     myInt?: number;
 
-    @field({name: 'my_string', dbtype: 'TEXT DEFAULT \'sqlite3orm\''})
+    @field({ name: 'my_string', dbtype: "TEXT DEFAULT 'sqlite3orm'" })
     myString?: string;
 
-    @field({name: 'my_real', dbtype: 'REAL DEFAULT 3.1415692'})
+    @field({ name: 'my_real', dbtype: 'REAL DEFAULT 3.1415692' })
     myReal?: number;
 
     notMapped?: string;
@@ -560,7 +557,6 @@ describe('test BaseDAO', () => {
       this.id = 0;
     }
   }
-
 
   // ---------------------------------------------
   it('expect default-clause to work: using additional model', async (done) => {
@@ -571,12 +567,11 @@ describe('test BaseDAO', () => {
       await fullDao.createTable();
 
       const writtenRow = await minDao.insert(writeRow);
-      let readRow = await fullDao.selectById({id: writtenRow.id});
+      let readRow = await fullDao.selectById({ id: writtenRow.id });
       expect(readRow.myBool).toBeTruthy();
       expect(readRow.myInt).toBe(42);
       expect(readRow.myString).toBe('sqlite3orm');
       expect(readRow.myReal).toBe(3.1415692);
-
     } catch (err) {
       fail(err);
     }
@@ -586,7 +581,6 @@ describe('test BaseDAO', () => {
       fail(err);
     }
     done();
-
   });
 
   // ---------------------------------------------
@@ -598,43 +592,45 @@ describe('test BaseDAO', () => {
       await fullDao.createTable();
 
       const writtenRow = await minDao.insert(writeRow);
-      let readRow = await fullDao.selectById({id: writtenRow.id});
+      let readRow = await fullDao.selectById({ id: writtenRow.id });
       expect(readRow.myBool).toBeTruthy();
       expect(readRow.myInt).toBe(42);
 
       const updateMyBool = fullDao.queryModel.getUpdateAllStatement(['myBool']);
-      await sqldb.run(updateMyBool, {':myBool': false});
+      await sqldb.run(updateMyBool, { ':myBool': false });
 
-      readRow = await fullDao.selectById({id: writtenRow.id});
+      readRow = await fullDao.selectById({ id: writtenRow.id });
       expect(readRow.myBool).toBeFalsy();
       expect(readRow.myInt).toBe(42);
 
-      const updateMyBoolAndMyInt = fullDao.queryModel.getUpdateAllStatement(['myBool', 'myInt', 'myBool']);
-      await sqldb.run(updateMyBoolAndMyInt, {':myBool': true, ':myInt': 99});
+      const updateMyBoolAndMyInt = fullDao.queryModel.getUpdateAllStatement([
+        'myBool',
+        'myInt',
+        'myBool',
+      ]);
+      await sqldb.run(updateMyBoolAndMyInt, { ':myBool': true, ':myInt': 99 });
 
-      readRow = await fullDao.selectById({id: writtenRow.id});
+      readRow = await fullDao.selectById({ id: writtenRow.id });
       expect(readRow.myBool).toBeTruthy();
       expect(readRow.myInt).toBe(99);
 
       const writtenRow2 = await minDao.insert(readRow);
 
-      readRow = await fullDao.selectById({id: writtenRow2.id});
+      readRow = await fullDao.selectById({ id: writtenRow2.id });
       expect(readRow.myBool).toBeTruthy();
       expect(readRow.myInt).toBe(42);
 
       const deleteAll = fullDao.queryModel.getDeleteAllStatement();
-      await sqldb.run(deleteAll + ' where my_integer=:myInt', {':myInt': 99});
+      await sqldb.run(deleteAll + ' where my_integer=:myInt', { ':myInt': 99 });
 
-      readRow = await fullDao.selectById({id: writtenRow2.id});
+      readRow = await fullDao.selectById({ id: writtenRow2.id });
       expect(readRow.myBool).toBeTruthy();
       expect(readRow.myInt).toBe(42);
 
       try {
-        readRow = await fullDao.selectById({id: writtenRow.id});
+        readRow = await fullDao.selectById({ id: writtenRow.id });
         fail(`record should not exist`);
-      } catch (e) {
-      }
-
+      } catch (e) {}
     } catch (err) {
       fail(err);
     }
@@ -644,9 +640,7 @@ describe('test BaseDAO', () => {
       fail(err);
     }
     done();
-
   });
-
 
   // ---------------------------------------------
   /* this is now checked at compile time
@@ -661,20 +655,18 @@ describe('test BaseDAO', () => {
   });
   */
 
-
   // ---------------------------------------------
   it('expect default-clause to work: using partial insert and empty partial model (autoincrement)', async (done) => {
     const fullDao: BaseDAO<TestDbDefaultsFull> = new BaseDAO(TestDbDefaultsFull, sqldb);
     try {
       await fullDao.createTable();
 
-      const insertedPartial = await fullDao.insertPartial({notMapped: 'foo'});
-      let readRow = await fullDao.selectById({id: insertedPartial.id, notMapped: 'foo'});
+      const insertedPartial = await fullDao.insertPartial({ notMapped: 'foo' });
+      let readRow = await fullDao.selectById({ id: insertedPartial.id, notMapped: 'foo' });
       expect(readRow.myBool).toBeTruthy();
       expect(readRow.myInt).toBe(42);
       expect(readRow.myString).toBe('sqlite3orm');
       expect(readRow.myReal).toBe(3.1415692);
-
     } catch (err) {
       fail(err);
     }
@@ -684,7 +676,6 @@ describe('test BaseDAO', () => {
       fail(err);
     }
     done();
-
   });
 
   // ---------------------------------------------
@@ -693,13 +684,12 @@ describe('test BaseDAO', () => {
     try {
       await fullDao.createTable();
 
-      const insertedPartial = await fullDao.insertPartial({id: 1});
-      let readRow = await fullDao.selectById({id: insertedPartial.id});
+      const insertedPartial = await fullDao.insertPartial({ id: 1 });
+      let readRow = await fullDao.selectById({ id: insertedPartial.id });
       expect(readRow.myBool).toBeTruthy();
       expect(readRow.myInt).toBe(42);
       expect(readRow.myString).toBe('sqlite3orm');
       expect(readRow.myReal).toBe(3.1415692);
-
     } catch (err) {
       fail(err);
     }
@@ -709,7 +699,6 @@ describe('test BaseDAO', () => {
       fail(err);
     }
     done();
-
   });
 
   // ---------------------------------------------
@@ -725,17 +714,15 @@ describe('test BaseDAO', () => {
       return;
     }
     try {
-      await fullDao.updatePartial({notMapped: 'foo'});
+      await fullDao.updatePartial({ notMapped: 'foo' });
       fail('should have thrown');
-    } catch (err) {
-    }
+    } catch (err) {}
     try {
       await fullDao.dropTable();
     } catch (err) {
       fail(err);
     }
     done();
-
   });
 
   it('expect partial update to fail for only identity properties in partial model', async (done) => {
@@ -750,17 +737,15 @@ describe('test BaseDAO', () => {
       return;
     }
     try {
-      await fullDao.updatePartial({id: insertedPartial.id});
+      await fullDao.updatePartial({ id: insertedPartial.id });
       fail('should have thrown');
-    } catch (err) {
-    }
+    } catch (err) {}
     try {
       await fullDao.dropTable();
     } catch (err) {
       fail(err);
     }
     done();
-
   });
 
   it('expect partial update to succeed for partial model', async (done) => {
@@ -770,8 +755,8 @@ describe('test BaseDAO', () => {
       await fullDao.createTable();
 
       insertedPartial = await fullDao.insertPartial({});
-      await fullDao.updatePartial({id: insertedPartial.id, myBool: false, myString: 'foo'});
-      let readRow = await fullDao.selectById({id: insertedPartial.id});
+      await fullDao.updatePartial({ id: insertedPartial.id, myBool: false, myString: 'foo' });
+      let readRow = await fullDao.selectById({ id: insertedPartial.id });
       expect(readRow.myBool).toBe(false, 'wrong myBool');
       expect(readRow.myInt).toBe(42, 'wrong myInt');
       expect(readRow.myString).toBe('foo', 'wrong myString');
@@ -785,7 +770,6 @@ describe('test BaseDAO', () => {
       fail(err);
     }
     done();
-
   });
 
   it('expect partial update to succeed for full model', async (done) => {
@@ -795,13 +779,13 @@ describe('test BaseDAO', () => {
       await fullDao.createTable();
 
       insertedPartial = await fullDao.insertPartial({});
-      const readRow = await fullDao.selectById({id: insertedPartial.id});
+      const readRow = await fullDao.selectById({ id: insertedPartial.id });
       readRow.myBool = false;
       readRow.myInt = readRow.myInt || 0;
       readRow.myInt += insertedPartial.id as number;
       readRow.notMapped = 'foo';
       await fullDao.updatePartial(readRow);
-      const readRow2 = await fullDao.selectById({id: insertedPartial.id});
+      const readRow2 = await fullDao.selectById({ id: insertedPartial.id });
       expect(readRow2.myBool).toBe(false);
       expect(readRow2.myInt).toBe(42 + (insertedPartial.id as number));
     } catch (err) {
@@ -813,7 +797,6 @@ describe('test BaseDAO', () => {
       fail(err);
     }
     done();
-
   });
 
   it('expect update/delete all (without condition) to succeed for partial model', async (done) => {
@@ -824,8 +807,8 @@ describe('test BaseDAO', () => {
 
       insertedPartial = await fullDao.insertPartial({});
       insertedPartial.myInt = 59;
-      await fullDao.updatePartialAll({myInt: insertedPartial.myInt, notMapped: 'foo'});
-      let readRow = await fullDao.selectById({id: insertedPartial.id});
+      await fullDao.updatePartialAll({ myInt: insertedPartial.myInt, notMapped: 'foo' });
+      let readRow = await fullDao.selectById({ id: insertedPartial.id });
       expect(readRow.myBool).toBe(true);
       expect(readRow.myInt).toBe(59);
       expect(readRow.myString).toBe('sqlite3orm');
@@ -833,10 +816,9 @@ describe('test BaseDAO', () => {
       await fullDao.deleteAll();
       try {
         insertedPartial.myBool = false;
-        await fullDao.updatePartial({id: insertedPartial.id, myBool: insertedPartial.myBool});
+        await fullDao.updatePartial({ id: insertedPartial.id, myBool: insertedPartial.myBool });
         fail(`update should have failed`);
-      } catch (err) {
-      }
+      } catch (err) {}
     } catch (err) {
       fail(err);
     }
@@ -846,7 +828,6 @@ describe('test BaseDAO', () => {
       fail(err);
     }
     done();
-
   });
 
   it('expect update/delete all (with condition) to succeed for partial model', async (done) => {
@@ -857,19 +838,20 @@ describe('test BaseDAO', () => {
 
       insertedPartial = await fullDao.insertPartial({});
       insertedPartial.myInt = 59;
-      await fullDao.updatePartialAll({myInt: insertedPartial.myInt}, 'where ID=:id', {':id': insertedPartial.id});
-      let readRow = await fullDao.selectById({id: insertedPartial.id});
+      await fullDao.updatePartialAll({ myInt: insertedPartial.myInt }, 'where ID=:id', {
+        ':id': insertedPartial.id,
+      });
+      let readRow = await fullDao.selectById({ id: insertedPartial.id });
       expect(readRow.myBool).toBe(true);
       expect(readRow.myInt).toBe(59);
       expect(readRow.myString).toBe('sqlite3orm');
       expect(readRow.myReal).toBe(3.1415692);
-      await fullDao.deleteAll('where ID=:id', {':id': insertedPartial.id});
+      await fullDao.deleteAll('where ID=:id', { ':id': insertedPartial.id });
       try {
         insertedPartial.myBool = false;
-        await fullDao.updatePartial({id: insertedPartial.id, myBool: insertedPartial.myBool});
+        await fullDao.updatePartial({ id: insertedPartial.id, myBool: insertedPartial.myBool });
         fail(`update should have failed`);
-      } catch (err) {
-      }
+      } catch (err) {}
     } catch (err) {
       fail(err);
     }
@@ -879,7 +861,6 @@ describe('test BaseDAO', () => {
       fail(err);
     }
     done();
-
   });
 
   it('expect update/delete all to fail if nothing changed', async (done) => {
@@ -894,14 +875,15 @@ describe('test BaseDAO', () => {
       fail(err);
     }
     try {
-      await fullDao.updatePartialAll(
-          {myInt: insertedPartial.myInt}, 'where ID=:id', {':id': insertedPartial.id as number + 1});
+      await fullDao.updatePartialAll({ myInt: insertedPartial.myInt }, 'where ID=:id', {
+        ':id': (insertedPartial.id as number) + 1,
+      });
       fail('updateAll should have failed');
     } catch (err) {
       expect(err.message).toContain('nothing changed');
     }
     try {
-      await fullDao.deleteAll('where ID=:id', {':id': insertedPartial.id as number + 1});
+      await fullDao.deleteAll('where ID=:id', { ':id': (insertedPartial.id as number) + 1 });
       fail('deleteAll should have failed');
     } catch (err) {
       expect(err.message).toContain('nothing changed');
@@ -912,8 +894,5 @@ describe('test BaseDAO', () => {
       fail(err);
     }
     done();
-
   });
-
-
 });

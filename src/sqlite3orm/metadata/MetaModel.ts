@@ -1,14 +1,13 @@
 // import * as core from './core';
-import {MetaProperty} from './MetaProperty';
-import {TableOpts, FieldOpts} from './decorators';
-import {Table} from './Table';
-import {schema} from './Schema';
-import {FKDefinition} from './FKDefinition';
-import {IDXDefinition} from './IDXDefinition';
-import {QueryModelCache} from '../query/QueryModelBase';
+import { MetaProperty } from './MetaProperty';
+import { TableOpts, FieldOpts } from './decorators';
+import { Table } from './Table';
+import { schema } from './Schema';
+import { FKDefinition } from './FKDefinition';
+import { IDXDefinition } from './IDXDefinition';
+import { QueryModelCache } from '../query/QueryModelBase';
 
-export type KeyType = (string|number|symbol);
-
+export type KeyType = string | number | symbol;
 
 interface PropertyFieldOptions {
   name: string;
@@ -34,7 +33,6 @@ interface PropertyOptions {
   index?: Map<KeyType, Map<string, PropertyIndexOptions>>;
 }
 
-
 export class MetaModel {
   public readonly properties: Map<KeyType, MetaProperty>;
   public readonly mapColNameToProp: Map<string, MetaProperty>;
@@ -51,7 +49,7 @@ export class MetaModel {
 
   private opts: PropertyOptions;
 
-  qmCache!: QueryModelCache;  // initialized by QueryModel (BaseDAO,..)
+  qmCache!: QueryModelCache; // initialized by QueryModel (BaseDAO,..)
 
   constructor(public readonly name: string) {
     this.properties = new Map<KeyType, MetaProperty>();
@@ -59,7 +57,7 @@ export class MetaModel {
     this.opts = {};
   }
 
-  hasProperty(key: KeyType): MetaProperty|undefined {
+  hasProperty(key: KeyType): MetaProperty | undefined {
     return this.properties.get(key);
   }
 
@@ -87,14 +85,20 @@ export class MetaModel {
     }
     let fieldOpts = this.opts.field.get(key);
     if (fieldOpts) {
-      throw new Error(`property '${this.name}.${key.toString()}' already mapped to '${fieldOpts.name}'`);
+      throw new Error(
+        `property '${this.name}.${key.toString()}' already mapped to '${fieldOpts.name}'`,
+      );
     }
-    fieldOpts = {name: opts.name || key.toString(), isIdentity, opts};
+    fieldOpts = { name: opts.name || key.toString(), isIdentity, opts };
     this.opts.field.set(key, fieldOpts);
   }
 
-  setPropertyForeignKey(key: KeyType, constraintName: string, foreignTableName: string, foreignTableField: string):
-      void {
+  setPropertyForeignKey(
+    key: KeyType,
+    constraintName: string,
+    foreignTableName: string,
+    foreignTableField: string,
+  ): void {
     this.getOrAddProperty(key);
     if (!this.opts.fk) {
       this.opts.fk = new Map<KeyType, Map<string, PropertyForeignKeyOptions>>();
@@ -105,9 +109,13 @@ export class MetaModel {
       this.opts.fk.set(key, propertyFkOpts);
     }
     if (propertyFkOpts.has(constraintName)) {
-      throw new Error(`property '${this.name}.${key.toString()}' already mapped to foreign key '${constraintName}'`);
+      throw new Error(
+        `property '${
+          this.name
+        }.${key.toString()}' already mapped to foreign key '${constraintName}'`,
+      );
     }
-    propertyFkOpts.set(constraintName, {constraintName, foreignTableName, foreignTableField});
+    propertyFkOpts.set(constraintName, { constraintName, foreignTableName, foreignTableField });
   }
 
   setPropertyIndexKey(key: KeyType, indexName: string, isUnique?: boolean, desc?: boolean): void {
@@ -121,12 +129,12 @@ export class MetaModel {
       this.opts.index.set(key, propertyIdxOpts);
     }
     if (propertyIdxOpts.has(indexName)) {
-      throw new Error(`property '${this.name}.${key.toString()}' already mapped to index '${indexName}'`);
+      throw new Error(
+        `property '${this.name}.${key.toString()}' already mapped to index '${indexName}'`,
+      );
     }
-    propertyIdxOpts.set(indexName, {name: indexName, isUnique, desc});
+    propertyIdxOpts.set(indexName, { name: indexName, isUnique, desc });
   }
-
-
 
   init(tableOpts: TableOpts): void {
     if (this._table) {
@@ -154,7 +162,7 @@ export class MetaModel {
       let fieldOpts = this.opts.field!.get(key);
       /* istanbul ignore if */
       if (!fieldOpts) {
-        fieldOpts = {name: key.toString(), isIdentity: false, opts: {}};
+        fieldOpts = { name: key.toString(), isIdentity: false, opts: {} };
         this.opts.field!.set(key, fieldOpts);
       }
       prop.init(this, fieldOpts.name, fieldOpts.isIdentity, fieldOpts.opts);
@@ -171,13 +179,17 @@ export class MetaModel {
             // tslint:disable triple-equals
             if (propIdxOpts.isUnique != undefined) {
               if (idxDef.isUnique != undefined && propIdxOpts.isUnique !== idxDef.isUnique) {
-                throw new Error(`property '${this.name}.${prop.key.toString()}': conflicting index uniqueness setting`);
+                throw new Error(
+                  `property '${
+                    this.name
+                  }.${prop.key.toString()}': conflicting index uniqueness setting`,
+                );
               }
               idxDef.isUnique = propIdxOpts.isUnique;
             }
             // tslint:enable triple-equals
           }
-          idxDef.fields.push({name: prop.field.name, desc: propIdxOpts.desc});
+          idxDef.fields.push({ name: prop.field.name, desc: propIdxOpts.desc });
         });
       }
 
@@ -192,16 +204,18 @@ export class MetaModel {
             // test for conflicting foreign table setting
             if (propFkOpts.foreignTableName !== fkDef.foreignTableName) {
               throw new Error(
-                  `property '${this.name}.${
-                                            prop.key.toString()
-                                          }': conflicting foreign table setting: new: '${
-                                                                                         propFkOpts.foreignTableName
-                                                                                       }', old '${
-                                                                                                  fkDef.foreignTableName
-                                                                                                }'`);
+                `property '${
+                  this.name
+                }.${prop.key.toString()}': conflicting foreign table setting: new: '${
+                  propFkOpts.foreignTableName
+                }', old '${fkDef.foreignTableName}'`,
+              );
             }
           }
-          fkDef.fields.push({name: prop.field.name, foreignColumnName: propFkOpts.foreignTableField});
+          fkDef.fields.push({
+            name: prop.field.name,
+            foreignColumnName: propFkOpts.foreignTableField,
+          });
         });
       }
     });
@@ -218,8 +232,6 @@ export class MetaModel {
     this.table.models.add(this);
     this.opts = {};
   }
-
-
 
   destroy(): void {
     if (this._table) {

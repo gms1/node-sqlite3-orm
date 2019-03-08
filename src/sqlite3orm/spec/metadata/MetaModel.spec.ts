@@ -1,31 +1,40 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-import {field, fk, getModelMetadata, id, index, METADATA_MODEL_KEY, MetaModel, schema, table} from '../..';
+import {
+  field,
+  fk,
+  getModelMetadata,
+  id,
+  index,
+  METADATA_MODEL_KEY,
+  MetaModel,
+  schema,
+  table,
+} from '../..';
 
 // ---------------------------------------------
 
 describe('test metaModels', () => {
-
   // ---------------------------------------------
   it('both models using all options', async (done) => {
     try {
-      @table({name: 'MPT1:T1', withoutRowId: false, autoIncrement: true})
+      @table({ name: 'MPT1:T1', withoutRowId: false, autoIncrement: true })
       class Model1 {
-        @id({name: 'MPT1:ID', dbtype: 'INTEGER NOT NULL', isJson: false})
+        @id({ name: 'MPT1:ID', dbtype: 'INTEGER NOT NULL', isJson: false })
         id!: number;
 
         @index('MPT1:IDX1', false)
         @fk('MPT1:FK1', 'MPT1:T1', 'MPT1:ID')
-        @field({name: 'MPT1:COL', dbtype: 'INTEGER', isJson: false, dateInMilliSeconds: false})
+        @field({ name: 'MPT1:COL', dbtype: 'INTEGER', isJson: false, dateInMilliSeconds: false })
         col?: Date;
       }
-      @table({name: 'MPT1:T1', withoutRowId: false, autoIncrement: true})
+      @table({ name: 'MPT1:T1', withoutRowId: false, autoIncrement: true })
       class Model2 {
-        @id({name: 'MPT1:ID', dbtype: 'INTEGER NOT NULL', isJson: false})
+        @id({ name: 'MPT1:ID', dbtype: 'INTEGER NOT NULL', isJson: false })
         id!: number;
 
         @index('MPT1:IDX1', false)
         @fk('MPT1:FK1', 'MPT1:T1', 'MPT1:ID')
-        @field({name: 'MPT1:COL', dbtype: 'INTEGER', isJson: false, dateInMilliSeconds: false})
+        @field({ name: 'MPT1:COL', dbtype: 'INTEGER', isJson: false, dateInMilliSeconds: false })
         col?: Date;
       }
     } catch (err) {
@@ -37,22 +46,22 @@ describe('test metaModels', () => {
   // ---------------------------------------------
   it('first model using default options, second model all options', async (done) => {
     try {
-      @table({name: 'MPT2:T1'})
+      @table({ name: 'MPT2:T1' })
       class Model1 {
-        @id({name: 'MPT2:ID'})
+        @id({ name: 'MPT2:ID' })
         id!: number;
 
-        @field({name: 'MPT2:COL'})
+        @field({ name: 'MPT2:COL' })
         col?: Date;
       }
-      @table({name: 'MPT2:T1', withoutRowId: false, autoIncrement: true})
+      @table({ name: 'MPT2:T1', withoutRowId: false, autoIncrement: true })
       class Model2 {
-        @id({name: 'MPT2:ID', dbtype: 'INTEGER NOT NULL', isJson: false})
+        @id({ name: 'MPT2:ID', dbtype: 'INTEGER NOT NULL', isJson: false })
         id!: number;
 
         @index('MPT2:IDX1', false)
         @fk('MPT2:FK1', 'MPT2:T1', 'MPT2:ID')
-        @field({name: 'MPT2:COL', dbtype: 'INTEGER', isJson: false, dateInMilliSeconds: false})
+        @field({ name: 'MPT2:COL', dbtype: 'INTEGER', isJson: false, dateInMilliSeconds: false })
         col?: Date;
       }
     } catch (err) {
@@ -64,19 +73,19 @@ describe('test metaModels', () => {
   // ---------------------------------------------
   it('first model using all options, second model default options', async (done) => {
     try {
-      @table({name: 'MPT3:T1', withoutRowId: false, autoIncrement: true})
+      @table({ name: 'MPT3:T1', withoutRowId: false, autoIncrement: true })
       class Model1 {
-        @id({name: 'MPT3:ID', dbtype: 'INTEGER NOT NULL', isJson: false})
+        @id({ name: 'MPT3:ID', dbtype: 'INTEGER NOT NULL', isJson: false })
         id!: number;
 
         @index('MPT3:IDX1', false)
         @fk('MPT3:FK1', 'MPT3:T1', 'MPT3:ID')
-        @field({dbtype: 'INTEGER', isJson: false, dateInMilliSeconds: false})
+        @field({ dbtype: 'INTEGER', isJson: false, dateInMilliSeconds: false })
         col?: Date;
       }
-      @table({name: 'MPT3:T1'})
+      @table({ name: 'MPT3:T1' })
       class Model2 {
-        @id({name: 'MPT3:ID'})
+        @id({ name: 'MPT3:ID' })
         id!: number;
 
         @index('MPT3:IDX1')
@@ -88,24 +97,25 @@ describe('test metaModels', () => {
     done();
   });
 
-
   // ---------------------------------------------
   it('both models using default options', async (done) => {
     try {
-      @table({name: 'MPT4A:T1'})
+      @table({ name: 'MPT4A:T1' })
       class Model1 {
-        @id({name: 'MPT4A:ID'})
+        @id({ name: 'MPT4A:ID' })
         id!: number;
 
-        @field({name: 'MPT4A:COL'}) @index('MPT4A:IDX1')
+        @field({ name: 'MPT4A:COL' })
+        @index('MPT4A:IDX1')
         col?: Date;
       }
-      @table({name: 'MPT4A:T1'})
+      @table({ name: 'MPT4A:T1' })
       class Model2 {
-        @id({name: 'MPT4A:ID'})
+        @id({ name: 'MPT4A:ID' })
         id!: number;
 
-        @field({name: 'MPT4A:COL'}) @index('MPT4A:IDX1')
+        @field({ name: 'MPT4A:COL' })
+        @index('MPT4A:IDX1')
         col?: Date;
       }
       let testTable = schema().getTable('MPT4A:T1');
@@ -121,14 +131,14 @@ describe('test metaModels', () => {
   // ---------------------------------------------
   it('conflicting withoutRowId-table option', async (done) => {
     try {
-      @table({name: 'MPT4:T1', withoutRowId: false})
+      @table({ name: 'MPT4:T1', withoutRowId: false })
       class Model1 {
-        @id({name: 'MPT4:ID'})
+        @id({ name: 'MPT4:ID' })
         id!: number;
       }
-      @table({name: 'MPT4:T1', withoutRowId: true})
+      @table({ name: 'MPT4:T1', withoutRowId: true })
       class Model2 {
-        @id({name: 'MPT4:ID'})
+        @id({ name: 'MPT4:ID' })
         id!: number;
       }
       fail('should have thrown');
@@ -141,14 +151,14 @@ describe('test metaModels', () => {
   // ---------------------------------------------
   it('conflicting autoincrement-table option', async (done) => {
     try {
-      @table({name: 'MPT5:T1', autoIncrement: false})
+      @table({ name: 'MPT5:T1', autoIncrement: false })
       class Model1 {
-        @id({name: 'MPT5:ID'})
+        @id({ name: 'MPT5:ID' })
         id!: number;
       }
-      @table({name: 'MPT5:T1', autoIncrement: true})
+      @table({ name: 'MPT5:T1', autoIncrement: true })
       class Model2 {
-        @id({name: 'MPT5:ID'})
+        @id({ name: 'MPT5:ID' })
         id!: number;
       }
       fail('should have thrown');
@@ -161,14 +171,14 @@ describe('test metaModels', () => {
   // ---------------------------------------------
   it('conflicting identity-field option', async (done) => {
     try {
-      @table({name: 'MPT6:T1'})
+      @table({ name: 'MPT6:T1' })
       class Model1 {
-        @id({name: 'MPT6:ID'})
+        @id({ name: 'MPT6:ID' })
         id!: number;
       }
-      @table({name: 'MPT6:T1'})
+      @table({ name: 'MPT6:T1' })
       class Model2 {
-        @field({name: 'MPT6:ID'})
+        @field({ name: 'MPT6:ID' })
         id!: number;
       }
       fail('should have thrown');
@@ -181,14 +191,14 @@ describe('test metaModels', () => {
   // ---------------------------------------------
   it('conflicting dbtype-field option', async (done) => {
     try {
-      @table({name: 'MPT7:T1'})
+      @table({ name: 'MPT7:T1' })
       class Model1 {
-        @field({name: 'COL', dbtype: 'INTEGER'})
+        @field({ name: 'COL', dbtype: 'INTEGER' })
         col!: number;
       }
-      @table({name: 'MPT7:T1'})
+      @table({ name: 'MPT7:T1' })
       class Model2 {
-        @field({name: 'COL', dbtype: 'TEXT'})
+        @field({ name: 'COL', dbtype: 'TEXT' })
         col!: number;
       }
       fail('should have thrown');
@@ -201,14 +211,14 @@ describe('test metaModels', () => {
   // ---------------------------------------------
   it('conflicting isJson-field option', async (done) => {
     try {
-      @table({name: 'MPT8:T1'})
+      @table({ name: 'MPT8:T1' })
       class Model1 {
-        @field({name: 'MPT8:COL', isJson: true})
+        @field({ name: 'MPT8:COL', isJson: true })
         col!: number;
       }
-      @table({name: 'MPT8:T1'})
+      @table({ name: 'MPT8:T1' })
       class Model2 {
-        @field({name: 'MPT8:COL', isJson: false})
+        @field({ name: 'MPT8:COL', isJson: false })
         col!: number;
       }
       fail('should have thrown');
@@ -221,14 +231,14 @@ describe('test metaModels', () => {
   // ---------------------------------------------
   it('conflicting dateInMilliSeconds-field option', async (done) => {
     try {
-      @table({name: 'MPT8A:T1'})
+      @table({ name: 'MPT8A:T1' })
       class Model1 {
-        @field({name: 'MPT8A:COL', dateInMilliSeconds: true})
+        @field({ name: 'MPT8A:COL', dateInMilliSeconds: true })
         col!: Date;
       }
-      @table({name: 'MPT8A:T1'})
+      @table({ name: 'MPT8A:T1' })
       class Model2 {
-        @field({name: 'MPT8A:COL', dateInMilliSeconds: false})
+        @field({ name: 'MPT8A:COL', dateInMilliSeconds: false })
         col!: Date;
       }
       fail('should have thrown');
@@ -238,16 +248,16 @@ describe('test metaModels', () => {
     done();
   });
 
-
   // ---------------------------------------------
   it('conflicting index options (single model)', async (done) => {
     try {
-      @table({name: 'MPT9:T1'})
+      @table({ name: 'MPT9:T1' })
       class Model1 {
-        @id({name: 'MPT9:ID'})
+        @id({ name: 'MPT9:ID' })
         id!: number;
 
-        @index('MPT9:IDX1', false) @field({name: 'MPT9:COL'})
+        @index('MPT9:IDX1', false)
+        @field({ name: 'MPT9:COL' })
         col?: number;
 
         @index('MPT9:IDX1', true)
@@ -262,12 +272,13 @@ describe('test metaModels', () => {
   // ---------------------------------------------
   it('non-conflicting index options (single model)', async (done) => {
     try {
-      @table({name: 'MPT9A:T1'})
+      @table({ name: 'MPT9A:T1' })
       class Model1 {
-        @id({name: 'MPT9A:ID'})
+        @id({ name: 'MPT9A:ID' })
         id!: number;
 
-        @index('MPT9A:IDX1') @field({name: 'MPT9A:COL'})
+        @index('MPT9A:IDX1')
+        @field({ name: 'MPT9A:COL' })
         col?: number;
 
         @index('MPT9A:IDX1', true)
@@ -279,24 +290,25 @@ describe('test metaModels', () => {
     done();
   });
 
-
   // ---------------------------------------------
   it('conflicting index options (multi model)', async (done) => {
     try {
-      @table({name: 'MPT9B:T1'})
+      @table({ name: 'MPT9B:T1' })
       class Model1 {
-        @id({name: 'MPT9B:ID'})
+        @id({ name: 'MPT9B:ID' })
         id!: number;
 
-        @index('MPT9B:IDX1', false) @field({name: 'MPT9B:COL'})
+        @index('MPT9B:IDX1', false)
+        @field({ name: 'MPT9B:COL' })
         col?: number;
       }
-      @table({name: 'MPT9B:T1'})
+      @table({ name: 'MPT9B:T1' })
       class Model2 {
-        @id({name: 'MPT9B:ID'})
+        @id({ name: 'MPT9B:ID' })
         id!: number;
 
-        @index('MPT9B:IDX1', true) @field({name: 'MPT9B:COL'})
+        @index('MPT9B:IDX1', true)
+        @field({ name: 'MPT9B:COL' })
         col?: number;
       }
       fail('should have thrown');
@@ -306,23 +318,24 @@ describe('test metaModels', () => {
     done();
   });
 
-
   it('non conflicting index options (multi model)', async (done) => {
     try {
-      @table({name: 'MPT9C:T1'})
+      @table({ name: 'MPT9C:T1' })
       class Model1 {
-        @id({name: 'MPT9C:ID'})
+        @id({ name: 'MPT9C:ID' })
         id!: number;
 
-        @index('MPT9C:IDX1', false) @field({name: 'MPT9C:COL'})
+        @index('MPT9C:IDX1', false)
+        @field({ name: 'MPT9C:COL' })
         col?: number;
       }
-      @table({name: 'MPT9C:T1'})
+      @table({ name: 'MPT9C:T1' })
       class Model2 {
-        @id({name: 'MPT9C:ID'})
+        @id({ name: 'MPT9C:ID' })
         id!: number;
 
-        @index('MPT9C:IDX1', false) @field({name: 'MPT9C:COL'})
+        @index('MPT9C:IDX1', false)
+        @field({ name: 'MPT9C:COL' })
         col?: number;
       }
     } catch (err) {
@@ -334,12 +347,13 @@ describe('test metaModels', () => {
   // ---------------------------------------------
   it('conflicting foreign key options (single model)', async (done) => {
     try {
-      @table({name: 'MPT10:T1'})
+      @table({ name: 'MPT10:T1' })
       class Model1 {
-        @id({name: 'MPT10:ID'})
+        @id({ name: 'MPT10:ID' })
         id!: number;
 
-        @fk('MPT10:FK1', 'MPT10:T2', 'MPT10:ID') @field({name: 'MPT10:COL'})
+        @fk('MPT10:FK1', 'MPT10:T2', 'MPT10:ID')
+        @field({ name: 'MPT10:COL' })
         col?: number;
 
         @fk('MPT10:FK1', 'MPT10:T1', 'MPT10:ID')
@@ -351,24 +365,25 @@ describe('test metaModels', () => {
     done();
   });
 
-
   // ---------------------------------------------
   it('conflicting foreign key options (multi model)', async (done) => {
     try {
-      @table({name: 'MPT10:T1'})
+      @table({ name: 'MPT10:T1' })
       class Model1 {
-        @id({name: 'MPT10:ID'})
+        @id({ name: 'MPT10:ID' })
         id!: number;
 
-        @fk('MPT10:FK1', 'MPT10:T1', 'MPT10:ID2') @field({name: 'MPT10:COL'})
+        @fk('MPT10:FK1', 'MPT10:T1', 'MPT10:ID2')
+        @field({ name: 'MPT10:COL' })
         col?: number;
       }
-      @table({name: 'MPT10:T1'})
+      @table({ name: 'MPT10:T1' })
       class Model2 {
-        @id({name: 'MPT10:ID'})
+        @id({ name: 'MPT10:ID' })
         id!: number;
 
-        @fk('MPT10:FK1', 'MPT10:T1', 'MPT10:ID') @field({name: 'MPT10:COL'})
+        @fk('MPT10:FK1', 'MPT10:T1', 'MPT10:ID')
+        @field({ name: 'MPT10:COL' })
         col?: number;
       }
       fail('should have thrown');
@@ -378,24 +393,23 @@ describe('test metaModels', () => {
     done();
   });
 
-
   // ---------------------------------------------
   it('model destroy', async (done) => {
     try {
-      @table({name: 'MPT11:T1'})
+      @table({ name: 'MPT11:T1' })
       class Model1 {
-        @id({name: 'MPT11:ID'})
+        @id({ name: 'MPT11:ID' })
         id!: number;
 
-        @field({name: 'MPT11:COL'})
+        @field({ name: 'MPT11:COL' })
         col?: number;
       }
-      @table({name: 'MPT11:T1'})
+      @table({ name: 'MPT11:T1' })
       class Model2 {
-        @id({name: 'MPT11:ID'})
+        @id({ name: 'MPT11:ID' })
         id!: number;
 
-        @field({name: 'MPT11:COL'})
+        @field({ name: 'MPT11:COL' })
         col?: number;
       }
       expect(schema().hasTable('MPT11:T1')).toBeTruthy(`table not found`);
@@ -405,7 +419,6 @@ describe('test metaModels', () => {
       metaModel2.destroy();
       expect(schema().hasTable('MPT11:T1')).toBeFalsy(`table found`);
       metaModel1.destroy();
-
     } catch (err) {
       fail(`should not throw: ${err.message}`);
     }
@@ -413,25 +426,24 @@ describe('test metaModels', () => {
     done();
   });
 
-
   // ---------------------------------------------
   it('model default types', async (done) => {
     try {
-      @table({name: 'MPT12:T1'})
+      @table({ name: 'MPT12:T1' })
       class Model {
-        @id({name: 'MPT12:ID'})
+        @id({ name: 'MPT12:ID' })
         id!: number;
 
-        @field({name: 'MPT12:COLNUM'})
+        @field({ name: 'MPT12:COLNUM' })
         colNum?: number;
 
-        @field({name: 'MPT12:COLSTR'})
+        @field({ name: 'MPT12:COLSTR' })
         colString?: string;
 
-        @field({name: 'MPT12:COLBOOL'})
+        @field({ name: 'MPT12:COLBOOL' })
         colBool?: boolean;
 
-        @field({name: 'MPT12:COLDATE'})
+        @field({ name: 'MPT12:COLDATE' })
         colDate?: boolean;
       }
       expect(schema().hasTable('MPT12:T1')).toBeTruthy(`table not found`);
@@ -453,7 +465,6 @@ describe('test metaModels', () => {
 
       expect(metaModel1.table.fields[4].name).toBe('MPT12:COLDATE');
       expect(metaModel1.table.fields[4].dbtype).toBe('INTEGER');
-
     } catch (err) {
       fail(`should not throw: ${err.message}`);
     }
@@ -461,11 +472,10 @@ describe('test metaModels', () => {
     done();
   });
 
-
   // ---------------------------------------------
   it('conflicting dbtype-field option', async (done) => {
     try {
-      @table({name: 'MPT13:T1'})
+      @table({ name: 'MPT13:T1' })
       class Model1 {
         @id()
         col!: number;
@@ -486,17 +496,14 @@ describe('test metaModels', () => {
       const metaModel1 = Reflect.getMetadata(METADATA_MODEL_KEY, Model1.prototype) as MetaModel;
 
       expect(metaModel1.table.fields.length).toBe(5);
-      expect(metaModel1.table.fields[0].dbTypeInfo.typeAffinity).toBe('INTEGER');  // number (id)
-      expect(metaModel1.table.fields[1].dbTypeInfo.typeAffinity).toBe('INTEGER');  // boolean
-      expect(metaModel1.table.fields[2].dbTypeInfo.typeAffinity).toBe('INTEGER');  // date
-      expect(metaModel1.table.fields[3].dbTypeInfo.typeAffinity).toBe('REAL');     // number (no-id)
-      expect(metaModel1.table.fields[4].dbTypeInfo.typeAffinity).toBe('TEXT');     // string
-
-
+      expect(metaModel1.table.fields[0].dbTypeInfo.typeAffinity).toBe('INTEGER'); // number (id)
+      expect(metaModel1.table.fields[1].dbTypeInfo.typeAffinity).toBe('INTEGER'); // boolean
+      expect(metaModel1.table.fields[2].dbTypeInfo.typeAffinity).toBe('INTEGER'); // date
+      expect(metaModel1.table.fields[3].dbTypeInfo.typeAffinity).toBe('REAL'); // number (no-id)
+      expect(metaModel1.table.fields[4].dbTypeInfo.typeAffinity).toBe('TEXT'); // string
     } catch (err) {
       fail('err');
     }
     done();
   });
-
 });

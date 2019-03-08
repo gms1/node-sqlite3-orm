@@ -3,9 +3,9 @@
 // tslint:disable-next-line no-require-imports
 import * as _dbg from 'debug';
 
-import {SqlConnectionPoolDatabase} from './SqlConnectionPoolDatabase';
-import {SQL_OPEN_CREATE, SQL_OPEN_DEFAULT, SqlDatabase} from './SqlDatabase';
-import {SqlDatabaseSettings} from './SqlDatabaseSettings';
+import { SqlConnectionPoolDatabase } from './SqlConnectionPoolDatabase';
+import { SQL_OPEN_CREATE, SQL_OPEN_DEFAULT, SqlDatabase } from './SqlDatabase';
+import { SqlDatabaseSettings } from './SqlDatabaseSettings';
 
 const debug = _dbg('sqlite3orm:pool');
 
@@ -62,8 +62,12 @@ export class SqlConnectionPool {
    * @returns A promise
    */
   async open(
-      databaseFile: string, mode: number = SQL_OPEN_DEFAULT, min: number = 1, max: number = 0,
-      settings?: SqlDatabaseSettings): Promise<void> {
+    databaseFile: string,
+    mode: number = SQL_OPEN_DEFAULT,
+    min: number = 1,
+    max: number = 0,
+    settings?: SqlDatabaseSettings,
+  ): Promise<void> {
     if (this._opening) {
       try {
         await this._opening;
@@ -71,8 +75,7 @@ export class SqlConnectionPool {
           // already opened
           return;
         }
-      } catch (err) {
-      }
+      } catch (err) {}
     }
     this._opening = this.openInternal(databaseFile, mode, min, max, settings);
     try {
@@ -86,12 +89,15 @@ export class SqlConnectionPool {
   }
 
   protected async openInternal(
-      databaseFile: string, mode: number = SQL_OPEN_DEFAULT, min: number = 1, max: number = 0,
-      settings?: SqlDatabaseSettings): Promise<void> {
+    databaseFile: string,
+    mode: number = SQL_OPEN_DEFAULT,
+    min: number = 1,
+    max: number = 0,
+    settings?: SqlDatabaseSettings,
+  ): Promise<void> {
     try {
       await this.close();
-    } catch (err) {
-    }
+    } catch (err) {}
     try {
       this.databaseFile = databaseFile;
       this.mode = mode;
@@ -119,12 +125,15 @@ export class SqlConnectionPool {
       if (this.name.length) {
         SqlConnectionPool.openNamedPools.set(this.name, this);
       }
-      debug(`pool ${this.name}: opened: ${this.inUse.size} connections open (${this.inPool.length} in pool)`);
+      debug(
+        `pool ${this.name}: opened: ${this.inUse.size} connections open (${
+          this.inPool.length
+        } in pool)`,
+      );
     } catch (err) {
       try {
         await this.close();
-      } catch (_ignore) {
-      }
+      } catch (_ignore) {}
       debug(`pool ${this.name}: opening ${databaseFile} failed: ${err.message}`);
       return Promise.reject(err);
     }
@@ -139,11 +148,17 @@ export class SqlConnectionPool {
     try {
       if (this.databaseFile) {
         if (this.inUse.size) {
-          debug(`pool ${this.name}: closing: forcibly closing ${
-                                                                this.inUse.size
-                                                              } opened connections (${this.inPool.length} in pool)`);
+          debug(
+            `pool ${this.name}: closing: forcibly closing ${this.inUse.size} opened connections (${
+              this.inPool.length
+            } in pool)`,
+          );
         } else {
-          debug(`pool ${this.name}: closing: ${this.inUse.size} connections open (${this.inPool.length} in pool)`);
+          debug(
+            `pool ${this.name}: closing: ${this.inUse.size} connections open (${
+              this.inPool.length
+            } in pool)`,
+          );
         }
       }
       if (this.name.length) {
@@ -182,7 +197,7 @@ export class SqlConnectionPool {
    */
   async get(timeout: number = 0): Promise<SqlDatabase> {
     try {
-      let sqldb: SqlConnectionPoolDatabase|undefined;
+      let sqldb: SqlConnectionPoolDatabase | undefined;
       const cond = () => this.inPool.length > 0;
       if (this.max > 0 && !cond() && this.inUse.size >= this.max) {
         await wait(cond, timeout);
@@ -191,7 +206,9 @@ export class SqlConnectionPool {
         // tslint:disable-next-line no-unnecessary-type-assertion
         sqldb = this.inPool.shift() as SqlConnectionPoolDatabase;
         this.inUse.add(sqldb);
-        debug(`pool ${this.name}: ${this.inUse.size} connections open (${this.inPool.length} in pool)`);
+        debug(
+          `pool ${this.name}: ${this.inUse.size} connections open (${this.inPool.length} in pool)`,
+        );
         return sqldb;
       }
       if (!this.databaseFile) {
@@ -200,7 +217,9 @@ export class SqlConnectionPool {
       sqldb = new SqlConnectionPoolDatabase();
       await sqldb.openByPool(this, this.databaseFile, this.mode, this.settings);
       this.inUse.add(sqldb);
-      debug(`pool ${this.name}: ${this.inUse.size} connections open (${this.inPool.length} in pool)`);
+      debug(
+        `pool ${this.name}: ${this.inUse.size} connections open (${this.inPool.length} in pool)`,
+      );
       return sqldb;
     } catch (err) {
       debug(`pool ${this.name}: getting connection from pool failed: ${err.message}`);
@@ -231,13 +250,18 @@ export class SqlConnectionPool {
         await newsqldb.recycleByPool(this, sqldb, this.settings);
         this.inPool.push(newsqldb);
       }
-      debug(`pool ${this.name}: ${this.inUse.size} connections open (${this.inPool.length} in pool)`);
+      debug(
+        `pool ${this.name}: ${this.inUse.size} connections open (${this.inPool.length} in pool)`,
+      );
     }
   }
 
   // tslint:disable member-ordering
 
-  static readonly openNamedPools: Map<string, SqlConnectionPool> = new Map<string, SqlConnectionPool>();
+  static readonly openNamedPools: Map<string, SqlConnectionPool> = new Map<
+    string,
+    SqlConnectionPool
+  >();
 }
 
 // TODO: move this function or find a better one:
@@ -250,7 +274,7 @@ function wait(cond: () => boolean, timeout: number = 0, intervall: number = 100)
         resolve();
         return;
       }
-      if (timeout > 0 && (++counter * intervall) >= timeout) {
+      if (timeout > 0 && ++counter * intervall >= timeout) {
         clearInterval(timer);
         debug(`getting connection timed out`);
         reject(new Error('timeout reached'));

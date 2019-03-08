@@ -1,3 +1,5 @@
-import {MetaModel} from '../metadata';
+import { MetaModel } from '../metadata';
 
-export interface QueryOperation { toSql(metaModel: MetaModel, params: Object, tablePrefix: string): Promise<string>; }
+export interface QueryOperation {
+  toSql(metaModel: MetaModel, params: Object, tablePrefix: string): Promise<string>;
+}

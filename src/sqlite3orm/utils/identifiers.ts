@@ -1,4 +1,4 @@
-import {SQL_DEFAULT_SCHEMA} from '../core/SqlDatabase';
+import { SQL_DEFAULT_SCHEMA } from '../core/SqlDatabase';
 
 // -----------------------------------------------------------------
 
@@ -44,13 +44,12 @@ export function qualifiySchemaIdentifier(name: string, schema?: string): string 
   return `${schema}.${name}`;
 }
 
-
-export function splitSchemaIdentifier(name: string): {identName: string, identSchema?: string} {
+export function splitSchemaIdentifier(name: string): { identName: string; identSchema?: string } {
   const identifiers = name.split('.');
 
   if (identifiers.length >= 2) {
-    return {identSchema: identifiers.shift(), identName: identifiers.join('.')};
+    return { identSchema: identifiers.shift(), identName: identifiers.join('.') };
   } else {
-    return {identName: identifiers[0]};
+    return { identName: identifiers[0] };
   }
 }

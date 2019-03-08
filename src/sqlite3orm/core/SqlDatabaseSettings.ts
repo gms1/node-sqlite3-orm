@@ -7,7 +7,7 @@ export interface SqlDatabaseSettings {
   /*
    * PRAGMA schema.journal_mode = DELETE | TRUNCATE | PERSIST | MEMORY | WAL | OFF
    */
-  journalMode?: string|string[];
+  journalMode?: string | string[];
   /*
    * PRAGMA busy_timeout = milliseconds
    */
@@ -15,7 +15,7 @@ export interface SqlDatabaseSettings {
   /*
    * PRAGMA schema.synchronous = OFF | NORMAL | FULL | EXTRA;
    */
-  synchronous?: string|string[];
+  synchronous?: string | string[];
   /*
    * PRAGMA case_sensitive_like = TRUE | FALSE
    */
@@ -49,7 +49,7 @@ export interface SqlDatabaseSettings {
   /*
    * PRAGMA schema.secure_delete = TRUE | FALSE | FAST
    */
-  secureDelete?: string|string[];
+  secureDelete?: string | string[];
 
   /*
    *  SERIALIZE | PARALLELIZE

@@ -1,31 +1,39 @@
 // tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-import {BaseDAO, field, id, schema, SQL_MEMORY_DB_PRIVATE, SqlDatabase, table, ValueTransformer} from '../../..';
+import {
+  BaseDAO,
+  field,
+  id,
+  schema,
+  SQL_MEMORY_DB_PRIVATE,
+  SqlDatabase,
+  table,
+  ValueTransformer,
+} from '../../..';
 
 const DATATYPE_OTHER_TABLE = 'DJ:DATATYPE_NUMBER';
 
 // tslint:disable triple-equals no-null-keyword no-unbound-method
 
 const testTransformer: ValueTransformer = {
-  toDB: (input) => (input == undefined) ? null : input.toFixed(2),
-  fromDB: (input) => (input == null) ? undefined : Number(input)
+  toDB: (input) => (input == undefined ? null : input.toFixed(2)),
+  fromDB: (input) => (input == null ? undefined : Number(input)),
 };
 
-@table({name: DATATYPE_OTHER_TABLE, autoIncrement: true})
+@table({ name: DATATYPE_OTHER_TABLE, autoIncrement: true })
 class DataTypeOther {
-  @id({name: 'id', dbtype: 'INTEGER NOT NULL'})
+  @id({ name: 'id', dbtype: 'INTEGER NOT NULL' })
   id: number;
 
-  @field({name: 'my_number_text', dbtype: 'TEXT'})
+  @field({ name: 'my_number_text', dbtype: 'TEXT' })
   myNumberText?: number;
 
-  @field({name: 'my_string_real', dbtype: 'INTEGER'})
+  @field({ name: 'my_string_real', dbtype: 'INTEGER' })
   myStringInteger?: string;
 
   @field({
     name: 'my_number_text2',
     dbtype: 'TEXT',
-    transform: testTransformer
-
+    transform: testTransformer,
   })
   myNumberText2?: number;
 
@@ -33,7 +41,6 @@ class DataTypeOther {
     this.id = 0;
   }
 }
-
 
 describe('test Json data', () => {
   let sqldb: SqlDatabase;
@@ -48,7 +55,6 @@ describe('test Json data', () => {
       const prop = dao.metaModel.getProperty('myNumberText2');
       expect(prop.transform.toDB).toBe(testTransformer.toDB, 'transformer not set');
       expect(prop.transform.fromDB).toBe(testTransformer.fromDB, 'transformer not set');
-
     } catch (err) {
       fail(err);
     }
@@ -71,12 +77,10 @@ describe('test Json data', () => {
       expect(model2.myNumberText).toBe(3.14, 'got wrong myNumberText');
       expect(model2.myStringInteger).toBe('42', 'got wrong myStringInteger');
       expect(model2.myNumberText2).toBe(3.15, 'got wrong myNumberText2');
-
     } catch (err) {
       fail(err);
     }
     done();
-
   });
 
   it('expect reading/writing undefined properties from/to the database as text/real to succeed', async (done) => {
@@ -91,12 +95,9 @@ describe('test Json data', () => {
       expect(model2.myNumberText).toBeUndefined('got defined myNumberText');
       expect(model2.myStringInteger).toBeUndefined('got defined myStringInteger');
       expect(model2.myNumberText2).toBeUndefined('got defined myNumberText2');
-
     } catch (err) {
       fail(err);
     }
     done();
-
   });
-
 });
