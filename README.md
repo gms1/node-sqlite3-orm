@@ -4,12 +4,11 @@
 [![DeepScan Grade](https://deepscan.io/api/projects/699/branches/1107/badge/grade.svg)](https://deepscan.io/dashboard/#view=project&pid=699&bid=1107)
 [![Dependency Status](https://david-dm.org/gms1/node-sqlite3-orm.svg)](https://david-dm.org/gms1/node-sqlite3-orm)
 [![Known Vulnerabilities](https://snyk.io/test/github/gms1/node-sqlite3-orm/badge.svg)](https://snyk.io/test/github/gms1/node-sqlite3-orm)
-[![Greenkeeper badge](https://badges.greenkeeper.io/gms1/node-sqlite3-orm.svg)](https://greenkeeper.io/)
 
 # node-sqlite3-orm
 
 This module allows you to map your model, written in JavaScript or TypeScript, to a database schema using SQLite Version 3.
-**node-sqlite3-orm** is designed to work with new JavaScript *Decorators*, *Promises* and the *async/await* feature.
+**node-sqlite3-orm** is designed to work with new JavaScript _Decorators_, _Promises_ and the _async/await_ feature.
 It also supports typesafe database queries and refactoring, with a filter syntax designed to serialize safely without any SQL injection possibility
 
 > NOTE: Your contribution is highly welcome! Feel free to pick-up a TODO-item or add yours.
@@ -57,10 +56,14 @@ class Contact {
 
 With **node-sqlite3-orm** you have full control over the names for tables, fields, indexes and foreign key constraints in the mapped database schema.
 
-> NOTE: Properties without a *node-sqlite3-orm* decorator will not be mapped to the database.
+> NOTE: Properties without a _node-sqlite3-orm_ decorator will not be mapped to the database.
+
 <!-- -->
+
 > NOTE: you can use the 'temp' qualifier to create a temporary table. e.g `@table({name: 'temp.MYTEMPTABLE'`
+
 <!-- -->
+
 > NOTE: you can map the same table to different model classes, e.g for using a partial model class
 
 ## Database Connection
@@ -230,7 +233,7 @@ All predicates are combined using logical 'AND' operator, so if we have the need
 'and' and 'or' operators are expecing an array, the 'not' operator requires a single child-condition/predicates only
 
 ```TypeScript
-{  
+{
   not: {
     or: [{deleted: true}, {deleted: {isNull: true}}]
   }
@@ -240,9 +243,9 @@ All predicates are combined using logical 'AND' operator, so if we have the need
 Furthermore, it is also possible to define parts of the query as sql expression, or replace the complete where-object with a sql where-clause:
 
 ```TypeScript
-{  
+{
   and: [{deleted: true}, {sql: `
-EXISTS (select 1 from CONTACTS C where C.user_id = T.user_id)  
+EXISTS (select 1 from CONTACTS C where C.user_id = T.user_id)
   `}]
 }   // transforms to: WHERE NOT ( user_deleted = 1 OR user_deleted IS NULL )
 ```
@@ -265,7 +268,7 @@ userDAO.deleteAll({deleted: true});
 All primitive JavaScript data types ('String', 'Number', 'Boolean') and properties of type 'Date' are supported.
 Type safety is guaranteed, when reading properties of these types from the database (NULL values are treated as 'undefined').
 
-**Date** properties can be mapped to either the 'TEXT' or to the 'INTEGER' storage class (defaults to 'INTEGER') and their values will be stored as UTC. Using 'INTEGER' converts to Unix-Time, so fractions of seconds are lost. This can be changed by using the field option 'dateInMilliSeconds' or by setting as default using ```schema().dateInMilliSeconds = true```.
+**Date** properties can be mapped to either the 'TEXT' or to the 'INTEGER' storage class (defaults to 'INTEGER') and their values will be stored as UTC. Using 'INTEGER' converts to Unix-Time, so fractions of seconds are lost. This can be changed by using the field option 'dateInMilliSeconds' or by setting as default using `schema().dateInMilliSeconds = true`.
 
 These are the corresponding defaults for a 'current timestamp':
 
@@ -273,13 +276,13 @@ default for 'TEXT':
 
 ```TypeScript
  dbtype: 'TEXT    DEFAULT(datetime(\'now\') || \'Z\')'
- ```
+```
 
 default for 'INTEGER' (in seconds):
 
 ```TypeScript
  dbtype: 'INTEGER DEFAULT(CAST(strftime(\'%s\',\'now\') as INT))' // unix epoch in seconds
- ```
+```
 
 **Boolean** properties can either be mapped to 'TEXT' or to 'INTEGER' (default). On storing a boolean value **false** will be converted to '0' and **true** will be converted to '1', on reading '0' or 'false' will be converted to **false** and '1' or 'true' will be converted to **true**. All other values will result in **undefined**
 
@@ -332,19 +335,27 @@ autoUpgrader.isActual([userDAO.table, contactDAO.table]);
 autoUpgrader.upgradeTables([userDAO.table]);
 ```
 
-> NOTE: *autoupgrade* should be carefully tested before running it on a production database! A backup should be self-evident!
+> NOTE: _autoupgrade_ should be carefully tested before running it on a production database! A backup should be self-evident!
+
 <!-- -->
-> NOTE: renaming of columns can not be detected! *autoupgrade* would normally add a new column with the new name and the data in the old column would be lost, but there is an option 'keepOldColumns' for preventing old columns from beeing dropped. Recycling the old column name for other purpose is asking for trouble
+
+> NOTE: renaming of columns can not be detected! _autoupgrade_ would normally add a new column with the new name and the data in the old column would be lost, but there is an option 'keepOldColumns' for preventing old columns from beeing dropped. Recycling the old column name for other purpose is asking for trouble
+
 <!-- -->
-> NOTE: changing autoIncrement cannot be detected! You can use the optional parameter *force* to force a recreation
+
+> NOTE: changing autoIncrement cannot be detected! You can use the optional parameter _force_ to force a recreation
+
 <!-- -->
+
 > NOTE: if you have changed the column type, the table definition will be updated accordingly, but the content of the column will be still the same. You need an additional action if you want to convert the content of the column
+
 <!-- -->
+
 > NOTE: please always add a DEFAULT-clause for newly added columns which are not nullable
 
 ## Install
 
-``` bash
+```bash
 npm install sqlite3orm
 ```
 
