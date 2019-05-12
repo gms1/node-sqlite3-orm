@@ -73,10 +73,5 @@
   },
   "typescript": {
     "definition": "./index.d.ts"
-  },
-  "greenkeeper": {
-    "ignore": [
-      "@types/node"
-    ]
   }
 }
