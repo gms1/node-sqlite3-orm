@@ -1,0 +1,9 @@
+{
+  "name": "sqlite3orm",
+  "tsconfig": "tsconfig.json",
+  "output": "docs/sqlite3orm",
+  "theme": "vagrant",
+  "disablePrivate": true,
+  "disableProtected": true,
+  "disableInternal": true
+}
