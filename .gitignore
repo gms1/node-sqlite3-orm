@@ -15,7 +15,7 @@ npm-debug.log*
 # compiled output:
 
 /dist
-/docs/typedoc
+/docs/sqlite3orm
 /.nyc_output
 /coverage
 /tmp
