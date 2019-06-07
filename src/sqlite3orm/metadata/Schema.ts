@@ -98,9 +98,7 @@ export class Schema {
         // tslint:disable-next-line triple-equals
         if (table.isWithoutRowIdDefined && opts.withoutRowId != table.withoutRowId) {
           throw new Error(
-            `conflicting withoutRowId settings: new: ${opts.withoutRowId}, old ${
-              table.withoutRowId
-            }`,
+            `conflicting withoutRowId settings: new: ${opts.withoutRowId}, old ${table.withoutRowId}`,
           );
         }
         table.withoutRowId = opts.withoutRowId;
@@ -110,9 +108,7 @@ export class Schema {
         // tslint:disable-next-line triple-equals
         if (table.isAutoIncrementDefined && opts.autoIncrement != table.autoIncrement) {
           throw new Error(
-            `conflicting autoIncrement settings: new: ${opts.autoIncrement}, old ${
-              table.autoIncrement
-            }`,
+            `conflicting autoIncrement settings: new: ${opts.autoIncrement}, old ${table.autoIncrement}`,
           );
         }
         table.autoIncrement = opts.autoIncrement;

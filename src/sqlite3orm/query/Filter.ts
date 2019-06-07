@@ -1,11 +1,11 @@
 import { Where } from './Where';
 
 export type Columns<MT> = {
-  [K in keyof MT]?: boolean // true: include, false: exclude
+  [K in keyof MT]?: boolean; // true: include, false: exclude
 };
 
 export type OrderColumns<MT> = {
-  [K in keyof MT]?: boolean // true: ascending, false: descending
+  [K in keyof MT]?: boolean; // true: ascending, false: descending
 };
 
 export interface Filter<MT> {

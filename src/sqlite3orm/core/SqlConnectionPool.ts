@@ -126,9 +126,7 @@ export class SqlConnectionPool {
         SqlConnectionPool.openNamedPools.set(this.name, this);
       }
       debug(
-        `pool ${this.name}: opened: ${this.inUse.size} connections open (${
-          this.inPool.length
-        } in pool)`,
+        `pool ${this.name}: opened: ${this.inUse.size} connections open (${this.inPool.length} in pool)`,
       );
     } catch (err) {
       try {
@@ -149,15 +147,11 @@ export class SqlConnectionPool {
       if (this.databaseFile) {
         if (this.inUse.size) {
           debug(
-            `pool ${this.name}: closing: forcibly closing ${this.inUse.size} opened connections (${
-              this.inPool.length
-            } in pool)`,
+            `pool ${this.name}: closing: forcibly closing ${this.inUse.size} opened connections (${this.inPool.length} in pool)`,
           );
         } else {
           debug(
-            `pool ${this.name}: closing: ${this.inUse.size} connections open (${
-              this.inPool.length
-            } in pool)`,
+            `pool ${this.name}: closing: ${this.inUse.size} connections open (${this.inPool.length} in pool)`,
           );
         }
       }

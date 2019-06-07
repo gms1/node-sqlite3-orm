@@ -188,9 +188,7 @@ export class Table {
           field.dateInMilliSeconds !== opts.dateInMilliSeconds
         ) {
           throw new Error(
-            `conflicting dateInMilliSeconds setting: new: ${opts.dateInMilliSeconds}, old: ${
-              field.dateInMilliSeconds
-            }`,
+            `conflicting dateInMilliSeconds setting: new: ${opts.dateInMilliSeconds}, old: ${field.dateInMilliSeconds}`,
           );
         }
         field.dateInMilliSeconds = opts.dateInMilliSeconds;
@@ -436,9 +434,7 @@ export class Table {
           (identSchema !== 'main' && (!tableSchema || tableSchema !== identSchema)))
       ) {
         throw new Error(
-          `table '${this.name}': foreign key '${fkName}' references table in wrong schema: '${
-            fk.foreignTableName
-          }'`,
+          `table '${this.name}': foreign key '${fkName}' references table in wrong schema: '${fk.foreignTableName}'`,
         );
       }
 
