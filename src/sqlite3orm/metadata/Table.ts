@@ -413,7 +413,7 @@ export class Table {
     // add foreign key constraint definition:
     this.mapNameToFKDef.forEach((fk, fkName) => {
       /* istanbul ignore if */
-      if (!fk.fields.length || !fk.fields.length || fk.fields.length !== fk.fields.length) {
+      if (!fk.fields.length || fk.fields.length !== fk.fields.length) {
         throw new Error(
           `table '${this.name}': foreign key constraint '${fkName}' definition is incomplete`,
         );
