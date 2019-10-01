@@ -2,7 +2,7 @@
 
 // tslint:disable-next-line no-require-imports
 import { FieldOpts } from './decorators';
-import * as transformers from './DefaultValueTransformers';
+import { DEFAULT_VALUE_TRANSFORMERS } from './DefaultValueTransformers';
 import { Field } from './Field';
 import { KeyType, MetaModel } from './MetaModel';
 import { PropertyType } from './PropertyType';
@@ -107,44 +107,44 @@ export class MetaProperty {
       this._transform = opts.transform;
     } else {
       if (this.field.isJson) {
-        this._transform = new transformers.JsonTransformer();
+        this._transform = DEFAULT_VALUE_TRANSFORMERS.json;
       } else {
         switch (this.propertyType) {
           /* BOOLEAN */
           case PropertyType.BOOLEAN:
             if (typeAffinity === 'TEXT') {
-              this._transform = new transformers.BooleanTextTransformer();
+              this._transform = DEFAULT_VALUE_TRANSFORMERS.booleanText;
             } else {
-              this._transform = new transformers.BooleanNumberTransformer();
+              this._transform = DEFAULT_VALUE_TRANSFORMERS.booleanNumber;
             }
             break;
           case PropertyType.DATE:
             if (typeAffinity === 'TEXT') {
-              this._transform = new transformers.DateTextTransformer();
+              this._transform = DEFAULT_VALUE_TRANSFORMERS.dateText;
             } else {
               if (this._field.dateInMilliSeconds) {
-                this._transform = new transformers.DateIntegerAsMillisecondsTransformer();
+                this._transform = DEFAULT_VALUE_TRANSFORMERS.dateIntegerAsMilliseconds;
               } else {
-                this._transform = new transformers.DateIntegerAsSecondsTransformer();
+                this._transform = DEFAULT_VALUE_TRANSFORMERS.dateIntegerAsSeconds;
               }
             }
             break;
           case PropertyType.NUMBER:
             if (typeAffinity === 'TEXT') {
-              this._transform = new transformers.NumberTextTransformer();
+              this._transform = DEFAULT_VALUE_TRANSFORMERS.numberText;
             } else {
-              this._transform = new transformers.NumberDefaultTransformer();
+              this._transform = DEFAULT_VALUE_TRANSFORMERS.numberDefault;
             }
             break;
           case PropertyType.STRING:
             if (typeAffinity === 'TEXT') {
-              this._transform = new transformers.StringDefaultTransformer();
+              this._transform = DEFAULT_VALUE_TRANSFORMERS.stringDefault;
             } else {
-              this._transform = new transformers.StringNumberTransformer();
+              this._transform = DEFAULT_VALUE_TRANSFORMERS.stringNumber;
             }
             break;
           default:
-            this._transform = new transformers.UnknownDefaultTransformer();
+            this._transform = DEFAULT_VALUE_TRANSFORMERS.unknownDefault;
             break;
         }
       }

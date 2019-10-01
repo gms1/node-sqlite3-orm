@@ -83,7 +83,7 @@ export class NumberTextTransformer implements ValueTransformer {
 
 export class NumberDefaultTransformer implements ValueTransformer {
   toDB(input: number | undefined): number | null {
-    return input == undefined ? null : input;
+    return input == undefined ? null : Number(input);
   }
 
   fromDB(input: number | null): number | undefined {
@@ -93,7 +93,7 @@ export class NumberDefaultTransformer implements ValueTransformer {
 
 export class StringDefaultTransformer implements ValueTransformer {
   toDB(input: string | undefined): string | null {
-    return input == undefined ? null : input;
+    return input == undefined ? null : String(input);
   }
 
   fromDB(input: string | null): string | undefined {
@@ -122,3 +122,19 @@ export class UnknownDefaultTransformer implements ValueTransformer {
     return input == null ? undefined : input;
   }
 }
+
+export class DefaultValueTransformers {
+  readonly json: ValueTransformer = new JsonTransformer();
+  readonly booleanText: ValueTransformer = new BooleanTextTransformer();
+  readonly booleanNumber: ValueTransformer = new BooleanNumberTransformer();
+  readonly dateText: ValueTransformer = new DateTextTransformer();
+  readonly dateIntegerAsSeconds: ValueTransformer = new DateIntegerAsSecondsTransformer();
+  readonly dateIntegerAsMilliseconds: ValueTransformer = new DateIntegerAsMillisecondsTransformer();
+  readonly numberText: ValueTransformer = new NumberTextTransformer();
+  readonly numberDefault: ValueTransformer = new NumberDefaultTransformer();
+  readonly stringNumber: ValueTransformer = new StringNumberTransformer();
+  readonly stringDefault: ValueTransformer = new StringDefaultTransformer();
+  readonly unknownDefault: ValueTransformer = new UnknownDefaultTransformer();
+}
+
+export const DEFAULT_VALUE_TRANSFORMERS = new DefaultValueTransformers();
