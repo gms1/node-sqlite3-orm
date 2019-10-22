@@ -53,13 +53,13 @@
     "sqlite3": "^4.1.0"
   },
   "devDependencies": {
-    "@compodoc/compodoc": "^1.1.10",
+    "@compodoc/compodoc": "^1.1.11",
     "@types/debug": "4.1.5",
-    "@types/fs-extra": "^8.0.0",
-    "@types/jasmine": "^3.4.1",
-    "@types/node": "^12.7.8",
+    "@types/fs-extra": "^8.0.1",
+    "@types/jasmine": "^3.4.4",
+    "@types/node": "^12.11.2",
     "@types/sqlite3": "^3.1.5",
-    "coveralls": "^3.0.6",
+    "coveralls": "^3.0.7",
     "fs-extra": "^8.1.0",
     "jasmine": "^3.5.0",
     "jasmine-spec-reporter": "^4.2.1",
@@ -69,7 +69,7 @@
     "rimraf": "^3.0.0",
     "ts-node": "^8.4.1",
     "tslint": "^5.20.0",
-    "typescript": "^3.6.3"
+    "typescript": "^3.6.4"
   },
   "typescript": {
     "definition": "./index.d.ts"
