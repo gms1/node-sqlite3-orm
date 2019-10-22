@@ -437,19 +437,31 @@ describe('test metaModels', () => {
         @field({ name: 'MPT12:COLNUM' })
         colNum?: number;
 
+        @field({ name: 'MPT12:COLNUM_NN', notNull: true })
+        colNumNN!: number;
+
         @field({ name: 'MPT12:COLSTR' })
         colString?: string;
+
+        @field({ name: 'MPT12:COLSTR_NN', notNull: true })
+        colStringNN!: string;
 
         @field({ name: 'MPT12:COLBOOL' })
         colBool?: boolean;
 
+        @field({ name: 'MPT12:COLBOOL_NN', notNull: true })
+        colBoolNN!: boolean;
+
         @field({ name: 'MPT12:COLDATE' })
         colDate?: boolean;
+
+        @field({ name: 'MPT12:COLDATE_NN', notNull: true })
+        colDateNN!: boolean;
       }
       expect(schema().hasTable('MPT12:T1')).toBeTruthy(`table not found`);
       const metaModel1 = Reflect.getMetadata(METADATA_MODEL_KEY, Model.prototype) as MetaModel;
 
-      expect(metaModel1.table.fields.length).toBe(5);
+      expect(metaModel1.table.fields.length).toBe(9);
 
       expect(metaModel1.table.fields[0].name).toBe('MPT12:ID');
       expect(metaModel1.table.fields[0].dbtype).toBe('INTEGER NOT NULL');
@@ -457,14 +469,26 @@ describe('test metaModels', () => {
       expect(metaModel1.table.fields[1].name).toBe('MPT12:COLNUM');
       expect(metaModel1.table.fields[1].dbtype).toBe('REAL');
 
-      expect(metaModel1.table.fields[2].name).toBe('MPT12:COLSTR');
-      expect(metaModel1.table.fields[2].dbtype).toBe('TEXT');
+      expect(metaModel1.table.fields[2].name).toBe('MPT12:COLNUM_NN');
+      expect(metaModel1.table.fields[2].dbtype).toBe('REAL NOT NULL');
 
-      expect(metaModel1.table.fields[3].name).toBe('MPT12:COLBOOL');
-      expect(metaModel1.table.fields[3].dbtype).toBe('INTEGER');
+      expect(metaModel1.table.fields[3].name).toBe('MPT12:COLSTR');
+      expect(metaModel1.table.fields[3].dbtype).toBe('TEXT');
 
-      expect(metaModel1.table.fields[4].name).toBe('MPT12:COLDATE');
-      expect(metaModel1.table.fields[4].dbtype).toBe('INTEGER');
+      expect(metaModel1.table.fields[4].name).toBe('MPT12:COLSTR_NN');
+      expect(metaModel1.table.fields[4].dbtype).toBe('TEXT NOT NULL');
+
+      expect(metaModel1.table.fields[5].name).toBe('MPT12:COLBOOL');
+      expect(metaModel1.table.fields[5].dbtype).toBe('INTEGER');
+
+      expect(metaModel1.table.fields[6].name).toBe('MPT12:COLBOOL_NN');
+      expect(metaModel1.table.fields[6].dbtype).toBe('INTEGER NOT NULL');
+
+      expect(metaModel1.table.fields[7].name).toBe('MPT12:COLDATE');
+      expect(metaModel1.table.fields[7].dbtype).toBe('INTEGER');
+
+      expect(metaModel1.table.fields[8].name).toBe('MPT12:COLDATE_NN');
+      expect(metaModel1.table.fields[8].dbtype).toBe('INTEGER NOT NULL');
     } catch (err) {
       fail(`should not throw: ${err.message}`);
     }
@@ -473,7 +497,7 @@ describe('test metaModels', () => {
   });
 
   // ---------------------------------------------
-  it('conflicting dbtype-field option', async (done) => {
+  it('model type affinity', async (done) => {
     try {
       @table({ name: 'MPT13:T1' })
       class Model1 {

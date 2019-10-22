@@ -23,19 +23,22 @@ export class Field {
     return backtickQuoteSimpleIdentifier(this.name);
   }
 
-  private _dbDefaultType?: string;
+  private _dbDefaultType!: string;
   get dbDefaultType(): string {
-    return this._dbDefaultType ? this._dbDefaultType : 'TEXT';
+    return this._dbDefaultType;
   }
   set dbDefaultType(dbType: string) {
     this._dbDefaultType = dbType;
+    if (!this._dbtype) {
+      this._dbTypeInfo = Field.parseDbType(this._dbDefaultType);
+    }
   }
 
   /**
    * The type of the table column
    */
   private _dbtype?: string;
-  private _dbTypeInfo?: DbColumnTypeInfo;
+  private _dbTypeInfo!: DbColumnTypeInfo;
 
   get dbtype(): string {
     return this._dbtype ? this._dbtype : this.dbDefaultType;
@@ -49,13 +52,7 @@ export class Field {
   }
 
   get dbTypeInfo(): DbColumnTypeInfo {
-    return (
-      this._dbTypeInfo || {
-        typeAffinity: DbCatalogDAO.getTypeAffinity(this.dbDefaultType),
-        notNull: false,
-        defaultValue: undefined,
-      }
-    );
+    return this._dbTypeInfo;
   }
 
   /**
@@ -108,9 +105,7 @@ export class Field {
     this.name = name;
     this.isIdentity = !!isIdentity;
 
-    if (propertyType) {
-      this.setDbDefaultType(propertyType);
-    }
+    this.setDbDefaultType(propertyType, opts);
     if (opts) {
       if (opts.dbtype) {
         this.dbtype = opts.dbtype;
@@ -126,21 +121,36 @@ export class Field {
     }
   }
 
-  setDbDefaultType(propertyType: PropertyType): void {
+  setDbDefaultType(propertyType?: PropertyType, opts?: FieldOpts): void {
     switch (propertyType) {
       case PropertyType.BOOLEAN:
       case PropertyType.DATE:
-        this.dbDefaultType = 'INTEGER';
+        if (opts && opts.notNull) {
+          this.dbDefaultType = 'INTEGER NOT NULL';
+        } else {
+          this.dbDefaultType = 'INTEGER';
+        }
         break;
       case PropertyType.NUMBER:
         if (this.isIdentity) {
           this.dbDefaultType = 'INTEGER NOT NULL';
         } else {
-          this.dbDefaultType = 'REAL';
+          if (opts && opts.notNull) {
+            this.dbDefaultType = 'REAL NOT NULL';
+          } else {
+            this.dbDefaultType = 'REAL';
+          }
+        }
+        break;
+      default:
+        // otherwise 'TEXT' will be used as default
+        if (opts && opts.notNull) {
+          this.dbDefaultType = 'TEXT NOT NULL';
+        } else {
+          this.dbDefaultType = 'TEXT';
         }
         break;
     }
-    // otherwise 'TEXT' will be used as default
   }
 
   static parseDbType(dbtype: string): DbColumnTypeInfo {

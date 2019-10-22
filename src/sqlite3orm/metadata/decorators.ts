@@ -52,7 +52,10 @@ export interface FieldOpts {
    * [isJson] - Flag to indicate if field should be persisted as json string
    */
   isJson?: boolean;
-
+  /*
+   * [notNull] - Flag to indicate if this field is required (ignored if `dbtype` is explicitly set)
+   */
+  notNull?: boolean;
   /*
    * [dateInMilliSeconds] - If date is stored as integer use milliseconds instead of seconds
    */
