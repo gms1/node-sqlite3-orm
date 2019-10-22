@@ -67,11 +67,7 @@ export class SqlDatabase {
    * SQL_OPEN_READONLY | SQL_OPEN_READWRITE
    * @returns A promise
    */
-  public async open(
-    databaseFile: string,
-    mode?: number,
-    settings?: SqlDatabaseSettings,
-  ): Promise<void> {
+  public open(databaseFile: string, mode?: number, settings?: SqlDatabaseSettings): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       const db = new Database(databaseFile, mode || SQL_OPEN_DEFAULT, (err) => {
         if (err) {
@@ -412,17 +408,8 @@ ${sql}`);
    * Get the 'user_version' from the database
    * @returns A promise of the user version number
    */
-  public async getUserVersion(): Promise<number> {
-    let userVersion = 0;
-    try {
-      const res = await this.get('PRAGMA user_version');
-      userVersion = res.user_version;
-    } catch (e) {
-      // NOTE: should not happen
-      /* istanbul ignore next */
-      return Promise.reject(e);
-    }
-    return Promise.resolve(userVersion);
+  public getUserVersion(): Promise<number> {
+    return this.get('PRAGMA user_version').then((res) => res.user_version);
   }
 
   /**
