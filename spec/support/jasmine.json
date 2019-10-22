@@ -1,12 +1,4 @@
 {
-  "reporters": [
-    {
-      "name": "jasmine-spec-reporter#SpecReporter",
-      "options": {
-        "displayStacktrace": "all"
-      }
-    }
-  ],
-  "spec_dir": "src/sqlite3orm/spec",
+  "spec_dir": "/src/sqlite3orm/spec",
   "spec_files": ["**/*spec.ts"]
 }
