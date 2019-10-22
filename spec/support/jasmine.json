@@ -1,5 +1,5 @@
 {
-   "reporters": [
+  "reporters": [
     {
       "name": "jasmine-spec-reporter#SpecReporter",
       "options": {
@@ -7,8 +7,6 @@
       }
     }
   ],
-  "spec_dir": "",
-  "spec_files": [
-        "dist/spec/**/*spec.js"
-    ]
+  "spec_dir": "src/sqlite3orm/spec",
+  "spec_files": ["**/*spec.ts"]
 }
