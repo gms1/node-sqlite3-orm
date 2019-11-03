@@ -6,6 +6,7 @@
 export interface SqlDatabaseSettings {
   /*
    * PRAGMA schema.journal_mode = DELETE | TRUNCATE | PERSIST | MEMORY | WAL | OFF
+   *  for multiple schemas use e.g [ 'temp.OFF', 'main.WAL' ]
    */
   journalMode?: string | string[];
   /*
@@ -14,6 +15,7 @@ export interface SqlDatabaseSettings {
   busyTimeout?: number;
   /*
    * PRAGMA schema.synchronous = OFF | NORMAL | FULL | EXTRA;
+   *  for multiple schemas use e.g [ 'temp.OFF', 'main.FULL' ]
    */
   synchronous?: string | string[];
   /*
@@ -48,6 +50,7 @@ export interface SqlDatabaseSettings {
 
   /*
    * PRAGMA schema.secure_delete = TRUE | FALSE | FAST
+   *  for multiple schemas use e.g [ 'temp.OFF', 'main.FAST' ]
    */
   secureDelete?: string | string[];
 
@@ -55,4 +58,18 @@ export interface SqlDatabaseSettings {
    *  SERIALIZE | PARALLELIZE
    */
   executionMode?: string;
+
+  /*
+   *  PRAGMA cipher_compatibility = 1 | 2 | 3 | 4
+   *    see: https://www.zetetic.net/sqlcipher/sqlcipher-api/#cipher_compatibility
+   *    only available if node-sqlite3 has been compiled with sqlcipher support
+   */
+  cipherCompatibility?: number;
+
+  /*
+   * PRAGMA key = 'passphrase';
+   *    see: https://www.zetetic.net/sqlcipher/sqlcipher-api/#PRAGMA_key
+   *    only available if node-sqlite3 has been compiled with sqlcipher support
+   */
+  key?: string;
 }

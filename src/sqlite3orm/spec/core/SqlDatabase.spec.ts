@@ -6,6 +6,11 @@ import {
   SqlDatabase,
   SqlDatabaseSettings,
 } from '../..';
+import * as path from 'path';
+
+const CIPHER_DB = path.resolve(__dirname, '../fixtures/cipher.db');
+const CIPHER_COMPATIBILITY = 3;
+const CIPHER_KEY = 'sqlite3orm';
 
 // ---------------------------------------------
 
@@ -181,6 +186,17 @@ describe('test SqlDatabase', () => {
     }
     done();
   });
+
+  // ---------------------------------------------
+  it('expect getting PRAGMA cipher_version to succeed (can be undefined)', async (done) => {
+    try {
+      let version = await sqldb.getCipherVersion();
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+
   // ---------------------------------------------
   it('expect closing database to succeed', async (done) => {
     try {
@@ -388,5 +404,71 @@ describe('test SqlDatabase Settings', () => {
       fail(err);
     }
     done();
+  });
+});
+
+describe('test SqlDatabase when sqlcipher IS available', () => {
+  let sqldb: SqlDatabase;
+  let sqlcipherVersion: string | undefined;
+  beforeEach(async (done) => {
+    try {
+      sqldb = new SqlDatabase();
+
+      await sqldb.open(CIPHER_DB, SQL_OPEN_READWRITE, {
+        cipherCompatibility: CIPHER_COMPATIBILITY,
+        key: CIPHER_KEY,
+      });
+      sqlcipherVersion = await sqldb.getCipherVersion();
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+  it('should be able to read encrypted content', async (done) => {
+    if (!sqlcipherVersion) {
+      pending('sqlcipher IS NOT available');
+      return;
+    }
+    try {
+      let res = await sqldb.all('SELECT id, col FROM TEST order by id');
+      expect(res.length).toBeTruthy();
+      expect(res[0].id).toBe(1);
+      expect(res[0].col).toBe('my encrypted test data');
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+});
+
+describe('test SqlDatabase when sqlcipher IS NOT available', () => {
+  let sqldb: SqlDatabase;
+  let sqlcipherVersion: string | undefined;
+  beforeEach(async (done) => {
+    try {
+      sqldb = new SqlDatabase();
+
+      await sqldb.open(CIPHER_DB, SQL_OPEN_READWRITE, {
+        cipherCompatibility: CIPHER_COMPATIBILITY,
+        key: CIPHER_KEY,
+      });
+      sqlcipherVersion = await sqldb.getCipherVersion();
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+  it('', async (done) => {
+    if (sqlcipherVersion) {
+      pending(`sqlcipher IS available: version is '${sqlcipherVersion}'`);
+      return;
+    }
+    try {
+      await sqldb.all('SELECT id, col FROM TEST order by id');
+      fail('should not be able to read the database content');
+    } catch (err) {
+      done();
+      return;
+    }
   });
 });

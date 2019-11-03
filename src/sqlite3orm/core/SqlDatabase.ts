@@ -422,6 +422,17 @@ ${sql}`);
     return this.exec(`PRAGMA user_version = ${newver}`);
   }
 
+  /**
+   * Get the 'cipher_version' from the database
+   * @returns A promise of the cipher version
+   */
+  public getCipherVersion(): Promise<string | undefined> {
+    return this.get('PRAGMA cipher_version').then((res) =>
+      /* istanbul ignore next */ res ? res.cipher_version : undefined,
+    );
+  }
+
+  // tslint:disable-next-line: cyclomatic-complexity
   protected applySettings(settings: SqlDatabaseSettings): Promise<void> {
     /* istanbul ignore if */
     if (!this.db) {
@@ -429,9 +440,17 @@ ${sql}`);
     }
     const promises: Promise<void>[] = [];
     try {
+      /* istanbul ignore if */
+      if (settings.cipherCompatibility) {
+        this._addPragmaSetting(promises, 'cipher_compatibility', settings.cipherCompatibility);
+      }
+      /* istanbul ignore if */
+      if (settings.key) {
+        this._addPragmaSetting(promises, 'key', settings.key);
+      }
       /* istanbul ignore else */
       if (settings.journalMode) {
-        this._addPragmaSettings(promises, 'journal_mode', settings.journalMode);
+        this._addPragmaSchemaSettings(promises, 'journal_mode', settings.journalMode);
       }
       /* istanbul ignore else */
       if (settings.busyTimeout) {
@@ -439,7 +458,7 @@ ${sql}`);
       }
       /* istanbul ignore else */
       if (settings.synchronous) {
-        this._addPragmaSettings(promises, 'synchronous', settings.synchronous);
+        this._addPragmaSchemaSettings(promises, 'synchronous', settings.synchronous);
       }
       /* istanbul ignore else */
       if (settings.caseSensitiveLike) {
@@ -471,7 +490,7 @@ ${sql}`);
       }
       /* istanbul ignore else */
       if (settings.secureDelete) {
-        this._addPragmaSettings(promises, 'secure_delete', settings.secureDelete);
+        this._addPragmaSchemaSettings(promises, 'secure_delete', settings.secureDelete);
       }
       if (settings.executionMode) {
         switch (settings.executionMode.toUpperCase()) {
@@ -498,17 +517,17 @@ ${sql}`);
     return Promise.resolve();
   }
 
-  protected _addPragmaSettings(
+  protected _addPragmaSchemaSettings(
     promises: Promise<void>[],
     pragma: string,
     setting: string | string[],
   ): void {
     if (Array.isArray(setting)) {
       setting.forEach((val) => {
-        this._addPragmaSetting(promises, pragma, val);
+        this._addPragmaSetting(promises, pragma, val, true);
       });
     } else {
-      this._addPragmaSetting(promises, pragma, setting);
+      this._addPragmaSetting(promises, pragma, setting, true);
     }
   }
 
@@ -516,21 +535,28 @@ ${sql}`);
     promises: Promise<void>[],
     pragma: string,
     setting: string | number,
+    schemaSupport: boolean = false,
   ): void {
     if (typeof setting === 'number') {
       promises.push(this.exec(`PRAGMA ${pragma} = ${setting}`));
       return;
     }
-    const splitted = setting.split('.');
-    switch (splitted.length) {
-      case 1:
-        promises.push(this.exec(`PRAGMA ${pragma} = ${setting.toUpperCase()}`));
-        return;
-      case 2:
-        promises.push(this.exec(`PRAGMA ${splitted[0]}.${pragma} = ${splitted[1].toUpperCase()}`));
-        return;
+    if (schemaSupport) {
+      const splitted = setting.split('.');
+      switch (splitted.length) {
+        case 1:
+          promises.push(this.exec(`PRAGMA ${pragma} = ${setting.toUpperCase()}`));
+          return;
+        case 2:
+          promises.push(
+            this.exec(`PRAGMA ${splitted[0]}.${pragma} = ${splitted[1].toUpperCase()}`),
+          );
+          return;
+      }
+      throw new Error(`failed to read ${pragma} setting: ${setting.toString()}`);
+    } else {
+      promises.push(this.exec(`PRAGMA ${pragma} = ${setting}`));
     }
-    throw new Error(`failed to read ${pragma} setting: ${setting.toString()}`);
   }
 
   /**
