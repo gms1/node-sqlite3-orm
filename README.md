@@ -376,6 +376,8 @@ tsconfig.json:
 }
 ```
 
+SQLite's SQLCipher extension is also supported, see [SQLCipher](./docs/sqlcipher)
+
 ## Release Notes
 
 [CHANGELOG](./CHANGELOG.md)

@@ -1,4 +1,4 @@
-# using sqlcipher
+# using SQLCipher
 
 - install sqlcipher or build your own
 - rebuild node-sqlite3 using sqlcipher see [building for sqlcipher](https://github.com/mapbox/node-sqlite3#building-for-sqlcipher)
