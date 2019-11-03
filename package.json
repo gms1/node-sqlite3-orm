@@ -8,10 +8,14 @@
     "javascript",
     "typescript",
     "sqlite",
+    "sqlite3",
+    "sqlcipher",
     "ORM",
     "DAO",
     "schema",
-    "database"
+    "database",
+    "node",
+    "electron"
   ],
   "author": {
     "email": "www.gms@gmx.at",

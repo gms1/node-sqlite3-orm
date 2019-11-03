@@ -376,7 +376,9 @@ tsconfig.json:
 }
 ```
 
-SQLite's SQLCipher extension is also supported, see [SQLCipher](./docs/sqlcipher)
+> NOTE: SQLite's SQLCipher extension is also supported, see [SQLCipher](./docs/sqlcipher)
+
+> NOTE: for custom builds and Electron, see [Custom builds and Electron](https://github.com/mapbox/node-sqlite3#custom-builds-and-electron)
 
 ## Release Notes
 
