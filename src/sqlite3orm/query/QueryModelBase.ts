@@ -340,7 +340,10 @@ export class QueryModelBase<T> {
         // tslint:disable no-non-null-assertion
         foreignKeyPredicates.set(constraintName, selectCondition);
         foreignKeyProps.set(constraintName, fkProps);
-        foreignKeyRefCols.set(constraintName, fkDef.fields.map((field) => field.foreignColumnName));
+        foreignKeyRefCols.set(
+          constraintName,
+          fkDef.fields.map((field) => field.foreignColumnName),
+        );
         // tslint:enable no-non-null-assertion
       }
     });
