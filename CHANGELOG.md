@@ -2,7 +2,7 @@
 
 | Release   | Notes                                                                                                                       |
 | --------- | --------------------------------------------------------------------------------------------------------------------------- |
-| 2.4.2-15  | maintenance releases                                                                                                        |
+| 2.4.2-16  | maintenance releases                                                                                                        |
 | 2.4.14    | improved support for sqlcipher: new database settings for 'key' and 'cipherCompatibility'                                   |
 | 2.4.2-13  | maintenance releases                                                                                                        |
 | 2.4.1     | autoupgrade detection for autoIncrement changes                                                                             |
