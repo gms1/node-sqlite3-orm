@@ -75,7 +75,10 @@ export function getPropertyPredicates<MT, K extends keyof MT>(
   modelPredicates: ModelPredicates<MT>,
   key: K,
 ): PropertyPredicates<MT[K]> {
-  return (modelPredicates[key] || { eq: undefined }) as PropertyPredicates<MT[K]>;
+  // tslint:disable-next-line: triple-equals
+  return (modelPredicates[key] == undefined
+    ? { eq: undefined }
+    : modelPredicates[key]) as PropertyPredicates<MT[K]>;
 }
 
 export function getPropertyComparison<MT, K extends keyof MT>(
