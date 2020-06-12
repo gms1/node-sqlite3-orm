@@ -125,6 +125,24 @@ export class QueryModelBase<T> {
   }
 
   /**
+   * Get 'REPLACE INTO'-statement
+   *
+   * @returns The sql-statement
+   */
+  public getInsertOrReplaceStatement<K extends keyof T>(keys?: K[]): string {
+    const props = this.getPropertiesFromKeys(keys);
+    if (!props.length) {
+      return `INSERT OR REPLACE INTO ${this.table.quotedName} DEFAULT VALUES`;
+    }
+    let stmt = `INSERT OR REPLACE INTO ${this.table.quotedName} (\n  `;
+    stmt += props.map((prop) => prop.field.quotedName).join(', ');
+    stmt += '\n) VALUES (\n  ';
+    stmt += props.map((prop) => prop.getHostParameterName()).join(', ');
+    stmt += '\n)';
+    return stmt;
+  }
+
+  /**
    * Get a select-condition for a foreign key constraint
    *
    * @param constraintName - The constraint name

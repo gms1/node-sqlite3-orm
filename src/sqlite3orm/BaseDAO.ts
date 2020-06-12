@@ -85,6 +85,31 @@ export class BaseDAO<T extends Object> {
   }
 
   /**
+   * replace into
+   *
+   * @param model - A model class instance
+   * @returns A promise of the inserted or updated model class instance
+   */
+  public async insertOrReplace(model: T): Promise<T> {
+    return this.insertOrReplaceInternal(model) as Promise<T>;
+  }
+
+  /**
+   * replace into partially
+   *
+   * for this to work:
+   * all columns mapped to included properties must be nullable or their properties must provide a value
+   * all columns mapped to excluded properties must be nullable or must have a database default value
+   *
+   * @param input - A model class instance
+   * @returns A promise of the inserted or updated model class instance
+   */
+  public async insertOrReplacePartial(input: Partial<T>): Promise<Partial<T>> {
+    const keys = Object.keys(input);
+    return this.insertOrReplaceInternal(input, keys as (keyof T)[]);
+  }
+
+  /**
    * update
    *
    * @param model - A model class instance
@@ -520,7 +545,9 @@ export class BaseDAO<T extends Object> {
           // NOTE: should not happen
           const operation = this.table.autoIncrementField ? 'AUTOINCREMENT' : 'ROWID';
           return Promise.reject(
-            new Error(`getting ${operation} failed, 'lastID' is null or undefined`),
+            new Error(
+              `insert into '${this.table.name}' using ${operation} failed: 'lastID' is null or undefined`,
+            ),
           );
         }
         // tslint:disable-next-line: no-non-null-assertion
@@ -530,6 +557,36 @@ export class BaseDAO<T extends Object> {
       }
     } catch (e /* istanbul ignore next */) {
       return Promise.reject(new Error(`insert into '${this.table.name}' failed: ${e.message}`));
+    }
+    return input;
+  }
+
+  private async insertOrReplaceInternal<K extends keyof T>(
+    input: Partial<T>,
+    keys?: K[],
+  ): Promise<Partial<T>> {
+    try {
+      const res: any = await this.sqldb.run(
+        this.queryModel.getInsertOrReplaceStatement(keys),
+        this.queryModel.bindAllInputParams(input, keys),
+      );
+      if (this.table.autoIncrementField) {
+        /* istanbul ignore if */
+        // tslint:disable-next-line: triple-equals
+        if (res.lastID == undefined) {
+          // NOTE: should not happen
+          return Promise.reject(
+            new Error("replace into '${this.table.name}' failed: autoincrement failed"),
+          );
+        }
+        const autoProp = this.metaModel.mapColNameToProp.get(this.table.autoIncrementField.name);
+        /* istanbul ignore else */
+        if (autoProp) {
+          autoProp.setDBValueIntoModel(input, res.lastID);
+        }
+      }
+    } catch (e /* istanbul ignore next */) {
+      return Promise.reject(new Error(`replace into '${this.table.name}' failed: ${e.message}`));
     }
     return input;
   }

@@ -804,6 +804,121 @@ describe(`BaseDAO`, () => {
       }
       done();
     });
+
+    // ---------------------------------------------
+    it('expect default-clause to work: using insertOrReplace and empty partial model (autoincrement)', async (done) => {
+      try {
+        const insertedPartial = await fullDao.insertOrReplacePartial({ notMapped: 'foo' });
+        let readRow = await fullDao.selectById({ id: insertedPartial.id, notMapped: 'foo' });
+        expect(readRow.myBool).toBe(true);
+        expect(readRow.myInt).toBe(42);
+        expect(readRow.myString).toBe('sqlite3orm');
+        expect(readRow.myReal).toBe(3.1415692);
+      } catch (err) {
+        fail(err);
+      }
+      done();
+    });
+
+    // ---------------------------------------------
+    it('expect insertOrReplace to insert', async (done) => {
+      try {
+        const model = new TestDbDefaultsFull();
+        model.myBool = false;
+        model.myInt = 31;
+        model.myString = 'foo';
+        model.myReal = 3.14;
+        await fullDao.insertOrReplace(model);
+
+        let readRow = await fullDao.selectById({ id: model.id });
+        expect(readRow.myBool).toBe(false);
+        expect(readRow.myInt).toBe(31);
+        expect(readRow.myString).toBe('foo');
+        expect(readRow.myReal).toBe(3.14);
+      } catch (err) {
+        fail(err);
+      }
+      done();
+    });
+
+    // ---------------------------------------------
+    it('expect insertOrReplace to replace (by id)', async (done) => {
+      try {
+        const model = new TestDbDefaultsFull();
+        model.myBool = false;
+        model.myInt = 31;
+        model.myString = 'foo';
+        model.myReal = 3.14;
+
+        expect(model.id).toBeUndefined();
+        await fullDao.insertOrReplace(model); // insert using autoincrement
+        expect(model.id).toBeDefined();
+
+        const firstId = model.id;
+        let readRow = await fullDao.selectById({ id: firstId });
+        expect(readRow.myBool).toBe(false);
+        expect(readRow.myInt).toBe(31);
+        expect(readRow.myString).toBe('foo');
+        expect(readRow.myReal).toBe(3.14);
+
+        model.myBool = true;
+        model.myInt = 32;
+        model.myString = 'foo2';
+        model.myReal = 3.15;
+        await fullDao.insertOrReplace(model); // replace
+        expect(model.id).toBe(firstId);
+
+        readRow = await fullDao.selectById({ id: model.id });
+        expect(readRow.myBool).toBe(true);
+        expect(readRow.myInt).toBe(32);
+        expect(readRow.myString).toBe('foo2');
+        expect(readRow.myReal).toBe(3.15);
+      } catch (err) {
+        fail(err);
+      }
+      done();
+    });
+
+    // ---------------------------------------------
+    it('expect insertOrReplace to replace (by unique index)', async (done) => {
+      try {
+        const model = new TestDbDefaultsFull();
+        model.myBool = false;
+        model.myInt = 31;
+        model.myString = 'foo';
+        model.myReal = 3.14;
+
+        expect(model.id).toBeUndefined();
+        await fullDao.insertOrReplace(model); // insert using autoincrement
+        expect(model.id).toBeDefined();
+
+        const firstId = model.id;
+        let readRow = await fullDao.selectById({ id: firstId });
+        expect(readRow.myBool).toBe(false);
+        expect(readRow.myInt).toBe(31);
+        expect(readRow.myString).toBe('foo');
+        expect(readRow.myReal).toBe(3.14);
+
+        model.id = (undefined as unknown) as number;
+        model.myBool = true;
+        model.myInt = 32;
+        model.myString = 'foo';
+        model.myReal = 3.15;
+        await fullDao.insertOrReplace(model); // replace
+        const secondId = model.id;
+        expect(secondId).toBeGreaterThan(firstId);
+
+        const readRows = await fullDao.selectAll();
+        expect(readRows.length).toBe(1);
+        expect(readRows[0].myBool).toBe(true);
+        expect(readRows[0].myInt).toBe(32);
+        expect(readRows[0].myString).toBe('foo');
+        expect(readRows[0].myReal).toBe(3.15);
+      } catch (err) {
+        fail(err);
+      }
+      done();
+    });
   });
 
   describe('BaseDAO insert without autoincrement', () => {
@@ -865,37 +980,17 @@ describe(`BaseDAO`, () => {
     });
 
     // ---------------------------------------------
-    it('expect provided id to be inserted', async (done) => {
+    it('expect default-clause to work: using partial insertOrReplace and empty partial model (no autoincrement)', async (done) => {
       const fullDao: BaseDAO<TestDbDefaultsFull2> = new BaseDAO(TestDbDefaultsFull2, sqldb);
       try {
         await fullDao.createTable();
 
-        const insertedPartial = await fullDao.insertPartial(
-          { id: 3 },
-          BaseDAOInsertMode.StrictSqlite,
-        );
+        const insertedPartial = await fullDao.insertOrReplacePartial({ id: 1 });
         let readRow = await fullDao.selectById({ id: insertedPartial.id });
-        expect(readRow.id).toBe(3);
-      } catch (err) {
-        fail(err);
-      }
-      try {
-        await fullDao.dropTable();
-      } catch (err) {
-        fail(err);
-      }
-      done();
-    });
-
-    // ---------------------------------------------
-    it('expect not provided id to be defined after insert', async (done) => {
-      const fullDao: BaseDAO<TestDbDefaultsFull2> = new BaseDAO(TestDbDefaultsFull2, sqldb);
-      try {
-        await fullDao.createTable();
-
-        const insertedPartial = await fullDao.insertPartial({});
-        let readRow = await fullDao.selectById({ id: insertedPartial.id });
-        expect(insertedPartial.id).toBe(readRow.id);
+        expect(readRow.myBool).toBe(true);
+        expect(readRow.myInt).toBe(42);
+        expect(readRow.myString).toBe('sqlite3orm');
+        expect(readRow.myReal).toBe(3.1415692);
       } catch (err) {
         fail(err);
       }
