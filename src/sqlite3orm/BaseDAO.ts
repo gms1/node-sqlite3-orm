@@ -44,34 +44,7 @@ export class BaseDAO<T extends Object> {
    * @returns A promise of the inserted model class instance
    */
   public async insert(model: T): Promise<T> {
-    try {
-      if (!this.table.autoIncrementField) {
-        await this.sqldb.run(
-          this.queryModel.getInsertIntoStatement(),
-          this.queryModel.bindAllInputParams(model),
-        );
-      } else {
-        const res: any = await this.sqldb.run(
-          this.queryModel.getInsertIntoStatement(),
-          this.queryModel.bindNonPrimaryKeyInputParams(model),
-        );
-        /* istanbul ignore if */
-        // tslint:disable-next-line: triple-equals
-        if (res.lastID == undefined) {
-          // NOTE: should not happen
-          return Promise.reject(new Error("AUTOINCREMENT failed, 'lastID' is undefined or null"));
-        }
-        res[this.table.autoIncrementField.name] = res.lastID;
-        const autoProp = this.metaModel.mapColNameToProp.get(this.table.autoIncrementField.name);
-        /* istanbul ignore else */
-        if (autoProp) {
-          autoProp.setDBValueIntoModel(model, res.lastID);
-        }
-      }
-    } catch (e) {
-      return Promise.reject(new Error(`insert into '${this.table.name}' failed: ${e.message}`));
-    }
-    return model;
+    return this.insertInternal(model) as Promise<T>;
   }
 
   /**
@@ -85,35 +58,8 @@ export class BaseDAO<T extends Object> {
    * @returns A promise of the inserted model class instance
    */
   public async insertPartial(input: Partial<T>): Promise<Partial<T>> {
-    try {
-      const subset = Object.keys(input);
-      if (!this.table.autoIncrementField) {
-        await this.sqldb.run(
-          this.queryModel.getInsertIntoStatement(subset as (keyof T)[]),
-          this.queryModel.bindAllInputParams(input, subset as (keyof T)[]),
-        );
-      } else {
-        const res: any = await this.sqldb.run(
-          this.queryModel.getInsertIntoStatement(subset as (keyof T)[]),
-          this.queryModel.bindNonPrimaryKeyInputParams(input, subset as (keyof T)[]),
-        );
-        /* istanbul ignore if */
-        // tslint:disable-next-line: triple-equals
-        if (res.lastID == undefined) {
-          // NOTE: should not happen
-          return Promise.reject(new Error("AUTOINCREMENT failed, 'lastID' is undefined or null"));
-        }
-        res[this.table.autoIncrementField.name] = res.lastID;
-        const autoProp = this.metaModel.mapColNameToProp.get(this.table.autoIncrementField.name);
-        /* istanbul ignore else */
-        if (autoProp) {
-          autoProp.setDBValueIntoModel(input, res.lastID);
-        }
-      }
-    } catch (e /* istanbul ignore next */) {
-      return Promise.reject(new Error(`insert into '${this.table.name}' failed: ${e.message}`));
-    }
-    return input;
+    const keys = Object.keys(input);
+    return this.insertInternal(input, keys as (keyof T)[]);
   }
 
   /**
@@ -124,18 +70,7 @@ export class BaseDAO<T extends Object> {
    */
 
   public async update(model: T): Promise<T> {
-    try {
-      const res = await this.sqldb.run(
-        this.queryModel.getUpdateByIdStatement(),
-        this.queryModel.bindAllInputParams(model),
-      );
-      if (!res.changes) {
-        return Promise.reject(new Error(`update '${this.table.name}' failed: nothing changed`));
-      }
-    } catch (e) {
-      return Promise.reject(new Error(`update '${this.table.name}' failed: ${e.message}`));
-    }
-    return model;
+    return this.updateInternal(model) as Promise<T>;
   }
 
   /**
@@ -149,19 +84,8 @@ export class BaseDAO<T extends Object> {
    * @returns A promise of the updated model class instance
    */
   public async updatePartial(input: Partial<T>): Promise<Partial<T>> {
-    try {
-      const subset = Object.keys(input);
-      const res = await this.sqldb.run(
-        this.queryModel.getUpdateByIdStatement(subset as (keyof T)[]),
-        this.queryModel.bindAllInputParams(input, subset as (keyof T)[], true),
-      );
-      if (!res.changes) {
-        return Promise.reject(new Error(`update '${this.table.name}' failed: nothing changed`));
-      }
-    } catch (e) {
-      return Promise.reject(new Error(`update '${this.table.name}' failed: ${e.message}`));
-    }
-    return input;
+    const keys = Object.keys(input);
+    return this.updateInternal(input, keys as (keyof T)[]);
   }
 
   /**
@@ -184,11 +108,11 @@ export class BaseDAO<T extends Object> {
     params?: Object,
   ): Promise<number> {
     try {
-      const subset = Object.keys(input);
-      let sql = this.queryModel.getUpdateAllStatement(subset as (keyof T)[]);
+      const keys = Object.keys(input);
+      let sql = this.queryModel.getUpdateAllStatement(keys as (keyof T)[]);
       params = Object.assign(
         {},
-        this.queryModel.bindAllInputParams(input, subset as (keyof T)[]),
+        this.queryModel.bindAllInputParams(input, keys as (keyof T)[]),
         params,
       );
       const whereClause = await this.queryModel.getWhereClause(this.toFilter(where), params);
@@ -539,5 +463,57 @@ export class BaseDAO<T extends Object> {
       return whereOrFilter;
     }
     return { where: whereOrFilter, tableAlias };
+  }
+
+  private async insertInternal<K extends keyof T>(
+    input: Partial<T>,
+    keys?: K[],
+  ): Promise<Partial<T>> {
+    try {
+      if (!this.table.autoIncrementField) {
+        await this.sqldb.run(
+          this.queryModel.getInsertIntoStatement(keys),
+          this.queryModel.bindAllInputParams(input, keys),
+        );
+      } else {
+        const res: any = await this.sqldb.run(
+          this.queryModel.getInsertIntoStatement(keys),
+          this.queryModel.bindNonPrimaryKeyInputParams(input, keys),
+        );
+        /* istanbul ignore if */
+        // tslint:disable-next-line: triple-equals
+        if (res.lastID == undefined) {
+          // NOTE: should not happen
+          return Promise.reject(new Error("AUTOINCREMENT failed, 'lastID' is undefined or null"));
+        }
+        res[this.table.autoIncrementField.name] = res.lastID;
+        const autoProp = this.metaModel.mapColNameToProp.get(this.table.autoIncrementField.name);
+        /* istanbul ignore else */
+        if (autoProp) {
+          autoProp.setDBValueIntoModel(input, res.lastID);
+        }
+      }
+    } catch (e /* istanbul ignore next */) {
+      return Promise.reject(new Error(`insert into '${this.table.name}' failed: ${e.message}`));
+    }
+    return input;
+  }
+
+  private async updateInternal<K extends keyof T>(
+    input: Partial<T>,
+    keys?: K[],
+  ): Promise<Partial<T>> {
+    try {
+      const res = await this.sqldb.run(
+        this.queryModel.getUpdateByIdStatement(keys),
+        this.queryModel.bindAllInputParams(input, keys, true),
+      );
+      if (!res.changes) {
+        return Promise.reject(new Error(`update '${this.table.name}' failed: nothing changed`));
+      }
+    } catch (e) {
+      return Promise.reject(new Error(`update '${this.table.name}' failed: ${e.message}`));
+    }
+    return input;
   }
 }

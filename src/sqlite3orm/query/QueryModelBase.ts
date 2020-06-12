@@ -158,33 +158,27 @@ export class QueryModelBase<T> {
   }
 
   public getPropertiesFromKeys(keys?: (keyof T)[], addIdentity?: boolean): MetaProperty[] {
-    let props: MetaProperty[];
-    if (keys) {
-      const addedMap = new Set<keyof T>();
-      props = [];
-      keys.forEach((key) => {
-        const prop = this.metaModel.properties.get(key);
-        if (!prop) {
-          return;
-        }
-        if (!addedMap.has(key)) {
-          props.push(prop);
-          addedMap.add(key);
-        }
-      });
-      /* istanbul ignore if */
-      if (addIdentity) {
-        // for later use
-        props.push(
-          ...this.metaModel.qmCache.primaryKeyProps.filter(
-            (prop: MetaProperty) => !addedMap.has(prop.key as keyof T),
-          ),
-        );
-      }
-    } else {
-      props = Array.from(this.metaModel.properties.values());
+    if (!keys) {
+      return Array.from(this.metaModel.properties.values());
     }
-    return props;
+    const res: Map<string | number | symbol, MetaProperty> = new Map();
+    keys.forEach((key) => {
+      const prop = this.metaModel.properties.get(key);
+      if (!prop) {
+        return;
+      }
+      res.set(key, prop);
+    });
+    /* istanbul ignore if */
+    if (addIdentity) {
+      // for later use
+      this.metaModel.qmCache.primaryKeyProps
+        .filter((prop: MetaProperty) => !res.has(prop.key))
+        .forEach((prop) => {
+          res.set(prop.key, prop);
+        });
+    }
+    return Array.from(res.values());
   }
 
   public getPropertiesFromColumnNames(
@@ -272,22 +266,18 @@ export class QueryModelBase<T> {
     return hostParams;
   }
 
-  public bindAllInputParams(
-    model: Partial<T>,
-    subset?: (keyof T)[],
-    addIdentity?: boolean,
-  ): Object {
+  public bindAllInputParams(model: Partial<T>, keys?: (keyof T)[], addIdentity?: boolean): Object {
     const hostParams: Object = {};
-    const props = this.getPropertiesFromKeys(subset as (keyof T)[], addIdentity);
+    const props = this.getPropertiesFromKeys(keys, addIdentity);
     props.forEach((prop) => {
       this.setHostParam(hostParams, prop, model);
     });
     return hostParams;
   }
 
-  public bindNonPrimaryKeyInputParams(model: Partial<T>, subset?: (keyof T)[]): Object {
+  public bindNonPrimaryKeyInputParams(model: Partial<T>, keys?: (keyof T)[]): Object {
     const hostParams: Object = {};
-    const props = this.getPropertiesFromKeys(subset as (keyof T)[]);
+    const props = this.getPropertiesFromKeys(keys);
     props
       .filter((prop) => !prop.field.isIdentity)
       .forEach((prop) => {
