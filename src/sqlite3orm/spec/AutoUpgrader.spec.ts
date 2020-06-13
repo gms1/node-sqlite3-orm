@@ -538,6 +538,7 @@ describe('test autoupgrade', () => {
       const model1 = new Model1();
       await model1Dao.insert(model1);
       const id1 = model1.id;
+      model1.id = 0;
       model1.content = 'foo';
       model1.content2 = 'bar';
       await model1Dao.insert(model1);
@@ -657,6 +658,7 @@ describe('test autoupgrade', () => {
       model1.parentId = pId;
       await model1Dao.insert(model1);
       const id1 = model1.id;
+      model1.id = 0;
       model1.parentId = undefined;
       model1.content = 'foo';
       model1.content2 = 'bar';

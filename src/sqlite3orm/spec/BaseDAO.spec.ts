@@ -650,7 +650,7 @@ describe('BaseDAO', () => {
         readRow = await fullDao.selectById({ id: writtenRow.id });
         expect(readRow.myBool).toBe(true);
         expect(readRow.myInt).toBe(99);
-
+        readRow.id = 0;
         const writtenRow2 = await minDao.insert(readRow);
 
         readRow = await fullDao.selectById({ id: writtenRow2.id });
@@ -831,7 +831,7 @@ describe('BaseDAO', () => {
     });
   });
 
-  describe('BaseDAO insert using defaults without autoincrement', () => {
+  describe('BaseDAO insert without autoincrement', () => {
     let sqldb: SqlDatabase;
 
     const TEST_DB_DEFAULTS2 = 'BD:TEST_DB_DEFAULTS_TABLE2';
@@ -882,6 +882,46 @@ describe('BaseDAO', () => {
         expect(readRow.myInt).toBe(42);
         expect(readRow.myString).toBe('sqlite3orm');
         expect(readRow.myReal).toBe(3.1415692);
+      } catch (err) {
+        fail(err);
+      }
+      try {
+        await fullDao.dropTable();
+      } catch (err) {
+        fail(err);
+      }
+      done();
+    });
+
+    // ---------------------------------------------
+    it('expect provided id to be inserted', async (done) => {
+      const fullDao: BaseDAO<TestDbDefaultsFull2> = new BaseDAO(TestDbDefaultsFull2, sqldb);
+      try {
+        await fullDao.createTable();
+
+        const insertedPartial = await fullDao.insertPartial({ id: 3 });
+        let readRow = await fullDao.selectById({ id: insertedPartial.id });
+        expect(readRow.id).toBe(3);
+      } catch (err) {
+        fail(err);
+      }
+      try {
+        await fullDao.dropTable();
+      } catch (err) {
+        fail(err);
+      }
+      done();
+    });
+
+    // ---------------------------------------------
+    it('expect not provided id to be defined after insert', async (done) => {
+      const fullDao: BaseDAO<TestDbDefaultsFull2> = new BaseDAO(TestDbDefaultsFull2, sqldb);
+      try {
+        await fullDao.createTable();
+
+        const insertedPartial = await fullDao.insertPartial({});
+        let readRow = await fullDao.selectById({ id: insertedPartial.id });
+        expect(insertedPartial.id).toBe(readRow.id);
       } catch (err) {
         fail(err);
       }

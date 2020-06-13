@@ -470,28 +470,35 @@ export class BaseDAO<T extends Object> {
     keys?: K[],
   ): Promise<Partial<T>> {
     try {
-      if (!this.table.autoIncrementField) {
-        await this.sqldb.run(
-          this.queryModel.getInsertIntoStatement(keys),
-          this.queryModel.bindAllInputParams(input, keys),
-        );
-      } else {
-        const res: any = await this.sqldb.run(
-          this.queryModel.getInsertIntoStatement(keys),
-          this.queryModel.bindNonPrimaryKeyInputParams(input, keys),
-        );
+      const stmt = this.queryModel.getInsertIntoStatement(keys);
+      const params: any = this.queryModel.bindAllInputParams(input, keys);
+      const idProperty = this.table.rowIdField
+        ? this.metaModel.mapColNameToProp.get(this.table.rowIdField.name)
+        : undefined;
+      if (
+        idProperty &&
+        this.table.autoIncrementField &&
+        // tslint:disable-next-line: triple-equals
+        idProperty.getDBValueFromModel(input) != undefined
+      ) {
+        // tslint:disable-next-line: no-null-keyword
+        params[idProperty.getHostParameterName()] = null;
+      }
+      const res: any = await this.sqldb.run(stmt, params);
+      if (idProperty) {
         /* istanbul ignore if */
         // tslint:disable-next-line: triple-equals
         if (res.lastID == undefined) {
           // NOTE: should not happen
-          return Promise.reject(new Error("AUTOINCREMENT failed, 'lastID' is undefined or null"));
+          const operation = this.table.autoIncrementField ? 'AUTOINCREMENT' : 'ROWID';
+          return Promise.reject(
+            new Error("getting ${operation} failed, 'lastID' is null or undefined"),
+          );
         }
-        res[this.table.autoIncrementField.name] = res.lastID;
-        const autoProp = this.metaModel.mapColNameToProp.get(this.table.autoIncrementField.name);
+        // tslint:disable-next-line: no-non-null-assertion
+        res[this.table.rowIdField!.name] = res.lastID;
         /* istanbul ignore else */
-        if (autoProp) {
-          autoProp.setDBValueIntoModel(input, res.lastID);
-        }
+        idProperty.setDBValueIntoModel(input, res.lastID);
       }
     } catch (e /* istanbul ignore next */) {
       return Promise.reject(new Error(`insert into '${this.table.name}' failed: ${e.message}`));

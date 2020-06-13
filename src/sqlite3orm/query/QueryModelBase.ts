@@ -111,10 +111,7 @@ export class QueryModelBase<T> {
    * @returns The sql-statement
    */
   public getInsertIntoStatement<K extends keyof T>(keys?: K[]): string {
-    let props = this.getPropertiesFromKeys(keys);
-    if (this.table.autoIncrementField) {
-      props = props.filter((prop) => !prop.field.isIdentity);
-    }
+    const props = this.getPropertiesFromKeys(keys);
     if (!props.length) {
       return `INSERT INTO ${this.table.quotedName} DEFAULT VALUES`;
     }
@@ -275,6 +272,8 @@ export class QueryModelBase<T> {
     return hostParams;
   }
 
+  /* istanbul ignore next */
+  // obsolete
   public bindNonPrimaryKeyInputParams(model: Partial<T>, keys?: (keyof T)[]): Object {
     const hostParams: Object = {};
     const props = this.getPropertiesFromKeys(keys);

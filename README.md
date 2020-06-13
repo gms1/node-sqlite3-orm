@@ -355,6 +355,20 @@ autoUpgrader.upgradeTables([userDAO.table]);
 
 > NOTE: please always add a DEFAULT-clause for newly added columns which are not nullable
 
+## explicit AUTOINCREMENT vs implicit AUTOINCREMENT
+
+[SQLite Autoincrement](https://www.sqlite.org/autoinc.html)
+
+Whenever you create a table without specifying either WITHOUT ROWID or AUTOINCREMENT, you get an implicit autoincrement column called ROWID.
+
+Whenever you create a table without specifying WITHOUT ROWID and having a PRIMARY KEY column of type INTEGER, this column is an alias of the ROWID column, which is always a 64-bit signed integer.
+
+On an INSERT, if the ROWID or INTEGER PRIMARY KEY column is not explicitly given a value, then it will be filled automatically with an unused integer, usually one more than the largest ROWID currently in use. This is true regardless of whether or not the AUTOINCREMENT keyword is used.
+
+The AUTOINCREMENT keyword imposes extra CPU, memory, disk space, and disk I/O overhead and should be avoided if not strictly needed. It is usually not needed.
+
+If the AUTOINCREMENT keyword appears after INTEGER PRIMARY KEY, that changes the automatic ROWID assignment algorithm to prevent the reuse of ROWIDs over the lifetime of the database. In other words, the purpose of AUTOINCREMENT is to prevent the reuse of ROWIDs from previously deleted rows.
+
 ## Install
 
 ```bash
@@ -380,14 +394,14 @@ tsconfig.json:
 
 > NOTE: for custom builds and Electron, see [Custom builds and Electron](https://github.com/mapbox/node-sqlite3#custom-builds-and-electron)
 
-## Release Notes
+## RELEASE NOTES
 
 [CHANGELOG](./CHANGELOG.md)
 
-## License
+## LICENSE
 
 **node-sqlite3-orm** is licensed under the MIT License: [LICENSE](./LICENSE)
 
-## Wiki
+## WIKI
 
 further documentation can be found in our [Wiki](https://github.com/gms1/node-sqlite3-orm/wiki/)

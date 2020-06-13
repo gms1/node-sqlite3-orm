@@ -73,8 +73,18 @@ export class Table {
   readonly fields: Field[] = [];
 
   /**
-   * The field mapped to the primary key; only set if the
-   * AUTOINCREMENT feature can be used
+   * The field mapped to the primary key; only set if using the
+   * primary key column is alias for the rowId.
+   */
+  private _rowIdField: Field | undefined;
+
+  get rowIdField(): Field | undefined {
+    return this._rowIdField;
+  }
+
+  /**
+   * The field mapped to the primary key; only set if using the
+   * AUTOINCREMENT feature
    */
   private _autoIncrementField: Field | undefined;
 
@@ -196,14 +206,19 @@ export class Table {
     }
     if (field.isIdentity) {
       if (
-        this.autoIncrement &&
         !this.withoutRowId &&
         this.mapNameToIdentityField.size === 1 &&
         field.dbTypeInfo.typeAffinity === 'INTEGER'
       ) {
-        this._autoIncrementField = field;
+        this._rowIdField = field;
+        if (this.autoIncrement) {
+          this._autoIncrementField = field;
+        } else {
+          this._autoIncrementField = undefined;
+        }
       } else {
         this._autoIncrementField = undefined;
+        this._rowIdField = undefined;
       }
     }
     return field;
