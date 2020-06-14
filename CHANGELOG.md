@@ -2,6 +2,7 @@
 
 | Release   | Notes                                                                                                                       |
 | --------- | --------------------------------------------------------------------------------------------------------------------------- |
+| 2.5.0     | [2.5.0 changes](#2.5.0-changes)                                                                                             |
 | 2.4.18    | bug fix: query model: binding `false` values using shorthand form (#74)                                                     |
 | 2.4.2-17  | maintenance releases                                                                                                        |
 | 2.4.14    | improved support for sqlcipher: new database settings for 'key' and 'cipherCompatibility'                                   |
@@ -26,6 +27,13 @@
 | 0.0.8     | SqlConnectionPool: allow connections to be garbage-collected if the connection pool is not limited by max-connections       |
 | 0.0.7     | SqlConnectionPool: a new connection pool                                                                                    |
 | 0.0.6     | BaseDAO: ensure type safety for mapped properties of primitive or Date type                                                 |
+
+## 2.5.0 changes
+
+### new features
+
+- BaseDAO: new `replace` methods for [REPLACE command](https://www.sqlite.org/lang_replace.html)
+- BaseDAO: insert modes; see [insert modes](./README.md#basedao-insert-modes)
 
 ## 2.4.0 changes
 

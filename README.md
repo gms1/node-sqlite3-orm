@@ -373,9 +373,9 @@ If the AUTOINCREMENT keyword appears after INTEGER PRIMARY KEY, that changes the
 
 for historical reasons, when explicit AUTOINCREMENT is in use, the insert methods of the BaseDAO class by default prevents the insertion of predefined primary key values, so that the primary key column is always filled automatically with a generated ROWID. This is not the case, when implicit AUTOINCREMENT is in use.
 
-This behavior can be overwritten globally using the static `BaseDAO.options` or using an optional parameter for the insert method.
+This behavior can be overwritten globally using the static `BaseDAO.options` or using an optional parameter for the insert method:
 
-#### These are the different insert modes
+#### BaseDAO insert modes
 
 - StrictSqlite: use the provided value if defined, otherwise sqlite generates the value automatically
 - ForceAutoGeneration: prevents the insertion of predefined primary key values; always let sqlite generate a value automatically
