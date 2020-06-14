@@ -85,17 +85,17 @@ export class BaseDAO<T extends Object> {
   }
 
   /**
-   * replace into
+   * replace ( insert or replace )
    *
    * @param model - A model class instance
    * @returns A promise of the inserted or updated model class instance
    */
-  public async insertOrReplace(model: T): Promise<T> {
+  public async replace(model: T): Promise<T> {
     return this.insertOrReplaceInternal(model) as Promise<T>;
   }
 
   /**
-   * replace into partially
+   * replace ( insert or replace ) partially
    *
    * for this to work:
    * all columns mapped to included properties must be nullable or their properties must provide a value
@@ -104,7 +104,7 @@ export class BaseDAO<T extends Object> {
    * @param input - A model class instance
    * @returns A promise of the inserted or updated model class instance
    */
-  public async insertOrReplacePartial(input: Partial<T>): Promise<Partial<T>> {
+  public async replacePartial(input: Partial<T>): Promise<Partial<T>> {
     const keys = Object.keys(input);
     return this.insertOrReplaceInternal(input, keys as (keyof T)[]);
   }

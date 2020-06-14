@@ -808,7 +808,7 @@ describe(`BaseDAO`, () => {
     // ---------------------------------------------
     it('expect default-clause to work: using insertOrReplace and empty partial model (autoincrement)', async (done) => {
       try {
-        const insertedPartial = await fullDao.insertOrReplacePartial({ notMapped: 'foo' });
+        const insertedPartial = await fullDao.replacePartial({ notMapped: 'foo' });
         let readRow = await fullDao.selectById({ id: insertedPartial.id, notMapped: 'foo' });
         expect(readRow.myBool).toBe(true);
         expect(readRow.myInt).toBe(42);
@@ -828,7 +828,7 @@ describe(`BaseDAO`, () => {
         model.myInt = 31;
         model.myString = 'foo';
         model.myReal = 3.14;
-        await fullDao.insertOrReplace(model);
+        await fullDao.replace(model);
 
         let readRow = await fullDao.selectById({ id: model.id });
         expect(readRow.myBool).toBe(false);
@@ -851,7 +851,7 @@ describe(`BaseDAO`, () => {
         model.myReal = 3.14;
 
         expect(model.id).toBeUndefined();
-        await fullDao.insertOrReplace(model); // insert using autoincrement
+        await fullDao.replace(model); // insert using autoincrement
         expect(model.id).toBeDefined();
 
         const firstId = model.id;
@@ -865,7 +865,7 @@ describe(`BaseDAO`, () => {
         model.myInt = 32;
         model.myString = 'foo2';
         model.myReal = 3.15;
-        await fullDao.insertOrReplace(model); // replace
+        await fullDao.replace(model); // replace
         expect(model.id).toBe(firstId);
 
         readRow = await fullDao.selectById({ id: model.id });
@@ -889,7 +889,7 @@ describe(`BaseDAO`, () => {
         model.myReal = 3.14;
 
         expect(model.id).toBeUndefined();
-        await fullDao.insertOrReplace(model); // insert using autoincrement
+        await fullDao.replace(model); // insert using autoincrement
         expect(model.id).toBeDefined();
 
         const firstId = model.id;
@@ -904,7 +904,7 @@ describe(`BaseDAO`, () => {
         model.myInt = 32;
         model.myString = 'foo';
         model.myReal = 3.15;
-        await fullDao.insertOrReplace(model); // replace
+        await fullDao.replace(model); // replace
         const secondId = model.id;
         expect(secondId).toBeGreaterThan(firstId);
 
@@ -985,7 +985,7 @@ describe(`BaseDAO`, () => {
       try {
         await fullDao.createTable();
 
-        const insertedPartial = await fullDao.insertOrReplacePartial({ id: 1 });
+        const insertedPartial = await fullDao.replacePartial({ id: 1 });
         let readRow = await fullDao.selectById({ id: insertedPartial.id });
         expect(readRow.myBool).toBe(true);
         expect(readRow.myInt).toBe(42);
