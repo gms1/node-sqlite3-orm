@@ -25,10 +25,10 @@ import {table, id, field, index, fk, FieldOpts, TableOpts} from 'sqlite3orm';
 @table({name: 'USERS'})
 class User {
   @id({name: 'user_id', dbtype: 'INTEGER NOT NULL'})
-  userId: number;
+  userId!: number;
 
   @field({name: 'user_loginname', dbtype: 'TEXT NOT NULL'})
-  userLoginName: string;
+  userLoginName!: string;
 
   @field({name: 'user_json', dbtype: 'TEXT', isJson: true})
   userJsonData: any;
@@ -41,18 +41,18 @@ class User {
 @table({name: 'CONTACTS', autoIncrement: true})
 class Contact {
   @id({name: 'contact_id', dbtype: 'INTEGER NOT NULL'})
-  contactId: number;
+  contactId!: number;
 
   @field({name: 'contact_email', dbtype: 'TEXT'})
-  emailAddress: string;
+  emailAddress?: string;
 
   @field({name: 'contact_mobile', dbtype: 'TEXT'})
-  mobile: string;
+  mobile?: string;
 
   @field({name: 'user_id', dbtype: 'INTEGER NOT NULL'})
   @fk('fk_user_contacts', 'USERS', 'user_id')
   @index('idx_contacts_user')
-  userId: number;
+  userId!: number;
 }
 ```
 
@@ -368,6 +368,17 @@ On an INSERT, if the ROWID or INTEGER PRIMARY KEY column is not explicitly given
 The AUTOINCREMENT keyword imposes extra CPU, memory, disk space, and disk I/O overhead and should be avoided if not strictly needed. It is usually not needed.
 
 If the AUTOINCREMENT keyword appears after INTEGER PRIMARY KEY, that changes the automatic ROWID assignment algorithm to prevent the reuse of ROWIDs over the lifetime of the database. In other words, the purpose of AUTOINCREMENT is to prevent the reuse of ROWIDs from previously deleted rows.
+
+### BaseDAO support for explicit and implicit AUTOINCREMENT
+
+for historical reasons, when explicit AUTOINCREMENT is in use, the insert methods of the BaseDAO class by default prevents the insertion of predefined primary key values, so that the primary key column is always filled automatically with a generated ROWID. This is not the case, when implicit AUTOINCREMENT is in use.
+
+This behavior can be overwritten globally using the static `BaseDAO.options` or using an optional parameter for the insert method.
+
+#### These are the different insert modes
+
+- StrictSqlite: use the provided value if defined, otherwise sqlite generates the value automatically
+- ForceAutoGeneration: prevents the insertion of predefined primary key values; always let sqlite generate a value automatically
 
 ## Install
 

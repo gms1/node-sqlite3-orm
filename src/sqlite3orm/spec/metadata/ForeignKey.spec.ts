@@ -33,27 +33,22 @@ const CHILD_FK_REF_NAME = 'FK PARENT REF';
 @table({ name: PARENT_TABLE_NAMEQ })
 class Parent {
   @id({ name: PARENT_COL_ID1, dbtype: 'INTEGER NOT NULL' })
-  id1: number;
+  id1!: number;
 
   @id({ name: PARENT_COL_ID2, dbtype: 'INTEGER NOT NULL' })
-  id2: number;
+  id2!: number;
 
   @field({ name: PARENT_COL_REF, dbtype: 'TEXT' })
   ref?: string;
 
   @field({ name: 'parent info', dbtype: 'TEXT' })
   parentInfo?: string;
-
-  constructor() {
-    this.id1 = 0;
-    this.id2 = 0;
-  }
 }
 
 @table({ name: CHILD_TABLE_NAMEQ, withoutRowId: true })
 class Child {
   @id({ name: 'child id', dbtype: 'INTEGER NOT NULL' })
-  id: number;
+  id!: number;
 
   @field({ name: 'child info', dbtype: 'TEXT' })
   childInfo?: string;
@@ -71,10 +66,6 @@ class Child {
   @fk(CHILD_FK_REF_NAME, PARENT_TABLE_NAME, PARENT_COL_REF)
   @field({ name: 'child parent ref', dbtype: 'TEXT' })
   ref?: string;
-
-  constructor() {
-    this.id = 0;
-  }
 }
 
 // NOTES: it seems sqlite3 does not support schema names for the referenced tabled in foreign key definitions

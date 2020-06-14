@@ -6,7 +6,7 @@ const DATATYPE_DATE_TABLE = 'DD:DATATYPE_DATE';
 @table({ name: DATATYPE_DATE_TABLE })
 class DataTypeDate {
   @id({ name: 'id', dbtype: 'INTEGER NOT NULL' })
-  id: number;
+  id!: number;
 
   @field({ name: 'my_date_text', dbtype: "TEXT DEFAULT(datetime('now') || 'Z')" })
   myDate2Text?: Date;
@@ -24,16 +24,12 @@ class DataTypeDate {
     dateInMilliSeconds: true,
   })
   myDate2Milliseconds?: Date;
-
-  constructor() {
-    this.id = 0;
-  }
 }
 
 describe('test Date type', () => {
   let sqldb: SqlDatabase;
   let dao: BaseDAO<DataTypeDate>;
-  let lastModelId = 0;
+  let lastModelId = 1;
 
   // ---------------------------------------------
   beforeEach(async (done) => {

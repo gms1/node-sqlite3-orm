@@ -17,11 +17,11 @@ const CONTACTS_TABLE = 'main.QB:CONTACTS TABLE';
 
 @table({ name: USERS_TABLE })
 class User {
-  @id({ name: 'user_id', dbtype: 'INTEGER NOT NULL' }) userId: number;
+  @id({ name: 'user_id', dbtype: 'INTEGER NOT NULL' }) userId!: number;
 
-  @field({ name: 'user_loginname', dbtype: 'TEXT NOT NULL' }) userLoginName: string;
+  @field({ name: 'user_loginname', dbtype: 'TEXT NOT NULL' }) userLoginName!: string;
 
-  @field({ name: 'user_followers', dbtype: 'NUMBER NOT NULL' }) userFollowers: number;
+  @field({ name: 'user_followers', dbtype: 'NUMBER NOT NULL' }) userFollowers!: number;
 
   @field({ name: 'user_likes1', dbtype: 'NUMBER' }) userLikes1?: number;
 
@@ -38,41 +38,10 @@ class User {
   notMapped?: string;
 
   constructor() {
-    this.userId = 0;
-    this.userLoginName = 'noname';
-    this.userFollowers = 0;
     this.userCreated = new Date();
     this.userUpdated = new Date();
   }
 }
-
-/*
-@table({ name: CONTACTS_TABLE, autoIncrement: true })
-class Contact {
-  static userConstraint: string = 'user';
-
-  @id({ name: 'contact_id', dbtype: 'INTEGER NOT NULL' })
-  contactId: number;
-
-  @field({ name: 'contact_email', dbtype: 'TEXT' })
-  emailAddress: string;
-
-  @field({ name: 'contact_mobile', dbtype: 'TEXT' })
-  mobile: string;
-
-  @fk(Contact.userConstraint, USERS_TABLE, 'user_id') @field({ name: 'user_id', dbtype: 'INTEGER NOT NULL' })
-  userId: number;
-
-  notMapped?: string;
-
-  constructor() {
-    this.contactId = 0;
-    this.emailAddress = 'noemail';
-    this.mobile = 'nomobile';
-    this.userId = 0;
-  }
-}
-*/
 
 describe('test QueryModel', () => {
   let sqldb: SqlDatabase;

@@ -22,7 +22,7 @@ const testTransformer: ValueTransformer = {
 @table({ name: DATATYPE_OTHER_TABLE, autoIncrement: true })
 class DataTypeOther {
   @id({ name: 'id', dbtype: 'INTEGER NOT NULL' })
-  id: number;
+  id!: number;
 
   @field({ name: 'my_number_text', dbtype: 'TEXT' })
   myNumberText?: number;
@@ -36,10 +36,6 @@ class DataTypeOther {
     transform: testTransformer,
   })
   myNumberText2?: number;
-
-  constructor() {
-    this.id = 0;
-  }
 }
 
 describe('test Json data', () => {

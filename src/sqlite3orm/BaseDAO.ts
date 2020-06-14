@@ -8,12 +8,34 @@ import { Filter, isFilter, QueryModel, TABLEALIAS, Where } from './query';
 
 /**
  *
+ * @export
+ * @enum
+ */
+export enum BaseDAOInsertMode {
+  /** use the provided value if defined, otherwise let sqlite generate the value automatically */
+  StrictSqlite = 1,
+  /** prevents the insertion of predefined primary key values; always let sqlite generate a value automatically */
+  ForceAutoGeneration = 2,
+}
+/**
+ *
+ * @export
+ * @interface BaseDAOOptions
+ */
+export interface BaseDAOOptions {
+  insertMode?: BaseDAOInsertMode;
+}
+
+/**
+ *
  *
  * @export
  * @class BaseDAO
  * @template T - The class mapped to the base table
  */
 export class BaseDAO<T extends Object> {
+  static options?: BaseDAOOptions;
+
   readonly type: { new (): T };
   readonly metaModel: MetaModel;
   readonly table: Table;
@@ -43,8 +65,8 @@ export class BaseDAO<T extends Object> {
    * @param model - A model class instance
    * @returns A promise of the inserted model class instance
    */
-  public async insert(model: T): Promise<T> {
-    return this.insertInternal(model) as Promise<T>;
+  public async insert(model: T, mode?: BaseDAOInsertMode): Promise<T> {
+    return this.insertInternal(model, undefined, mode) as Promise<T>;
   }
 
   /**
@@ -57,9 +79,9 @@ export class BaseDAO<T extends Object> {
    * @param input - A model class instance
    * @returns A promise of the inserted model class instance
    */
-  public async insertPartial(input: Partial<T>): Promise<Partial<T>> {
+  public async insertPartial(input: Partial<T>, mode?: BaseDAOInsertMode): Promise<Partial<T>> {
     const keys = Object.keys(input);
-    return this.insertInternal(input, keys as (keyof T)[]);
+    return this.insertInternal(input, keys as (keyof T)[], mode);
   }
 
   /**
@@ -468,8 +490,10 @@ export class BaseDAO<T extends Object> {
   private async insertInternal<K extends keyof T>(
     input: Partial<T>,
     keys?: K[],
+    mode?: BaseDAOInsertMode,
   ): Promise<Partial<T>> {
     try {
+      const insertMode = mode || BaseDAO.options?.insertMode;
       const stmt = this.queryModel.getInsertIntoStatement(keys);
       const params: any = this.queryModel.bindAllInputParams(input, keys);
       const idProperty = this.table.rowIdField
@@ -477,12 +501,16 @@ export class BaseDAO<T extends Object> {
         : undefined;
       if (
         idProperty &&
-        this.table.autoIncrementField &&
         // tslint:disable-next-line: triple-equals
         idProperty.getDBValueFromModel(input) != undefined
       ) {
-        // tslint:disable-next-line: no-null-keyword
-        params[idProperty.getHostParameterName()] = null;
+        if (
+          (insertMode === undefined && this.table.autoIncrementField) ||
+          insertMode === BaseDAOInsertMode.ForceAutoGeneration
+        ) {
+          // tslint:disable-next-line: no-null-keyword
+          params[idProperty.getHostParameterName()] = null;
+        }
       }
       const res: any = await this.sqldb.run(stmt, params);
       if (idProperty) {
@@ -492,7 +520,7 @@ export class BaseDAO<T extends Object> {
           // NOTE: should not happen
           const operation = this.table.autoIncrementField ? 'AUTOINCREMENT' : 'ROWID';
           return Promise.reject(
-            new Error("getting ${operation} failed, 'lastID' is null or undefined"),
+            new Error(`getting ${operation} failed, 'lastID' is null or undefined`),
           );
         }
         // tslint:disable-next-line: no-non-null-assertion
@@ -524,3 +552,6 @@ export class BaseDAO<T extends Object> {
     return input;
   }
 }
+
+// BaseDAO.options = { insertMode: BaseDAOInsertMode.StrictSqlite };
+// BaseDAO.options = { insertMode: BaseDAOInsertMode.ForceAutoGeneration };

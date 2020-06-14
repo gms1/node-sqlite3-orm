@@ -14,7 +14,7 @@ import {
 
 @table({ name: 'ISSUE74_TABLE' })
 class Issue74Model {
-  @id({ name: 'id', dbtype: 'INTEGER NOT NULL' }) id: number = 0;
+  @id({ name: 'id', dbtype: 'INTEGER NOT NULL' }) id!: number;
 
   @field({ name: 'loaded' })
   loaded: boolean = false;

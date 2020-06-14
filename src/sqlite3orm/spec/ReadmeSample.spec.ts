@@ -6,45 +6,33 @@ import { BaseDAO, field, fk, id, index, schema, SqlDatabase, table } from '..';
 @table({ name: 'USERS' })
 class User {
   @id({ name: 'user_id', dbtype: 'INTEGER NOT NULL' })
-  userId: number;
+  userId!: number;
 
   @field({ name: 'user_loginname', dbtype: 'TEXT NOT NULL' })
-  userLoginName: string;
+  userLoginName!: string;
 
   @field({ name: 'user_json', dbtype: 'TEXT', isJson: true })
   userJsonData: any;
 
   @field({ name: 'user_deleted' })
   deleted?: boolean;
-
-  constructor() {
-    this.userId = 0;
-    this.userLoginName = 'noname';
-  }
 }
 
 @table({ name: 'CONTACTS', autoIncrement: true })
 class Contact {
   @id({ name: 'contact_id', dbtype: 'INTEGER NOT NULL' })
-  contactId: number;
+  contactId!: number;
 
   @field({ name: 'contact_email', dbtype: 'TEXT' })
-  emailAddress: string;
+  emailAddress?: string;
 
   @field({ name: 'contact_mobile', dbtype: 'TEXT' })
-  mobile: string;
+  mobile?: string;
 
   @field({ name: 'user_id', dbtype: 'INTEGER NOT NULL' })
   @fk('fk_user_contacts', 'USERS', 'user_id')
   @index('idx_contacts_user')
-  userId: number;
-
-  constructor() {
-    this.contactId = 0;
-    this.emailAddress = 'noemail';
-    this.mobile = 'nomobile';
-    this.userId = 0;
-  }
+  userId!: number;
 }
 
 async function runSample(): Promise<void> {

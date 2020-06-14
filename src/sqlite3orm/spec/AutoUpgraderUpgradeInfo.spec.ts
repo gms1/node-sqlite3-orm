@@ -191,20 +191,16 @@ describe('test autoupgrade - upgrade info', () => {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
         @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
-        id1: number;
+        id1!: number;
 
         @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
-        id2: number;
-
-        constructor() {
-          this.id1 = this.id2 = 0;
-        }
+        id2!: number;
       }
 
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
         @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
-        id: number;
+        id!: number;
 
         @field({ name: 'PARENT1_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
@@ -243,10 +239,6 @@ describe('test autoupgrade - upgrade info', () => {
 
         @field({ name: 'FLD5', dbtype: "TEXT NOT NULL DEFAULT('foo')" })
         fld5?: string;
-
-        constructor() {
-          this.id = 0;
-        }
       }
 
       const metaModel = Reflect.getMetadata(METADATA_MODEL_KEY, Model1.prototype) as MetaModel;
@@ -267,20 +259,16 @@ describe('test autoupgrade - upgrade info', () => {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
         @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
-        id1: number;
+        id1!: number;
 
         @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
-        id2: number;
-
-        constructor() {
-          this.id1 = this.id2 = 0;
-        }
+        id2!: number;
       }
 
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
         @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
-        id: number;
+        id!: number;
 
         @field({ name: 'PARENT1_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
@@ -319,10 +307,6 @@ describe('test autoupgrade - upgrade info', () => {
 
         @field({ name: 'FLD5', dbtype: "TEXT NOT NULL DEFAULT('foo')" })
         fld5?: string;
-
-        constructor() {
-          this.id = 0;
-        }
       }
 
       const metaModel = Reflect.getMetadata(METADATA_MODEL_KEY, Model1.prototype) as MetaModel;
@@ -343,20 +327,16 @@ describe('test autoupgrade - upgrade info', () => {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
         @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
-        id1: number;
+        id1!: number;
 
         @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
-        id2: number;
-
-        constructor() {
-          this.id1 = this.id2 = 0;
-        }
+        id2!: number;
       }
 
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
         @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
-        id: number;
+        id!: number;
 
         @field({ name: 'PARENT1_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
@@ -395,10 +375,6 @@ describe('test autoupgrade - upgrade info', () => {
 
         @field({ name: 'FLD5', dbtype: "TEXT NOT NULL DEFAULT('foo')" })
         fld5?: string;
-
-        constructor() {
-          this.id = 0;
-        }
       }
 
       const metaModel = Reflect.getMetadata(METADATA_MODEL_KEY, Model1.prototype) as MetaModel;
@@ -421,20 +397,16 @@ describe('test autoupgrade - upgrade info', () => {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
         @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
-        id1: number;
+        id1!: number;
 
         @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
-        id2: number;
-
-        constructor() {
-          this.id1 = this.id2 = 0;
-        }
+        id2!: number;
       }
 
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
         @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
-        id: number;
+        id!: number;
 
         @field({ name: 'PARENT1_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
@@ -475,10 +447,6 @@ describe('test autoupgrade - upgrade info', () => {
 
         @field({ name: 'FLD5', dbtype: "TEXT NOT NULL DEFAULT('foo')" })
         fld5?: string;
-
-        constructor() {
-          this.id = 0;
-        }
       }
 
       const metaModel = Reflect.getMetadata(METADATA_MODEL_KEY, Model1.prototype) as MetaModel;
@@ -499,20 +467,16 @@ describe('test autoupgrade - upgrade info', () => {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
         @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
-        id1: number;
+        id1!: number;
 
         @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
-        id2: number;
-
-        constructor() {
-          this.id1 = this.id2 = 0;
-        }
+        id2!: number;
       }
 
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
         @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
-        id: number;
+        id!: number;
 
         @field({ name: 'PARENT1_ID2', dbtype: 'INTEGER' })
         @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID2') // !!! <= changed foreign key
@@ -551,10 +515,6 @@ describe('test autoupgrade - upgrade info', () => {
 
         @field({ name: 'FLD5', dbtype: "TEXT NOT NULL DEFAULT('foo')" })
         fld5?: string;
-
-        constructor() {
-          this.id = 0;
-        }
       }
 
       const metaModel = Reflect.getMetadata(METADATA_MODEL_KEY, Model1.prototype) as MetaModel;
@@ -575,20 +535,16 @@ describe('test autoupgrade - upgrade info', () => {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
         @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
-        id1: number;
+        id1!: number;
 
         @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
-        id2: number;
-
-        constructor() {
-          this.id1 = this.id2 = 0;
-        }
+        id2!: number;
       }
 
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
         @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
-        id: number;
+        id!: number;
 
         @field({ name: 'PARENT1_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
@@ -624,13 +580,6 @@ describe('test autoupgrade - upgrade info', () => {
 
         @field({ name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14' })
         fld4?: number;
-
-        // @field({name: 'FLD5', dbtype: 'TEXT NOT NULL DEFAULT(\'foo\')'})  // !!! <= dropped column
-        // fld5?: string;
-
-        constructor() {
-          this.id = 0;
-        }
       }
 
       const metaModel = Reflect.getMetadata(METADATA_MODEL_KEY, Model1.prototype) as MetaModel;
@@ -651,20 +600,16 @@ describe('test autoupgrade - upgrade info', () => {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
         @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
-        id1: number;
+        id1!: number;
 
         @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
-        id2: number;
-
-        constructor() {
-          this.id1 = this.id2 = 0;
-        }
+        id2!: number;
       }
 
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
         @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
-        id: number;
+        id!: number;
 
         @field({ name: 'PARENT1_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
@@ -700,13 +645,6 @@ describe('test autoupgrade - upgrade info', () => {
 
         @field({ name: 'FLD4', dbtype: 'REAL NOT NULL DEFAULT 3.14' })
         fld4?: number;
-
-        // @field({name: 'FLD5', dbtype: 'TEXT NOT NULL DEFAULT(\'foo\')'})  // !!! <= dropped not-null column
-        // fld5?: string;
-
-        constructor() {
-          this.id = 0;
-        }
       }
 
       const metaModel = Reflect.getMetadata(METADATA_MODEL_KEY, Model1.prototype) as MetaModel;
@@ -729,20 +667,16 @@ describe('test autoupgrade - upgrade info', () => {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
         @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
-        id1: number;
+        id1!: number;
 
         @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
-        id2: number;
-
-        constructor() {
-          this.id1 = this.id2 = 0;
-        }
+        id2!: number;
       }
 
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
         @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
-        id: number;
+        id!: number;
 
         @field({ name: 'PARENT1_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
@@ -781,10 +715,6 @@ describe('test autoupgrade - upgrade info', () => {
 
         @field({ name: 'FLD5', dbtype: "TEXT NOT NULL DEFAULT('foo')" })
         fld5?: string;
-
-        constructor() {
-          this.id = 0;
-        }
       }
 
       const metaModel = Reflect.getMetadata(METADATA_MODEL_KEY, Model1.prototype) as MetaModel;
@@ -807,20 +737,16 @@ describe('test autoupgrade - upgrade info', () => {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
         @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
-        id1: number;
+        id1!: number;
 
         @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
-        id2: number;
-
-        constructor() {
-          this.id1 = this.id2 = 0;
-        }
+        id2!: number;
       }
 
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
         @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
-        id: number;
+        id!: number;
 
         @field({ name: 'PARENT1_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
@@ -859,10 +785,6 @@ describe('test autoupgrade - upgrade info', () => {
 
         @field({ name: 'FLD5', dbtype: 'REAL NOT NULL DEFAULT 3.14' }) // !!! <= changed column
         fld5?: number;
-
-        constructor() {
-          this.id = 0;
-        }
       }
 
       const metaModel = Reflect.getMetadata(METADATA_MODEL_KEY, Model1.prototype) as MetaModel;
@@ -883,21 +805,17 @@ describe('test autoupgrade - upgrade info', () => {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
         @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
-        id1: number;
+        id1!: number;
 
         @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
-        id2: number;
-
-        constructor() {
-          this.id1 = this.id2 = 0;
-        }
+        id2!: number;
       }
 
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
         // @id({name: 'ID', dbtype: 'INTEGER NOT NULL'}) // !!! <= primary key removed
         @field({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
-        id: number;
+        id!: number;
 
         @field({ name: 'PARENT1_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
@@ -936,10 +854,6 @@ describe('test autoupgrade - upgrade info', () => {
 
         @field({ name: 'FLD5', dbtype: "TEXT NOT NULL DEFAULT('foo')" })
         fld5?: string;
-
-        constructor() {
-          this.id = 0;
-        }
       }
 
       const metaModel = Reflect.getMetadata(METADATA_MODEL_KEY, Model1.prototype) as MetaModel;
@@ -960,21 +874,17 @@ describe('test autoupgrade - upgrade info', () => {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
         @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
-        id1: number;
+        id1!: number;
 
         @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
-        id2: number;
-
-        constructor() {
-          this.id1 = this.id2 = 0;
-        }
+        id2!: number;
       }
 
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
         // @id({name: 'ID', dbtype: 'INTEGER NOT NULL'}) // !!! <= primary key changed
         @field({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
-        id: number;
+        id!: number;
 
         @field({ name: 'PARENT1_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
@@ -1013,10 +923,6 @@ describe('test autoupgrade - upgrade info', () => {
 
         @field({ name: 'FLD5', dbtype: "TEXT NOT NULL DEFAULT('foo')" })
         fld5?: string;
-
-        constructor() {
-          this.id = 0;
-        }
       }
 
       const metaModel = Reflect.getMetadata(METADATA_MODEL_KEY, Model1.prototype) as MetaModel;
@@ -1037,20 +943,16 @@ describe('test autoupgrade - upgrade info', () => {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
         @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
-        id1: number;
+        id1!: number;
 
         @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
-        id2: number;
-
-        constructor() {
-          this.id1 = this.id2 = 0;
-        }
+        id2!: number;
       }
 
       @table({ name: TEST_TABLE, autoIncrement: false }) // !!! <= autoIncrement changed
       class Model1 {
         @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
-        id: number;
+        id!: number;
 
         @field({ name: 'PARENT1_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
@@ -1089,10 +991,6 @@ describe('test autoupgrade - upgrade info', () => {
 
         @field({ name: 'FLD5', dbtype: "TEXT NOT NULL DEFAULT('foo')" })
         fld5?: string;
-
-        constructor() {
-          this.id = 0;
-        }
       }
 
       const metaModel = Reflect.getMetadata(METADATA_MODEL_KEY, Model1.prototype) as MetaModel;
@@ -1113,20 +1011,16 @@ describe('test autoupgrade - upgrade info', () => {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
         @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
-        id1: number;
+        id1!: number;
 
         @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
-        id2: number;
-
-        constructor() {
-          this.id1 = this.id2 = 0;
-        }
+        id2!: number;
       }
 
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
         @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
-        id: number;
+        id!: number;
 
         @field({ name: 'PARENT1_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
@@ -1168,10 +1062,6 @@ describe('test autoupgrade - upgrade info', () => {
 
         @field({ name: 'FLD6', dbtype: 'TEXT' }) // !!! <= added column
         fld6?: string;
-
-        constructor() {
-          this.id = 0;
-        }
       }
 
       const metaModel = Reflect.getMetadata(METADATA_MODEL_KEY, Model1.prototype) as MetaModel;
@@ -1192,20 +1082,16 @@ describe('test autoupgrade - upgrade info', () => {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
         @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
-        id1: number;
+        id1!: number;
 
         @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
-        id2: number;
-
-        constructor() {
-          this.id1 = this.id2 = 0;
-        }
+        id2!: number;
       }
 
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
         @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
-        id: number;
+        id!: number;
 
         @field({ name: 'PARENT1_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
@@ -1246,10 +1132,6 @@ describe('test autoupgrade - upgrade info', () => {
 
         @field({ name: 'FLD5', dbtype: "TEXT NOT NULL DEFAULT('foo')" })
         fld5?: string;
-
-        constructor() {
-          this.id = 0;
-        }
       }
 
       const metaModel = Reflect.getMetadata(METADATA_MODEL_KEY, Model1.prototype) as MetaModel;
@@ -1270,20 +1152,16 @@ describe('test autoupgrade - upgrade info', () => {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
         @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
-        id1: number;
+        id1!: number;
 
         @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
-        id2: number;
-
-        constructor() {
-          this.id1 = this.id2 = 0;
-        }
+        id2!: number;
       }
 
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
         @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
-        id: number;
+        id!: number;
 
         @field({ name: 'PARENT1_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
@@ -1324,10 +1202,6 @@ describe('test autoupgrade - upgrade info', () => {
 
         @field({ name: 'FLD5', dbtype: "TEXT NOT NULL DEFAULT('foo')" })
         fld5?: string;
-
-        constructor() {
-          this.id = 0;
-        }
       }
 
       const metaModel = Reflect.getMetadata(METADATA_MODEL_KEY, Model1.prototype) as MetaModel;
@@ -1348,20 +1222,16 @@ describe('test autoupgrade - upgrade info', () => {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
         @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
-        id1: number;
+        id1!: number;
 
         @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
-        id2: number;
-
-        constructor() {
-          this.id1 = this.id2 = 0;
-        }
+        id2!: number;
       }
 
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
         @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
-        id: number;
+        id!: number;
 
         @field({ name: 'PARENT1_ID1', dbtype: 'INTEGER' })
         @fk('FK_PARENT1', TEST_PARENT_TABLE, 'ID1')
@@ -1402,10 +1272,6 @@ describe('test autoupgrade - upgrade info', () => {
 
         @field({ name: 'FLD5', dbtype: "TEXT NOT NULL DEFAULT('foo')" })
         fld5?: string;
-
-        constructor() {
-          this.id = 0;
-        }
       }
 
       const metaModel = Reflect.getMetadata(METADATA_MODEL_KEY, Model1.prototype) as MetaModel;

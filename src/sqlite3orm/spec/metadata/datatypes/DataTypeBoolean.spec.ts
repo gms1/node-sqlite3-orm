@@ -6,7 +6,7 @@ const DATATYPE_BOOLEAN_TABLE = 'DB:DATATYPE_BOOLEAN';
 @table({ name: DATATYPE_BOOLEAN_TABLE })
 class DataTypeBoolean {
   @id({ name: 'id', dbtype: 'INTEGER NOT NULL' })
-  id: number;
+  id!: number;
 
   @field({ name: 'my_bool_text', dbtype: 'TEXT' })
   myBool2Text?: boolean;
@@ -16,10 +16,6 @@ class DataTypeBoolean {
 
   @field({ name: 'my_bool_real', dbtype: 'REAL' })
   myBool2Real?: boolean;
-
-  constructor() {
-    this.id = 0;
-  }
 }
 
 describe('test boolean type', () => {
@@ -33,7 +29,7 @@ describe('test boolean type', () => {
       await sqldb.open(SQL_MEMORY_DB_PRIVATE);
       await schema().createTable(sqldb, DATATYPE_BOOLEAN_TABLE);
       dao = new BaseDAO<DataTypeBoolean>(DataTypeBoolean, sqldb);
-      model.id = 0;
+      model.id = 1;
     } catch (err) {
       fail(err);
     }

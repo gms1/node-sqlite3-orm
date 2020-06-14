@@ -3,12 +3,13 @@
 import {
   AutoUpgrader,
   BaseDAO,
+  BaseDAOInsertMode,
   DbCatalogDAO,
   field,
   id,
   schema,
-  SQL_MEMORY_DB_PRIVATE,
   SqlDatabase,
+  SQL_MEMORY_DB_PRIVATE,
   Table,
   table,
   UpgradeInfo,
@@ -78,14 +79,10 @@ describe('test autoupgrade', () => {
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
         @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
-        id: number;
+        id!: number;
 
         @field({ name: 'CONTENT', dbtype: 'TEXT' })
         content?: string;
-
-        constructor() {
-          this.id = 0;
-        }
       }
       await autoUpgrader.foreignKeyEnable(false);
 
@@ -120,14 +117,10 @@ describe('test autoupgrade', () => {
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
         @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
-        id: number;
+        id!: number;
 
         @field({ name: 'CONTENT', dbtype: 'TEXT' })
         content?: string;
-
-        constructor() {
-          this.id = 0;
-        }
       }
       const model1Dao = new BaseDAO<Model1>(Model1, sqldb);
 
@@ -152,17 +145,13 @@ describe('test autoupgrade', () => {
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model2 {
         @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
-        id: number;
+        id!: number;
 
         @field({ name: 'CONTENT', dbtype: 'TEXT' })
         content?: string;
 
         @field({ name: 'CONTENT2', dbtype: 'TEXT' })
         content2?: string;
-
-        constructor() {
-          this.id = 0;
-        }
       }
       const model2Dao = new BaseDAO<Model2>(Model2, sqldb);
 
@@ -191,14 +180,10 @@ describe('test autoupgrade', () => {
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
         @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
-        id: number;
+        id!: number;
 
         @field({ name: 'CONTENT', dbtype: 'TEXT' })
         content?: string;
-
-        constructor() {
-          this.id = 0;
-        }
       }
       const model1Dao = new BaseDAO<Model1>(Model1, sqldb);
 
@@ -223,17 +208,13 @@ describe('test autoupgrade', () => {
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model2 {
         @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
-        id: number;
+        id!: number;
 
         @field({ name: 'CONTENT', dbtype: 'TEXT' })
         content?: string;
 
         @field({ name: 'CONTENT2', dbtype: 'TEXT NOT NULL' })
         content2?: string;
-
-        constructor() {
-          this.id = 0;
-        }
       }
       const model2Dao = new BaseDAO<Model2>(Model2, sqldb);
 
@@ -253,7 +234,7 @@ describe('test autoupgrade', () => {
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
         @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
-        id: number;
+        id!: number;
 
         @field({ name: 'CONTENT', dbtype: 'TEXT' })
         @index('IDX_CONTENT')
@@ -261,10 +242,6 @@ describe('test autoupgrade', () => {
 
         @field({ name: 'CONTENT2', dbtype: 'TEXT' })
         content2?: string;
-
-        constructor() {
-          this.id = 0;
-        }
       }
       const model1Dao = new BaseDAO<Model1>(Model1, sqldb);
 
@@ -290,15 +267,11 @@ describe('test autoupgrade', () => {
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model2 {
         @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
-        id: number;
+        id!: number;
 
         @field({ name: 'CONTENT', dbtype: 'TEXT' })
         @index('IDX_CONTENT')
         content?: string;
-
-        constructor() {
-          this.id = 0;
-        }
       }
       const model2Dao = new BaseDAO<Model2>(Model2, sqldb);
 
@@ -332,7 +305,7 @@ describe('test autoupgrade', () => {
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
         @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
-        id: number;
+        id!: number;
 
         @field({ name: 'CONTENT', dbtype: 'TEXT' })
         @index('IDX_CONTENT')
@@ -340,10 +313,6 @@ describe('test autoupgrade', () => {
 
         @field({ name: 'CONTENT2', dbtype: 'TEXT' })
         content2?: string;
-
-        constructor() {
-          this.id = 0;
-        }
       }
 
       const model1Dao = new BaseDAO<Model1>(Model1, sqldb);
@@ -370,7 +339,7 @@ describe('test autoupgrade', () => {
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model2 {
         @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
-        id: number;
+        id!: number;
 
         @field({ name: 'CONTENT', dbtype: 'TEXT' })
         @index('IDX_CONTENT')
@@ -378,10 +347,6 @@ describe('test autoupgrade', () => {
 
         @field({ name: 'CONTENT3', dbtype: 'TEXT' })
         content3?: string;
-
-        constructor() {
-          this.id = 0;
-        }
       }
       const model2Dao = new BaseDAO<Model2>(Model2, sqldb);
 
@@ -413,7 +378,7 @@ describe('test autoupgrade', () => {
       class Model1 {
         @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
         @index('IDX_KEEP')
-        id: number;
+        id!: number;
 
         @field({ name: 'CONTENT', dbtype: 'TEXT' })
         @index('IDX_DROP')
@@ -422,10 +387,6 @@ describe('test autoupgrade', () => {
         @field({ name: 'CONTENT2', dbtype: 'TEXT' })
         @index('IDX_CHANGE')
         content2?: string;
-
-        constructor() {
-          this.id = 0;
-        }
       }
       const model1Dao = new BaseDAO<Model1>(Model1, sqldb);
 
@@ -458,7 +419,7 @@ describe('test autoupgrade', () => {
       class Model2 {
         @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
         @index('IDX_KEEP')
-        id: number;
+        id!: number;
 
         @field({ name: 'CONTENT', dbtype: 'TEXT' })
         @index('IDX_CHANGE')
@@ -467,10 +428,6 @@ describe('test autoupgrade', () => {
         @field({ name: 'CONTENT2', dbtype: 'TEXT' })
         @index('IDX_ADD')
         content2?: string;
-
-        constructor() {
-          this.id = 0;
-        }
       }
       const model2Dao = new BaseDAO<Model2>(Model2, sqldb);
 
@@ -506,7 +463,7 @@ describe('test autoupgrade', () => {
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
         @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
-        id: number;
+        id!: number;
 
         @field({ name: 'CONTENT', dbtype: 'TEXT' })
         @index('IDX_CONTENT')
@@ -514,10 +471,6 @@ describe('test autoupgrade', () => {
 
         @field({ name: 'CONTENT2', dbtype: 'TEXT' })
         content2?: string;
-
-        constructor() {
-          this.id = 0;
-        }
       }
       const model1Dao = new BaseDAO<Model1>(Model1, sqldb);
 
@@ -538,10 +491,9 @@ describe('test autoupgrade', () => {
       const model1 = new Model1();
       await model1Dao.insert(model1);
       const id1 = model1.id;
-      model1.id = 0;
       model1.content = 'foo';
       model1.content2 = 'bar';
-      await model1Dao.insert(model1);
+      await model1Dao.insert(model1, BaseDAOInsertMode.ForceAutoGeneration);
       const id2 = model1.id;
 
       schema().deleteTable(TEST_TABLE);
@@ -552,15 +504,11 @@ describe('test autoupgrade', () => {
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model2 {
         @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
-        id: number;
+        id!: number;
 
         @field({ name: 'CONTENT', dbtype: 'TEXT' })
         @index('IDX_CONTENT')
         content?: string;
-
-        constructor() {
-          this.id = 0;
-        }
       }
       const model2Dao = new BaseDAO<Model2>(Model2, sqldb);
 
@@ -597,17 +545,13 @@ describe('test autoupgrade', () => {
       @table({ name: TEST_PARENT_TABLE, autoIncrement: true })
       class ParentModel {
         @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
-        id: number;
-
-        constructor() {
-          this.id = 0;
-        }
+        id!: number;
       }
 
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
         @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
-        id: number;
+        id!: number;
 
         @field({ name: 'CONTENT', dbtype: 'TEXT' })
         @index('IDX_CONTENT')
@@ -622,10 +566,6 @@ describe('test autoupgrade', () => {
         @field({ name: 'PARENT_ID', dbtype: 'INTEGER' })
         @fk('PARENT', TEST_PARENT_TABLE, 'ID')
         parentId?: number;
-
-        constructor() {
-          this.id = 0;
-        }
       }
 
       const parentModelDao = new BaseDAO<ParentModel>(ParentModel, sqldb);
@@ -658,12 +598,11 @@ describe('test autoupgrade', () => {
       model1.parentId = pId;
       await model1Dao.insert(model1);
       const id1 = model1.id;
-      model1.id = 0;
       model1.parentId = undefined;
       model1.content = 'foo';
       model1.content2 = 'bar';
       model1.content3 = 'baz';
-      await model1Dao.insert(model1);
+      await model1Dao.insert(model1, BaseDAOInsertMode.ForceAutoGeneration);
       const id2 = model1.id;
 
       schema().deleteTable(TEST_TABLE);
@@ -674,7 +613,7 @@ describe('test autoupgrade', () => {
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model2 {
         @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
-        id: number;
+        id!: number;
 
         @field({ name: 'CONTENT', dbtype: 'TEXT' })
         @index('IDX_CONTENT')
@@ -685,10 +624,6 @@ describe('test autoupgrade', () => {
 
         @field({ name: 'PARENT_ID', dbtype: 'INTEGER' })
         parentId?: number;
-
-        constructor() {
-          this.id = 0;
-        }
       }
       const model2Dao = new BaseDAO<Model2>(Model2, sqldb);
 

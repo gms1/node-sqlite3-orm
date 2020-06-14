@@ -11,14 +11,10 @@ interface JsonData {
 @table({ name: DATATYPE_JSON_TABLE, autoIncrement: true })
 class DataTypeJson {
   @id({ name: 'id', dbtype: 'INTEGER NOT NULL' })
-  id: number;
+  id!: number;
 
   @field({ name: 'my_json_text', dbtype: 'TEXT', isJson: true })
   myJsonData?: JsonData;
-
-  constructor() {
-    this.id = 0;
-  }
 }
 
 describe('test Json data', () => {

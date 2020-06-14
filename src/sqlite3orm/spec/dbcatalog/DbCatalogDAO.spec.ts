@@ -23,14 +23,10 @@ const CHILD_TABLEQ = `main.${CHILD_TABLE}`;
 @table({ name: PARENT_TABLEQ })
 class ParentTable {
   @id({ name: 'ID1', dbtype: 'INTEGER NOT NULL' })
-  id1: number;
+  id1!: number;
 
   @id({ name: 'ID2', dbtype: 'INTEGER NOT NULL' })
-  id2: number;
-
-  constructor() {
-    this.id1 = this.id2 = 0;
-  }
+  id2!: number;
 }
 
 @table({ name: CHILD_TABLEQ, autoIncrement: true })
@@ -46,7 +42,7 @@ class ChildTable {
   pid1?: number;
 
   @id({ name: 'ID', dbtype: 'INTEGER NOT NULL' })
-  id: number;
+  id!: number;
 
   @field({ name: 'PID3', dbtype: 'INTEGER' })
   @fk('PARENT2', PARENT_TABLE, 'ID1')
@@ -57,10 +53,6 @@ class ChildTable {
   @fk('PARENT2', PARENT_TABLE, 'ID2')
   @index('PIDX2', false, true)
   pid4?: number;
-
-  constructor() {
-    this.id = 0;
-  }
 }
 
 @table({ name: CHILD_TABLEQ })

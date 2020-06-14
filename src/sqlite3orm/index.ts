@@ -1,5 +1,5 @@
 export { AutoUpgrader, UpgradeInfo, UpgradeMode } from './AutoUpgrader';
-export { BaseDAO } from './BaseDAO';
+export { BaseDAO, BaseDAOInsertMode, BaseDAOOptions } from './BaseDAO';
 export {
   SQL_DEFAULT_SCHEMA,
   SQL_MEMORY_DB_PRIVATE,

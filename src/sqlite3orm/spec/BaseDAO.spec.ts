@@ -2,25 +2,23 @@
 // tslint:disable no-non-null-assertion
 import {
   BaseDAO,
+  BaseDAOInsertMode,
   field,
   fk,
   id,
   index,
   schema,
-  SQL_MEMORY_DB_PRIVATE,
   SqlDatabase,
+  SQL_MEMORY_DB_PRIVATE,
   table,
 } from '..';
 
-describe('BaseDAO', () => {
+describe(`BaseDAO`, () => {
   describe('BaseDAO instantiation', () => {
     let sqldb: SqlDatabase;
 
     class NoTable {
-      id: number;
-      constructor() {
-        this.id = 0;
-      }
+      id!: number;
     }
     // ---------------------------------------------
     beforeEach(async (done) => {
@@ -54,7 +52,7 @@ describe('BaseDAO', () => {
     @table({ name: USERS_TABLE })
     class User {
       @id({ name: 'user_id', dbtype: 'INTEGER NOT NULL' })
-      userId: number;
+      userId!: number;
 
       @field({ name: 'user_loginname', dbtype: 'TEXT NOT NULL' })
       userLoginName: string;
@@ -62,7 +60,6 @@ describe('BaseDAO', () => {
       notMapped?: string;
 
       constructor() {
-        this.userId = 0;
         this.userLoginName = 'noname';
       }
     }
@@ -72,7 +69,7 @@ describe('BaseDAO', () => {
       static userConstraint: string = 'user';
 
       @id({ name: 'contact_id', dbtype: 'INTEGER NOT NULL' })
-      contactId: number;
+      contactId!: number;
 
       @field({ name: 'contact_email', dbtype: 'TEXT' })
       emailAddress: string;
@@ -82,15 +79,13 @@ describe('BaseDAO', () => {
 
       @fk(Contact.userConstraint, USERS_TABLE, 'user_id')
       @field({ name: 'user_id', dbtype: 'INTEGER NOT NULL' })
-      userId: number;
+      userId!: number;
 
       notMapped?: string;
 
       constructor() {
-        this.contactId = 0;
         this.emailAddress = 'noemail';
         this.mobile = 'nomobile';
-        this.userId = 0;
       }
     }
 
@@ -176,22 +171,19 @@ describe('BaseDAO', () => {
         user.userLoginName = 'login3';
         await userDao.insert(user);
 
-        contact.contactId = 0;
         contact.userId = 1;
         contact.emailAddress = 'user1@test1.net';
-        contact = await contactDao.insert(contact);
+        contact = await contactDao.insert(contact, BaseDAOInsertMode.ForceAutoGeneration);
         expect(contact.contactId).toBe(1, 'autoIncrement id not updated');
 
-        contact.contactId = 0;
         contact.userId = 1;
         contact.emailAddress = 'user1@test2.net';
-        contact = await contactDao.insert(contact);
+        contact = await contactDao.insert(contact, BaseDAOInsertMode.ForceAutoGeneration);
         expect(contact.contactId).toBe(2, 'autoIncrement id not updated');
 
-        contact.contactId = 0;
         contact.userId = 2;
         contact.emailAddress = 'user2@test.net';
-        contact = await contactDao.insert(contact);
+        contact = await contactDao.insert(contact, BaseDAOInsertMode.ForceAutoGeneration);
         expect(contact.contactId).toBe(3, 'autoIncrement id not updated');
 
         user.userId = 1;
@@ -235,7 +227,7 @@ describe('BaseDAO', () => {
       try {
         user1.userId = 1;
         user1.userLoginName = 'login1/2';
-        await userDao.insert(user1);
+        await userDao.insert(user1, BaseDAOInsertMode.StrictSqlite);
         fail('inserting duplicate id should have thrown');
       } catch (err) {}
       done();
@@ -390,7 +382,7 @@ describe('BaseDAO', () => {
     @table({ name: TEST_SET_PROP_TABLE })
     class TestSetProperty {
       @id({ name: 'id', dbtype: 'INTEGER NOT NULL' })
-      id: number;
+      id!: number;
 
       @field({ name: 'my_bool_text', dbtype: 'TEXT' })
       myBool2Text?: boolean;
@@ -408,10 +400,6 @@ describe('BaseDAO', () => {
       myDate2Milliseconds?: Date;
 
       notMapped?: string;
-
-      constructor() {
-        this.id = 0;
-      }
     }
 
     // ---------------------------------------------
@@ -432,22 +420,22 @@ describe('BaseDAO', () => {
       try {
         await testDao.createTable();
         await sqldb.exec(`
-        INSERT INTO "${TEST_SET_PROP_TABLE}" (
-          id,
-          my_bool_text,
-          my_number_text,
-          my_string_int,
-          my_date_sec_real,
-          my_date_milli_real
-        ) values (
-          1,
-          \"abc\",
-          \"42\",
-          24,
-          3.14,
-          3.14
-        )
-      `);
+          INSERT INTO "${TEST_SET_PROP_TABLE}" (
+            id,
+            my_bool_text,
+            my_number_text,
+            my_string_int,
+            my_date_sec_real,
+            my_date_milli_real
+          ) values (
+            1,
+            \"abc\",
+            \"42\",
+            24,
+            3.14,
+            3.14
+          )
+        `);
         testRow = await testDao.selectById({ id: 1 });
         expect(testRow.myBool2Text).toBeUndefined();
         expect(testRow.myNumber2Text).toBe(42);
@@ -471,7 +459,7 @@ describe('BaseDAO', () => {
     @table({ name: TEST_INDEX_TABLE1, autoIncrement: true })
     class TestIndexTable1 {
       @id({ name: 'id', dbtype: 'INTEGER NOT NULL' })
-      id: number;
+      id!: number;
 
       @field({ name: 'info', dbtype: 'TEXT' })
       @index(TEST_INDEX_NAME)
@@ -481,16 +469,12 @@ describe('BaseDAO', () => {
       otherId?: number;
 
       notMapped?: string;
-
-      constructor() {
-        this.id = 0;
-      }
     }
 
     @table({ name: TEST_INDEX_TABLE2, autoIncrement: true })
     class TestIndexTable2 {
       @id({ name: 'id', dbtype: 'INTEGER NOT NULL' })
-      id: number;
+      id!: number;
 
       @field({ name: 'info', dbtype: 'TEXT' })
       @index(TEST_INDEX_NAME)
@@ -500,10 +484,6 @@ describe('BaseDAO', () => {
       otherId?: number;
 
       notMapped?: string;
-
-      constructor() {
-        this.id = 0;
-      }
     }
 
     // ---------------------------------------------
@@ -568,13 +548,9 @@ describe('BaseDAO', () => {
     @table({ name: TEST_DB_DEFAULTS })
     class TestDbDefaultsMin {
       @id({ name: 'id', dbtype: 'INTEGER NOT NULL' })
-      id: number;
+      id!: number;
 
       notMapped?: string;
-
-      constructor() {
-        this.id = 0;
-      }
     }
 
     // ---------------------------------------------
@@ -650,8 +626,7 @@ describe('BaseDAO', () => {
         readRow = await fullDao.selectById({ id: writtenRow.id });
         expect(readRow.myBool).toBe(true);
         expect(readRow.myInt).toBe(99);
-        readRow.id = 0;
-        const writtenRow2 = await minDao.insert(readRow);
+        const writtenRow2 = await minDao.insert(readRow, BaseDAOInsertMode.ForceAutoGeneration);
 
         readRow = await fullDao.selectById({ id: writtenRow2.id });
         expect(readRow.myBool).toBe(true);
@@ -838,7 +813,7 @@ describe('BaseDAO', () => {
     @table({ name: TEST_DB_DEFAULTS2, autoIncrement: false })
     class TestDbDefaultsFull2 {
       @id({ name: 'id', dbtype: 'INTEGER NOT NULL' })
-      id: number;
+      id!: number;
 
       @field({ name: 'my_bool', dbtype: 'TEXT DEFAULT 1' })
       myBool?: boolean;
@@ -853,10 +828,6 @@ describe('BaseDAO', () => {
       myReal?: number;
 
       notMapped?: string;
-
-      constructor() {
-        this.id = 0;
-      }
     }
 
     // ---------------------------------------------
@@ -899,7 +870,10 @@ describe('BaseDAO', () => {
       try {
         await fullDao.createTable();
 
-        const insertedPartial = await fullDao.insertPartial({ id: 3 });
+        const insertedPartial = await fullDao.insertPartial(
+          { id: 3 },
+          BaseDAOInsertMode.StrictSqlite,
+        );
         let readRow = await fullDao.selectById({ id: insertedPartial.id });
         expect(readRow.id).toBe(3);
       } catch (err) {
