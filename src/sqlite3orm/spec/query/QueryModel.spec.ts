@@ -293,6 +293,22 @@ describe('test QueryModel', () => {
     done();
   });
 
+  it('multiple property comparisons `gt` and `lt` string predicate', async (done) => {
+    try {
+      const userDao = new BaseDAO(User, sqldb);
+      const res = await userDao.selectAll({
+        where: { userLoginName: { gt: 'Ec', lt: 'Fz' } },
+        order: { userId: true },
+      });
+      expect(res.length).toBe(2);
+      expect(res[0].userId).toBe(5);
+      expect(res[1].userId).toBe(6);
+    } catch (err) {
+      fail(err);
+    }
+    done();
+  });
+
   it('`isBetween` [string,string] predicate', async (done) => {
     try {
       const userDao = new BaseDAO(User, sqldb);
