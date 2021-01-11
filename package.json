@@ -54,7 +54,7 @@
   "dependencies": {
     "debug": "^4.2.0",
     "reflect-metadata": "^0.1.13",
-    "sqlite3": "^5.0.0"
+    "sqlite3": "^5.0.1"
   },
   "devDependencies": {
     "@compodoc/compodoc": "^1.1.11",
