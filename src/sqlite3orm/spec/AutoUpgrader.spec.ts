@@ -200,6 +200,11 @@ describe('test autoupgrade', () => {
       expect(table1Info1).toBeDefined();
       expect(table1Info1!.columns['CONTENT2']).toBeUndefined("column 'CONTENT2' exist");
 
+      const data = new Model1();
+      data.id = 31;
+      data.content = 'foo';
+      await model1Dao.insert(data);
+
       schema().deleteTable(TEST_TABLE);
       // --------------------------------------------
       // upgrade
@@ -222,7 +227,11 @@ describe('test autoupgrade', () => {
       expect(actual).toBeFalsy('3rd time');
 
       await autoUpgrader.upgradeTables([model2Dao.table]);
-      fail(`should have failed: Cannot add a NOT NULL column with default value NULL`);
+
+      actual = await autoUpgrader.isActual(model2Dao.table);
+      expect(actual).toBeFalsy('4th time');
+
+      fail(`should have failed: Cannot add a NOT NULL column without default value`);
     } catch (err) {}
 
     done();
