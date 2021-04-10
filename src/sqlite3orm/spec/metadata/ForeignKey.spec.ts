@@ -92,7 +92,7 @@ describe('test Foreign Keys', () => {
   let childDAO: BaseDAO<Child>;
 
   // ---------------------------------------------
-  beforeEach(async (done) => {
+  beforeEach(async () => {
     try {
       sqldb = new SqlDatabase();
       await sqldb.open(SQL_MEMORY_DB_PRIVATE);
@@ -104,10 +104,9 @@ describe('test Foreign Keys', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
-  afterEach(async (done) => {
+  afterEach(async () => {
     try {
       await dropSchema(sqldb);
       parentDAO = undefined as any;
@@ -115,10 +114,9 @@ describe('test Foreign Keys', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
-  it('expect selectAllOf for foreign key having multiple colums to work', async (done) => {
+  it('expect selectAllOf for foreign key having multiple colums to work', async () => {
     let parent = new Parent();
     let child = new Child();
     try {
@@ -198,6 +196,5 @@ describe('test Foreign Keys', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 });

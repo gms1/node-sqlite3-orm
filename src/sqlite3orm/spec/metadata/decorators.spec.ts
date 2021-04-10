@@ -5,7 +5,7 @@ import { field, fk, id, index, table } from '../..';
 
 describe('test decorators', () => {
   // ---------------------------------------------
-  it('expect decorating class twice for same table to throw', (done) => {
+  it('expect decorating class twice for same table to throw', () => {
     try {
       @table({ name: 'D:TABLE1_FOR_SAME_CLASS', autoIncrement: true })
       @table({ name: 'D:TABLE1_FOR_SAME_CLASS', autoIncrement: true })
@@ -14,11 +14,10 @@ describe('test decorators', () => {
       }
       fail('should have thrown');
     } catch (err) {}
-    done();
   });
 
   // ---------------------------------------------
-  it('expect decorating class for different tables to throw', (done) => {
+  it('expect decorating class for different tables to throw', () => {
     try {
       @table({ name: 'D:TABLE1_FOR_SAME_CLASS', autoIncrement: true })
       @table({ name: 'D:TABLE2_FOR_SAME_CLASS', autoIncrement: true })
@@ -27,11 +26,10 @@ describe('test decorators', () => {
       }
       fail('should have thrown');
     } catch (err) {}
-    done();
   });
 
   // ---------------------------------------------
-  it('expect decorating static property as field to throw', (done) => {
+  it('expect decorating static property as field to throw', () => {
     try {
       @table({ name: 'D:TABLE_USING_STATIC_PROPERTY_FOR_FIELD', autoIncrement: true })
       class TableUsingStaticProperyForField {
@@ -40,11 +38,10 @@ describe('test decorators', () => {
       }
       fail('should have thrown');
     } catch (err) {}
-    done();
   });
 
   // ---------------------------------------------
-  it('expect decorating static property as index to throw', (done) => {
+  it('expect decorating static property as index to throw', () => {
     try {
       @table({ name: 'D:TABLE_USING_STATIC_PROPERTY_FOR_INDEX', autoIncrement: true })
       class TableUsingStaticProperyForIndex {
@@ -54,11 +51,10 @@ describe('test decorators', () => {
       }
       fail('should have thrown');
     } catch (err) {}
-    done();
   });
 
   // ---------------------------------------------
-  it('expect decorating static property as foreign key to throw', (done) => {
+  it('expect decorating static property as foreign key to throw', () => {
     try {
       @table({ name: 'D:TABLE_USING_STATIC_PROPERTY_FOR_FK', autoIncrement: true })
       class TableUsingStaticProperyForFk {
@@ -68,11 +64,10 @@ describe('test decorators', () => {
       }
       fail('should have thrown');
     } catch (err) {}
-    done();
   });
 
   // ---------------------------------------------
-  it('expect decorating property twice as same field to throw', (done) => {
+  it('expect decorating property twice as same field to throw', () => {
     try {
       @table({ name: 'D:TABLE_USING_DUPLICATE_FIELD', autoIncrement: true })
       class TableUsingDuplicateIndexOnField {
@@ -85,11 +80,10 @@ describe('test decorators', () => {
       }
       fail('should have thrown');
     } catch (err) {}
-    done();
   });
 
   // ---------------------------------------------
-  it('expect decorating property as different fields to throw', (done) => {
+  it('expect decorating property as different fields to throw', () => {
     try {
       @table({ name: 'D:TABLE_USING_DUPLICATE_FIELD', autoIncrement: true })
       class TableUsingDuplicateIndexOnField {
@@ -102,11 +96,10 @@ describe('test decorators', () => {
       }
       fail('should have thrown');
     } catch (err) {}
-    done();
   });
 
   // ---------------------------------------------
-  it('expect decorating property twice for same index to throw', (done) => {
+  it('expect decorating property twice for same index to throw', () => {
     try {
       @table({ name: 'D:TABLE_USING_DUPLICATE_INDEX_ON_FIELD', autoIncrement: true })
       class TableUsingDuplicateIndexOnField {
@@ -119,11 +112,10 @@ describe('test decorators', () => {
       }
       fail('should have thrown');
     } catch (err) {}
-    done();
   });
 
   // ---------------------------------------------
-  it('expect decorating foreign key twice for same constraint name to throw', (done) => {
+  it('expect decorating foreign key twice for same constraint name to throw', () => {
     try {
       @table({ name: 'D:PARENT_TABLE_FOR_DUPLICATE_FKS' })
       class ParentTableForDuplicateFKs {
@@ -142,6 +134,5 @@ describe('test decorators', () => {
       }
       fail('should have thrown');
     } catch (err) {}
-    done();
   });
 });

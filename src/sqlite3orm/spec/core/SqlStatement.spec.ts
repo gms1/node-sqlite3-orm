@@ -7,7 +7,7 @@ describe('test SqlStatement', () => {
   let sqldb: SqlDatabase;
 
   // ---------------------------------------------
-  beforeEach(async (done) => {
+  beforeEach(async () => {
     try {
       sqldb = new SqlDatabase();
       await sqldb.open(SQL_MEMORY_DB_PRIVATE);
@@ -21,11 +21,10 @@ describe('test SqlStatement', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('expect basic prepared dml to succeed', async (done) => {
+  it('expect basic prepared dml to succeed', async () => {
     let selStmt: SqlStatement;
     let insStmt: SqlStatement;
     selStmt = await sqldb.prepare('SELECT col FROM TEST WHERE id=?');
@@ -96,8 +95,6 @@ describe('test SqlStatement', () => {
     } catch (err) {
       fail(err);
     }
-
-    done();
   });
 
   // ---------------------------------------------

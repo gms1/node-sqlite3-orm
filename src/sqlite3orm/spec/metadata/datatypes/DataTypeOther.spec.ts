@@ -42,7 +42,7 @@ describe('test Json data', () => {
   let sqldb: SqlDatabase;
   let dao: BaseDAO<DataTypeOther>;
   // ---------------------------------------------
-  beforeEach(async (done) => {
+  beforeEach(async () => {
     try {
       sqldb = new SqlDatabase();
       await sqldb.open(SQL_MEMORY_DB_PRIVATE);
@@ -54,10 +54,9 @@ describe('test Json data', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
-  it('expect reading/writing number/string properties from/to the database as text/real to succeed', async (done) => {
+  it('expect reading/writing number/string properties from/to the database as text/real to succeed', async () => {
     try {
       // write
       const model: DataTypeOther = new DataTypeOther();
@@ -76,10 +75,9 @@ describe('test Json data', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
-  it('expect reading/writing undefined properties from/to the database as text/real to succeed', async (done) => {
+  it('expect reading/writing undefined properties from/to the database as text/real to succeed', async () => {
     try {
       // write
       const model: DataTypeOther = new DataTypeOther();
@@ -94,6 +92,5 @@ describe('test Json data', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 });

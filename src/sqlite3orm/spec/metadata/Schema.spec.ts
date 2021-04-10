@@ -105,13 +105,12 @@ describe('test schema', () => {
   let sqldb: SqlDatabase;
   let dbCatDao: DbCatalogDAO;
   // ---------------------------------------------
-  beforeEach(async (done) => {
+  beforeEach(async () => {
     try {
       expect(schema().dateInMilliSeconds).toBeFalsy();
       sqldb = new SqlDatabase();
       await sqldb.open(SQL_MEMORY_DB_PRIVATE);
       dbCatDao = new DbCatalogDAO(sqldb);
-      done();
     } catch (e) {
       fail(e);
     }
@@ -190,7 +189,7 @@ describe('test schema', () => {
   });
 
   // ---------------------------------------------
-  it('expect create (unique) index to work', async (done) => {
+  it('expect create (unique) index to work', async () => {
     let catalogDAO = new DbCatalogDAO(sqldb);
     try {
       await schema().createTable(sqldb, TABLE_TESTIDX_NAME);
@@ -277,12 +276,10 @@ describe('test schema', () => {
     } catch (e) {
       fail(e);
     }
-
-    done();
   });
 
   // ---------------------------------------------
-  it('expect create/drop/alter-table to work (using Schema)', async (done) => {
+  it('expect create/drop/alter-table to work (using Schema)', async () => {
     try {
       let catalogDAO = new DbCatalogDAO(sqldb);
       let tableInfo;
@@ -343,12 +340,10 @@ describe('test schema', () => {
     } catch (err) {
       fail(err);
     }
-
-    done();
   });
 
   // ---------------------------------------------
-  it('expect create/drop/alter-table to work (using BaseDAO)', async (done) => {
+  it('expect create/drop/alter-table to work (using BaseDAO)', async () => {
     try {
       let catalogDAO = new DbCatalogDAO(sqldb);
       let tableInfo;
@@ -412,57 +407,51 @@ describe('test schema', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('getTable for undefined table should throw', async (done) => {
+  it('getTable for undefined table should throw', async () => {
     try {
       schema().getTable('NOTABLE');
       fail('should have thrown');
     } catch (err) {}
-    done();
   });
 
   // ---------------------------------------------
-  it('get not defined field should throw', async (done) => {
+  it('get not defined field should throw', async () => {
     let testTable = schema().getTable(TABLE_TESTTABLE_NAME);
     try {
       let nameField = testTable.getTableField('undef');
       fail('should have thrown');
     } catch (err) {}
-    done();
   });
 
   // ---------------------------------------------
-  it('get create index statement for undefined index should throw', async (done) => {
+  it('get create index statement for undefined index should throw', async () => {
     let testTable = schema().getTable(TABLE_TESTTABLE_NAME);
     try {
       let nameField = testTable.getCreateIndexStatement('undef');
       fail('should have thrown');
     } catch (err) {}
-    done();
   });
 
   // ---------------------------------------------
-  it('get drop index statement for undefined index should throw', async (done) => {
+  it('get drop index statement for undefined index should throw', async () => {
     let testTable = schema().getTable(TABLE_TESTTABLE_NAME);
     try {
       let nameField = testTable.getDropIndexStatement('undef');
       fail('should have thrown');
     } catch (err) {}
-    done();
   });
 
   // ---------------------------------------------
-  it('schema should be a singleton', async (done) => {
+  it('schema should be a singleton', async () => {
     try {
       let currSchema = schema();
       expect(new Schema()).toBe(currSchema);
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------

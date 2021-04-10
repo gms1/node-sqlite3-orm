@@ -18,7 +18,7 @@ describe('test SqlDatabase', () => {
   let sqldb: SqlDatabase;
 
   // ---------------------------------------------
-  beforeEach(async (done) => {
+  beforeEach(async () => {
     try {
       sqldb = new SqlDatabase();
       await sqldb.open(SQL_MEMORY_DB_PRIVATE);
@@ -32,21 +32,19 @@ describe('test SqlDatabase', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
-  afterEach(async (done) => {
+  afterEach(async () => {
     try {
       await sqldb.close();
     } catch (err) {
       fail(err);
     }
     (sqldb as any) = undefined;
-    done();
   });
 
   // ---------------------------------------------
-  it('expect basic dmls to succeed', async (done) => {
+  it('expect basic dmls to succeed', async () => {
     try {
       // insert id=1 should work
       let res = await sqldb.run("INSERT INTO TEST (id,col) values (1,'testvalue 1/1')");
@@ -132,11 +130,10 @@ describe('test SqlDatabase', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('expect transaction to commit on end', async (done) => {
+  it('expect transaction to commit on end', async () => {
     try {
       let oldver = await sqldb.getUserVersion();
 
@@ -149,11 +146,10 @@ describe('test SqlDatabase', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('expect transaction to rollback on error', async (done) => {
+  it('expect transaction to rollback on error', async () => {
     try {
       let oldver = await sqldb.getUserVersion();
 
@@ -170,11 +166,10 @@ describe('test SqlDatabase', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('expect getting and setting PRAGMA user_version to succeed', async (done) => {
+  it('expect getting and setting PRAGMA user_version to succeed', async () => {
     try {
       let oldver = await sqldb.getUserVersion();
       expect(oldver).toBe(0);
@@ -184,138 +179,124 @@ describe('test SqlDatabase', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('expect getting PRAGMA cipher_version to succeed (can be undefined)', async (done) => {
+  it('expect getting PRAGMA cipher_version to succeed (can be undefined)', async () => {
     try {
       let version = await sqldb.getCipherVersion();
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('expect closing database to succeed', async (done) => {
+  it('expect closing database to succeed', async () => {
     try {
       await sqldb.close();
     } catch (err) {
       fail(err);
     }
-    done();
   });
   // ---------------------------------------------
-  it('expect closed database to throw on exec', async (done) => {
+  it('expect closed database to throw on exec', async () => {
     try {
       await sqldb.close();
       await sqldb.exec("INSERT INTO TEST (col) values ('testvalue 3')");
       fail('closed database should throw on exec');
     } catch (err) {}
-    done();
   });
   // ---------------------------------------------
-  it('expect closed database to throw on prepare', async (done) => {
+  it('expect closed database to throw on prepare', async () => {
     try {
       await sqldb.close();
       await sqldb.prepare("INSERT INTO TEST (col) values ('testvalue 3')");
       fail('closed database should throw on prepare');
     } catch (err) {}
-    done();
   });
   // ---------------------------------------------
-  it('expect closed database to throw on run', async (done) => {
+  it('expect closed database to throw on run', async () => {
     try {
       await sqldb.close();
       await sqldb.run("INSERT INTO TEST (col) values ('testvalue 3')");
       fail('closed database should throw on run');
     } catch (err) {}
-    done();
   });
   // ---------------------------------------------
-  it('expect closed database to throw on get', async (done) => {
+  it('expect closed database to throw on get', async () => {
     try {
       await sqldb.close();
       await sqldb.get('SELECT col from TEST');
       fail('closed database should throw on get');
     } catch (err) {}
-    done();
   });
   // ---------------------------------------------
-  it('expect closed database to throw on all', async (done) => {
+  it('expect closed database to throw on all', async () => {
     try {
       await sqldb.close();
       await sqldb.all('SELECT col from TEST');
       fail('closed database should throw on all');
     } catch (err) {}
-    done();
   });
   // ---------------------------------------------
-  it('expect closed database to throw on each', async (done) => {
+  it('expect closed database to throw on each', async () => {
     try {
       await sqldb.close();
       await sqldb.each('SELECT col from TEST', () => {});
       fail('closed database should throw on each');
     } catch (err) {}
-    done();
   });
 
   // ---------------------------------------------
-  it('expect closed database to throw on adding event listener', async (done) => {
+  it('expect closed database to throw on adding event listener', async () => {
     try {
       await sqldb.close();
       sqldb.on('error', () => {});
       fail('closed database should throw on adding event listener');
     } catch (err) {}
-    done();
   });
 
   // ---------------------------------------------
-  it('expect insert into not existing table to throw', async (done) => {
+  it('expect insert into not existing table to throw', async () => {
     try {
       SqlDatabase.verbose();
       await sqldb.exec("INSERT INTO NOTEXIST (col) values ('testvalue 3')");
       fail('insert into not existing table should throw');
     } catch (err) {}
-    done();
   });
 
   // ---------------------------------------------
-  it('expect get from not existing table to throw', async (done) => {
+  it('expect get from not existing table to throw', async () => {
     try {
       SqlDatabase.verbose();
       await sqldb.get('SELECT id from NOTEXIST');
       fail('get from not existing table should throw');
     } catch (err) {}
-    done();
   });
 
   // ---------------------------------------------
-  it('expect prepare from not existing table to throw', async (done) => {
+  it('expect prepare from not existing table to throw', async () => {
     try {
       SqlDatabase.verbose();
       await sqldb.prepare('SELECT id from NOTEXIST');
       fail('prepare from not existing table should throw');
     } catch (err) {}
-    done();
   });
 
   // ---------------------------------------------
-  it('expect adding event listener to succeed on open database', async (done) => {
+  it('expect adding event listener to succeed on open database', async () => {
     let errors = 0;
     try {
       sqldb.on('error', () => errors++);
     } catch (err) {
       fail(err);
     }
-    done();
   });
 });
 
 describe('test SqlDatabase Settings', () => {
   // ---------------------------------------------
-  it('should be able to open a database using custom settings', async (done) => {
+  it('should be able to open a database using custom settings', async () => {
     try {
       const settings: SqlDatabaseSettings = {
         journalMode: 'WAL',
@@ -337,39 +318,35 @@ describe('test SqlDatabase Settings', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
-  it('should fail to open wrong db file', async (done) => {
+  it('should fail to open wrong db file', async () => {
     try {
       const sqldb = new SqlDatabase();
       await sqldb.open('::/.', SQL_OPEN_READWRITE);
       fail(`should not succeed`);
     } catch (err) {}
-    done();
   });
 
-  it('should fail to open using wrong setting (schema having dot)', async (done) => {
+  it('should fail to open using wrong setting (schema having dot)', async () => {
     try {
       const settings: SqlDatabaseSettings = { synchronous: ['NOTEXIST.YYY.FULL'] };
       const sqldb = new SqlDatabase();
       await sqldb.open(SQL_MEMORY_DB_PRIVATE, SQL_OPEN_DEFAULT, settings);
       fail(`should not succeed`);
     } catch (err) {}
-    done();
   });
 
-  it('should fail to open using wrong setting (empty)', async (done) => {
+  it('should fail to open using wrong setting (empty)', async () => {
     try {
       const settings: SqlDatabaseSettings = { synchronous: [''] };
       const sqldb = new SqlDatabase();
       await sqldb.open(SQL_MEMORY_DB_PRIVATE, SQL_OPEN_DEFAULT, settings);
       fail(`should not succeed`);
     } catch (err) {}
-    done();
   });
 
-  it('should fail to open using wrong setting (executionMode)', async (done) => {
+  it('should fail to open using wrong setting (executionMode)', async () => {
     try {
       const settings: SqlDatabaseSettings = {
         journalMode: 'WAL',
@@ -388,10 +365,9 @@ describe('test SqlDatabase Settings', () => {
       await sqldb.open(SQL_MEMORY_DB_PRIVATE, SQL_OPEN_DEFAULT, settings);
       fail(`should not succeed`);
     } catch (err) {}
-    done();
   });
 
-  it('should succeed to open serialized', async (done) => {
+  it('should succeed to open serialized', async () => {
     try {
       const settings: SqlDatabaseSettings = {
         executionMode: 'SERIALIZE',
@@ -403,14 +379,13 @@ describe('test SqlDatabase Settings', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 });
 
 describe('test SqlDatabase when sqlcipher IS available', () => {
   let sqldb: SqlDatabase;
   let sqlcipherVersion: string | undefined;
-  beforeEach(async (done) => {
+  beforeEach(async () => {
     try {
       sqldb = new SqlDatabase();
 
@@ -422,9 +397,8 @@ describe('test SqlDatabase when sqlcipher IS available', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
-  it('should be able to read encrypted content', async (done) => {
+  it('should be able to read encrypted content', async () => {
     if (!sqlcipherVersion) {
       pending('sqlcipher IS NOT available');
       return;
@@ -437,14 +411,13 @@ describe('test SqlDatabase when sqlcipher IS available', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 });
 
 describe('test SqlDatabase when sqlcipher IS NOT available', () => {
   let sqldb: SqlDatabase;
   let sqlcipherVersion: string | undefined;
-  beforeEach(async (done) => {
+  beforeEach(async () => {
     try {
       sqldb = new SqlDatabase();
 
@@ -456,9 +429,9 @@ describe('test SqlDatabase when sqlcipher IS NOT available', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
-  it('', async (done) => {
+
+  it('', async () => {
     if (sqlcipherVersion) {
       pending(`sqlcipher IS available: version is '${sqlcipherVersion}'`);
       return;
@@ -467,7 +440,6 @@ describe('test SqlDatabase when sqlcipher IS NOT available', () => {
       await sqldb.all('SELECT id, col FROM TEST order by id');
       fail('should not be able to read the database content');
     } catch (err) {
-      done();
       return;
     }
   });

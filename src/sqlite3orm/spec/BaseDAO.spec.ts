@@ -21,23 +21,21 @@ describe(`BaseDAO`, () => {
       id!: number;
     }
     // ---------------------------------------------
-    beforeEach(async (done) => {
+    beforeEach(async () => {
       try {
         sqldb = new SqlDatabase();
         await sqldb.open(SQL_MEMORY_DB_PRIVATE);
       } catch (err) {
         fail(err);
       }
-      done();
     });
     // ---------------------------------------------
 
-    it('expect class without table-definition to throw', async (done) => {
+    it('expect class without table-definition to throw', async () => {
       try {
         let noTableDao: BaseDAO<NoTable> = new BaseDAO(NoTable, sqldb);
         fail('instantiation BaseDAO for class without table-definition should have thrown');
       } catch (err) {}
-      done();
     });
   });
 
@@ -90,7 +88,7 @@ describe(`BaseDAO`, () => {
     }
 
     // ---------------------------------------------
-    beforeEach(async (done) => {
+    beforeEach(async () => {
       try {
         schema().dateInMilliSeconds = false;
         sqldb = new SqlDatabase();
@@ -103,11 +101,10 @@ describe(`BaseDAO`, () => {
       } catch (err) {
         fail(err);
       }
-      done();
     });
 
     // ---------------------------------------------
-    it('expect basic functionality (insert/update/delete/select/selectAll) to work', async (done) => {
+    it('expect basic functionality (insert/update/delete/select/selectAll) to work', async () => {
       try {
         let user1: User = new User();
         let user2: User = new User();
@@ -148,11 +145,10 @@ describe(`BaseDAO`, () => {
       } catch (err) {
         fail(err);
       }
-      done();
     });
 
     // ---------------------------------------------
-    it('expect foreign key select to work', async (done) => {
+    it('expect foreign key select to work', async () => {
       try {
         let user: User = new User();
         let contact: Contact = new Contact();
@@ -210,11 +206,10 @@ describe(`BaseDAO`, () => {
       } catch (err) {
         fail(err);
       }
-      done();
     });
 
     // ---------------------------------------------
-    it('expect inserting duplicate id to throw', async (done) => {
+    it('expect inserting duplicate id to throw', async () => {
       const user1: User = new User();
       const userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
       try {
@@ -230,11 +225,10 @@ describe(`BaseDAO`, () => {
         await userDao.insert(user1, BaseDAOInsertMode.StrictSqlite);
         fail('inserting duplicate id should have thrown');
       } catch (err) {}
-      done();
     });
 
     // ---------------------------------------------
-    it('expect updating using wrong id to throw', async (done) => {
+    it('expect updating using wrong id to throw', async () => {
       let user1: User = new User();
       let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
       try {
@@ -243,11 +237,10 @@ describe(`BaseDAO`, () => {
         await userDao.update(user1);
         fail('updating using wrong id should have thrown');
       } catch (err) {}
-      done();
     });
 
     // ---------------------------------------------
-    it('expect updating not null column with null to throw', async (done) => {
+    it('expect updating not null column with null to throw', async () => {
       let user1: User = new User();
       let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
       try {
@@ -263,11 +256,10 @@ describe(`BaseDAO`, () => {
         await userDao.update(user1);
         fail('updating not null column with null should have thrown');
       } catch (err) {}
-      done();
     });
 
     // ---------------------------------------------
-    it('expect deleting using wrong id to throw', async (done) => {
+    it('expect deleting using wrong id to throw', async () => {
       let user1: User = new User();
       let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
       try {
@@ -276,11 +268,10 @@ describe(`BaseDAO`, () => {
         await userDao.delete(user1);
         fail('deleting using wrong id should have thrown');
       } catch (err) {}
-      done();
     });
 
     // ---------------------------------------------
-    it('expect deleting by id using wrong id to throw', async (done) => {
+    it('expect deleting by id using wrong id to throw', async () => {
       let user1: User = new User();
       let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
       try {
@@ -289,11 +280,10 @@ describe(`BaseDAO`, () => {
         await userDao.deleteById(user1);
         fail('deleting using wrong id should have thrown');
       } catch (err) {}
-      done();
     });
 
     // ---------------------------------------------
-    it('expect deleting by id to succeed', async (done) => {
+    it('expect deleting by id to succeed', async () => {
       let user1: User = new User();
       let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
       try {
@@ -315,21 +305,19 @@ describe(`BaseDAO`, () => {
         await userDao.selectAll('WHERE noColumn=9');
         fail('a condition using not existing column should have thrown');
       } catch (err) {}
-      done();
     });
 
     // ---------------------------------------------
-    it('expect selectAll to throw on failure', async (done) => {
+    it('expect selectAll to throw on failure', async () => {
       let user1: User = new User();
       let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
       try {
         await userDao.selectAll('WHERE noColumn=9');
         fail('a condition using not existing column should have thrown');
       } catch (err) {}
-      done();
     });
     // ---------------------------------------------
-    it('expect selectEach to throw on failure', async (done) => {
+    it('expect selectEach to throw on failure', async () => {
       let user1: User = new User();
       let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
       try {
@@ -337,11 +325,10 @@ describe(`BaseDAO`, () => {
         await userDao.selectEach(() => {}, 'WHERE noColumn=9');
         fail('a condition using not existing column should have thrown');
       } catch (err) {}
-      done();
     });
 
     // ---------------------------------------------
-    it('expect selectEach to succeed', async (done) => {
+    it('expect selectEach to succeed', async () => {
       let user1: User = new User();
       let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
       try {
@@ -360,18 +347,16 @@ describe(`BaseDAO`, () => {
       } catch (err) {
         fail(err);
       }
-      done();
     });
 
     // ---------------------------------------------
-    it('expect selectAllOf for undefined constraint to fail', async (done) => {
+    it('expect selectAllOf for undefined constraint to fail', async () => {
       let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
       let contact: Contact = new Contact();
       try {
         let usersContact1 = await userDao.selectAllOf('undefConstraint', Contact, contact);
         fail('selectAllOf for undefined constraint should have failed');
       } catch (err) {}
-      done();
     });
   });
 
@@ -403,18 +388,17 @@ describe(`BaseDAO`, () => {
     }
 
     // ---------------------------------------------
-    beforeEach(async (done) => {
+    beforeEach(async () => {
       try {
         sqldb = new SqlDatabase();
         await sqldb.open(SQL_MEMORY_DB_PRIVATE);
       } catch (err) {
         fail(err);
       }
-      done();
     });
 
     // ---------------------------------------------
-    it('expect setProperty to work if conversion is required', async (done) => {
+    it('expect setProperty to work if conversion is required', async () => {
       let testDao: BaseDAO<TestSetProperty> = new BaseDAO(TestSetProperty, sqldb);
       let testRow: TestSetProperty = new TestSetProperty();
       try {
@@ -445,7 +429,6 @@ describe(`BaseDAO`, () => {
       } catch (err) {
         fail(err);
       }
-      done();
     });
   });
 
@@ -487,17 +470,16 @@ describe(`BaseDAO`, () => {
     }
 
     // ---------------------------------------------
-    beforeEach(async (done) => {
+    beforeEach(async () => {
       try {
         sqldb = new SqlDatabase();
         await sqldb.open(SQL_MEMORY_DB_PRIVATE);
       } catch (err) {
         fail(err);
       }
-      done();
     });
     // ---------------------------------------------
-    it('expect create tables/indexes to work for tables/indexes having same name but different schema ', async (done) => {
+    it('expect create tables/indexes to work for tables/indexes having same name but different schema ', async () => {
       const table1DAO: BaseDAO<TestIndexTable1> = new BaseDAO(TestIndexTable1, sqldb);
       const table2DAO: BaseDAO<TestIndexTable2> = new BaseDAO(TestIndexTable2, sqldb);
       try {
@@ -512,7 +494,6 @@ describe(`BaseDAO`, () => {
       } catch (err) {
         fail(err);
       }
-      done();
     });
   });
 
@@ -554,7 +535,7 @@ describe(`BaseDAO`, () => {
     }
 
     // ---------------------------------------------
-    beforeEach(async (done) => {
+    beforeEach(async () => {
       try {
         sqldb = new SqlDatabase();
         await sqldb.open(SQL_MEMORY_DB_PRIVATE);
@@ -564,20 +545,18 @@ describe(`BaseDAO`, () => {
       } catch (err) {
         fail(err);
       }
-      done();
     });
 
-    afterEach(async (done) => {
+    afterEach(async () => {
       try {
         await fullDao.dropTable();
       } catch (err) {
         fail(err);
       }
-      done();
     });
 
     // ---------------------------------------------
-    it('expect default-clause to work: using additional model', async (done) => {
+    it('expect default-clause to work: using additional model', async () => {
       const minDao: BaseDAO<TestDbDefaultsMin> = new BaseDAO(TestDbDefaultsMin, sqldb);
       const writeRow: TestDbDefaultsMin = new TestDbDefaultsMin();
       try {
@@ -594,11 +573,10 @@ describe(`BaseDAO`, () => {
       } catch (err) {
         fail(err);
       }
-      done();
     });
 
     // ---------------------------------------------
-    it('expect update/delete-all to work', async (done) => {
+    it('expect update/delete-all to work', async () => {
       const minDao: BaseDAO<TestDbDefaultsMin> = new BaseDAO(TestDbDefaultsMin, sqldb);
       const writeRow: TestDbDefaultsMin = new TestDbDefaultsMin();
       try {
@@ -646,11 +624,10 @@ describe(`BaseDAO`, () => {
       } catch (err) {
         fail(err);
       }
-      done();
     });
 
     // ---------------------------------------------
-    it('expect default-clause to work: using partial insert and empty partial model (autoincrement)', async (done) => {
+    it('expect default-clause to work: using partial insert and empty partial model (autoincrement)', async () => {
       try {
         const insertedPartial = await fullDao.insertPartial({ notMapped: 'foo' });
         let readRow = await fullDao.selectById({ id: insertedPartial.id, notMapped: 'foo' });
@@ -661,11 +638,10 @@ describe(`BaseDAO`, () => {
       } catch (err) {
         fail(err);
       }
-      done();
     });
 
     // ---------------------------------------------
-    it('expect partial update to fail for empty partial model', async (done) => {
+    it('expect partial update to fail for empty partial model', async () => {
       let insertedPartial: Partial<TestDbDefaultsFull>;
       try {
         insertedPartial = await fullDao.insertPartial({});
@@ -677,10 +653,9 @@ describe(`BaseDAO`, () => {
         await fullDao.updatePartial({ notMapped: 'foo' });
         fail('should have thrown');
       } catch (err) {}
-      done();
     });
 
-    it('expect partial update to fail for only identity properties in partial model', async (done) => {
+    it('expect partial update to fail for only identity properties in partial model', async () => {
       let insertedPartial: Partial<TestDbDefaultsFull>;
       try {
         insertedPartial = await fullDao.insertPartial({});
@@ -692,10 +667,9 @@ describe(`BaseDAO`, () => {
         await fullDao.updatePartial({ id: insertedPartial.id });
         fail('should have thrown');
       } catch (err) {}
-      done();
     });
 
-    it('expect partial update to succeed for partial model', async (done) => {
+    it('expect partial update to succeed for partial model', async () => {
       let insertedPartial: Partial<TestDbDefaultsFull>;
       try {
         insertedPartial = await fullDao.insertPartial({});
@@ -708,10 +682,9 @@ describe(`BaseDAO`, () => {
       } catch (err) {
         fail(err);
       }
-      done();
     });
 
-    it('expect partial update to succeed for full model', async (done) => {
+    it('expect partial update to succeed for full model', async () => {
       let insertedPartial: Partial<TestDbDefaultsFull>;
       try {
         insertedPartial = await fullDao.insertPartial({});
@@ -727,10 +700,9 @@ describe(`BaseDAO`, () => {
       } catch (err) {
         fail(err);
       }
-      done();
     });
 
-    it('expect update/delete all (without condition) to succeed for partial model', async (done) => {
+    it('expect update/delete all (without condition) to succeed for partial model', async () => {
       let insertedPartial: Partial<TestDbDefaultsFull>;
       try {
         insertedPartial = await fullDao.insertPartial({});
@@ -750,10 +722,9 @@ describe(`BaseDAO`, () => {
       } catch (err) {
         fail(err);
       }
-      done();
     });
 
-    it('expect update/delete all (with condition) to succeed for partial model', async (done) => {
+    it('expect update/delete all (with condition) to succeed for partial model', async () => {
       let insertedPartial: Partial<TestDbDefaultsFull>;
       try {
         insertedPartial = await fullDao.insertPartial({});
@@ -775,10 +746,9 @@ describe(`BaseDAO`, () => {
       } catch (err) {
         fail(err);
       }
-      done();
     });
 
-    it('expect update/delete all to fail if nothing changed', async (done) => {
+    it('expect update/delete all to fail if nothing changed', async () => {
       let insertedPartial: Partial<TestDbDefaultsFull> = new TestDbDefaultsFull();
       try {
         await fullDao.createTable();
@@ -802,11 +772,10 @@ describe(`BaseDAO`, () => {
       } catch (err) {
         expect(err.message).toContain('nothing changed');
       }
-      done();
     });
 
     // ---------------------------------------------
-    it('expect default-clause to work: using insertOrReplace and empty partial model (autoincrement)', async (done) => {
+    it('expect default-clause to work: using insertOrReplace and empty partial model (autoincrement)', async () => {
       try {
         const insertedPartial = await fullDao.replacePartial({ notMapped: 'foo' });
         let readRow = await fullDao.selectById({ id: insertedPartial.id, notMapped: 'foo' });
@@ -817,11 +786,10 @@ describe(`BaseDAO`, () => {
       } catch (err) {
         fail(err);
       }
-      done();
     });
 
     // ---------------------------------------------
-    it('expect insertOrReplace to insert', async (done) => {
+    it('expect insertOrReplace to insert', async () => {
       try {
         const model = new TestDbDefaultsFull();
         model.myBool = false;
@@ -838,11 +806,10 @@ describe(`BaseDAO`, () => {
       } catch (err) {
         fail(err);
       }
-      done();
     });
 
     // ---------------------------------------------
-    it('expect insertOrReplace to replace (by id)', async (done) => {
+    it('expect insertOrReplace to replace (by id)', async () => {
       try {
         const model = new TestDbDefaultsFull();
         model.myBool = false;
@@ -876,11 +843,10 @@ describe(`BaseDAO`, () => {
       } catch (err) {
         fail(err);
       }
-      done();
     });
 
     // ---------------------------------------------
-    it('expect insertOrReplace to replace (by unique index)', async (done) => {
+    it('expect insertOrReplace to replace (by unique index)', async () => {
       try {
         const model = new TestDbDefaultsFull();
         model.myBool = false;
@@ -917,7 +883,6 @@ describe(`BaseDAO`, () => {
       } catch (err) {
         fail(err);
       }
-      done();
     });
   });
 
@@ -946,18 +911,17 @@ describe(`BaseDAO`, () => {
     }
 
     // ---------------------------------------------
-    beforeEach(async (done) => {
+    beforeEach(async () => {
       try {
         sqldb = new SqlDatabase();
         await sqldb.open(SQL_MEMORY_DB_PRIVATE);
       } catch (err) {
         fail(err);
       }
-      done();
     });
 
     // ---------------------------------------------
-    it('expect default-clause to work: using partial insert and empty partial model (no autoincrement)', async (done) => {
+    it('expect default-clause to work: using partial insert and empty partial model (no autoincrement)', async () => {
       const fullDao: BaseDAO<TestDbDefaultsFull2> = new BaseDAO(TestDbDefaultsFull2, sqldb);
       try {
         await fullDao.createTable();
@@ -976,11 +940,10 @@ describe(`BaseDAO`, () => {
       } catch (err) {
         fail(err);
       }
-      done();
     });
 
     // ---------------------------------------------
-    it('expect default-clause to work: using partial insertOrReplace and empty partial model (no autoincrement)', async (done) => {
+    it('expect default-clause to work: using partial insertOrReplace and empty partial model (no autoincrement)', async () => {
       const fullDao: BaseDAO<TestDbDefaultsFull2> = new BaseDAO(TestDbDefaultsFull2, sqldb);
       try {
         await fullDao.createTable();
@@ -999,7 +962,6 @@ describe(`BaseDAO`, () => {
       } catch (err) {
         fail(err);
       }
-      done();
     });
   });
 });

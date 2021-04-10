@@ -165,12 +165,11 @@ async function runSample(): Promise<void> {
 
 describe('test README sample', () => {
   // ---------------------------------------------
-  it('expect README sample to succeed', async (done) => {
+  it('expect README sample to succeed', async () => {
     try {
       await runSample();
     } catch (err) {
       fail(err);
     }
-    done();
   });
 });

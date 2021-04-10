@@ -9,7 +9,7 @@ import { field, fk, id, index, table } from '../..';
 
 describe('test multiple decorators per model', () => {
   // ---------------------------------------------
-  it('two table decorators', async (done) => {
+  it('two table decorators', async () => {
     try {
       @table({ name: 'MDM1:T' })
       @table({ name: 'MDM1:T' })
@@ -24,11 +24,10 @@ describe('test multiple decorators per model', () => {
     } catch (err) {
       expect((err.message as string).indexOf('already')).not.toBe(-1);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('two field decorators', async (done) => {
+  it('two field decorators', async () => {
     try {
       @table({ name: 'MDM2:T' })
       class Model {
@@ -43,11 +42,10 @@ describe('test multiple decorators per model', () => {
     } catch (err) {
       expect((err.message as string).indexOf('already')).not.toBe(-1);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('two index decorators', async (done) => {
+  it('two index decorators', async () => {
     try {
       @table({ name: 'MDM3:T' })
       class Model {
@@ -63,11 +61,10 @@ describe('test multiple decorators per model', () => {
     } catch (err) {
       expect((err.message as string).indexOf('already')).not.toBe(-1);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('conflicting foreign key decorators', async (done) => {
+  it('conflicting foreign key decorators', async () => {
     try {
       @table({ name: 'MDM4:T' })
       class Model {
@@ -83,6 +80,5 @@ describe('test multiple decorators per model', () => {
     } catch (err) {
       expect((err.message as string).indexOf('already')).not.toBe(-1);
     }
-    done();
   });
 });

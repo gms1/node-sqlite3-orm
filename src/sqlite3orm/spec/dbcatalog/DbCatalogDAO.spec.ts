@@ -79,7 +79,7 @@ describe('test DbTableInfo.discover', () => {
   let dbCatDao: DbCatalogDAO;
 
   // ---------------------------------------------
-  beforeEach(async (done) => {
+  beforeEach(async () => {
     try {
       sqldb = new SqlDatabase();
       await sqldb.open(SQL_MEMORY_DB_PRIVATE);
@@ -95,22 +95,20 @@ describe('test DbTableInfo.discover', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  afterEach(async (done) => {
+  afterEach(async () => {
     try {
       await childDao.dropTable();
       await parentDao.dropTable();
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('expect discovered schema info to match ', async (done) => {
+  it('expect discovered schema info to match ', async () => {
     try {
       const schemas = await dbCatDao.readSchemas();
       expect(schemas).toBeDefined('schemas');
@@ -129,11 +127,10 @@ describe('test DbTableInfo.discover', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('expect discovered table info to match ', async (done) => {
+  it('expect discovered table info to match ', async () => {
     try {
       const parentInfo = await dbCatDao.readTableInfo(PARENT_TABLEQ);
       const childInfo = await dbCatDao.readTableInfo(CHILD_TABLEQ);
@@ -284,7 +281,6 @@ describe('test DbTableInfo.discover', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------

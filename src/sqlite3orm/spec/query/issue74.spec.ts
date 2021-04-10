@@ -23,7 +23,7 @@ class Issue74Model {
 describe('test QueryModel', () => {
   let sqldb: SqlDatabase;
 
-  beforeAll(async (done) => {
+  beforeAll(async () => {
     sqldb = new SqlDatabase();
     await sqldb.open(SQL_MEMORY_DB_PRIVATE);
 
@@ -40,19 +40,16 @@ describe('test QueryModel', () => {
     issue74Model.id = 2;
     issue74Model.loaded = true;
     await issue74Dao.insert(issue74Model);
-
-    done();
   });
 
   // ---------------------------------------------
-  afterAll(async (done) => {
+  afterAll(async () => {
     try {
       let issue74Dao: BaseDAO<Issue74Model> = new BaseDAO(Issue74Model, sqldb);
       await issue74Dao.dropTable();
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   it('worked: `not: { loaded: true }``', async () => {

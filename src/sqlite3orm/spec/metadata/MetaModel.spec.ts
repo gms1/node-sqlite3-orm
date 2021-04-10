@@ -15,7 +15,7 @@ import {
 
 describe('test metaModels', () => {
   // ---------------------------------------------
-  it('both models using all options', async (done) => {
+  it('both models using all options', async () => {
     try {
       @table({ name: 'MPT1:T1', withoutRowId: false, autoIncrement: true })
       class Model1 {
@@ -40,11 +40,10 @@ describe('test metaModels', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('first model using default options, second model all options', async (done) => {
+  it('first model using default options, second model all options', async () => {
     try {
       @table({ name: 'MPT2:T1' })
       class Model1 {
@@ -67,11 +66,10 @@ describe('test metaModels', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('first model using all options, second model default options', async (done) => {
+  it('first model using all options, second model default options', async () => {
     try {
       @table({ name: 'MPT3:T1', withoutRowId: false, autoIncrement: true })
       class Model1 {
@@ -94,11 +92,10 @@ describe('test metaModels', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('both models using default options', async (done) => {
+  it('both models using default options', async () => {
     try {
       @table({ name: 'MPT4A:T1' })
       class Model1 {
@@ -125,11 +122,10 @@ describe('test metaModels', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('conflicting withoutRowId-table option', async (done) => {
+  it('conflicting withoutRowId-table option', async () => {
     try {
       @table({ name: 'MPT4:T1', withoutRowId: false })
       class Model1 {
@@ -145,11 +141,10 @@ describe('test metaModels', () => {
     } catch (err) {
       expect((err.message as string).indexOf('withoutRowId')).not.toBe(-1);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('conflicting autoincrement-table option', async (done) => {
+  it('conflicting autoincrement-table option', async () => {
     try {
       @table({ name: 'MPT5:T1', autoIncrement: false })
       class Model1 {
@@ -165,11 +160,10 @@ describe('test metaModels', () => {
     } catch (err) {
       expect((err.message as string).indexOf('autoIncrement')).not.toBe(-1);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('conflicting identity-field option', async (done) => {
+  it('conflicting identity-field option', async () => {
     try {
       @table({ name: 'MPT6:T1' })
       class Model1 {
@@ -185,11 +179,10 @@ describe('test metaModels', () => {
     } catch (err) {
       expect((err.message as string).indexOf('identity')).not.toBe(-1);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('conflicting dbtype-field option', async (done) => {
+  it('conflicting dbtype-field option', async () => {
     try {
       @table({ name: 'MPT7:T1' })
       class Model1 {
@@ -205,11 +198,10 @@ describe('test metaModels', () => {
     } catch (err) {
       expect((err.message as string).indexOf('dbtype')).not.toBe(-1);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('conflicting isJson-field option', async (done) => {
+  it('conflicting isJson-field option', async () => {
     try {
       @table({ name: 'MPT8:T1' })
       class Model1 {
@@ -225,11 +217,10 @@ describe('test metaModels', () => {
     } catch (err) {
       expect((err.message as string).indexOf('json')).not.toBe(-1);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('conflicting dateInMilliSeconds-field option', async (done) => {
+  it('conflicting dateInMilliSeconds-field option', async () => {
     try {
       @table({ name: 'MPT8A:T1' })
       class Model1 {
@@ -245,11 +236,10 @@ describe('test metaModels', () => {
     } catch (err) {
       expect((err.message as string).indexOf('dateInMilliSeconds')).not.toBe(-1);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('conflicting index options (single model)', async (done) => {
+  it('conflicting index options (single model)', async () => {
     try {
       @table({ name: 'MPT9:T1' })
       class Model1 {
@@ -266,11 +256,10 @@ describe('test metaModels', () => {
     } catch (err) {
       expect((err.message as string).indexOf('index')).not.toBe(-1);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('non-conflicting index options (single model)', async (done) => {
+  it('non-conflicting index options (single model)', async () => {
     try {
       @table({ name: 'MPT9A:T1' })
       class Model1 {
@@ -287,11 +276,10 @@ describe('test metaModels', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('conflicting index options (multi model)', async (done) => {
+  it('conflicting index options (multi model)', async () => {
     try {
       @table({ name: 'MPT9B:T1' })
       class Model1 {
@@ -315,10 +303,9 @@ describe('test metaModels', () => {
     } catch (err) {
       expect((err.message as string).indexOf('index')).not.toBe(-1);
     }
-    done();
   });
 
-  it('non conflicting index options (multi model)', async (done) => {
+  it('non conflicting index options (multi model)', async () => {
     try {
       @table({ name: 'MPT9C:T1' })
       class Model1 {
@@ -341,11 +328,10 @@ describe('test metaModels', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('conflicting foreign key options (single model)', async (done) => {
+  it('conflicting foreign key options (single model)', async () => {
     try {
       @table({ name: 'MPT10:T1' })
       class Model1 {
@@ -362,11 +348,10 @@ describe('test metaModels', () => {
     } catch (err) {
       expect((err.message as string).indexOf('foreign')).not.toBe(-1);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('conflicting foreign key options (multi model)', async (done) => {
+  it('conflicting foreign key options (multi model)', async () => {
     try {
       @table({ name: 'MPT10:T1' })
       class Model1 {
@@ -390,11 +375,10 @@ describe('test metaModels', () => {
     } catch (err) {
       expect((err.message as string).indexOf('foreign')).not.toBe(-1);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('model destroy', async (done) => {
+  it('model destroy', async () => {
     try {
       @table({ name: 'MPT11:T1' })
       class Model1 {
@@ -422,12 +406,10 @@ describe('test metaModels', () => {
     } catch (err) {
       fail(`should not throw: ${err.message}`);
     }
-
-    done();
   });
 
   // ---------------------------------------------
-  it('model default types', async (done) => {
+  it('model default types', async () => {
     try {
       @table({ name: 'MPT12:T1' })
       class Model {
@@ -492,12 +474,10 @@ describe('test metaModels', () => {
     } catch (err) {
       fail(`should not throw: ${err.message}`);
     }
-
-    done();
   });
 
   // ---------------------------------------------
-  it('model type affinity', async (done) => {
+  it('model type affinity', async () => {
     try {
       @table({ name: 'MPT13:T1' })
       class Model1 {
@@ -528,6 +508,5 @@ describe('test metaModels', () => {
     } catch (err) {
       fail('err');
     }
-    done();
   });
 });

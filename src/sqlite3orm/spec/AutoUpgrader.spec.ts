@@ -44,7 +44,7 @@ describe('test autoupgrade', () => {
   let catalogDao: DbCatalogDAO;
 
   // ---------------------------------------------
-  beforeEach(async (done) => {
+  beforeEach(async () => {
     try {
       sqldb = new SqlDatabase();
       autoUpgrader = new SpecAutoUpgrader(sqldb);
@@ -58,11 +58,10 @@ describe('test autoupgrade', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  afterEach(async (done) => {
+  afterEach(async () => {
     try {
       debug('end');
       schema().deleteTable(TEST_TABLE);
@@ -70,11 +69,10 @@ describe('test autoupgrade', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('should work for newly defined table (CREATE)', async (done) => {
+  it('should work for newly defined table (CREATE)', async () => {
     try {
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
@@ -108,11 +106,10 @@ describe('test autoupgrade', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('should work for added nullable column (ALTER)', async (done) => {
+  it('should work for added nullable column (ALTER)', async () => {
     try {
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
@@ -171,11 +168,10 @@ describe('test autoupgrade', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('should fail for added not-nullable column without default (ALTER)', async (done) => {
+  it('should fail for added not-nullable column without default (ALTER)', async () => {
     try {
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
@@ -233,12 +229,10 @@ describe('test autoupgrade', () => {
 
       fail(`should have failed: Cannot add a NOT NULL column without default value`);
     } catch (err) {}
-
-    done();
   });
 
   // ---------------------------------------------
-  it('should work for deleted column (NOOP, KEEP)', async (done) => {
+  it('should work for deleted column (NOOP, KEEP)', async () => {
     try {
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
@@ -305,11 +299,10 @@ describe('test autoupgrade', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('should work for added and deleted columns (ALTER, KEEP)', async (done) => {
+  it('should work for added and deleted columns (ALTER, KEEP)', async () => {
     try {
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
@@ -377,11 +370,10 @@ describe('test autoupgrade', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('should work for add/remove/change indexes (ALTER)', async (done) => {
+  it('should work for add/remove/change indexes (ALTER)', async () => {
     try {
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
@@ -463,11 +455,10 @@ describe('test autoupgrade', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('should work for deleted column (RECREATE, NOKEEP)', async (done) => {
+  it('should work for deleted column (RECREATE, NOKEEP)', async () => {
     try {
       @table({ name: TEST_TABLE, autoIncrement: true })
       class Model1 {
@@ -544,11 +535,10 @@ describe('test autoupgrade', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('should work for added and deleted columns (RECREATE, KEEP)', async (done) => {
+  it('should work for added and deleted columns (RECREATE, KEEP)', async () => {
     // using a dropped foreign key to force recreate
     try {
       @table({ name: TEST_PARENT_TABLE, autoIncrement: true })
@@ -665,6 +655,5 @@ describe('test autoupgrade', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 });

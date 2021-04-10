@@ -158,7 +158,7 @@ describe('test autoupgrade - upgrade info', () => {
   };
 
   // ---------------------------------------------
-  beforeEach(async (done) => {
+  beforeEach(async () => {
     try {
       sqldb = new SqlDatabase();
       autoUpgrader = new SpecAutoUpgrader(sqldb);
@@ -171,22 +171,20 @@ describe('test autoupgrade - upgrade info', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  afterEach(async (done) => {
+  afterEach(async () => {
     try {
       debug('end');
       schema().deleteTable(TEST_TABLE);
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('actual', async (done) => {
+  it('actual', async () => {
     try {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
@@ -250,11 +248,10 @@ describe('test autoupgrade - upgrade info', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('create', async (done) => {
+  it('create', async () => {
     try {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
@@ -318,11 +315,10 @@ describe('test autoupgrade - upgrade info', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('forced recreate', async (done) => {
+  it('forced recreate', async () => {
     try {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
@@ -388,11 +384,10 @@ describe('test autoupgrade - upgrade info', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('recreate because of added/removed foreign key', async (done) => {
+  it('recreate because of added/removed foreign key', async () => {
     try {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
@@ -458,11 +453,10 @@ describe('test autoupgrade - upgrade info', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('recreate because of changed foreign key', async (done) => {
+  it('recreate because of changed foreign key', async () => {
     try {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
@@ -526,11 +520,10 @@ describe('test autoupgrade - upgrade info', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('recreate because of dropped column', async (done) => {
+  it('recreate because of dropped column', async () => {
     try {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
@@ -591,11 +584,10 @@ describe('test autoupgrade - upgrade info', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('recreate and keep dropped not-null column', async (done) => {
+  it('recreate and keep dropped not-null column', async () => {
     try {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
@@ -658,11 +650,10 @@ describe('test autoupgrade - upgrade info', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('actual because of kept dropped nullable column', async (done) => {
+  it('actual because of kept dropped nullable column', async () => {
     try {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
@@ -728,11 +719,10 @@ describe('test autoupgrade - upgrade info', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('recreate because of changed column', async (done) => {
+  it('recreate because of changed column', async () => {
     try {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
@@ -796,11 +786,10 @@ describe('test autoupgrade - upgrade info', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('recreate because of primary key removed', async (done) => {
+  it('recreate because of primary key removed', async () => {
     try {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
@@ -865,11 +854,10 @@ describe('test autoupgrade - upgrade info', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('recreate because of primary key changed', async (done) => {
+  it('recreate because of primary key changed', async () => {
     try {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
@@ -934,11 +922,10 @@ describe('test autoupgrade - upgrade info', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('recreate because of autoincrement changed', async (done) => {
+  it('recreate because of autoincrement changed', async () => {
     try {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
@@ -1002,11 +989,10 @@ describe('test autoupgrade - upgrade info', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('alter because of added column', async (done) => {
+  it('alter because of added column', async () => {
     try {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
@@ -1073,11 +1059,10 @@ describe('test autoupgrade - upgrade info', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('alter because of added index', async (done) => {
+  it('alter because of added index', async () => {
     try {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
@@ -1143,11 +1128,10 @@ describe('test autoupgrade - upgrade info', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('alter because of added and dropped index', async (done) => {
+  it('alter because of added and dropped index', async () => {
     try {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
@@ -1213,11 +1197,10 @@ describe('test autoupgrade - upgrade info', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
   // ---------------------------------------------
-  it('alter because of changed index', async (done) => {
+  it('alter because of changed index', async () => {
     try {
       @table({ name: TEST_PARENT_TABLE })
       class ParentModel {
@@ -1283,6 +1266,5 @@ describe('test autoupgrade - upgrade info', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 });

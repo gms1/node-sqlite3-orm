@@ -13,7 +13,7 @@ import {
 describe('test SqlConnectionPool', () => {
   // ---------------------------------------------
 
-  it('expect pool to be able to open a database using default settings', async (done) => {
+  it('expect pool to be able to open a database using default settings', async () => {
     try {
       let pool = new SqlConnectionPool('TESTPOOL');
       await pool.open(SQL_MEMORY_DB_SHARED);
@@ -30,10 +30,9 @@ describe('test SqlConnectionPool', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
-  it('expect pool to be able to open a database using min < 1', async (done) => {
+  it('expect pool to be able to open a database using min < 1', async () => {
     try {
       let pool = new SqlConnectionPool();
       await pool.open(SQL_MEMORY_DB_SHARED, SQL_OPEN_DEFAULT, 0);
@@ -50,10 +49,9 @@ describe('test SqlConnectionPool', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
-  it('expect pool to share a file-database', async (done) => {
+  it('expect pool to share a file-database', async () => {
     try {
       let pool = new SqlConnectionPool();
       const fileName = 'testsqlite3.db';
@@ -126,10 +124,9 @@ describe('test SqlConnectionPool', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
-  it('expect pool to share a memory-database', async (done) => {
+  it('expect pool to share a memory-database', async () => {
     try {
       let pool = new SqlConnectionPool();
       await pool.open(SQL_MEMORY_DB_SHARED, SQL_OPEN_DEFAULT, 2, 2);
@@ -208,10 +205,9 @@ describe('test SqlConnectionPool', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
-  it('expect pool to be closed after failed attempt to open a database', async (done) => {
+  it('expect pool to be closed after failed attempt to open a database', async () => {
     try {
       let pool = new SqlConnectionPool();
       await pool.open('::/.', SQL_OPEN_READWRITE);
@@ -223,10 +219,9 @@ describe('test SqlConnectionPool', () => {
       let sqldb1 = await pool.get(100);
       fail('got invalid connection');
     } catch (err) {}
-    done();
   });
 
-  it('expect getting connection after pool has closed to fail', async (done) => {
+  it('expect getting connection after pool has closed to fail', async () => {
     let pool = new SqlConnectionPool();
     try {
       await pool.open(SQL_MEMORY_DB_SHARED, SQL_OPEN_DEFAULT, 0);
@@ -241,12 +236,10 @@ describe('test SqlConnectionPool', () => {
     try {
       let sqldb1 = await pool.get(100);
       fail('should not get a connection');
-    } catch (err) {
-      done();
-    }
+    } catch (err) {}
   });
 
-  it('expect opening pool multiple times (using same file and mode) to succeed', async (done) => {
+  it('expect opening pool multiple times (using same file and mode) to succeed', async () => {
     const pool = new SqlConnectionPool();
     try {
       await Promise.all([
@@ -258,10 +251,9 @@ describe('test SqlConnectionPool', () => {
       fail(err);
     }
     expect(pool.isOpen()).toBeTruthy();
-    done();
   });
 
-  it('expect opening pool multiple times (using different files) to fail', async (done) => {
+  it('expect opening pool multiple times (using different files) to fail', async () => {
     const pool = new SqlConnectionPool();
     try {
       await Promise.all([
@@ -274,10 +266,9 @@ describe('test SqlConnectionPool', () => {
     }
     // the last one wins ( same as running sequential )
     expect(pool.isOpen()).toBeTruthy();
-    done();
   });
 
-  it('getting connections from pool having max-limit should succeed', async (done) => {
+  it('getting connections from pool having max-limit should succeed', async () => {
     const pool = new SqlConnectionPool();
     let conn1: SqlDatabase | undefined;
     let conn2: SqlDatabase | undefined;
@@ -305,11 +296,9 @@ describe('test SqlConnectionPool', () => {
       fail(err);
     }
     expect(conn2).toBeDefined();
-
-    done();
   });
 
-  it('getting connections from pool without max-limit should succeed', async (done) => {
+  it('getting connections from pool without max-limit should succeed', async () => {
     const pool = new SqlConnectionPool();
     try {
       await pool.open(SQL_MEMORY_DB_SHARED, SQL_OPEN_DEFAULT, 1);
@@ -328,10 +317,9 @@ describe('test SqlConnectionPool', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
-  it('closing pool having connections open should succeed', async (done) => {
+  it('closing pool having connections open should succeed', async () => {
     const pool = new SqlConnectionPool();
     let conn1: SqlDatabase | undefined;
     let conn2: SqlDatabase | undefined;
@@ -373,10 +361,9 @@ describe('test SqlConnectionPool', () => {
     expect(conn1!.isOpen()).toBeFalsy();
     expect(conn2!.isOpen()).toBeFalsy();
     expect(conn3!.isOpen()).toBeFalsy();
-    done();
   });
 
-  it('connection should be closed by pool having min connections in pool', async (done) => {
+  it('connection should be closed by pool having min connections in pool', async () => {
     const pool = new SqlConnectionPool();
     let conn1: SqlDatabase | undefined;
     let conn2: SqlDatabase | undefined;
@@ -421,13 +408,12 @@ describe('test SqlConnectionPool', () => {
     expect(conn1!.isOpen()).toBeFalsy();
     expect(conn2!.isOpen()).toBeFalsy();
     expect(conn3!.isOpen()).toBeFalsy();
-    done();
   });
 });
 
 describe('test SqlConnectionPool Settings', () => {
   // ---------------------------------------------
-  it('should be able to open a database using custom settings', async (done) => {
+  it('should be able to open a database using custom settings', async () => {
     try {
       const settings: SqlDatabaseSettings = {
         journalMode: 'WAL',
@@ -476,6 +462,5 @@ describe('test SqlConnectionPool Settings', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 });

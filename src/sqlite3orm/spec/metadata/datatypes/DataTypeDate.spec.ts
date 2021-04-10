@@ -32,7 +32,7 @@ describe('test Date type', () => {
   let lastModelId = 1;
 
   // ---------------------------------------------
-  beforeEach(async (done) => {
+  beforeEach(async () => {
     try {
       sqldb = new SqlDatabase();
       await sqldb.open(SQL_MEMORY_DB_PRIVATE);
@@ -41,10 +41,9 @@ describe('test Date type', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
-  it('expect writing Date properties to the database to succeed', async (done) => {
+  it('expect writing Date properties to the database to succeed', async () => {
     try {
       const model: DataTypeDate = new DataTypeDate();
       model.id = ++lastModelId;
@@ -73,10 +72,9 @@ describe('test Date type', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
-  it('expect reading Date properties from database to succeed', async (done) => {
+  it('expect reading Date properties from database to succeed', async () => {
     try {
       const writeModel: DataTypeDate = new DataTypeDate();
       writeModel.id = ++lastModelId;
@@ -117,10 +115,9 @@ describe('test Date type', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
-  it('expect reading Date properties from database defaults to succeed', async (done) => {
+  it('expect reading Date properties from database defaults to succeed', async () => {
     try {
       const writeModel: DataTypeDate = new DataTypeDate();
       writeModel.id = ++lastModelId;
@@ -183,10 +180,9 @@ describe('test Date type', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 
-  it('expect writing undefined Date properties to the database to succeed', async (done) => {
+  it('expect writing undefined Date properties to the database to succeed', async () => {
     try {
       const model: DataTypeDate = new DataTypeDate();
       model.id = ++lastModelId;
@@ -200,6 +196,5 @@ describe('test Date type', () => {
     } catch (err) {
       fail(err);
     }
-    done();
   });
 });
