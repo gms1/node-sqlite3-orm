@@ -2,7 +2,7 @@
 
 | Release   | Notes                                                                                                                       |
 | --------- | --------------------------------------------------------------------------------------------------------------------------- |
-| 2.5.1-2   | maintenance releases                                                                                                        |
+| 2.5.1-3   | maintenance releases                                                                                                        |
 | 2.5.0     | [2.5.0 changes](#2.5.0-changes)                                                                                             |
 | 2.4.18    | bug fix: query model: binding `false` values using shorthand form (#74)                                                     |
 | 2.4.2-17  | maintenance releases                                                                                                        |
