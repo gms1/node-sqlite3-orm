@@ -1,4 +1,5 @@
-// import * as core from './core';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { MetaProperty } from './MetaProperty';
 import { TableOpts, FieldOpts } from './decorators';
 import { Table } from './Table';
@@ -150,7 +151,6 @@ export class MetaModel {
     const idxDefs = new Map<string, IDXDefinition>();
     const fkDefs = new Map<string, FKDefinition>();
 
-    // tslint:disable no-non-null-assertion
     /* istanbul ignore if */
     if (!this.opts.field) {
       this.opts.field = new Map<KeyType, PropertyFieldOptions>();
@@ -159,10 +159,12 @@ export class MetaModel {
     // after all the decoraters have run and a table has been created
     // we are able to fully initialize all properties:
     this.properties.forEach((prop, key) => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       let fieldOpts = this.opts.field!.get(key);
       /* istanbul ignore if */
       if (!fieldOpts) {
         fieldOpts = { name: key.toString(), isIdentity: false, opts: {} };
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         this.opts.field!.set(key, fieldOpts);
       }
       prop.init(this, fieldOpts.name, fieldOpts.isIdentity, fieldOpts.opts);
@@ -176,7 +178,6 @@ export class MetaModel {
             idxDefs.set(idxName, idxDef);
           } else {
             // test for conflicting isUniqe setting
-            // tslint:disable triple-equals
             if (propIdxOpts.isUnique != undefined) {
               if (idxDef.isUnique != undefined && propIdxOpts.isUnique !== idxDef.isUnique) {
                 throw new Error(
@@ -187,7 +188,6 @@ export class MetaModel {
               }
               idxDef.isUnique = propIdxOpts.isUnique;
             }
-            // tslint:enable triple-equals
           }
           idxDef.fields.push({ name: prop.field.name, desc: propIdxOpts.desc });
         });
@@ -219,7 +219,6 @@ export class MetaModel {
         });
       }
     });
-    // tslint:enable no-non-null-assertion
 
     idxDefs.forEach((idxDef) => {
       this.table.addIDXDefinition(idxDef);

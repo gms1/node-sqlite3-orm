@@ -3,11 +3,11 @@ import { SQL_DEFAULT_SCHEMA } from '../core/SqlDatabase';
 // -----------------------------------------------------------------
 
 export function quoteSimpleIdentifier(name: string): string {
-  return '"' + name.replace(/\"/g, '""') + '"';
+  return '"' + name.replace(/"/g, '""') + '"';
 }
 
 export function backtickQuoteSimpleIdentifier(name: string): string {
-  return '`' + name.replace(/\`/g, '``') + '`';
+  return '`' + name.replace(/`/g, '``') + '`';
 }
 
 // -----------------------------------------------------------------

@@ -1,19 +1,7 @@
-// tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-
-import {
-  BaseDAO,
-  field,
-  Filter,
-  fk,
-  id,
-  QueryModel,
-  SQL_MEMORY_DB_PRIVATE,
-  SqlDatabase,
-  table,
-} from '../..';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { BaseDAO, field, id, QueryModel, SQL_MEMORY_DB_PRIVATE, SqlDatabase, table } from '../..';
 
 const USERS_TABLE = 'QB:USERS TABLE';
-const CONTACTS_TABLE = 'main.QB:CONTACTS TABLE';
 
 @table({ name: USERS_TABLE })
 class User {
@@ -50,7 +38,7 @@ describe('test QueryModel', () => {
     sqldb = new SqlDatabase();
     await sqldb.open(SQL_MEMORY_DB_PRIVATE);
 
-    let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
+    const userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
     // let contactDao: BaseDAO<Contact> = new BaseDAO(Contact, sqldb);
     await userDao.createTable();
     // await contactDao.createTable();
@@ -126,9 +114,7 @@ describe('test QueryModel', () => {
   // ---------------------------------------------
   afterAll(async () => {
     try {
-      let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
-      // let contactDao: BaseDAO<Contact> = new BaseDAO(Contact, sqldb);
-      // await contactDao.dropTable();
+      const userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
       await userDao.dropTable();
     } catch (err) {
       fail(err);

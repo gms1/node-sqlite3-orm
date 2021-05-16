@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 type Primitive = string | number | boolean;
 
 export type ComparisonOperatorType =
@@ -75,7 +76,6 @@ export function getPropertyPredicates<MT, K extends keyof MT>(
   modelPredicates: ModelPredicates<MT>,
   key: K,
 ): PropertyPredicates<MT[K]> {
-  // tslint:disable-next-line: triple-equals
   return (modelPredicates[key] == undefined
     ? { eq: undefined }
     : modelPredicates[key]) as PropertyPredicates<MT[K]>;

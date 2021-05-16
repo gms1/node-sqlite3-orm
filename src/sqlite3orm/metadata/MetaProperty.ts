@@ -1,6 +1,6 @@
-// import * as core from './core';
-
-// tslint:disable-next-line no-require-imports
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/ban-types */
 import { FieldOpts } from './decorators';
 import { DEFAULT_VALUE_TRANSFORMERS } from './DefaultValueTransformers';
 import { Field } from './Field';

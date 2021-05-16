@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 import { MetaModel } from '../metadata';
 
 import { QueryOperation } from './QueryOperation';

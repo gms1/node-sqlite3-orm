@@ -1,6 +1,3 @@
-// import * as core from './core';
-// tslint:disable no-bitwise
-// tslint:disable-next-line no-require-imports
 import * as _dbg from 'debug';
 
 import { SqlConnectionPoolDatabase } from './SqlConnectionPoolDatabase';
@@ -197,7 +194,6 @@ export class SqlConnectionPool {
         await wait(cond, timeout);
       }
       if (this.inPool.length > 0) {
-        // tslint:disable-next-line no-unnecessary-type-assertion
         sqldb = this.inPool.shift() as SqlConnectionPoolDatabase;
         this.inUse.add(sqldb);
         debug(
@@ -249,8 +245,6 @@ export class SqlConnectionPool {
       );
     }
   }
-
-  // tslint:disable member-ordering
 
   static readonly openNamedPools: Map<string, SqlConnectionPool> = new Map<
     string,

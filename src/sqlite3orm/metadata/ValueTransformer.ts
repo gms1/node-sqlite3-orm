@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface ValueTransformer {
   /*
    * serialize property value to DB

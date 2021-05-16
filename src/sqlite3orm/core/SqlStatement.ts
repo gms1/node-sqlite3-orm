@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // import * as core from './core';
 
 import { Statement } from 'sqlite3';
@@ -44,7 +46,7 @@ export class SqlStatement {
    * @returns {Promise<void>}
    */
   public reset(): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve) => {
       this.stmt.reset(() => {
         resolve();
       });
@@ -77,12 +79,10 @@ export class SqlStatement {
    */
   public run(params?: any): Promise<SqlRunResult> {
     return new Promise<SqlRunResult>((resolve, reject) => {
-      // tslint:disable-next-line: only-arrow-functions
       this.stmt.run(params, function(err: Error): void {
         if (err) {
           reject(err);
         } else {
-          // tslint:disable-next-line: no-invalid-this
           const res: SqlRunResult = { lastID: this.lastID, changes: this.changes };
           resolve(res);
         }

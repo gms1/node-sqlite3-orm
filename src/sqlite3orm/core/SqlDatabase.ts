@@ -1,13 +1,12 @@
-// import * as core from './core';
-
-// tslint:disable-next-line no-require-imports
+/* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as _dbg from 'debug';
 import {
   Database,
   OPEN_CREATE,
   OPEN_READONLY,
   OPEN_READWRITE,
-  Statement,
   verbose as sqlverbose,
 } from 'sqlite3';
 
@@ -30,7 +29,6 @@ export const SQL_MEMORY_DB_SHARED = 'file:sqlite3orm?mode=memory&cache=shared';
 
 const debug = _dbg('sqlite3orm:database');
 
-// tslint:disable-next-line: no-bitwise
 export const SQL_OPEN_DEFAULT = SQL_OPEN_READWRITE | SQL_OPEN_CREATE;
 
 /**
@@ -52,12 +50,6 @@ export class SqlDatabase {
   protected dbId?: number;
 
   dirty?: boolean;
-
-  /**
-   * Creates an instance of SqlDatabase.
-   *
-   */
-  constructor() {}
 
   /**
    * Open a database connection
@@ -144,8 +136,8 @@ export class SqlDatabase {
         reject(new Error('database connection not open'));
         return;
       }
-      // tslint:disable-next-line: only-arrow-functions
       debug(`${this.dbId}: sql: ${sql}`);
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
       const self = this;
       this.db.run(sql, params, function(err: Error): void {
         // do not use arrow function for this callback
@@ -158,7 +150,6 @@ ${sql}\nparams: `,
           );
           reject(err);
         } else {
-          // tslint:disable-next-line: no-invalid-this
           const res: SqlRunResult = { lastID: this.lastID, changes: this.changes };
           resolve(res);
         }
@@ -304,9 +295,8 @@ ${sql}`);
         reject(new Error('database connection not open'));
         return;
       }
-      let dbstmt: Statement;
       debug(`${this.dbId}: sql: ${sql}`);
-      dbstmt = this.db.prepare(sql, params, (err) => {
+      const dbstmt = this.db.prepare(sql, params, (err) => {
         if (err) {
           debug(`${this.dbId}: failed sql: ${err.message}
 ${sql}`);
@@ -359,8 +349,6 @@ ${sql}`);
       .then((res) => this.run('COMMIT TRANSACTION').then(() => Promise.resolve(res)))
       .catch((err) => this.run('ROLLBACK TRANSACTION').then(() => Promise.reject(err)));
   }
-
-  // tslint:disable unified-signatures
 
   /**
    *
@@ -432,7 +420,6 @@ ${sql}`);
     );
   }
 
-  // tslint:disable-next-line: cyclomatic-complexity
   protected applySettings(settings: SqlDatabaseSettings): Promise<void> {
     /* istanbul ignore if */
     if (!this.db) {

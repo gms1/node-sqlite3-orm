@@ -1,4 +1,6 @@
-// tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable prefer-const */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { BaseDAO, field, fk, id, index, schema, SqlDatabase, table } from '..';
 
 // definition-part:

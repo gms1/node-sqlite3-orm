@@ -1,16 +1,4 @@
-// tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-
-import {
-  BaseDAO,
-  field,
-  Filter,
-  fk,
-  id,
-  QueryModel,
-  SQL_MEMORY_DB_PRIVATE,
-  SqlDatabase,
-  table,
-} from '../..';
+import { BaseDAO, field, id, QueryModel, SQL_MEMORY_DB_PRIVATE, SqlDatabase, table } from '../..';
 
 @table({ name: 'ISSUE74_TABLE' })
 class Issue74Model {
@@ -27,7 +15,7 @@ describe('test QueryModel', () => {
     sqldb = new SqlDatabase();
     await sqldb.open(SQL_MEMORY_DB_PRIVATE);
 
-    let issue74Dao: BaseDAO<Issue74Model> = new BaseDAO(Issue74Model, sqldb);
+    const issue74Dao: BaseDAO<Issue74Model> = new BaseDAO(Issue74Model, sqldb);
     await issue74Dao.createTable();
     // await contactDao.createTable();
     const issue74Model = new Issue74Model();
@@ -45,7 +33,7 @@ describe('test QueryModel', () => {
   // ---------------------------------------------
   afterAll(async () => {
     try {
-      let issue74Dao: BaseDAO<Issue74Model> = new BaseDAO(Issue74Model, sqldb);
+      const issue74Dao: BaseDAO<Issue74Model> = new BaseDAO(Issue74Model, sqldb);
       await issue74Dao.dropTable();
     } catch (err) {
       fail(err);

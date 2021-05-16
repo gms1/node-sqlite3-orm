@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { KeyType, MetaModel, MetaProperty } from '../metadata';
 
 import { QueryOperation } from './QueryOperation';
@@ -56,7 +60,7 @@ export class QueryPropertyPredicate<PT> implements QueryOperation {
 
       // two host variables:
       case 'isBetween':
-      case 'isNotBetween':
+      case 'isNotBetween': {
         /* istanbul ignore if */
         if (!Array.isArray(value)) {
           throw new Error(
@@ -74,10 +78,11 @@ export class QueryPropertyPredicate<PT> implements QueryOperation {
         sql += ' ' + this.setHostParameter(prop, params, prop.valueToDB(from));
         sql += ' AND ' + this.setHostParameter(prop, params, prop.valueToDB(to));
         return `(${sql})`;
+      }
 
       // multiple host variables:
       case 'isIn':
-      case 'isNotIn':
+      case 'isNotIn': {
         /* istanbul ignore if */
         if (!Array.isArray(value)) {
           throw new Error(
@@ -93,6 +98,7 @@ export class QueryPropertyPredicate<PT> implements QueryOperation {
         }
         sql += ' (' + hostParams.join(', ') + ')';
         return sql;
+      }
 
       /* istanbul ignore next */
       default:
@@ -141,7 +147,7 @@ export class QueryPropertyPredicate<PT> implements QueryOperation {
     const namePrefix = prop.getHostParameterName('w$');
     let nr = 1;
     let key = `${namePrefix}$`;
-    while (params.hasOwnProperty(key)) {
+    while (Object.prototype.hasOwnProperty.call(params, key)) {
       nr++;
       key = `${namePrefix}$${nr}`;
     }

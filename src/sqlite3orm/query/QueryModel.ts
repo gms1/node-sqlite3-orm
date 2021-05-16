@@ -1,5 +1,5 @@
-// tslint:disable callable-types
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/ban-types */
 import { SqlDatabase } from '../core';
 
 import { Filter } from './Filter';
@@ -182,7 +182,7 @@ export class QueryModel<T> extends QueryModelBase<T> {
     }
     const columns: (keyof T)[] = [];
     for (const key in filter.select) {
-      if (filter.select.hasOwnProperty(key) && filter.select[key]) {
+      if (Object.prototype.hasOwnProperty.call(filter.select, key) && filter.select[key]) {
         const prop = this.metaModel.properties.get(key);
         if (!prop) {
           continue;
@@ -200,7 +200,7 @@ export class QueryModel<T> extends QueryModelBase<T> {
     const columns: string[] = [];
     for (const key in filter.order) {
       /* istanbul ignore if */
-      if (!filter.order.hasOwnProperty(key)) {
+      if (!Object.prototype.hasOwnProperty.call(filter.order, key)) {
         continue;
       }
       const prop = this.metaModel.properties.get(key);

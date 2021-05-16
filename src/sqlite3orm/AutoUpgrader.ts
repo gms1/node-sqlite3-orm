@@ -1,4 +1,6 @@
-// tslint:disable-next-line no-require-imports
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-empty-function */
 import * as _dbg from 'debug';
 
 import { SqlDatabase } from './core/SqlDatabase';
@@ -119,7 +121,6 @@ export class AutoUpgrader {
     return this._getUpgradeInfo(table, tableInfo, opts);
   }
 
-  // tslint:disable cyclomatic-complexity
   protected _getUpgradeInfo(
     table: Table,
     tableInfo?: DbTableInfo,
@@ -178,7 +179,6 @@ export class AutoUpgrader {
         !newFldDef ||
         newFldDef.typeAffinity !== tableInfo.columns[colName].typeAffinity ||
         newFldDef.notNull !== tableInfo.columns[colName].notNull ||
-        // tslint:disable-next-line triple-equals
         newFldDef.defaultValue != tableInfo.columns[colName].defaultValue
       ) {
         debug(`  column changed '${colName}'`);
@@ -241,7 +241,6 @@ export class AutoUpgrader {
       }
     }
 
-    // tslint:enable cyclomatic-complexity
     return { tableInfo, opts, upgradeMode: UpgradeMode.ACTUAL };
   }
 
@@ -358,7 +357,6 @@ export class AutoUpgrader {
         // NOTE: these columns should always be nullable
         addField.dbtype = tableInfo.columns[colName].type;
         const defaultValue = tableInfo.columns[colName].defaultValue;
-        // tslint:disable-next-line triple-equals
         if (defaultValue != undefined) {
           addField.dbtype += ` DEFAULT(${defaultValue.toString()})`;
         }

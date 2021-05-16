@@ -1,4 +1,3 @@
-// tslint:disable-next-line no-require-imports
 import * as _dbg from 'debug';
 import { Database } from 'sqlite3';
 

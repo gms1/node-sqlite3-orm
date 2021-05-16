@@ -24,7 +24,6 @@ export class Schema {
 
   private _dateInMilliSeconds?: boolean;
   get dateInMilliSeconds(): boolean {
-    // tslint:disable-next-line triple-equals
     return this._dateInMilliSeconds == undefined ? false : this._dateInMilliSeconds;
   }
   set dateInMilliSeconds(val: boolean) {
@@ -84,18 +83,14 @@ export class Schema {
       table = new Table(name);
       this.mapNameToTable.set(qname, table);
 
-      // tslint:disable-next-line triple-equals
       if (opts.withoutRowId != undefined) {
         table.withoutRowId = opts.withoutRowId;
       }
-      // tslint:disable-next-line triple-equals
       if (opts.autoIncrement != undefined) {
         table.autoIncrement = opts.autoIncrement;
       }
     } else {
-      // tslint:disable-next-line triple-equals
       if (opts.withoutRowId != undefined) {
-        // tslint:disable-next-line triple-equals
         if (table.isWithoutRowIdDefined && opts.withoutRowId != table.withoutRowId) {
           throw new Error(
             `conflicting withoutRowId settings: new: ${opts.withoutRowId}, old ${table.withoutRowId}`,
@@ -103,9 +98,7 @@ export class Schema {
         }
         table.withoutRowId = opts.withoutRowId;
       }
-      // tslint:disable-next-line triple-equals
       if (opts.autoIncrement != undefined) {
-        // tslint:disable-next-line triple-equals
         if (table.isAutoIncrementDefined && opts.autoIncrement != table.autoIncrement) {
           throw new Error(
             `conflicting autoIncrement settings: new: ${opts.autoIncrement}, old ${table.autoIncrement}`,
@@ -218,7 +211,6 @@ export class Schema {
  */
 export function schema(): Schema {
   if (!Schema.schema) {
-    // tslint:disable-next-line: no-unused-expression
     new Schema();
   }
   return Schema.schema;

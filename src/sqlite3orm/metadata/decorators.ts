@@ -1,6 +1,5 @@
-// tslint:disable-next-line: no-import-side-effect
+/* eslint-disable @typescript-eslint/ban-types */
 import 'reflect-metadata';
-// import * as core from './core';
 
 import { MetaModel, KeyType } from './MetaModel';
 import { ValueTransformer } from './ValueTransformer';

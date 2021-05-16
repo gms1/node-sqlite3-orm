@@ -1,4 +1,4 @@
-// tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { SQL_MEMORY_DB_PRIVATE, SqlDatabase, SqlStatement } from '../..';
 
 // ---------------------------------------------
@@ -33,7 +33,7 @@ describe('test SqlStatement', () => {
       insStmt = await sqldb.prepare('INSERT INTO TEST (id,col) values(?,?)');
       let row: any;
       // insert id=1 col='testvalue 1'
-      let res = await insStmt.run([1, 'testvalue 1']);
+      const res = await insStmt.run([1, 'testvalue 1']);
       expect(res.changes).toBe(1);
       // select inserted row having id=1
       row = await selStmt.get(1);
@@ -62,7 +62,7 @@ describe('test SqlStatement', () => {
     selStmt = await sqldb.prepare('SELECT id, col FROM TEST WHERE id>=? ORDER BY id');
     try {
       // select all rows having id>0
-      let allRows = await selStmt.all(0);
+      const allRows = await selStmt.all(0);
       expect(allRows.length).toBe(2, 'result from prepared statement should have 2 rows');
       expect(allRows[0].id).toBe(0, 'result from prepared statement should have id=0 as first row');
       expect(allRows[0].col).toBe(
@@ -79,7 +79,7 @@ describe('test SqlStatement', () => {
     }
     try {
       // select all rows having id>0 using callback
-      let allRows: any[] = [];
+      const allRows: any[] = [];
       await selStmt.each(0, (err: any, row: any) => allRows.push(row));
       expect(allRows.length).toBe(2, 'result from prepared statement should have 2 rows');
       expect(allRows[0].id).toBe(0, 'result from prepared statement should have id=0 as first row');

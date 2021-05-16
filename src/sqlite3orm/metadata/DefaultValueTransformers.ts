@@ -1,7 +1,6 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ValueTransformer } from './ValueTransformer';
-
-// tslint:disable max-classes-per-file
-// tslint:disable triple-equals no-null-keyword
 
 export class JsonTransformer implements ValueTransformer {
   toDB(input: any): string | null {

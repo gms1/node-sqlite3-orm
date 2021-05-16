@@ -1,5 +1,7 @@
-// tslint:disable prefer-const max-classes-per-file no-unnecessary-class no-unused-variable
-// tslint:disable no-non-null-assertion
+/* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   BaseDAO,
   BaseDAOInsertMode,
@@ -33,7 +35,7 @@ describe(`BaseDAO`, () => {
 
     it('expect class without table-definition to throw', async () => {
       try {
-        let noTableDao: BaseDAO<NoTable> = new BaseDAO(NoTable, sqldb);
+        const noTableDao: BaseDAO<NoTable> = new BaseDAO(NoTable, sqldb);
         fail('instantiation BaseDAO for class without table-definition should have thrown');
       } catch (err) {}
     });
@@ -64,7 +66,7 @@ describe(`BaseDAO`, () => {
 
     @table({ name: CONTACTS_TABLE, autoIncrement: true })
     class Contact {
-      static userConstraint: string = 'user';
+      static userConstraint = 'user';
 
       @id({ name: 'contact_id', dbtype: 'INTEGER NOT NULL' })
       contactId!: number;
@@ -94,8 +96,8 @@ describe(`BaseDAO`, () => {
         sqldb = new SqlDatabase();
         await sqldb.open(SQL_MEMORY_DB_PRIVATE);
 
-        let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
-        let contactDao: BaseDAO<Contact> = new BaseDAO(Contact, sqldb);
+        const userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
+        const contactDao: BaseDAO<Contact> = new BaseDAO(Contact, sqldb);
         await userDao.createTable();
         await contactDao.createTable();
       } catch (err) {
@@ -108,7 +110,7 @@ describe(`BaseDAO`, () => {
       try {
         let user1: User = new User();
         let user2: User = new User();
-        let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
+        const userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
         user1.userId = 1;
         user1.userLoginName = 'login1/1';
         await userDao.insert(user1);
@@ -130,7 +132,7 @@ describe(`BaseDAO`, () => {
           'userLoginName does not match using selectById',
         );
 
-        let allUsers1 = await userDao.selectAll();
+        const allUsers1 = await userDao.selectAll();
         expect(allUsers1.length).toBe(1);
         user2 = allUsers1[0];
         expect(user1.userId).toBe(user2.userId, 'userId does not match after select all');
@@ -140,7 +142,7 @@ describe(`BaseDAO`, () => {
         );
 
         await userDao.delete(user1);
-        let allUsers2 = await userDao.selectAll();
+        const allUsers2 = await userDao.selectAll();
         expect(allUsers1.length).toBe(allUsers2.length + 1);
       } catch (err) {
         fail(err);
@@ -150,10 +152,10 @@ describe(`BaseDAO`, () => {
     // ---------------------------------------------
     it('expect foreign key select to work', async () => {
       try {
-        let user: User = new User();
+        const user: User = new User();
         let contact: Contact = new Contact();
-        let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
-        let contactDao: BaseDAO<Contact> = new BaseDAO(Contact, sqldb);
+        const userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
+        const contactDao: BaseDAO<Contact> = new BaseDAO(Contact, sqldb);
 
         user.userId = 1;
         user.userLoginName = 'login1';
@@ -183,19 +185,19 @@ describe(`BaseDAO`, () => {
         expect(contact.contactId).toBe(3, 'autoIncrement id not updated');
 
         user.userId = 1;
-        let contactsUser1 = await contactDao.selectAllOf(Contact.userConstraint, User, user);
+        const contactsUser1 = await contactDao.selectAllOf(Contact.userConstraint, User, user);
         expect(contactsUser1.length).toBe(2);
 
         user.userId = 2;
-        let contactsUser2 = await contactDao.selectAllOf(Contact.userConstraint, User, user);
+        const contactsUser2 = await contactDao.selectAllOf(Contact.userConstraint, User, user);
         expect(contactsUser2.length).toBe(1);
 
         user.userId = 3;
-        let contactsUser3 = await contactDao.selectAllOf(Contact.userConstraint, User, user);
+        const contactsUser3 = await contactDao.selectAllOf(Contact.userConstraint, User, user);
         expect(contactsUser3.length).toBe(0);
 
         user.userId = 1;
-        let contactsUser1$1 = await contactDao.selectAllOf(
+        const contactsUser1$1 = await contactDao.selectAllOf(
           Contact.userConstraint,
           User,
           user,
@@ -229,8 +231,8 @@ describe(`BaseDAO`, () => {
 
     // ---------------------------------------------
     it('expect updating using wrong id to throw', async () => {
-      let user1: User = new User();
-      let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
+      const user1: User = new User();
+      const userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
       try {
         user1.userId = (undefined as any) as number;
         user1.userLoginName = 'login1/2';
@@ -241,8 +243,8 @@ describe(`BaseDAO`, () => {
 
     // ---------------------------------------------
     it('expect updating not null column with null to throw', async () => {
-      let user1: User = new User();
-      let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
+      const user1: User = new User();
+      const userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
       try {
         user1.userId = 1;
         user1.userLoginName = 'login1/1';
@@ -260,8 +262,8 @@ describe(`BaseDAO`, () => {
 
     // ---------------------------------------------
     it('expect deleting using wrong id to throw', async () => {
-      let user1: User = new User();
-      let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
+      const user1: User = new User();
+      const userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
       try {
         user1.userId = (undefined as any) as number;
         user1.userLoginName = 'login1/2';
@@ -272,8 +274,8 @@ describe(`BaseDAO`, () => {
 
     // ---------------------------------------------
     it('expect deleting by id using wrong id to throw', async () => {
-      let user1: User = new User();
-      let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
+      const user1: User = new User();
+      const userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
       try {
         user1.userId = (undefined as any) as number;
         user1.userLoginName = 'login1/2';
@@ -284,8 +286,8 @@ describe(`BaseDAO`, () => {
 
     // ---------------------------------------------
     it('expect deleting by id to succeed', async () => {
-      let user1: User = new User();
-      let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
+      const user1: User = new User();
+      const userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
       try {
         user1.userId = 1;
         user1.userLoginName = 'login1/1';
@@ -309,8 +311,8 @@ describe(`BaseDAO`, () => {
 
     // ---------------------------------------------
     it('expect selectAll to throw on failure', async () => {
-      let user1: User = new User();
-      let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
+      const user1: User = new User();
+      const userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
       try {
         await userDao.selectAll('WHERE noColumn=9');
         fail('a condition using not existing column should have thrown');
@@ -318,8 +320,8 @@ describe(`BaseDAO`, () => {
     });
     // ---------------------------------------------
     it('expect selectEach to throw on failure', async () => {
-      let user1: User = new User();
-      let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
+      const user1: User = new User();
+      const userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
       try {
         user1.userId = 1;
         await userDao.selectEach(() => {}, 'WHERE noColumn=9');
@@ -329,8 +331,8 @@ describe(`BaseDAO`, () => {
 
     // ---------------------------------------------
     it('expect selectEach to succeed', async () => {
-      let user1: User = new User();
-      let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
+      const user1: User = new User();
+      const userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
       try {
         user1.userId = 1;
         user1.userLoginName = 'login1/1';
@@ -351,10 +353,10 @@ describe(`BaseDAO`, () => {
 
     // ---------------------------------------------
     it('expect selectAllOf for undefined constraint to fail', async () => {
-      let userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
-      let contact: Contact = new Contact();
+      const userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
+      const contact: Contact = new Contact();
       try {
-        let usersContact1 = await userDao.selectAllOf('undefConstraint', Contact, contact);
+        const usersContact1 = await userDao.selectAllOf('undefConstraint', Contact, contact);
         fail('selectAllOf for undefined constraint should have failed');
       } catch (err) {}
     });
@@ -399,7 +401,7 @@ describe(`BaseDAO`, () => {
 
     // ---------------------------------------------
     it('expect setProperty to work if conversion is required', async () => {
-      let testDao: BaseDAO<TestSetProperty> = new BaseDAO(TestSetProperty, sqldb);
+      const testDao: BaseDAO<TestSetProperty> = new BaseDAO(TestSetProperty, sqldb);
       let testRow: TestSetProperty = new TestSetProperty();
       try {
         await testDao.createTable();
@@ -413,8 +415,8 @@ describe(`BaseDAO`, () => {
             my_date_milli_real
           ) values (
             1,
-            \"abc\",
-            \"42\",
+            "abc",
+            "42",
             24,
             3.14,
             3.14
@@ -561,7 +563,7 @@ describe(`BaseDAO`, () => {
       const writeRow: TestDbDefaultsMin = new TestDbDefaultsMin();
       try {
         const writtenRow = await minDao.insert(writeRow);
-        let readRow = await fullDao.selectById({ id: writtenRow.id });
+        const readRow = await fullDao.selectById({ id: writtenRow.id });
         expect(readRow.myBool).toBe(true);
         expect(readRow.myInt).toBe(42);
         expect(readRow.myString).toBe('sqlite3orm');
@@ -630,7 +632,7 @@ describe(`BaseDAO`, () => {
     it('expect default-clause to work: using partial insert and empty partial model (autoincrement)', async () => {
       try {
         const insertedPartial = await fullDao.insertPartial({ notMapped: 'foo' });
-        let readRow = await fullDao.selectById({ id: insertedPartial.id, notMapped: 'foo' });
+        const readRow = await fullDao.selectById({ id: insertedPartial.id, notMapped: 'foo' });
         expect(readRow.myBool).toBe(true);
         expect(readRow.myInt).toBe(42);
         expect(readRow.myString).toBe('sqlite3orm');
@@ -674,7 +676,7 @@ describe(`BaseDAO`, () => {
       try {
         insertedPartial = await fullDao.insertPartial({});
         await fullDao.updatePartial({ id: insertedPartial.id, myBool: false, myString: 'foo' });
-        let readRow = await fullDao.selectById({ id: insertedPartial.id });
+        const readRow = await fullDao.selectById({ id: insertedPartial.id });
         expect(readRow.myBool).toBe(false, 'wrong myBool');
         expect(readRow.myInt).toBe(42, 'wrong myInt');
         expect(readRow.myString).toBe('foo', 'wrong myString');
@@ -708,7 +710,7 @@ describe(`BaseDAO`, () => {
         insertedPartial = await fullDao.insertPartial({});
         insertedPartial.myInt = 59;
         await fullDao.updatePartialAll({ myInt: insertedPartial.myInt, notMapped: 'foo' });
-        let readRow = await fullDao.selectById({ id: insertedPartial.id });
+        const readRow = await fullDao.selectById({ id: insertedPartial.id });
         expect(readRow.myBool).toBe(true);
         expect(readRow.myInt).toBe(59);
         expect(readRow.myString).toBe('sqlite3orm');
@@ -732,7 +734,7 @@ describe(`BaseDAO`, () => {
         await fullDao.updatePartialAll({ myInt: insertedPartial.myInt }, 'where ID=:id', {
           ':id': insertedPartial.id,
         });
-        let readRow = await fullDao.selectById({ id: insertedPartial.id });
+        const readRow = await fullDao.selectById({ id: insertedPartial.id });
         expect(readRow.myBool).toBe(true);
         expect(readRow.myInt).toBe(59);
         expect(readRow.myString).toBe('sqlite3orm');
@@ -778,7 +780,7 @@ describe(`BaseDAO`, () => {
     it('expect default-clause to work: using insertOrReplace and empty partial model (autoincrement)', async () => {
       try {
         const insertedPartial = await fullDao.replacePartial({ notMapped: 'foo' });
-        let readRow = await fullDao.selectById({ id: insertedPartial.id, notMapped: 'foo' });
+        const readRow = await fullDao.selectById({ id: insertedPartial.id, notMapped: 'foo' });
         expect(readRow.myBool).toBe(true);
         expect(readRow.myInt).toBe(42);
         expect(readRow.myString).toBe('sqlite3orm');
@@ -798,7 +800,7 @@ describe(`BaseDAO`, () => {
         model.myReal = 3.14;
         await fullDao.replace(model);
 
-        let readRow = await fullDao.selectById({ id: model.id });
+        const readRow = await fullDao.selectById({ id: model.id });
         expect(readRow.myBool).toBe(false);
         expect(readRow.myInt).toBe(31);
         expect(readRow.myString).toBe('foo');
@@ -859,7 +861,7 @@ describe(`BaseDAO`, () => {
         expect(model.id).toBeDefined();
 
         const firstId = model.id;
-        let readRow = await fullDao.selectById({ id: firstId });
+        const readRow = await fullDao.selectById({ id: firstId });
         expect(readRow.myBool).toBe(false);
         expect(readRow.myInt).toBe(31);
         expect(readRow.myString).toBe('foo');
@@ -927,7 +929,7 @@ describe(`BaseDAO`, () => {
         await fullDao.createTable();
 
         const insertedPartial = await fullDao.insertPartial({ id: 1 });
-        let readRow = await fullDao.selectById({ id: insertedPartial.id });
+        const readRow = await fullDao.selectById({ id: insertedPartial.id });
         expect(readRow.myBool).toBe(true);
         expect(readRow.myInt).toBe(42);
         expect(readRow.myString).toBe('sqlite3orm');
@@ -949,7 +951,7 @@ describe(`BaseDAO`, () => {
         await fullDao.createTable();
 
         const insertedPartial = await fullDao.replacePartial({ id: 1 });
-        let readRow = await fullDao.selectById({ id: insertedPartial.id });
+        const readRow = await fullDao.selectById({ id: insertedPartial.id });
         expect(readRow.myBool).toBe(true);
         expect(readRow.myInt).toBe(42);
         expect(readRow.myString).toBe('sqlite3orm');

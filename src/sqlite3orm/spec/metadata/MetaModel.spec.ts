@@ -1,4 +1,4 @@
-// tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   field,
   fk,
@@ -115,10 +115,10 @@ describe('test metaModels', () => {
         @index('MPT4A:IDX1')
         col?: Date;
       }
-      let testTable = schema().getTable('MPT4A:T1');
-      let sqlCreateTable = testTable.getCreateTableStatement(true);
-      let sqlCreateIndex = testTable.getCreateIndexStatement('MPT4A:IDX1');
-      let testModel = getModelMetadata(Model1);
+      const testTable = schema().getTable('MPT4A:T1');
+      const sqlCreateTable = testTable.getCreateTableStatement(true);
+      const sqlCreateIndex = testTable.getCreateIndexStatement('MPT4A:IDX1');
+      const testModel = getModelMetadata(Model1);
     } catch (err) {
       fail(err);
     }

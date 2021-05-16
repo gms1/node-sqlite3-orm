@@ -1,10 +1,9 @@
-// tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class deprecation
-// tslint:disable no-non-null-assertion
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   BaseDAO,
   DbCatalogDAO,
-  DbTableInfo,
-  Field,
   field,
   fk,
   getModelMetadata,
@@ -119,16 +118,16 @@ describe('test schema', () => {
   // ---------------------------------------------
   it('expect meta-data to be defined', () => {
     try {
-      let parentTable = schema().getTable(TABLE_PARENT_TABLE_NAME);
+      const parentTable = schema().getTable(TABLE_PARENT_TABLE_NAME);
       expect(parentTable).toBeDefined();
       expect(parentTable.name).toBe(TABLE_PARENT_TABLE_NAME);
       expect(parentTable.quotedName).toBeDefined();
-      let parentIdField = parentTable.getTableField(TABLE_PARENT_FIELD_ID_NAME);
+      const parentIdField = parentTable.getTableField(TABLE_PARENT_FIELD_ID_NAME);
       expect(parentIdField).toBeDefined();
       expect(parentIdField.name).toBe(TABLE_PARENT_FIELD_ID_NAME);
       expect(parentIdField.quotedName).toBeDefined();
       expect(parentIdField.isIdentity).toBeTruthy();
-      let parentNameField = parentTable.getTableField(TABLE_PARENT_FIELD_NAME_NAME);
+      const parentNameField = parentTable.getTableField(TABLE_PARENT_FIELD_NAME_NAME);
       expect(parentNameField).toBeDefined();
       expect(parentNameField.name).toBe(TABLE_PARENT_FIELD_NAME_NAME);
       expect(parentNameField.quotedName).toBeDefined();
@@ -151,16 +150,16 @@ describe('test schema', () => {
 
       expect(() => parentMetaModel.getProperty('this is not a property key')).toThrow();
 
-      let childTable = schema().getTable(TABLE_CHILD_TABLE_NAMEQ);
+      const childTable = schema().getTable(TABLE_CHILD_TABLE_NAMEQ);
       expect(childTable).toBeDefined();
       expect(childTable.name).toBe(TABLE_CHILD_TABLE_NAMEQ);
       expect(childTable.quotedName).toBeDefined();
-      let childIdField = childTable.getTableField(TABLE_CHILD_FIELD_ID_NAME);
+      const childIdField = childTable.getTableField(TABLE_CHILD_FIELD_ID_NAME);
       expect(childIdField).toBeDefined();
       expect(childIdField.name).toBe(TABLE_CHILD_FIELD_ID_NAME);
       expect(childIdField.quotedName).toBeDefined();
       expect(childIdField.isIdentity).toBeTruthy();
-      let childNameField = childTable.getTableField(TABLE_CHILD_FIELD_NAME_NAME);
+      const childNameField = childTable.getTableField(TABLE_CHILD_FIELD_NAME_NAME);
       expect(childNameField).toBeDefined();
       expect(childNameField.name).toBe(TABLE_CHILD_FIELD_NAME_NAME);
       expect(childNameField.quotedName).toBeDefined();
@@ -190,7 +189,7 @@ describe('test schema', () => {
 
   // ---------------------------------------------
   it('expect create (unique) index to work', async () => {
-    let catalogDAO = new DbCatalogDAO(sqldb);
+    const catalogDAO = new DbCatalogDAO(sqldb);
     try {
       await schema().createTable(sqldb, TABLE_TESTIDX_NAME);
       await schema().createIndex(sqldb, TABLE_TESTIDX_NAME, TABLE_TESTIDX_IDX_NAME_U);
@@ -281,7 +280,7 @@ describe('test schema', () => {
   // ---------------------------------------------
   it('expect create/drop/alter-table to work (using Schema)', async () => {
     try {
-      let catalogDAO = new DbCatalogDAO(sqldb);
+      const catalogDAO = new DbCatalogDAO(sqldb);
       let tableInfo;
 
       // the database objects should not exist in the database catalog:
@@ -309,7 +308,7 @@ describe('test schema', () => {
 
       // alter table add a new column
 
-      let parentTable = schema().getTable(TABLE_PARENT_TABLE_NAME);
+      const parentTable = schema().getTable(TABLE_PARENT_TABLE_NAME);
       expect(parentTable).toBeDefined();
 
       const newField = parentTable.getOrAddTableField('TESTADDCOL1', false, { dbtype: 'INTEGER' });
@@ -317,7 +316,7 @@ describe('test schema', () => {
       expect(parentTable.hasTableField(newField.name)).toBeTruthy();
 
       await schema().alterTableAddColumn(sqldb, TABLE_PARENT_TABLE_NAME, newField.name);
-      let parentTableInfo = await dbCatDao.readTableInfo(TABLE_PARENT_TABLE_NAME);
+      const parentTableInfo = await dbCatDao.readTableInfo(TABLE_PARENT_TABLE_NAME);
       expect(parentTableInfo!.columns[newField.name]).toBeDefined();
 
       await schema().dropIndex(sqldb, TABLE_CHILD_TABLE_NAMEQ, TABLE_CHILD_IDX_NAMEQ);
@@ -345,7 +344,7 @@ describe('test schema', () => {
   // ---------------------------------------------
   it('expect create/drop/alter-table to work (using BaseDAO)', async () => {
     try {
-      let catalogDAO = new DbCatalogDAO(sqldb);
+      const catalogDAO = new DbCatalogDAO(sqldb);
       let tableInfo;
 
       // the database objects should not exist in the database catalog:
@@ -357,8 +356,8 @@ describe('test schema', () => {
 
       // create tables
 
-      let parentDAO = new BaseDAO<ParentTable>(ParentTable, sqldb);
-      let childDAO = new BaseDAO<ChildTable>(ChildTable, sqldb);
+      const parentDAO = new BaseDAO<ParentTable>(ParentTable, sqldb);
+      const childDAO = new BaseDAO<ChildTable>(ChildTable, sqldb);
 
       await parentDAO.createTable();
       await childDAO.createTable();
@@ -376,7 +375,7 @@ describe('test schema', () => {
 
       // alter table add a new column
 
-      let parentTable = schema().getTable(TABLE_PARENT_TABLE_NAME);
+      const parentTable = schema().getTable(TABLE_PARENT_TABLE_NAME);
       expect(parentTable).toBeDefined();
 
       const newField = parentTable.getOrAddTableField('TESTADDCOL2', false, { dbtype: 'INTEGER' });
@@ -384,7 +383,7 @@ describe('test schema', () => {
       expect(parentTable.hasTableField(newField.name)).toBeTruthy();
 
       await parentDAO.alterTableAddColumn(newField.name);
-      let parentTableInfo = await dbCatDao.readTableInfo(TABLE_PARENT_TABLE_NAME);
+      const parentTableInfo = await dbCatDao.readTableInfo(TABLE_PARENT_TABLE_NAME);
       expect(parentTableInfo!.columns[newField.name]).toBeDefined();
 
       await childDAO.dropIndex(TABLE_CHILD_IDX_NAMEQ);
@@ -419,27 +418,27 @@ describe('test schema', () => {
 
   // ---------------------------------------------
   it('get not defined field should throw', async () => {
-    let testTable = schema().getTable(TABLE_TESTTABLE_NAME);
+    const testTable = schema().getTable(TABLE_TESTTABLE_NAME);
     try {
-      let nameField = testTable.getTableField('undef');
+      const nameField = testTable.getTableField('undef');
       fail('should have thrown');
     } catch (err) {}
   });
 
   // ---------------------------------------------
   it('get create index statement for undefined index should throw', async () => {
-    let testTable = schema().getTable(TABLE_TESTTABLE_NAME);
+    const testTable = schema().getTable(TABLE_TESTTABLE_NAME);
     try {
-      let nameField = testTable.getCreateIndexStatement('undef');
+      const nameField = testTable.getCreateIndexStatement('undef');
       fail('should have thrown');
     } catch (err) {}
   });
 
   // ---------------------------------------------
   it('get drop index statement for undefined index should throw', async () => {
-    let testTable = schema().getTable(TABLE_TESTTABLE_NAME);
+    const testTable = schema().getTable(TABLE_TESTTABLE_NAME);
     try {
-      let nameField = testTable.getDropIndexStatement('undef');
+      const nameField = testTable.getDropIndexStatement('undef');
       fail('should have thrown');
     } catch (err) {}
   });
@@ -447,7 +446,7 @@ describe('test schema', () => {
   // ---------------------------------------------
   it('schema should be a singleton', async () => {
     try {
-      let currSchema = schema();
+      const currSchema = schema();
       expect(new Schema()).toBe(currSchema);
     } catch (err) {
       fail(err);

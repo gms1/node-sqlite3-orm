@@ -1,4 +1,4 @@
-// tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   BaseDAO,
   field,
@@ -118,7 +118,7 @@ describe('test Foreign Keys', () => {
 
   it('expect selectAllOf for foreign key having multiple colums to work', async () => {
     let parent = new Parent();
-    let child = new Child();
+    const child = new Child();
     try {
       parent.id1 = 1;
       parent.id2 = 1;

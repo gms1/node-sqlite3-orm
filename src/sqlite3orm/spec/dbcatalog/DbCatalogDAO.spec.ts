@@ -1,5 +1,5 @@
-// tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class  no-non-null-assertion
-// tslint:disable no-null-keyword
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
   BaseDAO,
   DbCatalogDAO,
@@ -66,8 +66,6 @@ class ChildTableSubset {
   @fk('PARENT2', PARENT_TABLE, 'ID2')
   @index('PIDX2', false, true)
   pid4?: number;
-
-  constructor() {}
 }
 
 // ---------------------------------------------

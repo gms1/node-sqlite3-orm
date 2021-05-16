@@ -1,5 +1,5 @@
-// tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-// tslint:disable no-non-null-assertion no-string-literal no-null-keyword
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   AutoUpgrader,
   BaseDAO,

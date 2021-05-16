@@ -1,4 +1,3 @@
-// tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
 import { BaseDAO, field, id, schema, SQL_MEMORY_DB_PRIVATE, SqlDatabase, table } from '../../..';
 
 const DATATYPE_JSON_TABLE = 'DJ:DATATYPE_JSON';
@@ -40,7 +39,7 @@ describe('test Json data', () => {
       await dao.insert(model);
 
       // read
-      let model2: DataTypeJson = await dao.select(model);
+      const model2: DataTypeJson = await dao.select(model);
       expect(model2.id).toBe(model.id);
       expect(model2.myJsonData).toBeDefined();
       if (!model2.myJsonData) {
@@ -63,7 +62,7 @@ describe('test Json data', () => {
       await dao.insert(model);
 
       // read
-      let model2: DataTypeJson = await dao.select(model);
+      const model2: DataTypeJson = await dao.select(model);
       expect(model2.id).toBe(model.id);
       expect(model2.myJsonData).toBeUndefined('myJsonData is defined');
     } catch (err) {

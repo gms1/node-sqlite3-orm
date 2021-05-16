@@ -1,7 +1,5 @@
-// tslint:disable callable-types
-// tslint:disable-next-line: no-import-side-effect
-// import * as core from './core';
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/ban-types */
 import { SqlDatabase } from './core';
 import { METADATA_MODEL_KEY, MetaModel, Table } from './metadata';
 import { Filter, isFilter, QueryModel, TABLEALIAS, Where } from './query';
@@ -524,23 +522,17 @@ export class BaseDAO<T extends Object> {
       const idProperty = this.table.rowIdField
         ? this.metaModel.mapColNameToProp.get(this.table.rowIdField.name)
         : undefined;
-      if (
-        idProperty &&
-        // tslint:disable-next-line: triple-equals
-        idProperty.getDBValueFromModel(input) != undefined
-      ) {
+      if (idProperty && idProperty.getDBValueFromModel(input) != undefined) {
         if (
           (insertMode === undefined && this.table.autoIncrementField) ||
           insertMode === BaseDAOInsertMode.ForceAutoGeneration
         ) {
-          // tslint:disable-next-line: no-null-keyword
           params[idProperty.getHostParameterName()] = null;
         }
       }
       const res: any = await this.sqldb.run(stmt, params);
       if (idProperty) {
         /* istanbul ignore if */
-        // tslint:disable-next-line: triple-equals
         if (res.lastID == undefined) {
           // NOTE: should not happen
           const operation = this.table.autoIncrementField ? 'AUTOINCREMENT' : 'ROWID';
@@ -550,7 +542,7 @@ export class BaseDAO<T extends Object> {
             ),
           );
         }
-        // tslint:disable-next-line: no-non-null-assertion
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         res[this.table.rowIdField!.name] = res.lastID;
         /* istanbul ignore else */
         idProperty.setDBValueIntoModel(input, res.lastID);
@@ -572,7 +564,6 @@ export class BaseDAO<T extends Object> {
       );
       if (this.table.autoIncrementField) {
         /* istanbul ignore if */
-        // tslint:disable-next-line: triple-equals
         if (res.lastID == undefined) {
           // NOTE: should not happen
           return Promise.reject(

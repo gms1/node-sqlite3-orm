@@ -8,7 +8,6 @@ import {
 } from '../utils';
 
 import { FieldOpts } from './decorators';
-// tslint:disable no-use-before-declare
 import { Field } from './Field';
 import { FKDefinition } from './FKDefinition';
 import { IDXDefinition } from './IDXDefinition';
@@ -37,14 +36,12 @@ export class Table {
   private _withoutRowId?: boolean;
 
   get withoutRowId(): boolean {
-    // tslint:disable-next-line triple-equals
     return this._withoutRowId == undefined ? false : this._withoutRowId;
   }
   set withoutRowId(withoutRowId: boolean) {
     this._withoutRowId = withoutRowId;
   }
   get isWithoutRowIdDefined(): boolean {
-    // tslint:disable-next-line triple-equals
     return this._withoutRowId == undefined ? false : true;
   }
 
@@ -56,14 +53,12 @@ export class Table {
   private _autoIncrement?: boolean;
 
   get autoIncrement(): boolean {
-    // tslint:disable-next-line triple-equals
     return this._autoIncrement == undefined ? false : this._autoIncrement;
   }
   set autoIncrement(autoIncrement: boolean) {
     this._autoIncrement = autoIncrement;
   }
   get isAutoIncrementDefined(): boolean {
-    // tslint:disable-next-line triple-equals
     return this._autoIncrement == undefined ? false : true;
   }
 
@@ -152,7 +147,6 @@ export class Table {
    * @param [propertyType]
    * @returns The field definition
    */
-  // tslint:disable cyclomatic-complexity
   public getOrAddTableField(
     name: string,
     isIdentity: boolean,
@@ -184,14 +178,12 @@ export class Table {
         }
         field.dbtype = opts.dbtype;
       }
-      // tslint:disable-next-line triple-equals
       if (opts && opts.isJson != undefined) {
         if (field.isIsJsonDefined && field.isJson !== opts.isJson) {
           throw new Error(`conflicting json setting: new: ${opts.isJson}, old: ${field.isJson}`);
         }
         field.isJson = opts.isJson;
       }
-      // tslint:disable-next-line triple-equals
       if (opts && opts.dateInMilliSeconds != undefined) {
         if (
           field.isDateInMilliSecondsDefined &&
@@ -223,7 +215,6 @@ export class Table {
     }
     return field;
   }
-  // tslint:enable cyclomatic-complexity
 
   public hasFKDefinition(name: string): FKDefinition | undefined {
     return this.mapNameToFKDef.get(name);
@@ -336,7 +327,6 @@ export class Table {
         `table '${this.name}': index '${idxName}' is not defined on table '${this.name}'`,
       );
     }
-    // tslint:disable-next-line triple-equals
     if (unique == undefined) {
       unique = idxDef.isUnique ? true : false;
     }
@@ -344,7 +334,6 @@ export class Table {
     const idxCols = idxDef.fields.map(
       (field) => quoteSimpleIdentifier(field.name) + (field.desc ? ' DESC' : ''),
     );
-    // tslint:disable-next-line: restrict-plus-operands
     return (
       'CREATE ' +
       (unique ? 'UNIQUE ' : ' ') +
@@ -395,7 +384,7 @@ export class Table {
         colNamesPK.push(quotedFieldName);
         if (this.mapNameToIdentityField.size === 1) {
           colDef += ' PRIMARY KEY';
-          if (!!this.autoIncrementField) {
+          if (this.autoIncrementField) {
             colDef += ' AUTOINCREMENT';
           }
         }
@@ -454,7 +443,6 @@ export class Table {
       }
 
       stmt += `    REFERENCES ${quoteSimpleIdentifier(identName)} (`;
-      // tslint:disable-next-line: restrict-plus-operands
       stmt +=
         fk.fields.map((field) => quoteSimpleIdentifier(field.foreignColumnName)).join(', ') +
         ') ON DELETE CASCADE'; // TODO: hard-coded 'ON DELETE CASCADE'

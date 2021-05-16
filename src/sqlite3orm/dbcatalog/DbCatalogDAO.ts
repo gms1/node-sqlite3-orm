@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { SQL_DEFAULT_SCHEMA, SqlDatabase } from '../core';
 import { FKDefinition } from '../metadata';
 import { quoteSimpleIdentifier, splitSchemaIdentifier } from '../utils';
@@ -164,7 +165,6 @@ export class DbCatalogDAO {
       let fromCols: string[] = [];
       let toCols: string[] = [];
       fkList
-        // tslint:disable-next-line restrict-plus-operands
         .sort((fkA, fkB) => fkA.id * 1000 + fkA.seq - (fkB.id * 1000 + fkB.seq))
         .forEach((fk) => {
           if (lastId === fk.id) {

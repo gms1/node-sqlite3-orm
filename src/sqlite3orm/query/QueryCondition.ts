@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { MetaModel } from '../metadata';
 
 import { QueryModelPredicates } from './QueryModelPredicates';

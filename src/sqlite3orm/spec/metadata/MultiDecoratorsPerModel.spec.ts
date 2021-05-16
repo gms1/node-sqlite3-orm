@@ -1,8 +1,4 @@
-// tslint:disable max-classes-per-file
-
-// tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-// import * as core from '../core';
-
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { field, fk, id, index, table } from '../..';
 
 // ---------------------------------------------

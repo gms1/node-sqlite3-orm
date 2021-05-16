@@ -1,5 +1,6 @@
-// tslint:disable callable-types
-
+/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { METADATA_MODEL_KEY, MetaModel, MetaProperty, Table } from '../metadata';
 
 export const TABLEALIAS = 'T';
@@ -344,14 +345,12 @@ export class QueryModelBase<T> {
         const selectCondition = fkProps.map(
           (prop) => `${prop.field.quotedName}=${prop.getHostParameterName()}`,
         );
-        // tslint:disable no-non-null-assertion
         foreignKeyPredicates.set(constraintName, selectCondition);
         foreignKeyProps.set(constraintName, fkProps);
         foreignKeyRefCols.set(
           constraintName,
           fkDef.fields.map((field) => field.foreignColumnName),
         );
-        // tslint:enable no-non-null-assertion
       }
     });
     return {

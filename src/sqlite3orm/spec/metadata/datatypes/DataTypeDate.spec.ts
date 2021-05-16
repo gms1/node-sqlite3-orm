@@ -1,4 +1,3 @@
-// tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
 import { BaseDAO, field, id, schema, SQL_MEMORY_DB_PRIVATE, SqlDatabase, table } from '../../..';
 
 const DATATYPE_DATE_TABLE = 'DD:DATATYPE_DATE';
@@ -51,7 +50,7 @@ describe('test Date type', () => {
       model.myDate2Seconds = model.myDate2Text = model.myDate2Milliseconds = new Date();
       await dao.insert(model);
 
-      let sqlstmt = await sqldb.prepare(`SELECT
+      const sqlstmt = await sqldb.prepare(`SELECT
               id, my_date_text, my_date_sec, my_date_milli
             FROM "${DATATYPE_DATE_TABLE}"
             WHERE id = :id`);
@@ -80,7 +79,7 @@ describe('test Date type', () => {
       writeModel.id = ++lastModelId;
       writeModel.myDate2Text = writeModel.myDate2Seconds = writeModel.myDate2Milliseconds = new Date();
 
-      let sqlstmt = await sqldb.prepare(`INSERT INTO "${DATATYPE_DATE_TABLE}"
+      const sqlstmt = await sqldb.prepare(`INSERT INTO "${DATATYPE_DATE_TABLE}"
               (id, my_date_text, my_date_sec, my_date_milli)
             values
               (:id, :my_date_text, :my_date_sec, :my_date_milli)`);
@@ -125,7 +124,7 @@ describe('test Date type', () => {
       const writeDate = new Date();
       writeDate.setUTCMilliseconds(0);
 
-      let sqlstmt = await sqldb.prepare(`INSERT INTO "${DATATYPE_DATE_TABLE}"
+      const sqlstmt = await sqldb.prepare(`INSERT INTO "${DATATYPE_DATE_TABLE}"
               (id) values (:id)`);
       await sqlstmt.run({ ':id': writeModel.id });
 
@@ -188,7 +187,7 @@ describe('test Date type', () => {
       model.id = ++lastModelId;
       await dao.insert(model);
 
-      let model2: DataTypeDate = await dao.select(model);
+      const model2: DataTypeDate = await dao.select(model);
       expect(model2.id).toBe(model.id);
       expect(model2.myDate2Text).toBeUndefined('date wrongly written to text');
       expect(model2.myDate2Seconds).toBeUndefined('date wrongly written to integer');

@@ -61,20 +61,17 @@ export class Field {
   private _isJson?: boolean;
 
   get isJson(): boolean {
-    // tslint:disable-next-line triple-equals
     return this._isJson == undefined ? false : this._isJson;
   }
   set isJson(isJson: boolean) {
     this._isJson = isJson;
   }
   get isIsJsonDefined(): boolean {
-    // tslint:disable-next-line triple-equals
     return this._isJson == undefined ? false : true;
   }
 
   private _dateInMilliSeconds?: boolean;
   get dateInMilliSeconds(): boolean {
-    // tslint:disable-next-line triple-equals
     return this._dateInMilliSeconds == undefined
       ? schema().dateInMilliSeconds
       : this._dateInMilliSeconds;
@@ -83,7 +80,6 @@ export class Field {
     this._dateInMilliSeconds = val;
   }
   get isDateInMilliSecondsDefined(): boolean {
-    // tslint:disable-next-line triple-equals
     return this._dateInMilliSeconds == undefined ? false : true;
   }
 
@@ -110,11 +106,9 @@ export class Field {
       if (opts.dbtype) {
         this.dbtype = opts.dbtype;
       }
-      // tslint:disable-next-line triple-equals
       if (opts.isJson != undefined) {
         this._isJson = opts.isJson;
       }
-      // tslint:disable-next-line triple-equals
       if (opts.dateInMilliSeconds != undefined) {
         this._dateInMilliSeconds = opts.dateInMilliSeconds;
       }
@@ -173,9 +167,9 @@ export class Field {
     const defaultLiteralMatches = /\bDEFAULT\s+(('[^']*')+)/i.exec(rest);
     if (defaultLiteralMatches) {
       defaultValue = defaultLiteralMatches[1];
-      defaultValue.replace(/\'\'/g, "'");
+      defaultValue.replace(/''/g, "'");
     }
-    const defaultExprMatches = /\bDEFAULT\s*\(([^\)]*)\)/i.exec(rest);
+    const defaultExprMatches = /\bDEFAULT\s*\(([^)]*)\)/i.exec(rest);
     if (defaultExprMatches) {
       defaultValue = defaultExprMatches[1];
     }

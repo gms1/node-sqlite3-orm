@@ -1,6 +1,5 @@
-// tslint:disable prefer-const max-classes-per-file no-unused-variable no-unnecessary-class
-// tslint:disable no-non-null-assertion
-
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   SQL_MEMORY_DB_SHARED,
   SQL_OPEN_DEFAULT,
@@ -15,12 +14,12 @@ describe('test SqlConnectionPool', () => {
 
   it('expect pool to be able to open a database using default settings', async () => {
     try {
-      let pool = new SqlConnectionPool('TESTPOOL');
+      const pool = new SqlConnectionPool('TESTPOOL');
       await pool.open(SQL_MEMORY_DB_SHARED);
       expect(pool.isOpen()).toBeTruthy();
 
       // getting first connection
-      let sqldb1 = await pool.get(100);
+      const sqldb1 = await pool.get(100);
       expect(sqldb1).toBeDefined();
       expect(sqldb1.isOpen()).toBeTruthy();
 
@@ -34,12 +33,12 @@ describe('test SqlConnectionPool', () => {
 
   it('expect pool to be able to open a database using min < 1', async () => {
     try {
-      let pool = new SqlConnectionPool();
+      const pool = new SqlConnectionPool();
       await pool.open(SQL_MEMORY_DB_SHARED, SQL_OPEN_DEFAULT, 0);
       expect(pool.isOpen()).toBeTruthy();
 
       // getting first connection
-      let sqldb1 = await pool.get(100);
+      const sqldb1 = await pool.get(100);
       expect(sqldb1).toBeDefined();
       expect(sqldb1.isOpen()).toBeTruthy();
 
@@ -53,7 +52,7 @@ describe('test SqlConnectionPool', () => {
 
   it('expect pool to share a file-database', async () => {
     try {
-      let pool = new SqlConnectionPool();
+      const pool = new SqlConnectionPool();
       const fileName = 'testsqlite3.db';
       await pool.open(fileName, SQL_OPEN_DEFAULT, 2, 2);
       expect(pool.isOpen()).toBeTruthy();
@@ -66,7 +65,7 @@ describe('test SqlConnectionPool', () => {
       expect(sqldb1.isOpen()).toBeTruthy();
 
       // getting second connection
-      let sqldb2 = await pool.get(100);
+      const sqldb2 = await pool.get(100);
       expect(sqldb2).toBeDefined();
       expect(sqldb2.isOpen()).toBeTruthy();
 
@@ -128,19 +127,19 @@ describe('test SqlConnectionPool', () => {
 
   it('expect pool to share a memory-database', async () => {
     try {
-      let pool = new SqlConnectionPool();
+      const pool = new SqlConnectionPool();
       await pool.open(SQL_MEMORY_DB_SHARED, SQL_OPEN_DEFAULT, 2, 2);
       expect(pool.isOpen()).toBeTruthy();
       expect(pool.poolSize).toBe(2);
       expect(pool.openSize).toBe(0);
 
       // getting first connection
-      let sqldb1 = await pool.get(100);
+      const sqldb1 = await pool.get(100);
       expect(sqldb1).toBeDefined();
       expect(sqldb1.isOpen()).toBeTruthy();
 
       // getting second connection
-      let sqldb2 = await pool.get(100);
+      const sqldb2 = await pool.get(100);
       expect(sqldb2).toBeDefined();
       expect(sqldb2.isOpen()).toBeTruthy();
 
@@ -209,20 +208,20 @@ describe('test SqlConnectionPool', () => {
 
   it('expect pool to be closed after failed attempt to open a database', async () => {
     try {
-      let pool = new SqlConnectionPool();
+      const pool = new SqlConnectionPool();
       await pool.open('::/.', SQL_OPEN_READWRITE);
       expect(pool.isOpen()).toBeFalsy();
       expect(pool.poolSize).toBe(0);
       expect(pool.openSize).toBe(0);
 
       // getting first connection
-      let sqldb1 = await pool.get(100);
+      const sqldb1 = await pool.get(100);
       fail('got invalid connection');
     } catch (err) {}
   });
 
   it('expect getting connection after pool has closed to fail', async () => {
-    let pool = new SqlConnectionPool();
+    const pool = new SqlConnectionPool();
     try {
       await pool.open(SQL_MEMORY_DB_SHARED, SQL_OPEN_DEFAULT, 0);
       expect(pool.isOpen()).toBeTruthy();
@@ -234,7 +233,7 @@ describe('test SqlConnectionPool', () => {
     }
 
     try {
-      let sqldb1 = await pool.get(100);
+      const sqldb1 = await pool.get(100);
       fail('should not get a connection');
     } catch (err) {}
   });
@@ -428,13 +427,13 @@ describe('test SqlConnectionPool Settings', () => {
         secureDelete: ['FAST', 'temp.TRUE'],
         executionMode: 'PARALLELIZE',
       };
-      let pool = new SqlConnectionPool();
+      const pool = new SqlConnectionPool();
       await pool.open(SQL_MEMORY_DB_SHARED, SQL_OPEN_DEFAULT, 2, 3, settings);
       expect(pool.isOpen()).toBeTruthy();
       let sqldb1 = await pool.get(100);
       expect(sqldb1).toBeDefined();
       expect(sqldb1.isOpen()).toBeTruthy();
-      let sqldb2 = await pool.get();
+      const sqldb2 = await pool.get();
       expect(sqldb2).toBeDefined();
       expect(sqldb2.isOpen()).toBeTruthy();
 

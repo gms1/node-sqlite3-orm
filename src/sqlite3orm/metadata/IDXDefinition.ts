@@ -1,6 +1,3 @@
-// import * as core from './core';
-
-// tslint:disable interface-name
 export interface IDXFieldDefinition {
   name: string;
   desc?: boolean;
