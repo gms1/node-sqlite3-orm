@@ -64,7 +64,7 @@ describe('test Json data', () => {
       // read
       const model2: DataTypeJson = await dao.select(model);
       expect(model2.id).toBe(model.id);
-      expect(model2.myJsonData).toBeUndefined('myJsonData is defined');
+      expect(model2.myJsonData).toBeUndefined();
     } catch (err) {
       fail(err);
     }

@@ -56,18 +56,9 @@ describe('test Date type', () => {
             WHERE id = :id`);
       const row = await sqlstmt.get({ ':id': model.id });
       expect(row.id).toBe(model.id);
-      expect(row.my_date_text).toBe(
-        model.myDate2Text.toISOString(),
-        'date wrongly written to text',
-      );
-      expect(row.my_date_sec).toBe(
-        Math.floor(model.myDate2Text.getTime() / 1000),
-        'date wrongly written to integer (seconds)',
-      );
-      expect(row.my_date_milli).toBe(
-        model.myDate2Text.getTime(),
-        'date wrongly written to integer (milliseconds)',
-      );
+      expect(row.my_date_text).toBe(model.myDate2Text.toISOString());
+      expect(row.my_date_sec).toBe(Math.floor(model.myDate2Text.getTime() / 1000));
+      expect(row.my_date_milli).toBe(model.myDate2Text.getTime());
     } catch (err) {
       fail(err);
     }
@@ -91,26 +82,14 @@ describe('test Date type', () => {
         ':my_date_milli': writeModel.myDate2Milliseconds.getTime(),
       });
       const readModel = await dao.select(writeModel);
-      expect(readModel.myDate2Text instanceof Date).toBeTruthy(
-        `record ${readModel.id}: myDate2Text should be an instance of Date`,
-      );
-      expect(readModel.myDate2Seconds instanceof Date).toBeTruthy(
-        `record ${readModel.id}: myDate2Seconds should be an instance of Date`,
-      );
-      expect(readModel.myDate2Milliseconds instanceof Date).toBeTruthy(
-        `record ${readModel.id}: myDate2Milliseconds should be an instance of Date`,
-      );
+      expect(readModel.myDate2Text instanceof Date).toBeTruthy();
+      expect(readModel.myDate2Seconds instanceof Date).toBeTruthy();
+      expect(readModel.myDate2Milliseconds instanceof Date).toBeTruthy();
 
       expect(readModel.id).toBe(writeModel.id);
-      expect(readModel.myDate2Text).toBe(writeModel.myDate2Text, 'date wrongly written to text');
-      expect(readModel.myDate2Seconds).toBe(
-        writeModel.myDate2Seconds,
-        'date wrongly written to integer',
-      );
-      expect(readModel.myDate2Milliseconds).toBe(
-        writeModel.myDate2Milliseconds,
-        'date wrongly written to integer',
-      );
+      expect(readModel.myDate2Text).toBe(writeModel.myDate2Text);
+      expect(readModel.myDate2Seconds).toBe(writeModel.myDate2Seconds);
+      expect(readModel.myDate2Milliseconds).toBe(writeModel.myDate2Milliseconds);
     } catch (err) {
       fail(err);
     }
@@ -134,48 +113,24 @@ describe('test Date type', () => {
       readDate.setUTCMilliseconds(0);
       readDate.setUTCSeconds(readDate.getUTCSeconds() + 1);
 
-      expect(readModel.myDate2Text).toBeDefined(
-        `record ${readModel.id}: myDate2Text should be defined`,
-      );
-      expect(readModel.myDate2Seconds).toBeDefined(
-        `record ${readModel.id}: myDate2Seconds should be defined`,
-      );
-      expect(readModel.myDate2Milliseconds).toBeDefined(
-        `record ${readModel.id}: myDate2Milliseconds should be defined`,
-      );
+      expect(readModel.myDate2Text).toBeDefined();
+      expect(readModel.myDate2Seconds).toBeDefined();
+      expect(readModel.myDate2Milliseconds).toBeDefined();
 
-      expect(readModel.myDate2Text instanceof Date).toBeTruthy(
-        `record ${readModel.id}: myDate2Text should be an instance of Date`,
-      );
-      expect(readModel.myDate2Seconds instanceof Date).toBeTruthy(
-        `record ${readModel.id}: myDate2Seconds should be an instance of Date`,
-      );
-      expect(readModel.myDate2Milliseconds instanceof Date).toBeTruthy(
-        `record ${readModel.id}: myDate2Milliseconds should be an instance of Date`,
-      );
+      expect(readModel.myDate2Text instanceof Date).toBeTruthy();
+      expect(readModel.myDate2Seconds instanceof Date).toBeTruthy();
+      expect(readModel.myDate2Milliseconds instanceof Date).toBeTruthy();
 
       expect(readModel.id).toBe(writeModel.id);
 
-      expect(+writeDate <= +(readModel.myDate2Text as Date)).toBeTruthy(
-        'text-date has wrong default value',
-      );
-      expect(+readDate >= +(readModel.myDate2Text as Date)).toBeTruthy(
-        'text-date has wrong default value',
-      );
+      expect(+writeDate <= +(readModel.myDate2Text as Date)).toBeTruthy();
+      expect(+readDate >= +(readModel.myDate2Text as Date)).toBeTruthy();
 
-      expect(+writeDate <= +(readModel.myDate2Seconds as Date)).toBeTruthy(
-        'date_sec has wrong default value',
-      );
-      expect(+readDate >= +(readModel.myDate2Seconds as Date)).toBeTruthy(
-        'date_sec has wrong default value',
-      );
+      expect(+writeDate <= +(readModel.myDate2Seconds as Date)).toBeTruthy();
+      expect(+readDate >= +(readModel.myDate2Seconds as Date)).toBeTruthy();
 
-      expect(+writeDate <= +(readModel.myDate2Milliseconds as Date)).toBeTruthy(
-        'date_milli has wrong default value',
-      );
-      expect(+readDate >= +(readModel.myDate2Milliseconds as Date)).toBeTruthy(
-        'date_milli has wrong default value',
-      );
+      expect(+writeDate <= +(readModel.myDate2Milliseconds as Date)).toBeTruthy();
+      expect(+readDate >= +(readModel.myDate2Milliseconds as Date)).toBeTruthy();
     } catch (err) {
       fail(err);
     }
@@ -189,9 +144,9 @@ describe('test Date type', () => {
 
       const model2: DataTypeDate = await dao.select(model);
       expect(model2.id).toBe(model.id);
-      expect(model2.myDate2Text).toBeUndefined('date wrongly written to text');
-      expect(model2.myDate2Seconds).toBeUndefined('date wrongly written to integer');
-      expect(model2.myDate2Milliseconds).toBeUndefined('date wrongly written to integer');
+      expect(model2.myDate2Text).toBeUndefined();
+      expect(model2.myDate2Seconds).toBeUndefined();
+      expect(model2.myDate2Milliseconds).toBeUndefined();
     } catch (err) {
       fail(err);
     }

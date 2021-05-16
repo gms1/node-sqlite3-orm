@@ -1,8 +1,8 @@
 dist: xenial
 language: node_js
 node_js:
-  - '10'
-  - 'stable'
+  - 'lts/*'
+  - 'node'
 
 install:
   - bash build/travis_install

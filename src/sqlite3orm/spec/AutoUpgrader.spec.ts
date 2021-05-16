@@ -88,12 +88,12 @@ describe('test autoupgrade', () => {
 
       let actual: boolean;
       actual = await autoUpgrader.isActual(model1Dao.table);
-      expect(actual).toBeFalsy('1st time');
+      expect(actual).toBeFalsy();
 
       await autoUpgrader.upgradeTables([model1Dao.table]);
 
       actual = await autoUpgrader.isActual([model1Dao.table]);
-      expect(actual).toBeTruthy('2nd time');
+      expect(actual).toBeTruthy();
 
       const tableDef = schema().getTable(TEST_TABLE);
 
@@ -123,16 +123,16 @@ describe('test autoupgrade', () => {
 
       let actual: boolean;
       actual = await autoUpgrader.isActual(model1Dao.table);
-      expect(actual).toBeFalsy('1st time');
+      expect(actual).toBeFalsy();
 
       await autoUpgrader.upgradeTables([model1Dao.table]);
 
       actual = await autoUpgrader.isActual(model1Dao.table);
-      expect(actual).toBeTruthy('2nd time');
+      expect(actual).toBeTruthy();
 
       const table1Info1 = await catalogDao.readTableInfo(TEST_TABLE);
       expect(table1Info1).toBeDefined();
-      expect(table1Info1!.columns['CONTENT2']).toBeUndefined("column 'CONTENT2' exist");
+      expect(table1Info1!.columns['CONTENT2']).toBeUndefined();
 
       schema().deleteTable(TEST_TABLE);
       // --------------------------------------------
@@ -153,18 +153,18 @@ describe('test autoupgrade', () => {
       const model2Dao = new BaseDAO<Model2>(Model2, sqldb);
 
       actual = await autoUpgrader.isActual(model2Dao.table);
-      expect(actual).toBeFalsy('3rd time');
+      expect(actual).toBeFalsy();
 
       const spyAlter = spyOn(autoUpgrader, 'alterTable').and.callThrough();
       await autoUpgrader.upgradeTables([model2Dao.table]);
       expect(spyAlter.calls.count()).toBe(1);
 
       actual = await autoUpgrader.isActual(model2Dao.table);
-      expect(actual).toBeTruthy('4th time');
+      expect(actual).toBeTruthy();
 
       const table1Info2 = await catalogDao.readTableInfo(TEST_TABLE);
       expect(table1Info2).toBeDefined();
-      expect(table1Info2!.columns['CONTENT2']).toBeDefined("column 'CONTENT2' does not exist");
+      expect(table1Info2!.columns['CONTENT2']).toBeDefined();
     } catch (err) {
       fail(err);
     }
@@ -185,16 +185,16 @@ describe('test autoupgrade', () => {
 
       let actual: boolean;
       actual = await autoUpgrader.isActual(model1Dao.table);
-      expect(actual).toBeFalsy('1st time');
+      expect(actual).toBeFalsy();
 
       await autoUpgrader.upgradeTables([model1Dao.table]);
 
       actual = await autoUpgrader.isActual(model1Dao.table);
-      expect(actual).toBeTruthy('2nd time');
+      expect(actual).toBeTruthy();
 
       const table1Info1 = await catalogDao.readTableInfo(TEST_TABLE);
       expect(table1Info1).toBeDefined();
-      expect(table1Info1!.columns['CONTENT2']).toBeUndefined("column 'CONTENT2' exist");
+      expect(table1Info1!.columns['CONTENT2']).toBeUndefined();
 
       const data = new Model1();
       data.id = 31;
@@ -220,12 +220,12 @@ describe('test autoupgrade', () => {
       const model2Dao = new BaseDAO<Model2>(Model2, sqldb);
 
       actual = await autoUpgrader.isActual(model2Dao.table);
-      expect(actual).toBeFalsy('3rd time');
+      expect(actual).toBeFalsy();
 
       await autoUpgrader.upgradeTables([model2Dao.table]);
 
       actual = await autoUpgrader.isActual(model2Dao.table);
-      expect(actual).toBeFalsy('4th time');
+      expect(actual).toBeFalsy();
 
       fail(`should have failed: Cannot add a NOT NULL column without default value`);
     } catch (err) {}
@@ -250,17 +250,17 @@ describe('test autoupgrade', () => {
 
       let actual: boolean;
       actual = await autoUpgrader.isActual(model1Dao.table);
-      expect(actual).toBeFalsy('1st time');
+      expect(actual).toBeFalsy();
 
       await autoUpgrader.upgradeTables([model1Dao.table]);
 
       actual = await autoUpgrader.isActual(model1Dao.table);
-      expect(actual).toBeTruthy('2nd time');
+      expect(actual).toBeTruthy();
 
       const table1Info1 = await catalogDao.readTableInfo(TEST_TABLE);
       expect(table1Info1).toBeDefined();
-      expect(table1Info1!.columns['CONTENT2']).toBeDefined("column 'CONTENT2' does not exist");
-      expect(table1Info1!.indexes['IDX_CONTENT']).toBeDefined("index 'IDX_CONTENT' does not exist");
+      expect(table1Info1!.columns['CONTENT2']).toBeDefined();
+      expect(table1Info1!.indexes['IDX_CONTENT']).toBeDefined();
 
       schema().deleteTable(TEST_TABLE);
       // --------------------------------------------
@@ -279,7 +279,7 @@ describe('test autoupgrade', () => {
       const model2Dao = new BaseDAO<Model2>(Model2, sqldb);
 
       actual = await autoUpgrader.isActual(model2Dao.table, { keepOldColumns: true });
-      expect(actual).toBeTruthy('3rd time');
+      expect(actual).toBeTruthy();
 
       const spyCreate = spyOn(autoUpgrader, 'createTable').and.callThrough();
       const spyAlter = spyOn(autoUpgrader, 'alterTable').and.callThrough();
@@ -290,12 +290,12 @@ describe('test autoupgrade', () => {
       expect(spyRecreate.calls.count()).toBe(0);
 
       actual = await autoUpgrader.isActual(model2Dao.table, { keepOldColumns: true });
-      expect(actual).toBeTruthy('4th time');
+      expect(actual).toBeTruthy();
 
       const table1Info2 = await catalogDao.readTableInfo(TEST_TABLE);
       expect(table1Info2).toBeDefined();
-      expect(table1Info2!.columns['CONTENT2']).toBeDefined("column 'CONTENT2' does not exist");
-      expect(table1Info2!.indexes['IDX_CONTENT']).toBeDefined("index 'IDX_CONTENT' does not exist");
+      expect(table1Info2!.columns['CONTENT2']).toBeDefined();
+      expect(table1Info2!.indexes['IDX_CONTENT']).toBeDefined();
     } catch (err) {
       fail(err);
     }
@@ -321,17 +321,17 @@ describe('test autoupgrade', () => {
 
       let actual: boolean;
       actual = await autoUpgrader.isActual(model1Dao.table);
-      expect(actual).toBeFalsy('1st time');
+      expect(actual).toBeFalsy();
 
       await autoUpgrader.upgradeTables([model1Dao.table]);
 
       actual = await autoUpgrader.isActual(model1Dao.table);
-      expect(actual).toBeTruthy('2nd time');
+      expect(actual).toBeTruthy();
 
       const table1Info1 = await catalogDao.readTableInfo(TEST_TABLE);
       expect(table1Info1).toBeDefined();
-      expect(table1Info1!.columns['CONTENT2']).toBeDefined("column 'CONTENT2' does not exist");
-      expect(table1Info1!.indexes['IDX_CONTENT']).toBeDefined("index 'IDX_CONTENT' does not exist");
+      expect(table1Info1!.columns['CONTENT2']).toBeDefined();
+      expect(table1Info1!.indexes['IDX_CONTENT']).toBeDefined();
 
       schema().deleteTable(TEST_TABLE);
       // --------------------------------------------
@@ -353,20 +353,20 @@ describe('test autoupgrade', () => {
       const model2Dao = new BaseDAO<Model2>(Model2, sqldb);
 
       actual = await autoUpgrader.isActual(model2Dao.table, { keepOldColumns: true });
-      expect(actual).toBeFalsy('3rd time');
+      expect(actual).toBeFalsy();
 
       const spyAlter = spyOn(autoUpgrader, 'alterTable').and.callThrough();
       await autoUpgrader.upgradeTables([model2Dao.table], { keepOldColumns: true });
       expect(spyAlter.calls.count()).toBe(1);
 
       actual = await autoUpgrader.isActual(model2Dao.table, { keepOldColumns: true });
-      expect(actual).toBeTruthy('4th time');
+      expect(actual).toBeTruthy();
 
       const table1Info2 = await catalogDao.readTableInfo(TEST_TABLE);
       expect(table1Info2).toBeDefined();
-      expect(table1Info2!.columns['CONTENT2']).toBeDefined("column 'CONTENT2' does not exist");
-      expect(table1Info2!.indexes['IDX_CONTENT']).toBeDefined("index 'IDX_CONTENT' does not exist");
-      expect(table1Info2!.columns['CONTENT3']).toBeDefined("column 'CONTENT3' does not exist");
+      expect(table1Info2!.columns['CONTENT2']).toBeDefined();
+      expect(table1Info2!.indexes['IDX_CONTENT']).toBeDefined();
+      expect(table1Info2!.columns['CONTENT3']).toBeDefined();
     } catch (err) {
       fail(err);
     }
@@ -393,23 +393,20 @@ describe('test autoupgrade', () => {
 
       let actual: boolean;
       actual = await autoUpgrader.isActual(model1Dao.table);
-      expect(actual).toBeFalsy('1st time');
+      expect(actual).toBeFalsy();
 
       await autoUpgrader.upgradeTables([model1Dao.table]);
 
       actual = await autoUpgrader.isActual(model1Dao.table);
-      expect(actual).toBeTruthy('2nd time');
+      expect(actual).toBeTruthy();
 
       const table1Info1 = await catalogDao.readTableInfo(TEST_TABLE);
       expect(table1Info1).toBeDefined();
-      expect(table1Info1!.columns['CONTENT2']).toBeDefined("column 'CONTENT2' does not exist");
-      expect(table1Info1!.indexes['IDX_KEEP']).toBeDefined("index 'IDX_KEEP' does not exist");
-      expect(table1Info1!.indexes['IDX_DROP']).toBeDefined("index 'IDX_DROP' does not exist");
-      expect(table1Info1!.indexes['IDX_CHANGE']).toBeDefined("index 'IDX_CHANGE' does not exist");
-      expect(table1Info1!.indexes['IDX_CHANGE'].columns[0].name).toBe(
-        'CONTENT2',
-        "index 'IDX_CHANGE' using wrong column",
-      );
+      expect(table1Info1!.columns['CONTENT2']).toBeDefined();
+      expect(table1Info1!.indexes['IDX_KEEP']).toBeDefined();
+      expect(table1Info1!.indexes['IDX_DROP']).toBeDefined();
+      expect(table1Info1!.indexes['IDX_CHANGE']).toBeDefined();
+      expect(table1Info1!.indexes['IDX_CHANGE'].columns[0].name).toBe('CONTENT2');
 
       schema().deleteTable(TEST_TABLE);
       // --------------------------------------------
@@ -433,25 +430,22 @@ describe('test autoupgrade', () => {
       const model2Dao = new BaseDAO<Model2>(Model2, sqldb);
 
       actual = await autoUpgrader.isActual(model2Dao.table, { keepOldColumns: true });
-      expect(actual).toBeFalsy('3rd time');
+      expect(actual).toBeFalsy();
 
       const spyAlter = spyOn(autoUpgrader, 'alterTable').and.callThrough();
       await autoUpgrader.upgradeTables([model2Dao.table], { keepOldColumns: true });
       expect(spyAlter.calls.count()).toBe(1);
 
       actual = await autoUpgrader.isActual(model2Dao.table, { keepOldColumns: true });
-      expect(actual).toBeTruthy('4th time');
+      expect(actual).toBeTruthy();
 
       const table1Info2 = await catalogDao.readTableInfo(TEST_TABLE);
       expect(table1Info2).toBeDefined();
-      expect(table1Info2!.indexes['IDX_DROP']).toBeUndefined("index 'IDX_DROP' does exist");
-      expect(table1Info1!.indexes['IDX_KEEP']).toBeDefined("index 'IDX_KEEP' does not exist");
-      expect(table1Info2!.indexes['IDX_ADD']).toBeDefined("index 'IDX_ADD' does not exist");
-      expect(table1Info2!.indexes['IDX_CHANGE']).toBeDefined("index 'IDX_CHANGE' does not exist");
-      expect(table1Info2!.indexes['IDX_CHANGE'].columns[0].name).toBe(
-        'CONTENT',
-        "index 'IDX_CHANGE' using wrong column",
-      );
+      expect(table1Info2!.indexes['IDX_DROP']).toBeUndefined();
+      expect(table1Info1!.indexes['IDX_KEEP']).toBeDefined();
+      expect(table1Info2!.indexes['IDX_ADD']).toBeDefined();
+      expect(table1Info2!.indexes['IDX_CHANGE']).toBeDefined();
+      expect(table1Info2!.indexes['IDX_CHANGE'].columns[0].name).toBe('CONTENT');
     } catch (err) {
       fail(err);
     }
@@ -476,17 +470,17 @@ describe('test autoupgrade', () => {
 
       let actual: boolean;
       actual = await autoUpgrader.isActual(model1Dao.table);
-      expect(actual).toBeFalsy('1st time');
+      expect(actual).toBeFalsy();
 
       await autoUpgrader.upgradeTables([model1Dao.table]);
 
       actual = await autoUpgrader.isActual(model1Dao.table);
-      expect(actual).toBeTruthy('2nd time');
+      expect(actual).toBeTruthy();
 
       const table1Info1 = await catalogDao.readTableInfo(TEST_TABLE);
       expect(table1Info1).toBeDefined();
-      expect(table1Info1!.columns['CONTENT2']).toBeDefined("column 'CONTENT2' does not exist");
-      expect(table1Info1!.indexes['IDX_CONTENT']).toBeDefined("index 'IDX_CONTENT' does not exist");
+      expect(table1Info1!.columns['CONTENT2']).toBeDefined();
+      expect(table1Info1!.indexes['IDX_CONTENT']).toBeDefined();
 
       const model1 = new Model1();
       await model1Dao.insert(model1);
@@ -513,19 +507,19 @@ describe('test autoupgrade', () => {
       const model2Dao = new BaseDAO<Model2>(Model2, sqldb);
 
       actual = await autoUpgrader.isActual(model2Dao.table);
-      expect(actual).toBeFalsy('3rd time');
+      expect(actual).toBeFalsy();
 
       const spyRecreate = spyOn(autoUpgrader, 'recreateTable').and.callThrough();
       await autoUpgrader.upgradeTables([model2Dao.table]);
       expect(spyRecreate.calls.count()).toBe(1);
 
       actual = await autoUpgrader.isActual(model2Dao.table);
-      expect(actual).toBeTruthy('4th time');
+      expect(actual).toBeTruthy();
 
       const table1Info2 = await catalogDao.readTableInfo(TEST_TABLE);
       expect(table1Info2).toBeDefined();
-      expect(table1Info2!.columns['CONTENT2']).toBeUndefined("column 'CONTENT2' exist");
-      expect(table1Info2!.indexes['IDX_CONTENT']).toBeDefined("index 'IDX_CONTENT' does not exist");
+      expect(table1Info2!.columns['CONTENT2']).toBeUndefined();
+      expect(table1Info2!.indexes['IDX_CONTENT']).toBeDefined();
 
       let model2 = await model2Dao.selectById({ id: id1 });
       expect(model2.content).toBeUndefined();
@@ -574,18 +568,18 @@ describe('test autoupgrade', () => {
 
       let actual: boolean;
       actual = await autoUpgrader.isActual([model1Dao.table, parentModelDao.table]);
-      expect(actual).toBeFalsy('1st time');
+      expect(actual).toBeFalsy();
 
       await autoUpgrader.upgradeTables([model1Dao.table]);
 
       actual = await autoUpgrader.isActual([model1Dao.table, parentModelDao.table]);
-      expect(actual).toBeTruthy('2nd time');
+      expect(actual).toBeTruthy();
 
       const table1Info1 = await catalogDao.readTableInfo(TEST_TABLE);
       expect(table1Info1).toBeDefined();
-      expect(table1Info1!.columns['CONTENT2']).toBeDefined("column 'CONTENT2' does not exist");
-      expect(table1Info1!.columns['CONTENT3']).toBeDefined("column 'CONTENT3' does not exist");
-      expect(table1Info1!.indexes['IDX_CONTENT']).toBeDefined("index 'IDX_CONTENT' does not exist");
+      expect(table1Info1!.columns['CONTENT2']).toBeDefined();
+      expect(table1Info1!.columns['CONTENT3']).toBeDefined();
+      expect(table1Info1!.indexes['IDX_CONTENT']).toBeDefined();
 
       const parentModel = new ParentModel();
       await parentModelDao.insert(parentModel);
@@ -627,21 +621,21 @@ describe('test autoupgrade', () => {
       const model2Dao = new BaseDAO<Model2>(Model2, sqldb);
 
       actual = await autoUpgrader.isActual(model2Dao.table, { keepOldColumns: true });
-      expect(actual).toBeFalsy('3rd time');
+      expect(actual).toBeFalsy();
 
       const spyRecreate = spyOn(autoUpgrader, 'recreateTable').and.callThrough();
       await autoUpgrader.upgradeTables([model2Dao.table], { keepOldColumns: true });
       expect(spyRecreate.calls.count()).toBe(1);
 
       actual = await autoUpgrader.isActual(model2Dao.table, { keepOldColumns: true });
-      expect(actual).toBeTruthy('4th time');
+      expect(actual).toBeTruthy();
 
       const table1Info2 = await catalogDao.readTableInfo(TEST_TABLE);
       expect(table1Info2).toBeDefined();
-      expect(table1Info2!.columns['CONTENT2']).toBeDefined("column 'CONTENT2' does not exist");
-      expect(table1Info2!.columns['CONTENT3']).toBeDefined("column 'CONTENT3' does not exist");
-      expect(table1Info2!.indexes['IDX_CONTENT']).toBeDefined("index 'IDX_CONTENT' does not exist");
-      expect(table1Info2!.columns['CONTENT4']).toBeDefined("column 'CONTENT4' does not exist");
+      expect(table1Info2!.columns['CONTENT2']).toBeDefined();
+      expect(table1Info2!.columns['CONTENT3']).toBeDefined();
+      expect(table1Info2!.indexes['IDX_CONTENT']).toBeDefined();
+      expect(table1Info2!.columns['CONTENT4']).toBeDefined();
 
       let model2 = await model2Dao.selectById({ id: id1 });
       expect(model2.content).toBeUndefined();

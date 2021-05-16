@@ -243,8 +243,8 @@ describe('test autoupgrade - upgrade info', () => {
 
       const upgradeInfo = autoUpgrader._getUpgradeInfo(metaModel.table, tableInfo);
 
-      expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
-      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.ACTUAL, 'upgradeMode should be ACTUAL');
+      expect(upgradeInfo).toBeDefined();
+      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.ACTUAL);
     } catch (err) {
       fail(err);
     }
@@ -310,8 +310,8 @@ describe('test autoupgrade - upgrade info', () => {
 
       const upgradeInfo = autoUpgrader._getUpgradeInfo(metaModel.table);
 
-      expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
-      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.CREATE, 'upgradeMode should be CREATE');
+      expect(upgradeInfo).toBeDefined();
+      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.CREATE);
     } catch (err) {
       fail(err);
     }
@@ -379,8 +379,8 @@ describe('test autoupgrade - upgrade info', () => {
         forceRecreate: true,
       }); // !!! <= forced recreate
 
-      expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
-      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.RECREATE, 'upgradeMode should be RECREATE');
+      expect(upgradeInfo).toBeDefined();
+      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.RECREATE);
     } catch (err) {
       fail(err);
     }
@@ -448,8 +448,8 @@ describe('test autoupgrade - upgrade info', () => {
 
       const upgradeInfo = autoUpgrader._getUpgradeInfo(metaModel.table, tableInfo);
 
-      expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
-      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.RECREATE, 'upgradeMode should be RECREATE');
+      expect(upgradeInfo).toBeDefined();
+      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.RECREATE);
     } catch (err) {
       fail(err);
     }
@@ -515,8 +515,8 @@ describe('test autoupgrade - upgrade info', () => {
 
       const upgradeInfo = autoUpgrader._getUpgradeInfo(metaModel.table, tableInfo);
 
-      expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
-      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.RECREATE, 'upgradeMode should be RECREATE');
+      expect(upgradeInfo).toBeDefined();
+      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.RECREATE);
     } catch (err) {
       fail(err);
     }
@@ -579,8 +579,8 @@ describe('test autoupgrade - upgrade info', () => {
 
       const upgradeInfo = autoUpgrader._getUpgradeInfo(metaModel.table, tableInfo);
 
-      expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
-      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.RECREATE, 'upgradeMode should be RECREATE');
+      expect(upgradeInfo).toBeDefined();
+      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.RECREATE);
     } catch (err) {
       fail(err);
     }
@@ -645,8 +645,8 @@ describe('test autoupgrade - upgrade info', () => {
         keepOldColumns: true,
       }); // !!! <= keep
 
-      expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
-      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.RECREATE, 'upgradeMode should be RECREATE');
+      expect(upgradeInfo).toBeDefined();
+      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.RECREATE);
     } catch (err) {
       fail(err);
     }
@@ -714,8 +714,8 @@ describe('test autoupgrade - upgrade info', () => {
         keepOldColumns: true,
       }); // !!! <= keep
 
-      expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
-      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.ACTUAL, 'upgradeMode should be ACTUAL');
+      expect(upgradeInfo).toBeDefined();
+      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.ACTUAL);
     } catch (err) {
       fail(err);
     }
@@ -781,8 +781,8 @@ describe('test autoupgrade - upgrade info', () => {
 
       const upgradeInfo = autoUpgrader._getUpgradeInfo(metaModel.table, tableInfo);
 
-      expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
-      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.RECREATE, 'upgradeMode should be RECREATE');
+      expect(upgradeInfo).toBeDefined();
+      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.RECREATE);
     } catch (err) {
       fail(err);
     }
@@ -849,8 +849,8 @@ describe('test autoupgrade - upgrade info', () => {
 
       const upgradeInfo = autoUpgrader._getUpgradeInfo(metaModel.table, tableInfo);
 
-      expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
-      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.RECREATE, 'upgradeMode should be RECREATE');
+      expect(upgradeInfo).toBeDefined();
+      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.RECREATE);
     } catch (err) {
       fail(err);
     }
@@ -917,8 +917,8 @@ describe('test autoupgrade - upgrade info', () => {
 
       const upgradeInfo = autoUpgrader._getUpgradeInfo(metaModel.table, tableInfo);
 
-      expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
-      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.RECREATE, 'upgradeMode should be RECREATE');
+      expect(upgradeInfo).toBeDefined();
+      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.RECREATE);
     } catch (err) {
       fail(err);
     }
@@ -984,8 +984,8 @@ describe('test autoupgrade - upgrade info', () => {
 
       const upgradeInfo = autoUpgrader._getUpgradeInfo(metaModel.table, tableInfo);
 
-      expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
-      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.RECREATE, 'upgradeMode should be RECREATE');
+      expect(upgradeInfo).toBeDefined();
+      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.RECREATE);
     } catch (err) {
       fail(err);
     }
@@ -1054,8 +1054,8 @@ describe('test autoupgrade - upgrade info', () => {
 
       const upgradeInfo = autoUpgrader._getUpgradeInfo(metaModel.table, tableInfo);
 
-      expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
-      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.ALTER, 'upgradeMode should be ALTER');
+      expect(upgradeInfo).toBeDefined();
+      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.ALTER);
     } catch (err) {
       fail(err);
     }
@@ -1123,8 +1123,8 @@ describe('test autoupgrade - upgrade info', () => {
 
       const upgradeInfo = autoUpgrader._getUpgradeInfo(metaModel.table, tableInfo);
 
-      expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
-      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.ALTER, 'upgradeMode should be ALTER');
+      expect(upgradeInfo).toBeDefined();
+      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.ALTER);
     } catch (err) {
       fail(err);
     }
@@ -1192,8 +1192,8 @@ describe('test autoupgrade - upgrade info', () => {
 
       const upgradeInfo = autoUpgrader._getUpgradeInfo(metaModel.table, tableInfo);
 
-      expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
-      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.ALTER, 'upgradeMode should be ALTER');
+      expect(upgradeInfo).toBeDefined();
+      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.ALTER);
     } catch (err) {
       fail(err);
     }
@@ -1261,8 +1261,8 @@ describe('test autoupgrade - upgrade info', () => {
 
       const upgradeInfo = autoUpgrader._getUpgradeInfo(metaModel.table, tableInfo);
 
-      expect(upgradeInfo).toBeDefined('upgradeInfo is not defined');
-      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.ALTER, 'upgradeMode should be ALTER');
+      expect(upgradeInfo).toBeDefined();
+      expect(upgradeInfo.upgradeMode).toBe(UpgradeMode.ALTER);
     } catch (err) {
       fail(err);
     }

@@ -85,21 +85,21 @@ describe('test SqlConnectionPool', () => {
 
       // second connection should work
       const ver2 = await sqldb2.getUserVersion();
-      expect(ver2).toBe(ver1, 'got wrong user version from connection 2');
+      expect(ver2).toBe(ver1);
 
       // closing one connection
       await sqldb2.close();
-      expect(sqldb2.isOpen()).toBeFalsy('closed connection 2 is open');
+      expect(sqldb2.isOpen()).toBeFalsy();
 
       // getting third connect should succeed
       sqldb3 = await pool.get(100);
       expect(sqldb3).toBeDefined();
       expect(sqldb3.isOpen()).toBeTruthy();
-      expect(sqldb3 !== sqldb2).toBeTruthy('got same connection instance from pool');
+      expect(sqldb3 !== sqldb2).toBeTruthy();
 
       // third connection should work
       const ver3 = await sqldb3.getUserVersion();
-      expect(ver3).toBe(ver1, 'got wrong user version from connection 3');
+      expect(ver3).toBe(ver1);
 
       await sqldb1.close();
       await sqldb2.close();
@@ -115,7 +115,7 @@ describe('test SqlConnectionPool', () => {
       sqldb1 = await pool.get(100);
 
       const ver4 = await sqldb1.getUserVersion();
-      expect(ver4).toBe(ver3, 'user version after reopening pool to file db');
+      expect(ver4).toBe(ver3);
 
       await sqldb1.close();
       await pool.close();
@@ -159,21 +159,21 @@ describe('test SqlConnectionPool', () => {
 
       // second connection should work
       const ver2 = await sqldb2.getUserVersion();
-      expect(ver2).toBe(ver1, 'got wrong user version from connection 2');
+      expect(ver2).toBe(ver1);
 
       // closing one connection
       await sqldb2.close();
-      expect(sqldb2.isOpen()).toBeFalsy('closed connection 2 is open');
+      expect(sqldb2.isOpen()).toBeFalsy();
 
       // getting third connect should succeed
       sqldb3 = await pool.get(100);
       expect(sqldb3).toBeDefined();
       expect(sqldb3.isOpen()).toBeTruthy();
-      expect(sqldb3 !== sqldb2).toBeTruthy('got same connection instance from pool');
+      expect(sqldb3 !== sqldb2).toBeTruthy();
 
       // third connection should work
       const ver3 = await sqldb3.getUserVersion();
-      expect(ver3).toBe(ver1, 'got wrong user version from connection 3');
+      expect(ver3).toBe(ver1);
 
       await sqldb1.close();
       await sqldb2.close();

@@ -46,8 +46,8 @@ describe('test Json data', () => {
       await schema().createTable(sqldb, DATATYPE_OTHER_TABLE);
       dao = new BaseDAO<DataTypeOther>(DataTypeOther, sqldb);
       const prop = dao.metaModel.getProperty('myNumberText2');
-      expect(prop.transform.toDB).toBe(testTransformer.toDB, 'transformer not set');
-      expect(prop.transform.fromDB).toBe(testTransformer.fromDB, 'transformer not set');
+      expect(prop.transform.toDB).toBe(testTransformer.toDB);
+      expect(prop.transform.fromDB).toBe(testTransformer.fromDB);
     } catch (err) {
       fail(err);
     }
@@ -66,9 +66,9 @@ describe('test Json data', () => {
       const model2: DataTypeOther = await dao.select(model);
 
       expect(model2.id).toBe(model.id);
-      expect(model2.myNumberText).toBe(3.14, 'got wrong myNumberText');
-      expect(model2.myStringInteger).toBe('42', 'got wrong myStringInteger');
-      expect(model2.myNumberText2).toBe(3.15, 'got wrong myNumberText2');
+      expect(model2.myNumberText).toBe(3.14);
+      expect(model2.myStringInteger).toBe('42');
+      expect(model2.myNumberText2).toBe(3.15);
     } catch (err) {
       fail(err);
     }
@@ -83,9 +83,9 @@ describe('test Json data', () => {
       // read
       const model2: DataTypeOther = await dao.select(model);
       expect(model2.id).toBe(model.id);
-      expect(model2.myNumberText).toBeUndefined('got defined myNumberText');
-      expect(model2.myStringInteger).toBeUndefined('got defined myStringInteger');
-      expect(model2.myNumberText2).toBeUndefined('got defined myNumberText2');
+      expect(model2.myNumberText).toBeUndefined();
+      expect(model2.myStringInteger).toBeUndefined();
+      expect(model2.myNumberText2).toBeUndefined();
     } catch (err) {
       fail(err);
     }

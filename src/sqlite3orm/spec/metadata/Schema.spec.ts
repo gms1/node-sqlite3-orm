@@ -131,7 +131,7 @@ describe('test schema', () => {
       expect(parentNameField).toBeDefined();
       expect(parentNameField.name).toBe(TABLE_PARENT_FIELD_NAME_NAME);
       expect(parentNameField.quotedName).toBeDefined();
-      expect(parentNameField.isIdentity).toBeFalsy('isIdentity is true');
+      expect(parentNameField.isIdentity).toBeFalsy();
 
       const parentMetaModel: MetaModel = getModelMetadata(ParentTable);
 
@@ -163,9 +163,9 @@ describe('test schema', () => {
       expect(childNameField).toBeDefined();
       expect(childNameField.name).toBe(TABLE_CHILD_FIELD_NAME_NAME);
       expect(childNameField.quotedName).toBeDefined();
-      expect(childNameField.isIdentity).toBeFalsy('isIdentity is true');
+      expect(childNameField.isIdentity).toBeFalsy();
 
-      expect(childTable.hasFKDefinition('foo')).toBeFalsy('fk is defined');
+      expect(childTable.hasFKDefinition('foo')).toBeFalsy();
 
       expect(childTable.hasFKDefinition(TABLE_CHILD_FK_CONSTRAINT_NAME)).toBeTruthy();
       const childParentFkDef = childTable.getFKDefinition(TABLE_CHILD_FK_CONSTRAINT_NAME);
@@ -178,7 +178,7 @@ describe('test schema', () => {
       const childIdxDef = childTable.getIDXDefinition(TABLE_CHILD_IDX_NAMEQ);
       expect(childIdxDef.fields.length).toBe(1);
       expect(childIdxDef.fields[0].name).toBe(TABLE_CHILD_FIELD_FK_NAME);
-      expect(childIdxDef.isUnique).toBeUndefined('isUnique is defined');
+      expect(childIdxDef.isUnique).toBeUndefined();
 
       expect(() => childTable.getFKDefinition('not existing fk constraint')).toThrow();
       expect(() => childTable.getIDXDefinition('not existing index')).toThrow();
@@ -200,28 +200,14 @@ describe('test schema', () => {
 
     try {
       const tableInfo = await catalogDAO.readTableInfo(TABLE_TESTIDX_NAME);
-      expect(tableInfo).toBeDefined('table not created');
-      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_U]).toBeDefined(
-        `index '${TABLE_TESTIDX_IDX_NAME_U}' not created`,
-      );
-      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_U].unique).toBeTruthy(
-        `index '${TABLE_TESTIDX_IDX_NAME_U}' is not unique`,
-      );
-      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_U].columns[0].desc).toBe(
-        true,
-        `index '${TABLE_TESTIDX_IDX_NAME_U}' is not descending`,
-      );
+      expect(tableInfo).toBeDefined();
+      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_U]).toBeDefined();
+      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_U].unique).toBeTruthy();
+      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_U].columns[0].desc).toBe(true);
 
-      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_N]).toBeDefined(
-        `index '${TABLE_TESTIDX_IDX_NAME_N}' not created`,
-      );
-      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_N].unique).toBeFalsy(
-        `index '${TABLE_TESTIDX_IDX_NAME_N}' is unique`,
-      );
-      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_N].columns[0].desc).toBe(
-        false,
-        `index '${TABLE_TESTIDX_IDX_NAME_N}' is not descending`,
-      );
+      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_N]).toBeDefined();
+      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_N].unique).toBeFalsy();
+      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_N].columns[0].desc).toBe(false);
     } catch (e) {
       fail(`reading catalog table info for '${TABLE_TESTIDX_NAME}' failed: ${e.message}`);
     }
@@ -243,29 +229,15 @@ describe('test schema', () => {
 
     try {
       const tableInfo = await catalogDAO.readTableInfo(TABLE_TESTIDX_NAME);
-      expect(tableInfo).toBeDefined('table not created');
+      expect(tableInfo).toBeDefined();
 
-      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_U]).toBeDefined(
-        `index '${TABLE_TESTIDX_IDX_NAME_U}' not created`,
-      );
-      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_U].unique).toBeFalsy(
-        `index '${TABLE_TESTIDX_IDX_NAME_U}' is unique`,
-      );
-      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_U].columns[0].desc).toBe(
-        true,
-        `index '${TABLE_TESTIDX_IDX_NAME_U}' is not descending`,
-      );
+      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_U]).toBeDefined();
+      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_U].unique).toBeFalsy();
+      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_U].columns[0].desc).toBe(true);
 
-      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_N]).toBeDefined(
-        `index '${TABLE_TESTIDX_IDX_NAME_N}' not created`,
-      );
-      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_N].unique).toBeTruthy(
-        `index '${TABLE_TESTIDX_IDX_NAME_N}' is not unique`,
-      );
-      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_N].columns[0].desc).toBe(
-        false,
-        `index '${TABLE_TESTIDX_IDX_NAME_N}' is not descending`,
-      );
+      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_N]).toBeDefined();
+      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_N].unique).toBeTruthy();
+      expect(tableInfo!.indexes[TABLE_TESTIDX_IDX_NAME_N].columns[0].desc).toBe(false);
     } catch (e) {
       fail(`reading second catalog table info for '${TABLE_TESTIDX_NAME}' failed: ${e.message}`);
     }
@@ -285,10 +257,10 @@ describe('test schema', () => {
 
       // the database objects should not exist in the database catalog:
       tableInfo = await catalogDAO.readTableInfo(TABLE_PARENT_TABLE_NAME);
-      expect(tableInfo).toBeUndefined(`table '${TABLE_PARENT_TABLE_NAME}' found`);
+      expect(tableInfo).toBeUndefined();
 
       tableInfo = await catalogDAO.readTableInfo(TABLE_CHILD_TABLE_NAMEQ);
-      expect(tableInfo).toBeUndefined(`table '${TABLE_CHILD_TABLE_NAMEQ}' found`);
+      expect(tableInfo).toBeUndefined();
 
       // create tables
 
@@ -298,13 +270,11 @@ describe('test schema', () => {
 
       // now the database objects should exist in the database catalog:
       tableInfo = await catalogDAO.readTableInfo(TABLE_PARENT_TABLE_NAME);
-      expect(tableInfo).toBeDefined(`table '${TABLE_PARENT_TABLE_NAME}' not found`);
+      expect(tableInfo).toBeDefined();
 
       tableInfo = await catalogDAO.readTableInfo(TABLE_CHILD_TABLE_NAMEQ);
-      expect(tableInfo).toBeDefined(`table '${TABLE_CHILD_TABLE_NAMEQ}' not found`);
-      expect(tableInfo!.indexes[TABLE_CHILD_IDX_NAME]).toBeDefined(
-        `index '${TABLE_CHILD_IDX_NAME}' not found`,
-      );
+      expect(tableInfo).toBeDefined();
+      expect(tableInfo!.indexes[TABLE_CHILD_IDX_NAME]).toBeDefined();
 
       // alter table add a new column
 
@@ -322,20 +292,18 @@ describe('test schema', () => {
       await schema().dropIndex(sqldb, TABLE_CHILD_TABLE_NAMEQ, TABLE_CHILD_IDX_NAMEQ);
 
       tableInfo = await catalogDAO.readTableInfo(TABLE_CHILD_TABLE_NAMEQ);
-      expect(tableInfo).toBeDefined(`table '${TABLE_CHILD_TABLE_NAMEQ}' not found`);
-      expect(tableInfo!.indexes[TABLE_CHILD_IDX_NAME]).toBeUndefined(
-        `index '${TABLE_CHILD_IDX_NAME}' found`,
-      );
+      expect(tableInfo).toBeDefined();
+      expect(tableInfo!.indexes[TABLE_CHILD_IDX_NAME]).toBeUndefined();
 
       await schema().dropTable(sqldb, TABLE_CHILD_TABLE_NAMEQ);
       await schema().dropTable(sqldb, TABLE_PARENT_TABLE_NAME);
 
       // now database objects should not exist in the database catalog:
       tableInfo = await catalogDAO.readTableInfo(TABLE_PARENT_TABLE_NAME);
-      expect(tableInfo).toBeUndefined(`table '${TABLE_PARENT_TABLE_NAME}' found`);
+      expect(tableInfo).toBeUndefined();
 
       tableInfo = await catalogDAO.readTableInfo(TABLE_CHILD_TABLE_NAMEQ);
-      expect(tableInfo).toBeUndefined(`table '${TABLE_CHILD_TABLE_NAMEQ}' found`);
+      expect(tableInfo).toBeUndefined();
     } catch (err) {
       fail(err);
     }
@@ -349,10 +317,10 @@ describe('test schema', () => {
 
       // the database objects should not exist in the database catalog:
       tableInfo = await catalogDAO.readTableInfo(TABLE_PARENT_TABLE_NAME);
-      expect(tableInfo).toBeUndefined(`table '${TABLE_PARENT_TABLE_NAME}' found`);
+      expect(tableInfo).toBeUndefined();
 
       tableInfo = await catalogDAO.readTableInfo(TABLE_CHILD_TABLE_NAMEQ);
-      expect(tableInfo).toBeUndefined(`table '${TABLE_CHILD_TABLE_NAMEQ}' found`);
+      expect(tableInfo).toBeUndefined();
 
       // create tables
 
@@ -365,13 +333,11 @@ describe('test schema', () => {
 
       // now the database objects should exist in the database catalog:
       tableInfo = await catalogDAO.readTableInfo(TABLE_PARENT_TABLE_NAME);
-      expect(tableInfo).toBeDefined(`table '${TABLE_PARENT_TABLE_NAME}' not found`);
+      expect(tableInfo).toBeDefined();
 
       tableInfo = await catalogDAO.readTableInfo(TABLE_CHILD_TABLE_NAMEQ);
-      expect(tableInfo).toBeDefined(`table '${TABLE_CHILD_TABLE_NAMEQ}' not found`);
-      expect(tableInfo!.indexes[TABLE_CHILD_IDX_NAME]).toBeDefined(
-        `index '${TABLE_CHILD_IDX_NAME}' not found`,
-      );
+      expect(tableInfo).toBeDefined();
+      expect(tableInfo!.indexes[TABLE_CHILD_IDX_NAME]).toBeDefined();
 
       // alter table add a new column
 
@@ -389,20 +355,18 @@ describe('test schema', () => {
       await childDAO.dropIndex(TABLE_CHILD_IDX_NAMEQ);
 
       tableInfo = await catalogDAO.readTableInfo(TABLE_CHILD_TABLE_NAMEQ);
-      expect(tableInfo).toBeDefined(`table '${TABLE_CHILD_TABLE_NAMEQ}' not found`);
-      expect(tableInfo!.indexes[TABLE_CHILD_IDX_NAME]).toBeUndefined(
-        `index '${TABLE_CHILD_IDX_NAME}' found`,
-      );
+      expect(tableInfo).toBeDefined();
+      expect(tableInfo!.indexes[TABLE_CHILD_IDX_NAME]).toBeUndefined();
 
       await childDAO.dropTable();
       await parentDAO.dropTable();
 
       // now database objects should not exist in the database catalog:
       tableInfo = await catalogDAO.readTableInfo(TABLE_PARENT_TABLE_NAME);
-      expect(tableInfo).toBeUndefined(`table '${TABLE_PARENT_TABLE_NAME}' found`);
+      expect(tableInfo).toBeUndefined();
 
       tableInfo = await catalogDAO.readTableInfo(TABLE_CHILD_TABLE_NAMEQ);
-      expect(tableInfo).toBeUndefined(`table '${TABLE_CHILD_TABLE_NAMEQ}' found`);
+      expect(tableInfo).toBeUndefined();
     } catch (err) {
       fail(err);
     }

@@ -109,19 +109,19 @@ describe('test DbTableInfo.discover', () => {
   it('expect discovered schema info to match ', async () => {
     try {
       const schemas = await dbCatDao.readSchemas();
-      expect(schemas).toBeDefined('schemas');
-      expect(schemas[0]).toBe('main', 'schemas');
+      expect(schemas).toBeDefined();
+      expect(schemas[0]).toBe('main');
 
       let tables = await dbCatDao.readTables('main');
 
-      expect(tables).toBeDefined('tables');
+      expect(tables).toBeDefined();
       tables = tables.filter((t) => t.indexOf(PREFIX) === 0).sort((a, b) => a.localeCompare(b));
-      expect(tables.length).toBe(2, 'tables');
-      expect(tables[0]).toBe(CHILD_TABLE, 'tables');
-      expect(tables[1]).toBe(PARENT_TABLE, 'tables');
+      expect(tables.length).toBe(2);
+      expect(tables[0]).toBe(CHILD_TABLE);
+      expect(tables[1]).toBe(PARENT_TABLE);
 
       const invalidInfo = await dbCatDao.readTableInfo('NOT EXISTING TABLE');
-      expect(invalidInfo).toBeUndefined(`not existing table info`);
+      expect(invalidInfo).toBeUndefined();
     } catch (err) {
       fail(err);
     }
@@ -132,150 +132,108 @@ describe('test DbTableInfo.discover', () => {
     try {
       const parentInfo = await dbCatDao.readTableInfo(PARENT_TABLEQ);
       const childInfo = await dbCatDao.readTableInfo(CHILD_TABLEQ);
-      expect(parentInfo).toBeDefined('parent info');
-      expect(parentInfo!.name).toBe(PARENT_TABLEQ, 'parent info');
+      expect(parentInfo).toBeDefined();
+      expect(parentInfo!.name).toBe(PARENT_TABLEQ);
 
-      expect(Object.keys(parentInfo!.columns).length).toBe(2, 'parent info: columns');
-      expect(parentInfo!.autoIncrement).toBeFalsy('parent info: autoIncrement');
+      expect(Object.keys(parentInfo!.columns).length).toBe(2);
+      expect(parentInfo!.autoIncrement).toBeFalsy();
 
-      expect(parentInfo!.columns.ID1).toBeDefined('parent info: column ID1');
-      expect(parentInfo!.columns.ID1.type).toBe('INTEGER', 'parent info: column ID1');
-      expect(parentInfo!.columns.ID1.notNull).toBe(true, 'parent info: column ID1');
-      expect(parentInfo!.columns.ID1.defaultValue).toBe(null, 'parent info: column ID1');
+      expect(parentInfo!.columns.ID1).toBeDefined();
+      expect(parentInfo!.columns.ID1.type).toBe('INTEGER');
+      expect(parentInfo!.columns.ID1.notNull).toBe(true);
+      expect(parentInfo!.columns.ID1.defaultValue).toBe(null);
 
-      expect(parentInfo!.columns.ID2).toBeDefined('parent info: column ID2');
-      expect(parentInfo!.columns.ID2).toBeDefined('parent info: column ID2');
-      expect(parentInfo!.columns.ID2.type).toBe('INTEGER', 'parent info: column ID2');
-      expect(parentInfo!.columns.ID2.notNull).toBe(true, 'parent info: column ID2');
-      expect(parentInfo!.columns.ID2.defaultValue).toBe(null, 'parent info: column ID2');
+      expect(parentInfo!.columns.ID2).toBeDefined();
+      expect(parentInfo!.columns.ID2).toBeDefined();
+      expect(parentInfo!.columns.ID2.type).toBe('INTEGER');
+      expect(parentInfo!.columns.ID2.notNull).toBe(true);
+      expect(parentInfo!.columns.ID2.defaultValue).toBe(null);
 
-      expect(parentInfo!.primaryKey.length).toBe(2, 'parent info: primary key');
-      expect(parentInfo!.primaryKey[0]).toBe('ID1', 'parent info: primary key');
-      expect(parentInfo!.primaryKey[1]).toBe('ID2', 'parent info: primary key');
+      expect(parentInfo!.primaryKey.length).toBe(2);
+      expect(parentInfo!.primaryKey[0]).toBe('ID1');
+      expect(parentInfo!.primaryKey[1]).toBe('ID2');
 
-      expect(Object.keys(parentInfo!.indexes).length).toBe(0, 'parent info: indexes');
-      expect(Object.keys(parentInfo!.foreignKeys).length).toBe(0, 'parent info: foreign keys');
+      expect(Object.keys(parentInfo!.indexes).length).toBe(0);
+      expect(Object.keys(parentInfo!.foreignKeys).length).toBe(0);
 
-      expect(childInfo).toBeDefined('child info');
-      expect(childInfo!.name).toBe(CHILD_TABLEQ, 'child info');
-      expect(childInfo!.autoIncrement).toBeTruthy('childinfo: autoIncrement');
+      expect(childInfo).toBeDefined();
+      expect(childInfo!.name).toBe(CHILD_TABLEQ);
+      expect(childInfo!.autoIncrement).toBeTruthy();
 
-      expect(Object.keys(childInfo!.columns).length).toBe(5, 'child info: columns');
+      expect(Object.keys(childInfo!.columns).length).toBe(5);
 
-      expect(childInfo!.columns.ID).toBeDefined('childinfo: column ID');
-      expect(childInfo!.columns.ID.type).toBe('INTEGER', 'childinfo: column ID');
-      expect(childInfo!.columns.ID.notNull).toBe(true, 'childinfo: column ID');
-      expect(childInfo!.columns.ID.defaultValue).toBe(null, 'childinfo: column ID');
+      expect(childInfo!.columns.ID).toBeDefined();
+      expect(childInfo!.columns.ID.type).toBe('INTEGER');
+      expect(childInfo!.columns.ID.notNull).toBe(true);
+      expect(childInfo!.columns.ID.defaultValue).toBe(null);
 
-      expect(childInfo!.columns.PID1).toBeDefined('childinfo: column PID1');
+      expect(childInfo!.columns.PID1).toBeDefined();
       expect(childInfo!.columns.PID1.type).toBe('INTEGER');
       expect(childInfo!.columns.PID1.notNull).toBe(false);
       expect(childInfo!.columns.PID1.defaultValue).toBe(null);
 
-      expect(childInfo!.columns.PID2).toBeDefined('childinfo: column PID2');
-      expect(childInfo!.columns.PID2.type).toBe('INTEGER', 'childinfo: column PID2');
-      expect(childInfo!.columns.PID2.notNull).toBe(false, 'childinfo: column PID2');
-      expect(childInfo!.columns.PID2.defaultValue).toBe(null, 'childinfo: column PID2');
+      expect(childInfo!.columns.PID2).toBeDefined();
+      expect(childInfo!.columns.PID2.type).toBe('INTEGER');
+      expect(childInfo!.columns.PID2.notNull).toBe(false);
+      expect(childInfo!.columns.PID2.defaultValue).toBe(null);
 
-      expect(childInfo!.columns.PID3).toBeDefined('childinfo: column PID3');
+      expect(childInfo!.columns.PID3).toBeDefined();
       expect(childInfo!.columns.PID3.type).toBe('INTEGER');
       expect(childInfo!.columns.PID3.notNull).toBe(false);
       expect(childInfo!.columns.PID3.defaultValue).toBe(null);
 
-      expect(childInfo!.columns.PID4).toBeDefined('childinfo: column PID4');
-      expect(childInfo!.columns.PID4.type).toBe('INTEGER', 'childinfo: column PID4');
-      expect(childInfo!.columns.PID4.notNull).toBe(false, 'childinfo: column PID4');
-      expect(childInfo!.columns.PID4.defaultValue).toBe(null, 'childinfo: column PID4');
+      expect(childInfo!.columns.PID4).toBeDefined();
+      expect(childInfo!.columns.PID4.type).toBe('INTEGER');
+      expect(childInfo!.columns.PID4.notNull).toBe(false);
+      expect(childInfo!.columns.PID4.defaultValue).toBe(null);
 
-      expect(childInfo!.primaryKey.length).toBe(1, 'childinfo: primary key');
-      expect(childInfo!.primaryKey[0]).toBe('ID', 'childinfo: primary key');
+      expect(childInfo!.primaryKey.length).toBe(1);
+      expect(childInfo!.primaryKey[0]).toBe('ID');
 
-      expect(Object.keys(childInfo!.indexes).length).toBe(2, 'childinfo: indexes');
-      expect(childInfo!.indexes.PIDX1).toBeDefined('childinfo: index PIDX1');
-      expect(childInfo!.indexes.PIDX1.name).toBe('PIDX1', 'childinfo: index PIDX1');
-      expect(childInfo!.indexes.PIDX1.unique).toBe(false, 'childinfo: index PIDX1');
-      expect(childInfo!.indexes.PIDX1.partial).toBe(false, 'childinfo: index PIDX1');
-      expect(childInfo!.indexes.PIDX1.columns).toBeDefined('childinfo: index PIDX1');
-      expect(childInfo!.indexes.PIDX1.columns.length).toBe(2, 'childinfo: index PIDX1');
+      expect(Object.keys(childInfo!.indexes).length).toBe(2);
+      expect(childInfo!.indexes.PIDX1).toBeDefined();
+      expect(childInfo!.indexes.PIDX1.name).toBe('PIDX1');
+      expect(childInfo!.indexes.PIDX1.unique).toBe(false);
+      expect(childInfo!.indexes.PIDX1.partial).toBe(false);
+      expect(childInfo!.indexes.PIDX1.columns).toBeDefined();
+      expect(childInfo!.indexes.PIDX1.columns.length).toBe(2);
 
-      expect(childInfo!.indexes.PIDX1.columns[0].name).toBe('PID2', 'childinfo: index PIDX1');
-      expect(childInfo!.indexes.PIDX1.columns[0].desc).toBe(false, 'childinfo: index PIDX1');
-      expect(childInfo!.indexes.PIDX1.columns[1].name).toBe('PID1', 'childinfo: index PIDX1');
-      expect(childInfo!.indexes.PIDX1.columns[1].desc).toBe(false, 'childinfo: index PIDX1');
+      expect(childInfo!.indexes.PIDX1.columns[0].name).toBe('PID2');
+      expect(childInfo!.indexes.PIDX1.columns[0].desc).toBe(false);
+      expect(childInfo!.indexes.PIDX1.columns[1].name).toBe('PID1');
+      expect(childInfo!.indexes.PIDX1.columns[1].desc).toBe(false);
 
-      expect(Object.keys(childInfo!.foreignKeys).length).toBe(2, 'childinfo: fk');
+      expect(Object.keys(childInfo!.foreignKeys).length).toBe(2);
 
       const fkName1 = FKDefinition.genericForeignKeyId(['PID2', 'PID1'], PARENT_TABLE, [
         'ID2',
         'ID1',
       ]);
-      expect(childInfo!.foreignKeys[fkName1]).toBeDefined(`childinfo: fk ${fkName1}`);
-      expect(childInfo!.foreignKeys[fkName1].refTable).toBe(
-        PARENT_TABLE,
-        `childinfo: fk ${fkName1}`,
-      );
+      expect(childInfo!.foreignKeys[fkName1]).toBeDefined();
+      expect(childInfo!.foreignKeys[fkName1].refTable).toBe(PARENT_TABLE);
 
-      expect(childInfo!.foreignKeys[fkName1].columns.length).toBe(
-        2,
-        `childinfo: fk ${fkName1} columns`,
-      );
-      expect(childInfo!.foreignKeys[fkName1].columns[0]).toBe(
-        'PID2',
-        `childinfo: fk ${fkName1} columns`,
-      );
-      expect(childInfo!.foreignKeys[fkName1].columns[1]).toBe(
-        'PID1',
-        `childinfo: fk ${fkName1} columns`,
-      );
+      expect(childInfo!.foreignKeys[fkName1].columns.length).toBe(2);
+      expect(childInfo!.foreignKeys[fkName1].columns[0]).toBe('PID2');
+      expect(childInfo!.foreignKeys[fkName1].columns[1]).toBe('PID1');
 
-      expect(childInfo!.foreignKeys[fkName1].refColumns.length).toBe(
-        2,
-        `childinfo: fk ${fkName1} refColumns`,
-      );
-      expect(childInfo!.foreignKeys[fkName1].refColumns[0]).toBe(
-        'ID2',
-        `childinfo: fk ${fkName1} refColumns`,
-      );
-      expect(childInfo!.foreignKeys[fkName1].refColumns[1]).toBe(
-        'ID1',
-        `childinfo: fk ${fkName1} refColumns`,
-      );
+      expect(childInfo!.foreignKeys[fkName1].refColumns.length).toBe(2);
+      expect(childInfo!.foreignKeys[fkName1].refColumns[0]).toBe('ID2');
+      expect(childInfo!.foreignKeys[fkName1].refColumns[1]).toBe('ID1');
 
       const fkName2 = FKDefinition.genericForeignKeyId(['PID3', 'PID4'], PARENT_TABLE, [
         'ID1',
         'ID2',
       ]);
-      expect(childInfo!.foreignKeys[fkName2]).toBeDefined(`childinfo: fk ${fkName2}`);
-      expect(childInfo!.foreignKeys[fkName2].refTable).toBe(
-        PARENT_TABLE,
-        `childinfo: fk ${fkName2}`,
-      );
+      expect(childInfo!.foreignKeys[fkName2]).toBeDefined();
+      expect(childInfo!.foreignKeys[fkName2].refTable).toBe(PARENT_TABLE);
 
-      expect(childInfo!.foreignKeys[fkName2].columns.length).toBe(
-        2,
-        `childinfo: fk ${fkName2} columns`,
-      );
-      expect(childInfo!.foreignKeys[fkName2].columns[0]).toBe(
-        'PID3',
-        `childinfo: fk ${fkName2} columns`,
-      );
-      expect(childInfo!.foreignKeys[fkName2].columns[1]).toBe(
-        'PID4',
-        `childinfo: fk ${fkName2} columns`,
-      );
+      expect(childInfo!.foreignKeys[fkName2].columns.length).toBe(2);
+      expect(childInfo!.foreignKeys[fkName2].columns[0]).toBe('PID3');
+      expect(childInfo!.foreignKeys[fkName2].columns[1]).toBe('PID4');
 
-      expect(childInfo!.foreignKeys[fkName2].refColumns.length).toBe(
-        2,
-        `childinfo: fk ${fkName2} refColumns`,
-      );
-      expect(childInfo!.foreignKeys[fkName2].refColumns[0]).toBe(
-        'ID1',
-        `childinfo: fk ${fkName2} refColumns`,
-      );
-      expect(childInfo!.foreignKeys[fkName2].refColumns[1]).toBe(
-        'ID2',
-        `childinfo: fk ${fkName2} refColumns`,
-      );
+      expect(childInfo!.foreignKeys[fkName2].refColumns.length).toBe(2);
+      expect(childInfo!.foreignKeys[fkName2].refColumns[0]).toBe('ID1');
+      expect(childInfo!.foreignKeys[fkName2].refColumns[1]).toBe('ID2');
     } catch (err) {
       fail(err);
     }

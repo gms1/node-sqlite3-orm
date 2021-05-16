@@ -396,12 +396,12 @@ describe('test metaModels', () => {
         @field({ name: 'MPT11:COL' })
         col?: number;
       }
-      expect(schema().hasTable('MPT11:T1')).toBeTruthy(`table not found`);
+      expect(schema().hasTable('MPT11:T1')).toBeTruthy();
       const metaModel1 = Reflect.getMetadata(METADATA_MODEL_KEY, Model1.prototype) as MetaModel;
       const metaModel2 = Reflect.getMetadata(METADATA_MODEL_KEY, Model2.prototype) as MetaModel;
       metaModel1.destroy();
       metaModel2.destroy();
-      expect(schema().hasTable('MPT11:T1')).toBeFalsy(`table found`);
+      expect(schema().hasTable('MPT11:T1')).toBeFalsy();
       metaModel1.destroy();
     } catch (err) {
       fail(`should not throw: ${err.message}`);
@@ -440,7 +440,7 @@ describe('test metaModels', () => {
         @field({ name: 'MPT12:COLDATE_NN', notNull: true })
         colDateNN!: boolean;
       }
-      expect(schema().hasTable('MPT12:T1')).toBeTruthy(`table not found`);
+      expect(schema().hasTable('MPT12:T1')).toBeTruthy();
       const metaModel1 = Reflect.getMetadata(METADATA_MODEL_KEY, Model.prototype) as MetaModel;
 
       expect(metaModel1.table.fields.length).toBe(9);

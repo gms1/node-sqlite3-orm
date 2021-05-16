@@ -63,17 +63,11 @@ describe('test SqlStatement', () => {
     try {
       // select all rows having id>0
       const allRows = await selStmt.all(0);
-      expect(allRows.length).toBe(2, 'result from prepared statement should have 2 rows');
-      expect(allRows[0].id).toBe(0, 'result from prepared statement should have id=0 as first row');
-      expect(allRows[0].col).toBe(
-        'testvalue 0',
-        'result from prepared statement have col="testvalue 0" in first row',
-      );
-      expect(allRows[1].id).toBe(1, 'result from prepared statement should have id=1 as first row');
-      expect(allRows[1].col).toBe(
-        'testvalue 1',
-        'result from prepared statement have col="testvalue 1" in first row',
-      );
+      expect(allRows.length).toBe(2);
+      expect(allRows[0].id).toBe(0);
+      expect(allRows[0].col).toBe('testvalue 0');
+      expect(allRows[1].id).toBe(1);
+      expect(allRows[1].col).toBe('testvalue 1');
     } catch (err) {
       fail(err);
     }
@@ -81,17 +75,11 @@ describe('test SqlStatement', () => {
       // select all rows having id>0 using callback
       const allRows: any[] = [];
       await selStmt.each(0, (err: any, row: any) => allRows.push(row));
-      expect(allRows.length).toBe(2, 'result from prepared statement should have 2 rows');
-      expect(allRows[0].id).toBe(0, 'result from prepared statement should have id=0 as first row');
-      expect(allRows[0].col).toBe(
-        'testvalue 0',
-        'result from prepared statement have col="testvalue 0" in first row',
-      );
-      expect(allRows[1].id).toBe(1, 'result from prepared statement should have id=1 as first row');
-      expect(allRows[1].col).toBe(
-        'testvalue 1',
-        'result from prepared statement have col="testvalue 1" in first row',
-      );
+      expect(allRows.length).toBe(2);
+      expect(allRows[0].id).toBe(0);
+      expect(allRows[0].col).toBe('testvalue 0');
+      expect(allRows[1].id).toBe(1);
+      expect(allRows[1].col).toBe('testvalue 1');
     } catch (err) {
       fail(err);
     }

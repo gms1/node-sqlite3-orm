@@ -119,27 +119,18 @@ describe(`BaseDAO`, () => {
         await userDao.update(user2);
 
         await userDao.select(user1);
-        expect(user1.userId).toBe(user2.userId, 'userId does not match after first update');
-        expect(user1.userLoginName).toBe(
-          user2.userLoginName,
-          'userLoginName does not match after first update',
-        );
+        expect(user1.userId).toBe(user2.userId);
+        expect(user1.userLoginName).toBe(user2.userLoginName);
 
         user1 = await userDao.selectById({ userId: 1 });
-        expect(user1.userId).toBe(user2.userId, 'userId does not match using selectById');
-        expect(user1.userLoginName).toBe(
-          user2.userLoginName,
-          'userLoginName does not match using selectById',
-        );
+        expect(user1.userId).toBe(user2.userId);
+        expect(user1.userLoginName).toBe(user2.userLoginName);
 
         const allUsers1 = await userDao.selectAll();
         expect(allUsers1.length).toBe(1);
         user2 = allUsers1[0];
-        expect(user1.userId).toBe(user2.userId, 'userId does not match after select all');
-        expect(user1.userLoginName).toBe(
-          user2.userLoginName,
-          'userLoginName does not match after select all',
-        );
+        expect(user1.userId).toBe(user2.userId);
+        expect(user1.userLoginName).toBe(user2.userLoginName);
 
         await userDao.delete(user1);
         const allUsers2 = await userDao.selectAll();
@@ -172,17 +163,17 @@ describe(`BaseDAO`, () => {
         contact.userId = 1;
         contact.emailAddress = 'user1@test1.net';
         contact = await contactDao.insert(contact, BaseDAOInsertMode.ForceAutoGeneration);
-        expect(contact.contactId).toBe(1, 'autoIncrement id not updated');
+        expect(contact.contactId).toBe(1);
 
         contact.userId = 1;
         contact.emailAddress = 'user1@test2.net';
         contact = await contactDao.insert(contact, BaseDAOInsertMode.ForceAutoGeneration);
-        expect(contact.contactId).toBe(2, 'autoIncrement id not updated');
+        expect(contact.contactId).toBe(2);
 
         contact.userId = 2;
         contact.emailAddress = 'user2@test.net';
         contact = await contactDao.insert(contact, BaseDAOInsertMode.ForceAutoGeneration);
-        expect(contact.contactId).toBe(3, 'autoIncrement id not updated');
+        expect(contact.contactId).toBe(3);
 
         user.userId = 1;
         const contactsUser1 = await contactDao.selectAllOf(Contact.userConstraint, User, user);
@@ -293,7 +284,7 @@ describe(`BaseDAO`, () => {
         user1.userLoginName = 'login1/1';
         await userDao.insert(user1);
         await userDao.selectById({ userId: 1 });
-        expect(user1.userId).toBe(1, 'userId does not match after insert');
+        expect(user1.userId).toBe(1);
         user1.userId = 1;
         await userDao.deleteById({ userId: 1 });
       } catch (err) {
@@ -343,8 +334,8 @@ describe(`BaseDAO`, () => {
       try {
         let user2: User = new User();
         await userDao.selectEach((err, usr) => (user2 = usr), 'WHERE user_id=1');
-        expect(user1.userId).toBe(user2.userId, 'userId does not match');
-        expect(user1.userLoginName).toBe(user2.userLoginName, 'userLoginName does not match');
+        expect(user1.userId).toBe(user2.userId);
+        expect(user1.userLoginName).toBe(user2.userLoginName);
         await userDao.selectEach((err, usr) => (user2 = usr));
       } catch (err) {
         fail(err);
@@ -677,10 +668,10 @@ describe(`BaseDAO`, () => {
         insertedPartial = await fullDao.insertPartial({});
         await fullDao.updatePartial({ id: insertedPartial.id, myBool: false, myString: 'foo' });
         const readRow = await fullDao.selectById({ id: insertedPartial.id });
-        expect(readRow.myBool).toBe(false, 'wrong myBool');
-        expect(readRow.myInt).toBe(42, 'wrong myInt');
-        expect(readRow.myString).toBe('foo', 'wrong myString');
-        expect(readRow.myReal).toBe(3.1415692, 'wrong myReal');
+        expect(readRow.myBool).toBe(false);
+        expect(readRow.myInt).toBe(42);
+        expect(readRow.myString).toBe('foo');
+        expect(readRow.myReal).toBe(3.1415692);
       } catch (err) {
         fail(err);
       }

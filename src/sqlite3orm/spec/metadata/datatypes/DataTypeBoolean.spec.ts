@@ -101,21 +101,12 @@ describe('test boolean type', () => {
         ':my_bool_real': true,
       });
       model = await dao.select(model);
-      expect(typeof model.myBool2Text).toBe(
-        'boolean',
-        `record ${model.id}: myBool2Text should be of type boolean`,
-      );
-      expect(typeof model.myBool2Int).toBe(
-        'boolean',
-        `record ${model.id}: myBool2Int should be of type boolean`,
-      );
-      expect(typeof model.myBool2Real).toBe(
-        'boolean',
-        `record ${model.id}: myBool2Real should be of type boolean`,
-      );
-      expect(model.myBool2Text).toBeTruthy(`record ${model.id}: myBool2Text should be true`);
-      expect(model.myBool2Int).toBeTruthy(`record ${model.id}: myBool2Int should be true`);
-      expect(model.myBool2Real).toBeTruthy(`record ${model.id}: myBool2Real should be true`);
+      expect(typeof model.myBool2Text).toBe('boolean');
+      expect(typeof model.myBool2Int).toBe('boolean');
+      expect(typeof model.myBool2Real).toBe('boolean');
+      expect(model.myBool2Text).toBeTruthy();
+      expect(model.myBool2Int).toBeTruthy();
+      expect(model.myBool2Real).toBeTruthy();
 
       // all false
       ++model.id;
@@ -126,21 +117,12 @@ describe('test boolean type', () => {
         ':my_bool_real': false,
       });
       model = await dao.select(model);
-      expect(typeof model.myBool2Text).toBe(
-        'boolean',
-        `record ${model.id}: myBool2Text should be of type boolean`,
-      );
-      expect(typeof model.myBool2Int).toBe(
-        'boolean',
-        `record ${model.id}: myBool2Int should be of type boolean`,
-      );
-      expect(typeof model.myBool2Real).toBe(
-        'boolean',
-        `record ${model.id}: myBool2Real should be of type boolean`,
-      );
-      expect(model.myBool2Text).toBeFalsy(`record ${model.id}: myBool2Text should be false`);
-      expect(model.myBool2Int).toBeFalsy(`record ${model.id}: myBool2Int should be false`);
-      expect(model.myBool2Real).toBeFalsy(`record ${model.id}: myBool2Real should be false`);
+      expect(typeof model.myBool2Text).toBe('boolean');
+      expect(typeof model.myBool2Int).toBe('boolean');
+      expect(typeof model.myBool2Real).toBe('boolean');
+      expect(model.myBool2Text).toBeFalsy();
+      expect(model.myBool2Int).toBeFalsy();
+      expect(model.myBool2Real).toBeFalsy();
 
       // all undefined
       ++model.id;
@@ -151,18 +133,9 @@ describe('test boolean type', () => {
         ':my_bool_real': undefined,
       });
       model = await dao.select(model);
-      expect(typeof model.myBool2Text).toBe(
-        'undefined',
-        `record ${model.id}: myBool2Text should be of type undefined`,
-      );
-      expect(typeof model.myBool2Int).toBe(
-        'undefined',
-        `record ${model.id}: myBool2Int should be of type undefined`,
-      );
-      expect(typeof model.myBool2Real).toBe(
-        'undefined',
-        `record ${model.id}: myBool2Real should be of type undefined`,
-      );
+      expect(typeof model.myBool2Text).toBe('undefined');
+      expect(typeof model.myBool2Int).toBe('undefined');
+      expect(typeof model.myBool2Real).toBe('undefined');
 
       // all null
       ++model.id;
@@ -173,18 +146,9 @@ describe('test boolean type', () => {
         ':my_bool_real': null,
       });
       model = await dao.select(model);
-      expect(typeof model.myBool2Text).toBe(
-        'undefined',
-        `record ${model.id}: myBool2Text should be of type undefined`,
-      );
-      expect(typeof model.myBool2Int).toBe(
-        'undefined',
-        `record ${model.id}: myBool2Int should be of type undefined`,
-      );
-      expect(typeof model.myBool2Real).toBe(
-        'undefined',
-        `record ${model.id}: myBool2Real should be of type undefined`,
-      );
+      expect(typeof model.myBool2Text).toBe('undefined');
+      expect(typeof model.myBool2Int).toBe('undefined');
+      expect(typeof model.myBool2Real).toBe('undefined');
 
       // myBool2Text is '0'
       ++model.id;
@@ -195,11 +159,8 @@ describe('test boolean type', () => {
         ':my_bool_real': undefined,
       });
       model = await dao.select(model);
-      expect(typeof model.myBool2Text).toBe(
-        'boolean',
-        `record ${model.id}: myBool2Text should be of type boolean`,
-      );
-      expect(model.myBool2Text).toBeFalsy(`record ${model.id}: myBool2Text should be false`);
+      expect(typeof model.myBool2Text).toBe('boolean');
+      expect(model.myBool2Text).toBeFalsy();
 
       // myBool2Text is '1'
       ++model.id;
@@ -210,11 +171,8 @@ describe('test boolean type', () => {
         ':my_bool_real': undefined,
       });
       model = await dao.select(model);
-      expect(typeof model.myBool2Text).toBe(
-        'boolean',
-        `record ${model.id}: myBool2Text should be of type boolean`,
-      );
-      expect(model.myBool2Text).toBeTruthy(`record ${model.id}: myBool2Text should be true`);
+      expect(typeof model.myBool2Text).toBe('boolean');
+      expect(model.myBool2Text).toBeTruthy();
 
       // myBool2Text is 'false'
       ++model.id;
@@ -225,11 +183,8 @@ describe('test boolean type', () => {
         ':my_bool_real': undefined,
       });
       model = await dao.select(model);
-      expect(typeof model.myBool2Text).toBe(
-        'boolean',
-        `record ${model.id}: myBool2Text should be of type boolean`,
-      );
-      expect(model.myBool2Text).toBeFalsy(`record ${model.id}: myBool2Text should be false`);
+      expect(typeof model.myBool2Text).toBe('boolean');
+      expect(model.myBool2Text).toBeFalsy();
 
       // myBool2Text is 'true'
       ++model.id;
@@ -240,11 +195,8 @@ describe('test boolean type', () => {
         ':my_bool_real': undefined,
       });
       model = await dao.select(model);
-      expect(typeof model.myBool2Text).toBe(
-        'boolean',
-        `record ${model.id}: myBool2Text should be of type boolean`,
-      );
-      expect(model.myBool2Text).toBeTruthy(`record ${model.id}: myBool2Text should be true`);
+      expect(typeof model.myBool2Text).toBe('boolean');
+      expect(model.myBool2Text).toBeTruthy();
 
       await sqlstmt.finalize();
     } catch (err) {
