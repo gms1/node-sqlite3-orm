@@ -11,4 +11,4 @@ script:
   - make
 
 after_script:
-  - make coveralls
+  - npm run coverage:codecov
