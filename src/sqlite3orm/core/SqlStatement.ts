@@ -34,6 +34,8 @@ export class SqlStatement {
    *
    * @param params
    */
+  /* istanbul ignore next */
+  // see https://github.com/mapbox/node-sqlite3/issues/841
   public bind(...params: any[]): this {
     this.stmt.bind(params);
     return this;
