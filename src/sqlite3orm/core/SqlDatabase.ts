@@ -5,8 +5,11 @@ import * as _dbg from 'debug';
 import {
   Database,
   OPEN_CREATE,
+  OPEN_PRIVATECACHE,
   OPEN_READONLY,
   OPEN_READWRITE,
+  OPEN_SHAREDCACHE,
+  OPEN_URI,
   verbose as sqlverbose,
 } from 'sqlite3';
 
@@ -17,14 +20,15 @@ export const SQL_OPEN_READONLY = OPEN_READONLY;
 export const SQL_OPEN_READWRITE = OPEN_READWRITE;
 export const SQL_OPEN_CREATE = OPEN_CREATE;
 
+// introduced by https://github.com/mapbox/node-sqlite3/pull/1078
+export const SQL_OPEN_URI = OPEN_URI;
+export const SQL_OPEN_SHAREDCACHE = OPEN_SHAREDCACHE;
+export const SQL_OPEN_PRIVATECACHE = OPEN_PRIVATECACHE;
+
 export const SQL_DEFAULT_SCHEMA = 'main';
 
+// see https://www.sqlite.org/inmemorydb.html
 export const SQL_MEMORY_DB_PRIVATE = ':memory:';
-
-// shared memory database is currently not supported by node-sqlite3
-//   see: https://github.com/mapbox/node-sqlite3/issues/710
-// but can be enabled by building node-sqlite3 and sqlite3 from source
-// see docs/enable-URI.md
 export const SQL_MEMORY_DB_SHARED = 'file:sqlite3orm?mode=memory&cache=shared';
 
 const debug = _dbg('sqlite3orm:database');
