@@ -59,6 +59,7 @@ export class SqlConnectionPoolDatabase extends SqlDatabase {
           this.pool = pool;
           this.db = db;
           this.dbId = SqlDatabase.lastId++;
+          this.databaseFile = databaseFile;
           debug(`${this.dbId}: opened`);
           resolve();
         }
@@ -87,6 +88,7 @@ export class SqlConnectionPoolDatabase extends SqlDatabase {
         debug(`${this.dbId}: close`);
         this.db = undefined;
         this.dbId = undefined;
+        this.databaseFile = undefined;
         db.close((err) => {
           db.removeAllListeners();
           /* istanbul ignore if */
@@ -114,6 +116,8 @@ export class SqlConnectionPoolDatabase extends SqlDatabase {
       // move
       this.db = sqldb.db;
       this.dbId = sqldb.dbId;
+      this.databaseFile = sqldb.databaseFile;
+
       this.pool = pool;
       // reapply default settings
       if (settings) {
@@ -124,6 +128,7 @@ export class SqlConnectionPoolDatabase extends SqlDatabase {
     }
     sqldb.db = undefined;
     sqldb.dbId = undefined;
+    sqldb.databaseFile = undefined;
     sqldb.pool = undefined;
   }
 }

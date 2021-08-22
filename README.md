@@ -382,6 +382,26 @@ This behavior can be overwritten globally using the static `BaseDAO.options` or 
 - StrictSqlite: use the provided value if defined, otherwise sqlite generates the value automatically
 - ForceAutoGeneration: prevents the insertion of predefined primary key values; always let sqlite generate a value automatically
 
+
+## Online Backup
+
+quick start:
+
+```Typescript
+import {SqlDatabase} from 'sqlite3orm';
+
+(async () => {
+  const sqldb = new SqlDatabase();
+  await sqldb.open('file:sqlite3orm?mode=memory&cache=shared') 
+  ... add your tables
+
+  const backup = await sqldb.backup('backup.db');
+  await backup.step(-1);
+  backup.finish();
+})();
+```
+
+
 ## Install
 
 ```bash

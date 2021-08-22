@@ -1,4 +1,5 @@
 import * as _dbg from 'debug';
+import { wait } from '../utils/wait';
 
 import { SqlConnectionPoolDatabase } from './SqlConnectionPoolDatabase';
 import { SQL_OPEN_CREATE, SQL_OPEN_DEFAULT, SqlDatabase } from './SqlDatabase';
@@ -250,24 +251,4 @@ export class SqlConnectionPool {
     string,
     SqlConnectionPool
   >();
-}
-
-// TODO: move this function or find a better one:
-function wait(cond: () => boolean, timeout: number = 0, intervall: number = 100): Promise<void> {
-  return new Promise<void>((resolve, reject) => {
-    let counter = 0;
-    const timer = setInterval(() => {
-      if (cond()) {
-        clearInterval(timer);
-        resolve();
-        return;
-      }
-      if (timeout > 0 && ++counter * intervall >= timeout) {
-        clearInterval(timer);
-        debug(`getting connection timed out`);
-        reject(new Error('timeout reached'));
-        return;
-      }
-    }, intervall);
-  });
 }

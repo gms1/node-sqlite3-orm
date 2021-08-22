@@ -8,11 +8,15 @@ export {
   SQL_OPEN_DEFAULT,
   SQL_OPEN_READONLY,
   SQL_OPEN_READWRITE,
+  SQL_OPEN_URI,
+  SQL_OPEN_SHAREDCACHE,
+  SQL_OPEN_PRIVATECACHE,
   SqlConnectionPool,
   SqlDatabase,
   SqlDatabaseSettings,
   SqlRunResult,
   SqlStatement,
+  SqlBackup,
 } from './core';
 export {
   DbCatalogDAO,

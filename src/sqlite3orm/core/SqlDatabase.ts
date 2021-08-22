@@ -12,6 +12,7 @@ import {
   OPEN_URI,
   verbose as sqlverbose,
 } from 'sqlite3';
+import { SqlBackup } from './SqlBackup';
 
 import { SqlDatabaseSettings } from './SqlDatabaseSettings';
 import { SqlRunResult, SqlStatement } from './SqlStatement';
@@ -52,6 +53,7 @@ export class SqlDatabase {
 
   protected db?: Database;
   protected dbId?: number;
+  protected databaseFile?: string;
 
   dirty?: boolean;
 
@@ -72,6 +74,7 @@ export class SqlDatabase {
         } else {
           this.db = db;
           this.dbId = SqlDatabase.lastId++;
+          this.databaseFile = databaseFile;
           debug(`${this.dbId}: opened`);
           resolve();
         }
@@ -100,6 +103,7 @@ export class SqlDatabase {
         debug(`${this.dbId}: close`);
         this.db = undefined;
         this.dbId = undefined;
+        this.databaseFile = undefined;
         db.close((err) => {
           db.removeAllListeners();
           /* istanbul ignore if */
@@ -352,6 +356,51 @@ ${sql}`);
       .then(callback)
       .then((res) => this.run('COMMIT TRANSACTION').then(() => Promise.resolve(res)))
       .catch((err) => this.run('ROLLBACK TRANSACTION').then(() => Promise.reject(err)));
+  }
+
+  /**
+   * initiate online backup
+   *
+   * @param database - the database file to backup from or to
+   * @param databaseIsDestination - if the provided database parameter is source or destination of the backup
+   * @param destName - the destination name
+   * @param sourceName - the source name
+   * @returns A promise
+   */
+
+  public backup(
+    database: string /* | SqlDatabase */,
+    databaseIsDestination = true,
+    destName = 'main',
+    sourceName = 'main',
+  ) {
+    return new Promise<SqlBackup>((resolve, reject) => {
+      /* istanbul ignore if */
+      if (!this.db) {
+        reject(new Error('database connection not open'));
+        return;
+      }
+      // TODO(Backup API): typings not yet available
+      const db: any = this.db;
+      const backup = db.backup(
+        database, // typeof database === 'string' ? database : database.db,
+        // TODO: jsdoc for Database#backup seems to be wrong; `sourceName` and` destName` are probably swapped
+        // please see upstream issue: https://github.com/mapbox/node-sqlite3/issues/1482#issuecomment-903233196
+        // swapping again:
+        destName,
+        sourceName,
+        databaseIsDestination,
+        (err: any) => {
+          /* istanbul ignore if */
+          if (err) {
+            debug(`${this.dbId}: backup init failed for '${database}': ${err.message}`);
+            reject(err);
+          } else {
+            resolve(new SqlBackup(backup));
+          }
+        },
+      );
+    });
   }
 
   /**
