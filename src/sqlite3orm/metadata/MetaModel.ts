@@ -145,7 +145,7 @@ export class MetaModel {
     try {
       this._table = schema().getOrAddTable(tableName, tableOpts);
     } catch (err) {
-      throw new Error(`meta model '${this.name}': failed to add field: ${err.message}`);
+      throw new Error(`meta model '${this.name}': failed to add table: ${err.message}`);
     }
 
     const idxDefs = new Map<string, IDXDefinition>();

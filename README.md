@@ -12,11 +12,13 @@
 
 This module allows you to map your model, written in JavaScript or TypeScript, to a database schema using SQLite Version 3.
 **node-sqlite3-orm** is designed to work with new JavaScript _Decorators_, _Promises_ and the _async/await_ feature.
-It also supports typesafe database queries and refactoring, with a filter syntax designed to serialize safely without any SQL injection possibility
+It offers connection pool, automatic upgrades and online backups as well as typesafe database queries and refactoring, using a filter syntax designed to serialize safely without any SQL injection possibility
 
 > NOTE: Your contribution is highly welcome! Feel free to pick-up a TODO-item or add yours.
 
-## Introduction
+If you are using **NestJs** please see [@HomeOfThings/nest-sqlite3](https://www.npmjs.com/package/@homeofthings/nestjs-sqlite3)
+
+## Mapping Introduction
 
 **node-sqlite3-orm** provides you with the ability to create the database schema for the mapped model and to store and retrieve the mapped data to and from the database,
 
