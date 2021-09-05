@@ -112,12 +112,14 @@ export class SqlConnectionPoolDatabase extends SqlDatabase {
   ): Promise<void> {
     /* istanbul ignore else */
     if (sqldb.db) {
+      try {
+        await sqldb.endTransaction(false);
+      } catch (err) {}
       sqldb.db.removeAllListeners();
       // move
       this.db = sqldb.db;
       this.dbId = sqldb.dbId;
       this.databaseFile = sqldb.databaseFile;
-
       this.pool = pool;
       // reapply default settings
       if (settings) {
