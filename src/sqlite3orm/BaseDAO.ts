@@ -48,13 +48,10 @@ export class BaseDAO<T extends Object> {
    */
   public constructor(type: { new (): T }, sqldb: SqlDatabase) {
     this.type = type;
-    this.metaModel = Reflect.getMetadata(METADATA_MODEL_KEY, type.prototype);
-    if (!this.metaModel) {
-      throw new Error(`no table-definition defined on prototype of ${this.type.name}'`);
-    }
-    this.table = this.metaModel.table;
-    this.sqldb = sqldb;
     this.queryModel = new QueryModel<T>(this.type);
+    this.metaModel = this.queryModel.metaModel;
+    this.table = this.queryModel.table;
+    this.sqldb = sqldb;
   }
 
   /**
