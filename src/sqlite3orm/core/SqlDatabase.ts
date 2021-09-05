@@ -149,7 +149,7 @@ export class SqlDatabase {
       const self = this;
       this.db.run(sql, params, function(err: Error): void {
         // do not use arrow function for this callback
-        // the below 'this' should not reference our self
+        // the below 'this' does not reference ourself
         if (err) {
           debug(
             `${self.dbId}: failed sql: ${err.message}
@@ -352,10 +352,53 @@ ${sql}`);
    * @param [callback]
    */
   public transactionalize<T>(callback: () => Promise<T>): Promise<T> {
-    return this.run('BEGIN IMMEDIATE TRANSACTION')
+    return this.beginTransaction()
       .then(callback)
-      .then((res) => this.run('COMMIT TRANSACTION').then(() => Promise.resolve(res)))
-      .catch((err) => this.run('ROLLBACK TRANSACTION').then(() => Promise.reject(err)));
+      .then((res) => this.commitTransaction().then(() => Promise.resolve(res)))
+      .catch((err) => this.rollbackTransaction().then(() => Promise.reject(err)));
+  }
+
+  public beginTransaction(): Promise<SqlRunResult> {
+    return this.run('BEGIN IMMEDIATE TRANSACTION');
+  }
+
+  public commitTransaction(): Promise<SqlRunResult> {
+    return this.run('COMMIT TRANSACTION');
+  }
+
+  public rollbackTransaction(): Promise<SqlRunResult> {
+    return this.run('ROLLBACK TRANSACTION');
+  }
+
+  public endTransaction(commit: boolean): Promise<void> {
+    // TODO: node-sqlite3 does not yet support `sqlite3_txn_state`
+    //   please see https://www.sqlite.org/draft/c3ref/txn_state.html
+    // we would need this do test if a transaction is open
+    // so we cannot use commitTransaction/rollbackTransaction which would error if no transaction is open
+    const sql = commit ? `COMMIT TRANSACTION` : `ROLLBACK TRANSACTION`;
+    return new Promise<void>((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error('database connection not open'));
+        return;
+      }
+      debug(`${this.dbId}: sql: ${sql}`);
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
+      const self = this;
+      this.db.run(sql, undefined, function(err: Error): void {
+        // do not use arrow function for this callback
+        // the below 'this' does not reference ourself
+        /* istanbul ignore if */
+        if (err && !err.message.includes('no transaction')) {
+          debug(
+            `${self.dbId}: failed sql: ${err.message}
+${sql}`,
+          );
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
   }
 
   /**
@@ -383,7 +426,7 @@ ${sql}`);
       // TODO(Backup API): typings not yet available
       const db: any = this.db;
       const backup = db.backup(
-        database, // typeof database === 'string' ? database : database.db,
+        database,
         // TODO: jsdoc for Database#backup seems to be wrong; `sourceName` and` destName` are probably swapped
         // please see upstream issue: https://github.com/mapbox/node-sqlite3/issues/1482#issuecomment-903233196
         // swapping again:

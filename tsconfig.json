@@ -18,19 +18,10 @@
     "skipLibCheck": true,
     "strictNullChecks": true,
     "strict": true,
-    "typeRoots": [
-      "node_modules/@types"
-    ],
-    "types": [
-      "node",
-      "jasmine"
-    ]
+    "useUnknownInCatchVariables": false,
+    "typeRoots": ["node_modules/@types"],
+    "types": ["node", "jasmine"]
   },
-  "include": [
-    "./src/**/*"
-  ],
-  "exclude": [
-    "./dist/**/*",
-    "./node_modules/**/*"
-  ]
+  "include": ["./src/**/*"],
+  "exclude": ["./dist/**/*", "./node_modules/**/*"]
 }

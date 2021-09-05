@@ -199,6 +199,45 @@ describe('test SqlDatabase', () => {
       fail(err);
     }
   });
+
+  // ---------------------------------------------
+  it('expect endTransaction(true) to succeed if no transaction is open', async () => {
+    try {
+      await sqldb.endTransaction(true);
+    } catch (err) {
+      fail(err);
+    }
+  });
+
+  // ---------------------------------------------
+  it('expect endTransaction(true) to succeed if transaction is open', async () => {
+    try {
+      await sqldb.beginTransaction();
+      await sqldb.endTransaction(true);
+    } catch (err) {
+      fail(err);
+    }
+  });
+
+  // ---------------------------------------------
+  it('expect endTransaction(false) to succeed if no transaction is open', async () => {
+    try {
+      await sqldb.endTransaction(true);
+    } catch (err) {
+      fail(err);
+    }
+  });
+
+  // ---------------------------------------------
+  it('expect endTransaction(false) to succeed if transaction is open', async () => {
+    try {
+      await sqldb.beginTransaction();
+      await sqldb.endTransaction(true);
+    } catch (err) {
+      fail(err);
+    }
+  });
+
   // ---------------------------------------------
   it('expect closed database to throw on exec', async () => {
     try {
@@ -256,7 +295,14 @@ describe('test SqlDatabase', () => {
       fail('closed database should throw on adding event listener');
     } catch (err) {}
   });
-
+  // ---------------------------------------------
+  it('expect closed database to throw on endTransaction', async () => {
+    try {
+      await sqldb.close();
+      await sqldb.endTransaction(true);
+      fail('closed database should throw on exec');
+    } catch (err) {}
+  });
   // ---------------------------------------------
   it('expect insert into not existing table to throw', async () => {
     try {
