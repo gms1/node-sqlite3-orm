@@ -106,35 +106,48 @@ describe(`BaseDAO`, () => {
     });
 
     // ---------------------------------------------
-    it('expect basic functionality (insert/update/delete/select/selectAll) to work', async () => {
+    it('expect basic functionality (insert/update/delete/select/selectAll/countAll/exists) to work', async () => {
       try {
-        let user1: User = new User();
-        let user2: User = new User();
+        let user1a: User = new User();
+        let user1b: User = new User();
+        const user2: User = new User();
         const userDao: BaseDAO<User> = new BaseDAO(User, sqldb);
-        user1.userId = 1;
-        user1.userLoginName = 'login1/1';
-        await userDao.insert(user1);
-        user2.userId = user1.userId;
-        user2.userLoginName = 'login1/2';
-        await userDao.update(user2);
 
-        await userDao.select(user1);
-        expect(user1.userId).toBe(user2.userId);
-        expect(user1.userLoginName).toBe(user2.userLoginName);
+        expect(await userDao.exists()).toBe(false);
+        user1a.userId = 1;
+        user1a.userLoginName = 'login1/1';
+        await userDao.insert(user1a);
+        expect(await userDao.exists()).toBe(true);
 
-        user1 = await userDao.selectById({ userId: 1 });
-        expect(user1.userId).toBe(user2.userId);
-        expect(user1.userLoginName).toBe(user2.userLoginName);
+        user1b.userId = user1a.userId;
+        user1b.userLoginName = 'login1/2';
+        await userDao.update(user1b);
 
-        const allUsers1 = await userDao.selectAll();
-        expect(allUsers1.length).toBe(1);
-        user2 = allUsers1[0];
-        expect(user1.userId).toBe(user2.userId);
-        expect(user1.userLoginName).toBe(user2.userLoginName);
+        user2.userId = 2;
+        user2.userLoginName = 'login2';
+        await userDao.insert(user2);
 
-        await userDao.delete(user1);
-        const allUsers2 = await userDao.selectAll();
-        expect(allUsers1.length).toBe(allUsers2.length + 1);
+        await userDao.select(user1a);
+        expect(user1a.userId).toBe(user1b.userId);
+        expect(user1a.userLoginName).toBe(user1b.userLoginName);
+
+        user1a = await userDao.selectById({ userId: 1 });
+        expect(user1a.userId).toBe(user1b.userId);
+        expect(user1a.userLoginName).toBe(user1b.userLoginName);
+
+        const allUsersFirst = await userDao.selectAll();
+        const countAllUsersFirst = await userDao.countAll();
+        expect(allUsersFirst.length).toBe(2);
+        expect(countAllUsersFirst).toBe(allUsersFirst.length);
+        user1b = allUsersFirst[0];
+        expect(user1a.userId).toBe(user1b.userId);
+        expect(user1a.userLoginName).toBe(user1b.userLoginName);
+
+        await userDao.delete(user1a);
+        const allUsersSecond = await userDao.selectAll();
+        const countAllUsersSecond = await userDao.countAll();
+        expect(allUsersFirst.length).toBe(allUsersSecond.length + 1);
+        expect(countAllUsersSecond).toBe(allUsersSecond.length);
       } catch (err) {
         fail(err);
       }

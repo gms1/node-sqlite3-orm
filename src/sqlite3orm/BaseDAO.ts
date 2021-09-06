@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-types */
 import { SqlDatabase } from './core';
-import { METADATA_MODEL_KEY, MetaModel, Table } from './metadata';
+import { MetaModel, Table } from './metadata';
 import { Filter, isFilter, QueryModel, TABLEALIAS, Where } from './query';
 
 /**
@@ -340,6 +340,32 @@ export class BaseDAO<T extends Object> {
    */
   public selectAll(whereOrFilter?: Where<T> | Filter<T>, params?: Object): Promise<T[]> {
     return this.queryModel.selectAll(this.sqldb, this.toFilter(whereOrFilter, TABLEALIAS), params);
+  }
+
+  /**
+   * Count all models using an optional filter
+   *
+   * @param [whereOrFilter] - An optional Where/Filter-object or
+   *                          sql-text which will be added to the select-statement
+   *                             e.g 'WHERE <your condition>'
+   * @param [params] - An optional object with additional host parameter
+   * @returns A promise of the count value
+   */
+  public countAll(whereOrFilter?: Where<T> | Filter<T>, params?: Object): Promise<number> {
+    return this.queryModel.countAll(this.sqldb, this.toFilter(whereOrFilter, TABLEALIAS), params);
+  }
+
+  /**
+   * check if model exist using an optional filter
+   *
+   * @param [whereOrFilter] - An optional Where/Filter-object or
+   *                          sql-text which will be added to the select-statement
+   *                             e.g 'WHERE <your condition>'
+   * @param [params] - An optional object with additional host parameter
+   * @returns A promise of the count value
+   */
+  public exists(whereOrFilter?: Where<T> | Filter<T>, params?: Object): Promise<boolean> {
+    return this.queryModel.exists(this.sqldb, this.toFilter(whereOrFilter, TABLEALIAS), params);
   }
 
   /**

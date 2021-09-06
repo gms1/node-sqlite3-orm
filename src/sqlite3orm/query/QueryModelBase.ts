@@ -53,6 +53,16 @@ export class QueryModelBase<T> {
   }
 
   /**
+   * Get 'SELECT ALL'-statement using provided column expression
+   *
+   * @returns The sql-statement
+   */
+  public getSelectAllStatementForColumnExpression(colexpr: string, tableAlias?: string): string {
+    tableAlias = tableAlias || '';
+    return `SELECT\n${colexpr}\nFROM ${this.table.quotedName} ${tableAlias}\n`;
+  }
+
+  /**
    * Get 'UPDATE ALL' statement
    *
    * @returns The sql-statement

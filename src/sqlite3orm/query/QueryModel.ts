@@ -14,6 +14,49 @@ export class QueryModel<T> extends QueryModelBase<T> {
   }
 
   /**
+   * count all models using an optional filter
+   *
+   * @param sqldb - The database connection
+   * @param [filter] - An optional Filter-object
+   * @param [params] - An optional object with additional host parameter
+   * @returns promise of the number of models
+   */
+  async countAll(sqldb: SqlDatabase, filter?: Filter<T>, params?: Object): Promise<number> {
+    try {
+      params = Object.assign({}, params);
+      const select = await this.getSelectStatementForColumnExpression(
+        'COUNT(*) as result',
+        filter || {},
+        params,
+      );
+      const row: any = await sqldb.get(select, params);
+      return row.result || 0;
+    } catch (e /* istanbul ignore next */) {
+      return Promise.reject(new Error(`count '${this.table.name}' failed: ${e.message}`));
+    }
+  }
+
+  /**
+   * check if model exist using an optional filter
+   *
+   * @param sqldb - The database connection
+   * @param [filter] - An optional Filter-object
+   * @param [params] - An optional object with additional host parameter
+   * @returns promise for boolean result
+   */
+  async exists(sqldb: SqlDatabase, filter?: Filter<T>, params?: Object): Promise<boolean> {
+    try {
+      params = Object.assign({}, params);
+      const subQuery = await this.getSelectStatementForColumnExpression('1', filter || {}, params);
+      const select = `SELECT EXISTS(\n${subQuery}) as result\n`;
+      const row: any = await sqldb.get(select, params);
+      return row.result ? true : false;
+    } catch (e /* istanbul ignore next */) {
+      return Promise.reject(new Error(`count '${this.table.name}' failed: ${e.message}`));
+    }
+  }
+
+  /**
    * Select all models using an optional filter
    *
    * @param sqldb - The database connection
@@ -158,26 +201,29 @@ export class QueryModel<T> extends QueryModelBase<T> {
   protected async getSelectStatement(filter: Filter<T>, params: Object): Promise<string> {
     try {
       let sql = this.getSelectAllStatement(this.getSelectColumns(filter), filter.tableAlias);
-      const whereClause = await this.getWhereClause(filter, params);
-      if (whereClause.length) {
-        sql += `  ${whereClause}\n`;
-      }
-      const orderByClause = this.getOrderByClause(filter);
-      if (orderByClause.length) {
-        sql += `  ${orderByClause}\n`;
-      }
-      const limitClause = this.getLimitClause(filter);
-      if (limitClause.length) {
-        sql += `  ${limitClause}\n`;
-      }
+      sql += await this.getNonColumnClauses(filter, params);
       return sql;
     } catch (e) {
       return Promise.reject(e);
     }
   }
 
-  protected getSelectColumns(filter?: Filter<T>): (keyof T)[] | undefined {
-    if (!filter || !filter.select) {
+  protected async getSelectStatementForColumnExpression(
+    colexpr: string,
+    filter: Filter<T>,
+    params: Object,
+  ): Promise<string> {
+    try {
+      let sql = this.getSelectAllStatementForColumnExpression(colexpr, filter.tableAlias);
+      sql += await this.getNonColumnClauses(filter, params);
+      return sql;
+    } catch (e /* istanbul ignore next */) {
+      return Promise.reject(e);
+    }
+  }
+
+  protected getSelectColumns(filter: Filter<T>): (keyof T)[] | undefined {
+    if (!filter.select) {
       return undefined;
     }
     const columns: (keyof T)[] = [];
@@ -191,6 +237,27 @@ export class QueryModel<T> extends QueryModelBase<T> {
       }
     }
     return columns.length ? columns : undefined;
+  }
+
+  protected async getNonColumnClauses(filter: Filter<T>, params: Object): Promise<string> {
+    let sql = '';
+    const whereClause = await this.getWhereClause(filter, params);
+    if (whereClause.length) {
+      sql += `  ${whereClause}\n`;
+    }
+    const orderByClause = this.getOrderByClause(filter);
+    if (orderByClause.length) {
+      sql += `  ${orderByClause}\n`;
+    }
+    const limitClause = this.getLimitClause(filter);
+    if (limitClause.length) {
+      sql += `  ${limitClause}\n`;
+    }
+    const offsetClause = this.getOffsetClause(filter);
+    if (offsetClause.length) {
+      sql += `  ${offsetClause}\n`;
+    }
+    return sql;
   }
 
   protected getOrderByClause(filter?: Filter<T>): string {
@@ -225,11 +292,14 @@ export class QueryModel<T> extends QueryModelBase<T> {
     if (!filter || !filter.limit) {
       return '';
     }
-    let stmt = `LIMIT ${filter.limit}`;
-    if (filter.offset) {
-      stmt += ` OFFSET ${filter.offset}`;
+    return `LIMIT ${filter.limit}`;
+  }
+
+  protected getOffsetClause(filter?: Filter<T>): string {
+    if (!filter || !filter.offset) {
+      return '';
     }
-    return stmt;
+    return ` OFFSET ${filter.offset}`;
   }
 
   protected toSelectAllColumnsFilter(filter?: Filter<T>): Filter<T> {
