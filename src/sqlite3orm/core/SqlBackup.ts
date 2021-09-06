@@ -5,7 +5,7 @@
 // https://github.com/mapbox/node-sqlite3/pull/1116
 // TODO(Backup API): typings not yet available
 import * as _dbg from 'debug';
-const debug = _dbg('sqlite3orm:database');
+const debug = _dbg('sqlite3orm:backup');
 
 export class SqlBackup {
   private readonly backup: any;
@@ -60,26 +60,32 @@ export class SqlBackup {
    */
   constructor(backup: any) {
     this.backup = backup;
+    debug(`backup initialized: page count: ${this.pageCount}`);
   }
 
   step(pages: number = -1): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       /* istanbul ignore if */
       if (!this.backup) {
-        reject(new Error('backup handle not open'));
+        const err = new Error('backup handle not open');
+        debug(`step '${pages}' failed: ${err.message}`);
+        reject(err);
         return;
       }
       this.backup.step(pages, (err: any) => {
         /* istanbul ignore if */
         if (err) {
+          debug(`step '${pages}' failed: ${err.message}`);
           reject(err);
         }
+        debug(`step '${pages}' succeeded`);
         resolve();
       });
     });
   }
 
   finish(): void {
+    debug(`finished`);
     this.backup.finish();
   }
 }
