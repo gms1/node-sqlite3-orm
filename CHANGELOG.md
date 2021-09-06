@@ -2,21 +2,22 @@
 
 | Release   | Notes                                                                                                                       |
 | --------- | --------------------------------------------------------------------------------------------------------------------------- |
+| 2.6.0     | [2.6.0 changes](#260-changes)                                                                                               |
 | 2.5.5     | new feature: online backup support                                                                                          |
 | 2.5.1-4   | maintenance releases                                                                                                        |
-| 2.5.0     | [2.5.0 changes](#2.5.0-changes)                                                                                             |
+| 2.5.0     | [2.5.0 changes](#250-changes)                                                                                               |
 | 2.4.18    | bug fix: query model: binding `false` values using shorthand form (#74)                                                     |
 | 2.4.2-17  | maintenance releases                                                                                                        |
 | 2.4.14    | improved support for sqlcipher: new database settings for 'key' and 'cipherCompatibility'                                   |
 | 2.4.2-13  | maintenance releases                                                                                                        |
 | 2.4.1     | autoupgrade detection for autoIncrement changes                                                                             |
-| 2.4.0     | [2.4.0 changes](#2.4.0-changes)                                                                                             |
+| 2.4.0     | [2.4.0 changes](#240-changes)                                                                                               |
 | 2.3.2     | customizable serialize/deserialize; support for date in milliseconds unix epoch                                             |
 | 2.3.1     | descending index columns                                                                                                    |
 | 2.3.0     | BaseDAO: added partial insert/update/update all, as well as delete all methods                                              |
 | 2.2.0     | autoupgrade for automatically creating or upgrade tables and indexes in the database                                        |
-| 2.1.0     | [2.1.0 changes](#2.1.0-changes)                                                                                             |
-| 2.0.0     | [2.0.0 changes](#2.0.0-changes)                                                                                             |
+| 2.1.0     | [2.1.0 changes](#210-changes)                                                                                               |
+| 2.0.0     | [2.0.0 changes](#200-changes)                                                                                               |
 | 1.0.1     | maintenance releases                                                                                                        |
 | 1.0.0     | maintenance releases                                                                                                        |
 | 0.0.20-24 | maintenance releases                                                                                                        |
@@ -29,6 +30,14 @@
 | 0.0.8     | SqlConnectionPool: allow connections to be garbage-collected if the connection pool is not limited by max-connections       |
 | 0.0.7     | SqlConnectionPool: a new connection pool                                                                                    |
 | 0.0.6     | BaseDAO: ensure type safety for mapped properties of primitive or Date type                                                 |
+
+## 2.6.0 changes
+
+### new features
+
+- BaseDAO: new 'countAll' method
+- BaseDAO: new 'exists' method
+- [Online Backup](./README.md#online-backup) introduced in 2.5.2
 
 ## 2.5.0 changes
 

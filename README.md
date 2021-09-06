@@ -403,6 +403,10 @@ import {SqlDatabase} from 'sqlite3orm';
 })();
 ```
 
+## Tracing
+
+**sqlite3orm** is using the 'debug' module to provide tracing functionality
+You can turn on the logging by setting the 'DEBUG' environment to "sqlite3orm:*"
 
 ## Install
 
