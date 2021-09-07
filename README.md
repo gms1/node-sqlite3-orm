@@ -3,7 +3,6 @@
 [![Coverage Status](https://codecov.io/gh/gms1/node-sqlite3-orm/branch/master/graph/badge.svg)](https://codecov.io/gh/gms1/node-sqlite3-orm)
 [![DeepScan Grade](https://deepscan.io/api/projects/699/branches/1107/badge/grade.svg)](https://deepscan.io/dashboard/#view=project&pid=699&bid=1107)
 [![Dependency Status](https://david-dm.org/gms1/node-sqlite3-orm.svg)](https://david-dm.org/gms1/node-sqlite3-orm)
-[![Known Vulnerabilities](https://snyk.io/test/github/gms1/node-sqlite3-orm/badge.svg)](https://snyk.io/test/github/gms1/node-sqlite3-orm)
 
 ![NPM](https://img.shields.io/npm/l/sqlite3orm)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
