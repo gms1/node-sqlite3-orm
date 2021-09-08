@@ -2,6 +2,7 @@
 
 | Release   | Notes                                                                                                                       |
 | --------- | --------------------------------------------------------------------------------------------------------------------------- |
+| 2.6.1     | BaseDao option 'ignoreNoChanges': if set to `true` resolve 'updatePartialAll' and 'deleteAll' with `0` if nothing changed   |
 | 2.6.0     | [2.6.0 changes](#260-changes)                                                                                               |
 | 2.5.5     | new feature: online backup support                                                                                          |
 | 2.5.1-4   | maintenance releases                                                                                                        |
