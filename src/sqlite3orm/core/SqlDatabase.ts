@@ -34,7 +34,9 @@ export const SQL_MEMORY_DB_SHARED = 'file:sqlite3orm?mode=memory&cache=shared';
 
 const debug = _dbg('sqlite3orm:database');
 
-export const SQL_OPEN_DEFAULT = SQL_OPEN_READWRITE | SQL_OPEN_CREATE;
+export const SQL_OPEN_DEFAULT_URI = SQL_OPEN_READWRITE | SQL_OPEN_CREATE | SQL_OPEN_URI;
+export const SQL_OPEN_DEFAULT_NO_URI = SQL_OPEN_READWRITE | SQL_OPEN_CREATE;
+export const SQL_OPEN_DEFAULT = SQL_OPEN_DEFAULT_NO_URI; // TODO: Breaking Change: change to 'SQL_OPEN_DEFAULT_URI'
 
 /**
  * A thin wrapper for the 'Database' class from 'node-sqlite3' using Promises
