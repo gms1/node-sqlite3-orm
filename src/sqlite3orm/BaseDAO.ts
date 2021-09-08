@@ -22,6 +22,10 @@ export enum BaseDAOInsertMode {
  */
 export interface BaseDAOOptions {
   insertMode?: BaseDAOInsertMode;
+  /**
+   * @description if set to `true` resolve 'updatePartialAll' and 'deleteAll' with `0` if nothing changed
+   */
+  ignoreNoChanges?: boolean;
 }
 
 /**
@@ -160,7 +164,8 @@ export class BaseDAO<T extends Object> {
       const whereClause = await this.queryModel.getWhereClause(this.toFilter(where), params);
       sql += `  ${whereClause}`;
       const res = await this.sqldb.run(sql, params);
-      if (!res.changes) {
+      if (!res.changes && !BaseDAO.options?.ignoreNoChanges) {
+        // TODO: Breaking Change: change to: BaseDAO.options?.ignoreNoChanges !== false
         return Promise.reject(new Error(`update '${this.table.name}' failed: nothing changed`));
       }
       return res.changes;
@@ -218,7 +223,8 @@ export class BaseDAO<T extends Object> {
       const whereClause = await this.queryModel.getWhereClause(this.toFilter(where), params);
       sql += `  ${whereClause}`;
       const res = await this.sqldb.run(sql, params);
-      if (!res.changes) {
+      if (!res.changes && !BaseDAO.options?.ignoreNoChanges) {
+        // TODO: Breaking Change: change to: BaseDAO.options?.ignoreNoChanges !== false
         return Promise.reject(
           new Error(`delete from '${this.table.name}' failed: nothing changed`),
         );
