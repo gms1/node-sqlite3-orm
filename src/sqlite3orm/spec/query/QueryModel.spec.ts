@@ -800,6 +800,35 @@ describe('test QueryModel', () => {
     }
   });
 
+  it('`selectOne` should succeed', async () => {
+    try {
+      const userDao = new BaseDAO(User, sqldb);
+      const res = await userDao.selectOne({ userCreated: new Date('2018-01-03') });
+      expect(res.userId).toBe(3);
+    } catch (err) {
+      fail(err);
+    }
+  });
+
+  it('`selectOne` should fail for multiple results', async () => {
+    try {
+      const userDao = new BaseDAO(User, sqldb);
+      const res = await userDao.selectOne({ userLoginName: { neq: 'Bravo' } });
+    } catch (err) {
+      return;
+    }
+  });
+
+  it('selectOne should fail for emtpy results', async () => {
+    try {
+      const userDao = new BaseDAO(User, sqldb);
+      const res = await userDao.selectOne({ userLoginName: { eq: `not a login name` } });
+    } catch (err) {
+      return;
+    }
+    fail('should have thrown');
+  });
+
   it('selectPartialAll', async () => {
     try {
       const userDao = new BaseDAO(User, sqldb);

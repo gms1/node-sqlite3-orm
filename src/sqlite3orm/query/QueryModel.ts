@@ -57,6 +57,30 @@ export class QueryModel<T> extends QueryModelBase<T> {
   }
 
   /**
+   * Select one model using an optional filter
+   *
+   * @param sqldb - The database connection
+   * @param [filter] - An optional Filter-object
+   * @param [params] - An optional object with additional host parameter
+   * @returns A promise of the selected model instance; rejects if result is not exactly one row
+   */
+  async selectOne(sqldb: SqlDatabase, filter?: Filter<T>, params?: Object): Promise<T> {
+    try {
+      params = Object.assign({}, params);
+      const select = await this.getSelectStatement(this.toSelectAllColumnsFilter(filter), params);
+      const rows: any[] = await sqldb.all(select, params);
+      if (rows.length != 1) {
+        return Promise.reject(
+          new Error(`select '${this.table.name}' failed: unexpectedly got ${rows.length} rows`),
+        );
+      }
+      return this.updateModelFromRow(new this.type(), rows[0]);
+    } catch (e) {
+      return Promise.reject(new Error(`select '${this.table.name}' failed: ${e.message}`));
+    }
+  }
+
+  /**
    * Select all models using an optional filter
    *
    * @param sqldb - The database connection

@@ -98,7 +98,8 @@ export class BaseDAO<T extends Object> {
    *
    * for this to work:
    * all columns mapped to included properties must be nullable or their properties must provide a value
-   * all columns mapped to excluded properties must be nullable or must have a database default value
+   * on insert: all columns mapped to excluded properties must be nullable or must have a database default value
+   * on update: all columns mapped to excluded properties are not affected by this update
    *
    * @param input - A model class instance
    * @returns A promise of the inserted or updated model class instance
@@ -333,6 +334,19 @@ export class BaseDAO<T extends Object> {
   ): Promise<P> {
     const parentDAO = new BaseDAO<P>(parentType, this.sqldb);
     return parentDAO.selectByChild(constraintName, this.type, childObj);
+  }
+
+  /**
+   * Select one model using an optional filter
+   *
+   * @param [whereOrFilter] - An optional Where/Filter-object or
+   *                          sql-text which will be added to the select-statement
+   *                             e.g 'WHERE <your condition>'
+   * @param [params] - An optional object with additional host parameter
+   * @returns A promise of the selected model instance; rejects if result is not exactly one row
+   */
+  public selectOne(whereOrFilter?: Where<T> | Filter<T>, params?: Object): Promise<T> {
+    return this.queryModel.selectOne(this.sqldb, this.toFilter(whereOrFilter, TABLEALIAS), params);
   }
 
   /**
