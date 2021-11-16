@@ -11,7 +11,7 @@ import {
   OPEN_SHAREDCACHE,
   OPEN_URI,
   verbose as sqlverbose,
-} from 'sqlite3';
+} from '@vscode/sqlite3';
 import { SqlBackup } from './SqlBackup';
 
 import { SqlDatabaseSettings } from './SqlDatabaseSettings';

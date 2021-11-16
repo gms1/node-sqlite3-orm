@@ -1,5 +1,5 @@
 import * as _dbg from 'debug';
-import { Database } from 'sqlite3';
+import { Database } from '@vscode/sqlite3';
 
 import { SqlConnectionPool } from './SqlConnectionPool';
 import { SQL_OPEN_DEFAULT, SqlDatabase } from './SqlDatabase';
