@@ -4,6 +4,10 @@ node_js:
   - 'lts/*'
   - 'node'
 
+before_install:
+  - 'pyenv global 3.6'
+  - 'pip install pip --upgrade'
+
 install:
   - bash build/travis_install
 
