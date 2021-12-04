@@ -16,12 +16,12 @@ module.exports = {
     'eslint-plugin-no-null',
     'eslint-plugin-jsdoc',
     '@typescript-eslint',
-    'deprecation',
+    '@delagen/deprecation',
   ],
   extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'prettier'],
   rules: {
     '@typescript-eslint/no-inferrable-types': 'off',
     'no-empty': 'off',
-    'deprecation/deprecation': 'warn',
+    '@delagen/deprecation/deprecation': 'warn',
   },
 };
