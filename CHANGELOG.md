@@ -2,6 +2,7 @@
 
 | Release   | Notes                                                                                                                       |
 | --------- | --------------------------------------------------------------------------------------------------------------------------- |
+| 3.0.0     | [3.0.0 changes](#300-changes)                                                                                               |
 | 2.6.2     | selectOne method                                                                                                            |
 | 2.6.1     | BaseDao option 'ignoreNoChanges': if set to `true` resolve 'updatePartialAll' and 'deleteAll' with `0` if nothing changed   |
 | 2.6.0     | [2.6.0 changes](#260-changes)                                                                                               |
@@ -32,6 +33,13 @@
 | 0.0.8     | SqlConnectionPool: allow connections to be garbage-collected if the connection pool is not limited by max-connections       |
 | 0.0.7     | SqlConnectionPool: a new connection pool                                                                                    |
 | 0.0.6     | BaseDAO: ensure type safety for mapped properties of primitive or Date type                                                 |
+
+
+## 3.0.0 changes
+
+### breaking changes
+
+- is now based on [@vscode/sqlite3](https://github.com/microsoft/vscode-node-sqlite3) instead of  [sqlite3](https://github.com/mapbox/node-sqlite3)
 
 ## 2.6.0 changes
 
