@@ -1,12 +1,8 @@
-dist: xenial
+dist: bionic
 language: node_js
 node_js:
   - 'lts/*'
   - 'node'
-
-before_install:
-  - sudo apt-get update
-  - sudo apt-get install python3.8-minimal
 
 install:
   - bash build/travis_install
