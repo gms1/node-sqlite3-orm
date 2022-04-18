@@ -199,7 +199,7 @@ export class QueryModel<T> extends QueryModelBase<T> {
     }
     let where: Where<T> = filter.where;
     if (typeof where === 'string') {
-      where = where.trimLeft();
+      where = where.trimStart();
       if (!where.length) {
         return '';
       }
