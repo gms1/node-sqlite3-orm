@@ -72,7 +72,7 @@ With **node-sqlite3-orm** you have full control over the names for tables, field
 
 ## Database Connection
 
-SqlDatabase is a thin promised-based wrapper around sqlite3.Database: [node-sqlite3](https://github.com/mapbox/node-sqlite3)
+SqlDatabase is a thin promised-based wrapper around sqlite3.Database: [node-sqlite3](https://github.com/TryGhost/node-sqlite3)
 
 ```TypeScript
 import {SqlDatabase} from 'sqlite3orm';
@@ -430,7 +430,7 @@ tsconfig.json:
 
 > NOTE: SQLite's SQLCipher extension is also supported, see [SQLCipher](./docs/sqlcipher)
 <!-- -->
-> NOTE: for custom builds and Electron, see [Custom builds and Electron](https://github.com/mapbox/node-sqlite3#custom-builds-and-electron)
+> NOTE: for custom builds and Electron, see [Custom builds and Electron](https://github.com/TryGhost/node-sqlite3#custom-builds-and-electron)
 
 ## RELEASE NOTES
 
