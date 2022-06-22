@@ -1,10 +1,9 @@
-[![npm version](https://badge.fury.io/js/sqlite3orm.svg)](https://badge.fury.io/js/sqlite3orm)
+![Version](https://img.shields.io/npm/v/sqlite3orm)
 [![Build Status](https://github.com/gms1/node-sqlite3-orm/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/gms1/node-sqlite3-orm/actions/workflows/build.yml)
 [![Coverage Status](https://codecov.io/gh/gms1/node-sqlite3-orm/branch/master/graph/badge.svg)](https://codecov.io/gh/gms1/node-sqlite3-orm)
 [![DeepScan Grade](https://deepscan.io/api/projects/699/branches/1107/badge/grade.svg)](https://deepscan.io/dashboard/#view=project&pid=699&bid=1107)
-[![Dependency Status](https://david-dm.org/gms1/node-sqlite3-orm.svg)](https://david-dm.org/gms1/node-sqlite3-orm)
 
-![NPM](https://img.shields.io/npm/l/sqlite3orm)
+![License](https://img.shields.io/npm/l/sqlite3orm)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
 # node-sqlite3-orm
@@ -383,7 +382,6 @@ This behavior can be overwritten globally using the static `BaseDAO.options` or 
 - StrictSqlite: use the provided value if defined, otherwise sqlite generates the value automatically
 - ForceAutoGeneration: prevents the insertion of predefined primary key values; always let sqlite generate a value automatically
 
-
 ## Online Backup
 
 quick start:
@@ -393,7 +391,7 @@ import {SqlDatabase} from 'sqlite3orm';
 
 (async () => {
   const sqldb = new SqlDatabase();
-  await sqldb.open('file:sqlite3orm?mode=memory&cache=shared') 
+  await sqldb.open('file:sqlite3orm?mode=memory&cache=shared')
   ... add your tables
 
   const backup = await sqldb.backup('backup.db');
@@ -405,7 +403,7 @@ import {SqlDatabase} from 'sqlite3orm';
 ## Tracing
 
 **sqlite3orm** is using the 'debug' module to provide tracing functionality
-You can turn on the logging by setting the 'DEBUG' environment to "sqlite3orm:*"
+You can turn on the logging by setting the 'DEBUG' environment to "sqlite3orm:\*"
 
 ## Install
 
@@ -429,7 +427,9 @@ tsconfig.json:
 ```
 
 > NOTE: SQLite's SQLCipher extension is also supported, see [SQLCipher](./docs/sqlcipher)
+
 <!-- -->
+
 > NOTE: for custom builds and Electron, see [Custom builds and Electron](https://github.com/TryGhost/node-sqlite3#custom-builds-and-electron)
 
 ## RELEASE NOTES
