@@ -1,9 +1,9 @@
-![Version](https://img.shields.io/npm/v/sqlite3orm)
+[![Version](https://img.shields.io/npm/v/sqlite3orm)](https://www.npmjs.com/package/sqlite3orm)
 [![Build Status](https://github.com/gms1/node-sqlite3-orm/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/gms1/node-sqlite3-orm/actions/workflows/build.yml)
 [![Coverage Status](https://codecov.io/gh/gms1/node-sqlite3-orm/branch/master/graph/badge.svg)](https://codecov.io/gh/gms1/node-sqlite3-orm)
 [![DeepScan Grade](https://deepscan.io/api/projects/699/branches/1107/badge/grade.svg)](https://deepscan.io/dashboard/#view=project&pid=699&bid=1107)
 
-![License](https://img.shields.io/npm/l/sqlite3orm)
+[![License](https://img.shields.io/npm/l/sqlite3orm)](https://github.com/gms1/node-sqlite3-orm/blob/master/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
 # node-sqlite3-orm
