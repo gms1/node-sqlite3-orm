@@ -2,6 +2,7 @@
 
 | Release   | Notes                                                                                                                       |
 | --------- | --------------------------------------------------------------------------------------------------------------------------- |
+| 2.6.4     | maintenance release                                                                                                         |
 | 2.6.3     | upgrade node-sqlite3 5.0.3 [TryGhost](https://github.com/TryGhost/node-sqlite3)                                             |
 | 2.6.2     | selectOne method                                                                                                            |
 | 2.6.1     | BaseDao option 'ignoreNoChanges': if set to `true` resolve 'updatePartialAll' and 'deleteAll' with `0` if nothing changed   |
