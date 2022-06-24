@@ -41,7 +41,7 @@
     "coverage:run": "nyc -e .ts -x \"**/*.spec.ts\" -x \"src/sqlite3orm/spec/**/*\" ts-node --project tsconfig.json node_modules/jasmine/bin/jasmine.js",
     "coverage:report": "nyc report --reporter=text-summary",
     "coverage:html": "nyc report --reporter=html",
-    "coverage:codecov": "nyc report --reporter=json --disable=gcov > coverage/coverage.json && codecov",
+    "coverage:codecov": "nyc report --reporter=json --disable=gcov",
     "docs": "compodoc .",
     "prepublishOnly": "echo \"ERROR: please use the dist-folder for publishing\" && exit 1",
     "release:build": "npm run clean && npm run build && npm run coverage:run && npm run lint && npm run _pubprep",
