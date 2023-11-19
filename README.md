@@ -1,3 +1,9 @@
+# node-sqlite3-orm
+
+**THIS PROJECT HAS BEEN MOVED!**
+
+**THE NEW LOCATION IS HERE: [sqlite3orm](https://github.com/gms1/HomeOfThings/tree/master/packages/node/sqlite3orm)**
+
 [![Version](https://img.shields.io/npm/v/sqlite3orm)](https://www.npmjs.com/package/sqlite3orm)
 [![Build Status](https://github.com/gms1/node-sqlite3-orm/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/gms1/node-sqlite3-orm/actions/workflows/build.yml)
 [![Coverage Status](https://codecov.io/gh/gms1/node-sqlite3-orm/branch/master/graph/badge.svg)](https://codecov.io/gh/gms1/node-sqlite3-orm)
@@ -5,8 +11,6 @@
 
 [![License](https://img.shields.io/npm/l/sqlite3orm)](https://github.com/gms1/node-sqlite3-orm/blob/master/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
-
-# node-sqlite3-orm
 
 This module allows you to map your model, written in JavaScript or TypeScript, to a database schema using SQLite Version 3.
 **node-sqlite3-orm** is designed to work with new JavaScript _Decorators_, _Promises_ and the _async/await_ feature.
